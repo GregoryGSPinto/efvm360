@@ -1,0 +1,28 @@
+# ============================================================================
+# VFZ v3.2 — CODEOWNERS
+# Defines required reviewers for code changes
+# ============================================================================
+
+# Default: all changes require team lead review
+* @vfz-team/leads
+
+# Backend changes require backend specialist
+/backend/ @vfz-team/backend
+
+# Frontend changes require frontend specialist
+/vfz/ @vfz-team/frontend
+
+# Security-critical files require security review
+/backend/src/middleware/auth*.ts @vfz-team/security
+/backend/src/services/authService.ts @vfz-team/security
+/vfz/src/services/security.ts @vfz-team/security
+/vfz/src/services/permissions.ts @vfz-team/security
+
+# CI/CD changes require DevOps review
+/.github/ @vfz-team/devops
+/docker-compose.yml @vfz-team/devops
+/backend/Dockerfile @vfz-team/devops
+
+# Database migrations require DBA review
+/backend/src/migrations/ @vfz-team/dba
+/backend/docs/init.sql @vfz-team/dba

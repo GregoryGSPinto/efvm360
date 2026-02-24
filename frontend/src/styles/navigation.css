@@ -1,0 +1,39 @@
+/* ============================================================================
+   EFVM360 — Responsive Navigation
+   Desktop  >= 768px: Top bar with flat links + avatar
+   Mobile   < 768px:  Bottom bar fixed, top bar simplified (logo + avatar)
+   ============================================================================ */
+
+/* ── Desktop (default) ────────────────────────────────────────────────── */
+.efvm360-topnav              { display: flex !important; }
+.efvm360-topnav-links        { display: flex !important; }
+.efvm360-mobilenav           { display: none !important; }
+.efvm360-avatar-text         { display: block; }
+
+/* ── Mobile (< 768px) ────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Hide top nav links, show bottom nav */
+  .efvm360-topnav-links      { display: none !important; }
+  .efvm360-mobilenav          { display: flex !important; }
+  .efvm360-avatar-text        { display: none !important; }
+
+  /* Extra bottom padding so content isn't hidden behind bottom nav */
+  .efvm360-main-content       { padding-bottom: 80px !important; }
+}
+
+/* ── Responsive Grid Helpers ─────────────────────────────────────────── */
+/* 2-col → 1-col on mobile */
+@media (max-width: 767px) {
+  .efvm360-grid-responsive-2 { grid-template-columns: 1fr !important; }
+  .efvm360-grid-responsive-3 { grid-template-columns: 1fr 1fr !important; }
+  .efvm360-grid-responsive-4 { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+@media (max-width: 479px) {
+  .efvm360-grid-responsive-3 { grid-template-columns: 1fr !important; }
+  .efvm360-grid-responsive-4 { grid-template-columns: 1fr !important; }
+}
+
+/* ── Scrollbar hiding for horizontal scroll containers ───────────────── */
+.efvm360-scroll-hide::-webkit-scrollbar { display: none; }
+.efvm360-scroll-hide { -ms-overflow-style: none; scrollbar-width: none; }

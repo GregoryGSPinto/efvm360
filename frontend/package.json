@@ -1,0 +1,51 @@
+{
+  "name": "passagem-servico-efvm360",
+  "packageManager": "pnpm@10.30.1",
+  "version": "2.0.0",
+  "description": "Sistema Digital de Passagem de Serviço Ferroviária - VFZ",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "clean": "rimraf node_modules/.vite dist",
+    "fresh": "rimraf node_modules/.vite dist && vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:unit": "vitest run __tests__/services __tests__/hooks",
+    "test:services": "vitest run __tests__/services",
+    "test:hooks": "vitest run __tests__/hooks"
+  },
+  "dependencies": {
+    "echarts": "^5.5.0",
+    "lucide-react": "^0.575.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "@vitest/coverage-v8": "^2.0.0",
+    "eslint": "^8.55.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "jsdom": "^24.0.0",
+    "rimraf": "^6.1.3",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.8",
+    "vitest": "^2.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  },
+  "author": "VFZ - Vale Ferrovia",
+  "license": "PROPRIETARY"
+}

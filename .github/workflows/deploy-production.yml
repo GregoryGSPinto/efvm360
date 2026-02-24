@@ -1,0 +1,135 @@
+# ============================================================================
+# VFZ v3.2 — Deploy Production
+# Trigger: push to main (after merge)
+# Pipeline: CI → deploy staging slot → smoke test → swap → verify → rollback
+# Requires: "production" environment with manual approval
+# ============================================================================
+
+name: "🏭 VFZ — Deploy Production"
+
+on:
+  push:
+    branches: [main]
+
+env:
+  NODE_VERSION: "20"
+  AZURE_RG: rg-vfz-prod
+  BACKEND_APP: vfz-api-production
+  FRONTEND_APP: vfz-frontend-production
+
+jobs:
+  # ── Run full CI first ──────────────────────────────────────────────────
+  ci:
+    name: "🔄 CI Pipeline"
+    uses: ./.github/workflows/ci.yml
+
+  # ── Deploy with Blue/Green (slot swap) ─────────────────────────────────
+  deploy:
+    name: "🏭 Production Deploy"
+    needs: ci
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://${{ env.BACKEND_APP }}.azurewebsites.net
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      # ── Build ──────────────────────────────────────────────────────────
+      - name: Build Backend
+        run: cd backend && npm ci && npm run build
+
+      - name: Build Frontend
+        run: cd vfz && npm ci && npm run build
+
+      # ── Azure Login ────────────────────────────────────────────────────
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS_PRODUCTION }}
+
+      # ── Deploy to staging slot (blue/green) ────────────────────────────
+      - name: Deploy Backend to Staging Slot
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.BACKEND_APP }}
+          slot-name: staging
+          package: backend/
+
+      # ── Smoke Test on Staging Slot ─────────────────────────────────────
+      - name: Smoke Test (Staging Slot)
+        run: |
+          echo "⏳ Aguardando staging slot..."
+          sleep 15
+          STATUS=$(curl -sf https://${{ env.BACKEND_APP }}-staging.azurewebsites.net/api/v1/health | jq -r '.status' || echo "unreachable")
+          if [ "$STATUS" != "healthy" ]; then
+            echo "❌ Staging slot não está healthy: $STATUS"
+            exit 1
+          fi
+          echo "✅ Staging slot healthy — prosseguindo com swap"
+
+      # ── Slot Swap (zero downtime) ──────────────────────────────────────
+      - name: Swap Staging → Production
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az webapp deployment slot swap \
+              -g ${{ env.AZURE_RG }} \
+              -n ${{ env.BACKEND_APP }} \
+              --slot staging \
+              --target-slot production
+
+      # ── Deploy Frontend (Static Web App) ───────────────────────────────
+      - name: Deploy Frontend
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_SWA_TOKEN_PRODUCTION }}
+          action: upload
+          app_location: vfz/dist
+          skip_app_build: true
+
+      # ── Post-Deploy Verification ───────────────────────────────────────
+      - name: Post-Deploy Health Check
+        id: healthcheck
+        run: |
+          sleep 15
+          STATUS=$(curl -sf https://${{ env.BACKEND_APP }}.azurewebsites.net/api/v1/health | jq -r '.status' || echo "unreachable")
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          if [ "$STATUS" = "healthy" ]; then
+            echo "✅ Production deploy verified!"
+          else
+            echo "⚠️ Production status: $STATUS — initiating rollback"
+          fi
+
+      # ── Auto-Rollback on Failure ───────────────────────────────────────
+      - name: Rollback (if unhealthy)
+        if: steps.healthcheck.outputs.status != 'healthy'
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            echo "🔙 Rolling back production..."
+            az webapp deployment slot swap \
+              -g ${{ env.AZURE_RG }} \
+              -n ${{ env.BACKEND_APP }} \
+              --slot staging \
+              --target-slot production
+            echo "✅ Rollback complete"
+            exit 1
+
+      # ── Summary ────────────────────────────────────────────────────────
+      - name: Deploy Summary
+        if: always()
+        run: |
+          echo "## 🏭 Production Deploy" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Item | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Health | ${{ steps.healthcheck.outputs.status || 'unknown' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Strategy | Blue/Green (slot swap) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Rollback | Auto if unhealthy |" >> $GITHUB_STEP_SUMMARY

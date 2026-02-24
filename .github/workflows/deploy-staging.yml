@@ -1,0 +1,112 @@
+# ============================================================================
+# VFZ v3.2 — Deploy Staging
+# Trigger: push to staging branch
+# Pipeline: CI → deploy backend (Azure App Service) → deploy frontend (SWA)
+# ============================================================================
+
+name: "🚀 VFZ — Deploy Staging"
+
+on:
+  push:
+    branches: [staging]
+
+env:
+  NODE_VERSION: "20"
+  AZURE_RG: rg-vfz-staging
+  BACKEND_APP: vfz-api-staging
+  FRONTEND_APP: vfz-frontend-staging
+
+jobs:
+  # ── Run full CI first ──────────────────────────────────────────────────
+  ci:
+    name: "🔄 CI Pipeline"
+    uses: ./.github/workflows/ci.yml
+
+  # ── Deploy Backend to Azure App Service ────────────────────────────────
+  deploy-backend:
+    name: "🚀 Backend → Azure"
+    needs: ci
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://${{ env.BACKEND_APP }}.azurewebsites.net
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install & Build
+        run: cd backend && npm ci && npm run build
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS_STAGING }}
+
+      - name: Deploy to App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.BACKEND_APP }}
+          package: backend/
+
+      - name: Health Check
+        run: |
+          echo "⏳ Aguardando deploy estabilizar..."
+          sleep 15
+          STATUS=$(curl -sf https://${{ env.BACKEND_APP }}.azurewebsites.net/api/v1/health | jq -r '.status' || echo "unreachable")
+          echo "### 🏥 Backend Health Check" >> $GITHUB_STEP_SUMMARY
+          if [ "$STATUS" = "healthy" ]; then
+            echo "✅ Backend staging healthy" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Backend staging status: $STATUS" >> $GITHUB_STEP_SUMMARY
+            echo "*(Pode levar mais tempo para cold start)*" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ── Deploy Frontend to Azure Static Web Apps ──────────────────────────
+  deploy-frontend:
+    name: "🚀 Frontend → Azure SWA"
+    needs: ci
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://${{ env.FRONTEND_APP }}.azurestaticapps.net
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: vfz/package-lock.json
+
+      - name: Install & Build
+        run: cd vfz && npm ci && npm run build
+
+      - name: Deploy to Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_SWA_TOKEN_STAGING }}
+          action: upload
+          app_location: vfz/dist
+          skip_app_build: true
+
+  # ── Deploy Summary ────────────────────────────────────────────────────
+  deploy-summary:
+    name: "📋 Deploy Summary"
+    needs: [deploy-backend, deploy-frontend]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - run: |
+          echo "## 🚀 Staging Deploy Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Status | URL |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|-----|" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend | ${{ needs.deploy-backend.result == 'success' && '✅' || '❌' }} | https://${{ env.BACKEND_APP }}.azurewebsites.net |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend | ${{ needs.deploy-frontend.result == 'success' && '✅' || '❌' }} | https://${{ env.FRONTEND_APP }}.azurestaticapps.net |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY

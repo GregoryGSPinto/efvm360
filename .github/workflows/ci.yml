@@ -1,0 +1,243 @@
+# ============================================================================
+# VFZ v3.2 — CI Pipeline (Continuous Integration)
+# Sistema de Passagem de Serviço Ferroviária — Vale S.A.
+# ============================================================================
+# Trigger: push (main/staging/develop), PRs para essas branches
+# Pipeline: lint → test → build → docker validate → summary
+# ============================================================================
+
+name: "🚂 VFZ — CI Pipeline"
+
+on:
+  push:
+    branches: [main, staging, develop]
+  pull_request:
+    branches: [main, staging, develop]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+
+# ─────────────────────────────────────────────────────────────────────────────
+
+jobs:
+  # ── 1. Frontend Lint + Type Check ─────────────────────────────────────
+  lint-frontend:
+    name: "🔍 Frontend Lint"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: vfz
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: vfz/package-lock.json
+
+      - run: npm ci --prefer-offline
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: TypeScript Strict Check
+        run: npm run type-check
+
+  # ── 2. Backend Lint + Type Check ──────────────────────────────────────
+  lint-backend:
+    name: "🔍 Backend Lint"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci --prefer-offline
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: TypeScript Type Check
+        run: npx tsc --noEmit
+
+  # ── 3. Frontend Tests (Vitest, 130 tests) ────────────────────────────
+  test-frontend:
+    name: "🧪 Frontend Tests"
+    runs-on: ubuntu-latest
+    needs: lint-frontend
+    defaults:
+      run:
+        working-directory: vfz
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: vfz/package-lock.json
+
+      - run: npm ci --prefer-offline
+
+      - name: "Run Vitest (130 tests)"
+        run: npm run test:coverage
+
+      - name: Upload Coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: vfz/coverage/
+          retention-days: 14
+
+  # ── 4. Backend Tests (Jest, 74 tests) ─────────────────────────────────
+  test-backend:
+    name: "🧪 Backend Tests"
+    runs-on: ubuntu-latest
+    needs: lint-backend
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci --prefer-offline
+
+      - name: "Run Jest (74 tests, SQLite in-memory)"
+        run: npm run test:coverage
+        env:
+          NODE_ENV: test
+
+      - name: Upload Coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage/
+          retention-days: 14
+
+  # ── 5. Build Frontend (Vite) ──────────────────────────────────────────
+  build-frontend:
+    name: "🏗️ Frontend Build"
+    runs-on: ubuntu-latest
+    needs: test-frontend
+    defaults:
+      run:
+        working-directory: vfz
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: vfz/package-lock.json
+
+      - run: npm ci --prefer-offline
+
+      - name: Build Vite
+        run: npm run build
+
+      - name: Check Bundle Size
+        run: |
+          SIZE=$(du -sb dist/ | awk '{print $1}')
+          SIZE_MB=$(echo "scale=2; $SIZE / 1048576" | bc)
+          echo "📦 Frontend bundle: ${SIZE_MB}MB"
+          echo "### 📦 Frontend Bundle" >> $GITHUB_STEP_SUMMARY
+          echo "Size: **${SIZE_MB} MB**" >> $GITHUB_STEP_SUMMARY
+          # Fail if > 15MB (enterprise threshold)
+          if [ "$SIZE" -gt 15728640 ]; then
+            echo "❌ Bundle exceeds 15MB limit" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: vfz/dist/
+          retention-days: 7
+
+  # ── 6. Build Backend (TypeScript) ─────────────────────────────────────
+  build-backend:
+    name: "🏗️ Backend Build"
+    runs-on: ubuntu-latest
+    needs: test-backend
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci --prefer-offline
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backend-dist
+          path: backend/dist/
+          retention-days: 7
+
+  # ── 7. Docker Validate (main only) ───────────────────────────────────
+  docker-validate:
+    name: "🐳 Docker Validate"
+    runs-on: ubuntu-latest
+    needs: [build-frontend, build-backend]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Docker Compose
+        run: docker compose config --quiet
+
+      - name: Build Backend Docker Image
+        run: docker build -t vfz-backend:ci-${{ github.sha }} ./backend
+
+  # ── 8. CI Summary ────────────────────────────────────────────────────
+  ci-complete:
+    name: "✅ CI Complete"
+    runs-on: ubuntu-latest
+    needs: [build-frontend, build-backend]
+    if: always()
+    steps:
+      - name: Pipeline Summary
+        run: |
+          echo "## 🚂 VFZ CI Pipeline — Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Stage | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend Build | ${{ needs.build-frontend.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend Build | ${{ needs.build-backend.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Tests:** 204 total (130 frontend + 74 backend)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail if any job failed
+        if: contains(needs.*.result, 'failure')
+        run: exit 1

@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="pt-BR" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/adamboot.png" />
+    <link rel="apple-touch-icon" href="/adamboot.png" />
+    
+    <!-- Viewport e Mobile -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="EFVM360" />
+    
+    <!-- Tema e Cores -->
+    <meta name="theme-color" content="#007e7a" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)" />
+    <meta name="msapplication-TileColor" content="#007e7a" />
+    <meta name="msapplication-TileImage" content="/adamboot.png" />
+    
+    <!-- SEO e Descrição -->
+    <meta name="description" content="Sistema Digital de Passagem de Serviço para Operação Ferroviária - Estrada de Ferro Vitória a Minas - EFVM360" />
+    <meta name="keywords" content="passagem de serviço, ferrovia, EFVM360, Vale, EFVM, operação ferroviária, DSS, segurança" />
+    <meta name="author" content="EFVM360 - Estrada de Ferro Vitória a Minas" />
+    <meta name="robots" content="noindex, nofollow" />
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="EFVM360 - Passagem de Serviço" />
+    <meta property="og:description" content="Sistema Digital de Passagem de Serviço para Operação Ferroviária" />
+    <meta property="og:image" content="/adamboot.png" />
+    <meta property="og:locale" content="pt_BR" />
+    
+    <!-- Acessibilidade -->
+    <meta name="format-detection" content="telephone=no" />
+    
+    <title>EFVM360 - Passagem de Serviço</title>
+    
+    <!-- Preload de recursos críticos -->
+    <link rel="preload" href="/adamboot.png" as="image" />
+    <link rel="preload" href="/system-background.jpg" as="image" />
+    
+    <style>
+      /* Reset e estilos base */
+      *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      
+      html {
+        min-height: 100%;
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: hidden;
+      }
+
+      body {
+        min-height: 100vh;
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: hidden;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        font-family: 'Segoe UI', 'Roboto', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      #root {
+        min-height: 100vh;
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: hidden;
+        position: relative;
+      }
+      
+      /* Suporte a backdrop-filter */
+      @supports (backdrop-filter: blur(10px)) {
+        .glass-supported { --glass-blur: blur(20px); }
+      }
+      
+      @supports not (backdrop-filter: blur(10px)) {
+        .glass-fallback { background-color: rgba(255, 255, 255, 0.95) !important; }
+      }
+      
+      /* Acessibilidade - Foco visível */
+      :focus-visible {
+        outline: 3px solid #007e7a;
+        outline-offset: 2px;
+      }
+      
+      /* Skip link para acessibilidade */
+      .skip-link {
+        position: absolute;
+        top: -100px;
+        left: 0;
+        background: #007e7a;
+        color: white;
+        padding: 8px 16px;
+        z-index: 10000;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      
+      .skip-link:focus {
+        top: 0;
+      }
+      
+      /* Reduzir movimento para preferência do usuário */
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+      
+      /* Scrollbar personalizada */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      
+      ::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+      }
+      
+      ::-webkit-scrollbar-thumb {
+        background: rgba(0,126,122,0.15);
+        border-radius: 4px;
+        transition: background 0.2s ease;
+      }
+      
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(0,126,122,0.15);
+      }
+      
+      /* Seleção de texto */
+      ::selection {
+        background: rgba(0,126,122,0.15);
+        color: inherit;
+      }
+      
+      /* Focus visible para acessibilidade */
+      :focus-visible {
+        outline: 2px solid #007e7a;
+        outline-offset: 2px;
+      }
+      
+      /* Transições suaves para tema */
+      body, #root {
+        transition: background-color 0.4s ease;
+      }
+      
+      /* Performance hints */
+      img, video, canvas, svg {
+        max-width: 100%;
+        height: auto;
+        content-visibility: auto;
+      }
+
+      table {
+        max-width: 100%;
+        display: block;
+        overflow-x: auto;
+      }
+
+      /* iOS zoom prevention on mobile */
+      @media (max-width: 767px) {
+        input, select, textarea {
+          font-size: 16px !important;
+        }
+      }
+      
+      /* ============================================
+         MICROINTERAÇÕES FUTURÍSTICAS CORPORATIVAS
+         Performance-first: CSS puro + GPU acceleration
+         EFVM360 Railway System - Elegância Profissional
+      ============================================ */
+      
+      /* === BOTÕES === */
+      button {
+        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
+                    box-shadow 0.2s ease,
+                    background 0.2s ease,
+                    border-color 0.2s ease !important;
+        will-change: transform;
+      }
+      
+      button:hover:not(:disabled) {
+        transform: translateY(-1px);
+      }
+      
+      button:active:not(:disabled) {
+        transform: translateY(0) scale(0.98);
+        transition-duration: 0.1s;
+      }
+      
+      /* Botão primário - glow verde sutil */
+      button[style*="linear-gradient"]:hover:not(:disabled) {
+        box-shadow: 0 6px 20px rgba(0,126,122,0.15),
+                    0 0 0 1px rgba(255, 255, 255, 0.1);
+      }
+      
+      /* === INPUTS - Focus elegante === */
+      input, select, textarea {
+        transition: border-color 0.2s ease, 
+                    box-shadow 0.2s ease,
+                    background 0.15s ease !important;
+      }
+      
+      input:focus, select:focus, textarea:focus {
+        border-color: #69be28 !important;
+        box-shadow: 0 0 0 3px rgba(0, 199, 123, 0.12),
+                    0 2px 8px rgba(0,126,122,0.15) !important;
+      }
+      
+      input:hover:not(:focus):not(:disabled),
+      select:hover:not(:focus):not(:disabled),
+      textarea:hover:not(:focus):not(:disabled) {
+        border-color: rgba(0,126,122,0.15) !important;
+      }
+      
+      /* === CARDS === */
+      .card-interactive {
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                    box-shadow 0.25s ease,
+                    border-color 0.25s ease;
+        will-change: transform, box-shadow;
+      }
+      
+      .card-interactive:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12),
+                    0 0 0 1px rgba(0,126,122,0.15);
+      }
+      
+      /* === KPI CARDS - Elevação premium === */
+      .kpi-card {
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    box-shadow 0.3s ease,
+                    border-color 0.25s ease;
+        will-change: transform;
+      }
+      
+      .kpi-card:hover {
+        transform: translateY(-4px) scale(1.015);
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15),
+                    0 0 0 1px rgba(0,126,122,0.15);
+      }
+      
+      /* === TABELAS === */
+      tr {
+        transition: background 0.15s ease;
+      }
+      
+      tbody tr:hover {
+        background: rgba(0,126,122,0.15) !important;
+      }
+      
+      /* Dark mode - linhas de tabela */
+      [data-theme="dark"] tbody tr:hover {
+        background: rgba(255, 255, 255, 0.05) !important;
+      }
+      
+      /* Células da tabela - transição suave */
+      td {
+        transition: background 0.15s ease;
+      }
+      
+      /* === ÍCONES DE AÇÃO === */
+      .action-icon {
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                    opacity 0.2s ease,
+                    color 0.2s ease;
+        cursor: pointer;
+      }
+      
+      .action-icon:hover {
+        transform: scale(1.18);
+        opacity: 1;
+      }
+      
+      .action-icon:active {
+        transform: scale(0.95);
+      }
+      
+      /* === BADGES / STATUS === */
+      .status-badge {
+        transition: transform 0.2s ease, 
+                    box-shadow 0.2s ease;
+      }
+      
+      .status-badge:hover {
+        transform: scale(1.05);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      
+      /* === LINKS E TEXTOS CLICÁVEIS === */
+      a, .clickable-text {
+        transition: color 0.15s ease, opacity 0.15s ease;
+      }
+      
+      /* === CHECKBOX E RADIO CUSTOM === */
+      input[type="checkbox"], input[type="radio"] {
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+      
+      input[type="checkbox"]:hover, input[type="radio"]:hover {
+        transform: scale(1.1);
+      }
+      
+      /* === TOOLTIPS (ECharts) === */
+      .echarts-tooltip {
+        transition: opacity 0.2s ease, transform 0.2s ease !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2) !important;
+      }
+      
+      /* === GRÁFICOS - Container hover === */
+      .chart-container {
+        transition: box-shadow 0.3s ease, border-color 0.3s ease;
+      }
+      
+      .chart-container:hover {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
+                    inset 0 0 0 1px rgba(0,126,122,0.15);
+      }
+      
+      /* === NAVEGAÇÃO INFERIOR === */
+      .nav-item {
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    background 0.2s ease,
+                    box-shadow 0.2s ease;
+        will-change: transform;
+      }
+      
+      .nav-item:hover:not(.nav-item-active) {
+        transform: scale(1.08) translateY(-2px);
+        background: rgba(255, 255, 255, 0.1);
+      }
+      
+      .nav-item:active {
+        transform: scale(0.98);
+      }
+      
+      .nav-item-active {
+        box-shadow: inset 0 0 16px rgba(255, 255, 255, 0.15);
+      }
+      
+      /* === SEÇÃO DO FORMULÁRIO === */
+      .form-section {
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      }
+      
+      .form-section:focus-within {
+        border-color: rgba(0,126,122,0.15);
+        box-shadow: 0 0 0 3px rgba(0,126,122,0.15);
+      }
+      
+      /* === ALERTAS === */
+      .alert-box {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      
+      .alert-box:hover {
+        transform: translateX(4px);
+        box-shadow: -4px 0 12px rgba(0, 0, 0, 0.05);
+      }
+      
+      /* === MODAL / OVERLAY === */
+      .modal-overlay {
+        transition: opacity 0.3s ease, backdrop-filter 0.3s ease;
+      }
+      
+      .modal-content {
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    opacity 0.3s ease;
+      }
+      
+      /* === TOGGLE SWITCH === */
+      .toggle-switch {
+        transition: background 0.2s ease;
+      }
+      
+      .toggle-switch:hover {
+        box-shadow: 0 0 0 3px rgba(0,126,122,0.15);
+      }
+      
+      /* === SCROLL SUAVE === */
+      html {
+        scroll-behavior: smooth;
+      }
+      
+      /* === RIPPLE EFFECT (sutil) === */
+      .ripple-effect {
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .ripple-effect::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.4s ease, height 0.4s ease, opacity 0.4s ease;
+        opacity: 0;
+        pointer-events: none;
+      }
+      
+      .ripple-effect:active::after {
+        width: 200%;
+        height: 200%;
+        opacity: 1;
+        transition: width 0s, height 0s, opacity 0s;
+      }
+      
+      /* === PERFORMANCE GLOBAL === */
+      * {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+      }
+      
+      /* GPU Acceleration para elementos animados */
+      .gpu-accelerated {
+        transform: translateZ(0);
+        backface-visibility: hidden;
+        perspective: 1000px;
+      }
+      
+      /* Cursor pointer em elementos clicáveis */
+      [role="button"], 
+      [onclick], 
+      .clickable,
+      button:not(:disabled) {
+        cursor: pointer;
+      }
+      
+      /* Desabilitar seleção em elementos interativos */
+      button, .nav-item, .kpi-card, .action-icon {
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      
+      /* === ANIMAÇÃO DE PULSE SUTIL (para notificações) === */
+      @keyframes pulse-subtle {
+        0%, 100% { 
+          box-shadow: 0 0 0 0 rgba(0,126,122,0.15);
+        }
+        50% { 
+          box-shadow: 0 0 0 8px rgba(0,126,122,0.15);
+        }
+      }
+      
+      .pulse-notification {
+        animation: pulse-subtle 2s ease-in-out infinite;
+      }
+      
+      /* === ANIMAÇÃO DE GLOW (para destaques) === */
+      @keyframes glow-subtle {
+        0%, 100% { 
+          box-shadow: 0 0 5px rgba(0, 199, 123, 0.2);
+        }
+        50% { 
+          box-shadow: 0 0 15px rgba(0, 199, 123, 0.3);
+        }
+      }
+      
+      .glow-highlight {
+        animation: glow-subtle 3s ease-in-out infinite;
+      }
+      
+      /* === SKELETON LOADING === */
+      @keyframes skeleton-shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+      }
+      
+      .skeleton {
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.05) 25%,
+          rgba(255, 255, 255, 0.1) 50%,
+          rgba(255, 255, 255, 0.05) 75%
+        );
+        background-size: 200% 100%;
+        animation: skeleton-shimmer 1.5s ease-in-out infinite;
+      }
+      
+      /* === REDUZIR MOTION PARA ACESSIBILIDADE === */
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Anti-flash: aplica tema ANTES do React renderizar -->
+    <script>
+      try {
+        var c = JSON.parse(localStorage.getItem('efvm360-config') || '{}');
+        var dk = c.tema === 'escuro' || (c.tema !== 'claro' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.body.style.background = dk ? '#121212' : '#f5f5f5';
+      } catch(e) { document.body.style.background = '#f5f5f5'; }
+    </script>
+    <!-- Skip link para acessibilidade -->
+    <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+    
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Registro do Service Worker para PWA -->
+    <script>
+      // Registrar Service Worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', async () => {
+          try {
+            const registration = await navigator.serviceWorker.register('/sw.js', {
+              scope: '/'
+            });
+            console.log('[EFVM360] Service Worker registrado:', registration.scope);
+            
+            // Verificar atualizações
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              if (newWorker) {
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    // Nova versão disponível
+                    console.log('[EFVM360] Nova versão disponível');
+                    if (window.confirm('Nova versão do EFVM360 disponível. Atualizar agora?')) {
+                      window.location.reload();
+                    }
+                  }
+                });
+              }
+            });
+          } catch (error) {
+            console.error('[EFVM360] Erro ao registrar Service Worker:', error);
+          }
+        });
+        
+        // Listener para mensagens do SW
+        navigator.serviceWorker.addEventListener('message', (event) => {
+          const { type, data } = event.data || {};
+          
+          if (type === 'SYNC_COMPLETE') {
+            console.log('[EFVM360] Sincronização completa:', data);
+            // Disparar evento customizado para o React
+            window.dispatchEvent(new CustomEvent('vfz-sync-complete', { detail: data }));
+          }
+        });
+      }
+      
+      // Indicador de conexão
+      window.addEventListener('online', () => {
+        console.log('[EFVM360] Conexão restaurada');
+        window.dispatchEvent(new CustomEvent('vfz-connection-change', { detail: { online: true } }));
+      });
+      
+      window.addEventListener('offline', () => {
+        console.log('[EFVM360] Conexão perdida');
+        window.dispatchEvent(new CustomEvent('vfz-connection-change', { detail: { online: false } }));
+      });
+      
+      // Prevenir zoom em inputs no iOS
+      document.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+    </script>
+    
+    <!-- Noscript fallback -->
+    <noscript>
+      <div style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #121212;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px;
+        font-family: system-ui, sans-serif;
+      ">
+        <div>
+          <h1 style="margin-bottom: 16px; color: #007e7a;">🚂 EFVM360</h1>
+          <p>JavaScript é necessário para executar o sistema EFVM360.</p>
+          <p style="margin-top: 8px; opacity: 0.7;">Por favor, habilite o JavaScript no seu navegador.</p>
+        </div>
+      </div>
+    </noscript>
+  </body>
+</html>

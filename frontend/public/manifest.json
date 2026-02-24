@@ -1,0 +1,47 @@
+{
+  "name": "EFVM360 — Passagem de Serviço Ferroviária",
+  "short_name": "EFVM360",
+  "description": "Sistema digital de passagem de serviço — Estrada de Ferro Vitória a Minas — Vale S.A.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#00843D",
+  "orientation": "any",
+  "scope": "/",
+  "lang": "pt-BR",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/adamboot.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/system-background.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Dashboard Principal"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nova Passagem",
+      "short_name": "Passagem",
+      "description": "Iniciar nova passagem de serviço",
+      "url": "/?action=nova-passagem",
+      "icons": [{ "src": "/adamboot.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "DSS",
+      "short_name": "DSS",
+      "description": "Diálogo de Segurança e Saúde",
+      "url": "/?action=dss",
+      "icons": [{ "src": "/adamboot.png", "sizes": "96x96" }]
+    }
+  ],
+  "prefer_related_applications": false
+}
