@@ -1,4 +1,4 @@
-# 🚂 VFZ — Passagem de Serviço Ferroviária
+Passagem de Serviço Ferroviária
 
 [![CI](https://github.com/vale/vfz/actions/workflows/ci.yml/badge.svg)](https://github.com/vale/vfz/actions/workflows/ci.yml)
 [![Deploy Staging](https://github.com/vale/vfz/actions/workflows/deploy-staging.yml/badge.svg)](https://github.com/vale/vfz/actions/workflows/deploy-staging.yml)
