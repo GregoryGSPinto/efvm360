@@ -596,5 +596,19 @@ export interface HistoricoDSS extends DadosDSS {
   timestamp: string;
 }
 
+// ============================================================================
+// INTERFACES DE GERENCIAMENTO DE PÁTIOS
+// ============================================================================
+
+export interface PatioInfo {
+  codigo: string;
+  nome: string;
+  ativo: boolean;
+  padrao: boolean;
+  criadoEm: string;
+  atualizadoEm?: string;
+  criadoPor?: string;
+}
+
 // Re-exportar tipos do dashboard
 export * from './dashboard';

@@ -193,10 +193,15 @@ AuditTrail.init({
   hash_registro: { type: DataTypes.STRING(128), allowNull: false },
 }, { sequelize, tableName: 'audit_trail', modelName: 'AuditTrail', updatedAt: false });
 
+// ── PÁTIOS ──────────────────────────────────────────────────────────────
+
+export { Patio } from './Patio';
+
 // ── RELACIONAMENTOS ──────────────────────────────────────────────────────
 
 Passagem.belongsTo(Usuario, { as: 'operadorSai', foreignKey: 'operador_sai_id' });
 Passagem.belongsTo(Usuario, { as: 'operadorEntra', foreignKey: 'operador_entra_id' });
 AuditTrail.belongsTo(Usuario, { as: 'usuario', foreignKey: 'usuario_id' });
 
-export default { Usuario, Passagem, AuditTrail };
+import { Patio as PatioModel } from './Patio';
+export default { Usuario, Passagem, AuditTrail, Patio: PatioModel };

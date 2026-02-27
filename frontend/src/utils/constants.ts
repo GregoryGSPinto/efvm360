@@ -7,6 +7,7 @@ import type {
   ConfiguracaoSistema,
   Equipamento,
   FuncaoOpcao,
+  PatioInfo,
   StatusLinha,
   Temas,
   ItemMenu,
@@ -277,6 +278,7 @@ export const STORAGE_KEYS = {
   PASSWORD_REQUESTS: 'efvm360-password-requests',
   TEAMS: 'efvm360-teams',
   PERFORMANCE: 'efvm360-performance',
+  PATIOS: 'efvm360-patios',
 } as const;
 
 /**
@@ -383,6 +385,22 @@ export const NIVEIS_MATURIDADE_5S: { value: NivelMaturidade5S; label: string; de
   { value: 3, label: 'Nível 3 - Padronizado', descricao: 'Práticas padronizadas', cor: '#eab308' },
   { value: 4, label: 'Nível 4 - Gerenciado', descricao: 'Práticas controladas', cor: '#22c55e' },
   { value: 5, label: 'Nível 5 - Otimizado', descricao: 'Melhoria contínua', cor: '#007e7a' },
+];
+
+// ============================================================================
+// SUGESTÕES DE PONTOS DE ATENÇÃO (PADRÕES E RECOMENDAÇÕES)
+// ============================================================================
+
+// ============================================================================
+// PÁTIOS PADRÃO — Cadastro base do sistema (fonte de verdade offline)
+// ============================================================================
+
+export const PATIOS_PADRAO: PatioInfo[] = [
+  { codigo: 'VFZ', nome: 'Pátio do Fazendão (Flexal)', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z' },
+  { codigo: 'VBR', nome: 'Barão de Cocais', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z' },
+  { codigo: 'VCS', nome: 'Costa Lacerda', ativo: false, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z' },
+  { codigo: 'P6', nome: 'Pedro Nolasco', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z' },
+  { codigo: 'VTO', nome: 'Tubarão Outbound', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z' },
 ];
 
 // ============================================================================

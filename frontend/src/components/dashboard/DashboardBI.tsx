@@ -31,6 +31,7 @@ import {
   GraficoRadarECharts,
 } from './EChartsComponents';
 import { CardKPI } from './Graficos';
+import AIInsightChart from './AIInsightChart';
 
 // ============================================================================
 // TIPOS
@@ -1218,6 +1219,12 @@ export const DashboardBI = memo<DashboardAvancadoProps>(({
             tema={tema}
             altura={300}
           />
+          <AIInsightChart
+            tema={tema}
+            tipoGrafico="Evolução do Risco Operacional"
+            patio="VFZ"
+            dadosGrafico={evolucaoRisco}
+          />
         </>
       )}
 
@@ -1412,6 +1419,12 @@ export const DashboardBI = memo<DashboardAvancadoProps>(({
             ]}
             tema={tema}
             altura={350}
+          />
+          <AIInsightChart
+            tema={tema}
+            tipoGrafico="Tendência de Passagens por Dia"
+            patio="VFZ"
+            dadosGrafico={tendencias}
           />
 
           {/* Cards de Tendência */}

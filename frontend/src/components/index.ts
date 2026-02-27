@@ -14,6 +14,10 @@ export { DashboardBI } from './dashboard/DashboardBI';
 
 // Componentes Operacionais
 export { ChecklistSeguranca } from './operacional';
+export { AICopilotPassagem, AIRiskScore } from './operacional';
+
+// AI Components
+export { default as AIInsightChart } from './dashboard/AIInsightChart';
 
 // Premium Enterprise
 export { SplashScreenPremium } from './SplashScreenPremium';

@@ -8,6 +8,7 @@
 import React, { useState, useMemo } from 'react';
 import type { TemaEstilos, HistoricoDSS } from '../../types';
 import { useDSS } from '../../hooks/useDSS';
+import AITemasDSS from './AITemasDSS';
 import {
   TEMAS_DSS_SUGERIDOS,
   METODOLOGIA_DSS,
@@ -452,6 +453,19 @@ export const PaginaDSS: React.FC<PaginaDSSProps> = ({ tema, styles, onVoltar, su
             </div>
           </div>
         )}
+      </div>
+
+      {/* AI Temas DSS — Sugestões Inteligentes */}
+      <div style={{ marginBottom: 20 }}>
+        <AITemasDSS
+          tema={tema}
+          patio="VFZ"
+          turno={dadosDSS.identificacao.turnoLetra || 'D'}
+          onUsarTema={(titulo, pontos) => {
+            atualizarTema(titulo, false);
+            atualizarRegistro('pontosAtencao', pontos.join('\n'));
+          }}
+        />
       </div>
 
       {/* CARD 2 - Tema do DSS */}

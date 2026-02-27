@@ -144,7 +144,7 @@ export interface PaginaConfiguracoesProps {
   config: ConfiguracaoSistema;
   usuarioLogado: Usuario | null;
   secaoConfigAtiva: string;
-  setSecaoConfigAtiva: (secao: 'perfil' | 'aparencia' | 'acessibilidade' | 'adamboot' | 'geral' | 'manual' | 'sobre' | 'avancado') => void;
+  setSecaoConfigAtiva: (secao: 'perfil' | 'aparencia' | 'acessibilidade' | 'adamboot' | 'geral' | 'manual' | 'sobre' | 'avancado' | 'patios') => void;
   setTema: (tema: string) => void;
   atualizarPreferenciasOperacionais: (campo: string, valor: unknown) => void;
   atualizarPreferenciasNotificacao: (campo: string, valor: boolean) => void;

@@ -28,6 +28,11 @@ interface AdamBootChatProps {
   modoAtivo?: boolean; // true = pós-login, false = pré-login (observador)
   alertasCriticos?: string[]; // Alertas para exibir ao abrir
   onAbrirAutomatico?: () => void; // Callback quando abrir automaticamente
+  // FASE 4: IA Enterprise
+  aiStatus?: 'idle' | 'loading' | 'success' | 'error';
+  isListening?: boolean;
+  onStartVoice?: () => void;
+  onStopVoice?: () => void;
 }
 
 type TipoAnexo = 'arquivo' | 'audio' | 'imagem' | 'none';
@@ -224,6 +229,10 @@ export const AdamBootChat = memo<AdamBootChatProps>(({
   modoAtivo = true, // Por padrão, modo ativo (pós-login)
   alertasCriticos = [],
   onAbrirAutomatico,
+  aiStatus,
+  isListening,
+  onStartVoice,
+  onStopVoice,
 }) => {
   // ========================================
   // ESTADOS
@@ -1233,7 +1242,32 @@ export const AdamBootChat = memo<AdamBootChatProps>(({
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleEnviar()}
             />
 
-            {/* Botão de Microfone */}
+            {/* Botão de Voz (Speech-to-Text) */}
+            {onStartVoice && (
+              <button
+                style={{
+                  background: isListening ? '#69be28' : 'transparent',
+                  border: `1px solid ${isListening ? '#69be28' : tema.cardBorda}`,
+                  borderRadius: '50%',
+                  width: '34px',
+                  height: '34px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  color: isListening ? '#fff' : tema.texto,
+                  transition: 'all 0.2s ease',
+                  animation: isListening ? 'adamboot-pulse 1s infinite' : 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                onClick={isListening ? onStopVoice : onStartVoice}
+                title={isListening ? 'Parar ditado' : 'Ditar mensagem (voz)'}
+              >
+                {isListening ? '⏹' : '🎙️'}
+              </button>
+            )}
+
+            {/* Botão de Microfone (gravar áudio) */}
             <button
               style={{
                 background: gravandoAudio ? tema.perigo : 'transparent',
@@ -1288,7 +1322,7 @@ export const AdamBootChat = memo<AdamBootChatProps>(({
               textAlign: 'center',
             }}
           >
-            🧠 IA Central • Memória: {memoria.interacoes.length} registros • v{memoria.versao}
+            {aiStatus === 'loading' ? '⏳' : '✨'} IA Claude {aiStatus === 'loading' ? '• Processando...' : '• Ativa'} • Memória: {memoria.interacoes.length} registros
           </div>
         </div>
       )}

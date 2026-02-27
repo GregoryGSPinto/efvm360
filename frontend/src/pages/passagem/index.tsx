@@ -6,7 +6,7 @@
 import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import type { PaginaPassagemProps } from '../types';
 import type { DadosFormulario, UsuarioCadastro } from '../../types';
-import { ChecklistSeguranca, Card, StatusBadge } from '../../components';
+import { ChecklistSeguranca, Card, StatusBadge, AICopilotPassagem, AIRiskScore } from '../../components';
 import { TabelaPatio, TabelaEquipamentos } from '../../components/tables';
 import { SECOES_FORMULARIO, TURNOS, SENSOS_5S, NIVEIS_MATURIDADE_5S, SUGESTOES_PONTOS_ATENCAO, STORAGE_KEYS } from '../../utils/constants';
 import { ALL_YARD_CODES, getYardShortName, type YardCode } from '../../domain/aggregates/YardRegistry';
@@ -2748,6 +2748,11 @@ SEGURANÇA EM MANOBRAS
         ))}
       </div>
 
+      {/* AI Risk Score Widget */}
+      <div style={{ marginBottom: 16 }}>
+        <AIRiskScore tema={tema} dadosFormulario={dadosFormulario} patio={selectedYard} />
+      </div>
+
       {/* Indicador modo edição */}
       {modoEdicao && (
         <div
@@ -2872,5 +2877,16 @@ SEGURANÇA EM MANOBRAS
   );
 
   // ========== RENDER PRINCIPAL DO SISTEMA ==========
-  return renderPaginaPassagem();
+  return (
+    <>
+      {renderPaginaPassagem()}
+      {/* AI Copilot — Painel lateral colapsável */}
+      <AICopilotPassagem
+        tema={tema}
+        dadosFormulario={dadosFormulario}
+        patio={selectedYard}
+        turno={dadosFormulario.cabecalho.turno || 'D'}
+      />
+    </>
+  );
 }

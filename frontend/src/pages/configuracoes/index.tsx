@@ -7,6 +7,7 @@ import { useCallback, useMemo } from 'react';
 import type { PaginaConfiguracoesProps } from '../types';
 import { SectionHeader, Card } from '../../components';
 import { STORAGE_KEYS, FUNCOES_USUARIO, TURNOS_LETRAS } from '../../utils/constants';
+import GerenciamentoPatios from './GerenciamentoPatios';
 
 export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JSX.Element {
   const {
@@ -76,6 +77,7 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
       { id: 'geral' as const, icon: '⚙️', label: 'Geral', sempreVisivel: true },
       { id: 'manual' as const, icon: '📖', label: 'Manual', sempreVisivel: true },
       { id: 'sobre' as const, icon: 'ℹ️', label: 'Sobre', sempreVisivel: true },
+      { id: 'patios' as const, icon: '🏗️', label: 'Gerenciar Pátios', sempreVisivel: false, requerPerfil: ['inspetor', 'gestor', 'administrador'] },
       { id: 'avancado' as const, icon: '🔧', label: 'Avançado', sempreVisivel: false, requerPerfil: ['gestor', 'administrador'] },
     ];
     
@@ -1356,6 +1358,7 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
             {secaoConfigAtiva === 'geral' && renderGeral()}
             {secaoConfigAtiva === 'manual' && renderManual()}
             {secaoConfigAtiva === 'sobre' && renderSobre()}
+            {secaoConfigAtiva === 'patios' && <GerenciamentoPatios styles={styles} tema={tema} />}
             {secaoConfigAtiva === 'avancado' && renderAvancado()}
           </div>
         </div>

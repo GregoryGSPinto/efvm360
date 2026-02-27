@@ -151,7 +151,7 @@ export default function App(): JSX.Element {
   const [splashVisible, setSplashVisible] = useState(true);
 
   // ── Page-local state ─────────────────────────────────────────────────
-  const [secaoConfigAtiva, setSecaoConfigAtiva] = useState<'perfil' | 'aparencia' | 'acessibilidade' | 'adamboot' | 'geral' | 'manual' | 'sobre' | 'avancado'>('perfil');
+  const [secaoConfigAtiva, setSecaoConfigAtiva] = useState<'perfil' | 'aparencia' | 'acessibilidade' | 'adamboot' | 'geral' | 'manual' | 'sobre' | 'avancado' | 'patios'>('perfil');
   const [secaoHistoricoAtiva, setSecaoHistoricoAtiva] = useState<'resumo' | 'atividades' | 'dss-temas' | 'rankings'>('resumo');
   const [filtroTemaHistorico, setFiltroTemaHistorico] = useState<string>('todos');
   const [filtroPeriodoHistorico, setFiltroPeriodoHistorico] = useState<'7dias' | '30dias' | '90dias' | 'todos'>('30dias');
@@ -167,10 +167,11 @@ export default function App(): JSX.Element {
 
   // ── Nav ──────────────────────────────────────────────────────────────
   const handleNavigate = useCallback((id: string) => {
-    if (id === 'dss') { setMostrarPaginaDSS(true); return; }
+    if (id === 'dss') { setMostrarPaginaDSS(true); adamBoot.setPaginaAtual('dss'); return; }
     setMostrarPaginaDSS(false);
     setPaginaAtiva(id);
-  }, []);
+    adamBoot.setPaginaAtual(id);
+  }, [adamBoot.setPaginaAtual]);
 
   // ── Audit login ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -472,6 +473,10 @@ export default function App(): JSX.Element {
         tema={tema}
         modoAtivo={!!usuarioLogado}
         alertasCriticos={alertasCriticos.map((a) => a.mensagem || '')}
+        aiStatus={adamBoot.aiStatus}
+        isListening={adamBoot.isListening}
+        onStartVoice={adamBoot.startVoice}
+        onStopVoice={adamBoot.stopVoice}
       />
     </div>
   );

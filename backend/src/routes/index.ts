@@ -65,6 +65,13 @@ router.get('/lgpd/meus-dados', authenticate, lgpdCtrl.meusDados);
 router.post('/lgpd/exportar', authenticate, lgpdCtrl.exportar);
 router.post('/lgpd/anonimizar', authenticate, authorize('administrador'), lgpdCtrl.anonimizar);
 
+// ── PÁTIOS ──────────────────────────────────────────────────────────────
+import * as patiosCtrl from '../controllers/patiosController';
+router.get('/patios', authenticate, patiosCtrl.listarAtivos);
+router.get('/patios/todos', authenticate, authorize('inspetor', 'gestor', 'administrador'), patiosCtrl.listar);
+router.post('/patios', authenticate, authorize('inspetor', 'gestor', 'administrador'), patiosCtrl.criar);
+router.patch('/patios/:codigo', authenticate, authorize('inspetor', 'gestor', 'administrador'), patiosCtrl.atualizar);
+
 // ── SYNC (Offline-First) ─────────────────────────────────────────────────
 import syncRoutes from './syncRoutes';
 router.use('/sync', syncRoutes);

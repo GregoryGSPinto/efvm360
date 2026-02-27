@@ -2,7 +2,7 @@
 // EFVM360 - CADASTRO — Mesma paleta do Login (Ultra-defensive)
 // ============================================================================
 import React, { useState, useCallback, useMemo } from 'react';
-import { ALL_YARD_CODES, getYardName } from '../../domain/aggregates/YardRegistry';
+import { usePatio } from '../../hooks/usePatio';
 
 // Funções NÃO disponíveis para auto-cadastro (requerem nomeação por gestor/admin)
 const FUNCOES_BLOQUEADAS_CADASTRO = ['administrador', 'supervisor', 'gestor', 'coordenador', 'outra'];
@@ -28,6 +28,7 @@ const CadastroPremium: React.FC<CadastroPremiumProps> = ({
   const [showPwd2, setShowPwd2] = useState(false);
   const [foc, setFoc] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const { patiosAtivos } = usePatio();
 
   // Filtrar funções que NÃO devem aparecer no auto-cadastro
   const funcoesDisponiveis = useMemo(() =>
@@ -231,8 +232,8 @@ const CadastroPremium: React.FC<CadastroPremiumProps> = ({
                 onChange={e => update('primaryYard', e.target.value)}
                 onFocus={() => setFoc('patio')} onBlur={() => setFoc(null)}>
                 <option value="">Selecione o pátio...</option>
-                {ALL_YARD_CODES.map(code => (
-                  <option key={code} value={code}>{code} — {getYardName(code)}</option>
+                {patiosAtivos.map(patio => (
+                  <option key={patio.codigo} value={patio.codigo}>{patio.codigo} — {patio.nome}</option>
                 ))}
               </select>
             </div>
