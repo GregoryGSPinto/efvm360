@@ -170,6 +170,12 @@
         overflow-x: auto;
       }
 
+      /* Dark mode: forçar opções de select a herdar cores do select pai */
+      select option {
+        background-color: inherit;
+        color: inherit;
+      }
+
       /* iOS zoom prevention on mobile */
       @media (max-width: 767px) {
         input, select, textarea {

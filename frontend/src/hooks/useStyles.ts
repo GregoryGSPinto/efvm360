@@ -189,6 +189,7 @@ export function useStyles(
         borderRadius: '8px', color: tema.texto, fontSize: '14px',
         outline: 'none', boxSizing: 'border-box' as const,
         transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+        colorScheme: isDark ? 'dark' : 'light',
       },
       inputFocus: { borderColor: '#007e7a', boxShadow: '0 0 0 3px rgba(0,126,122,0.12)' },
 
@@ -198,6 +199,7 @@ export function useStyles(
         borderRadius: '8px', color: tema.texto, fontSize: '14px',
         outline: 'none', boxSizing: 'border-box' as const,
         transition: 'border-color 0.2s ease',
+        colorScheme: isDark ? 'dark' : 'light',
       },
       selectFocus: { borderColor: '#007e7a', boxShadow: '0 0 0 3px rgba(0,126,122,0.12)' },
 
@@ -208,6 +210,7 @@ export function useStyles(
         fontFamily: 'inherit', resize: 'vertical' as const, minHeight: '80px',
         outline: 'none', boxSizing: 'border-box' as const,
         transition: 'border-color 0.2s ease',
+        colorScheme: isDark ? 'dark' : 'light',
       },
       textareaFocus: { borderColor: '#007e7a', boxShadow: '0 0 0 3px rgba(0,126,122,0.12)' },
 

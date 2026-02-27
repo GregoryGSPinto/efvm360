@@ -3,7 +3,10 @@
     "allow": [
       "Bash(test:*)",
       "Bash(cd:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(echo gh CLI não encontrado ou não autenticado:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)"
     ]
   }
 }

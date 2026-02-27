@@ -93,6 +93,7 @@ const CadastroPremium: React.FC<CadastroPremiumProps> = ({
   const selSt: React.CSSProperties = {
     flex: 1, padding: '12px', background: 'transparent', border: 'none', outline: 'none',
     fontSize: 14, color: txt, fontFamily: "'Segoe UI','Inter',sans-serif", cursor: 'pointer',
+    colorScheme: dk ? 'dark' : 'light',
   };
 
   const bp: React.CSSProperties = {
