@@ -19,7 +19,7 @@ const criarEstadoInicialDSS = (): DadosDSS => ({
   identificacao: {
     data: new Date().toISOString().split('T')[0],
     turno: '',
-    turnoLetra: '',
+    turnoLetra: 'D',
     turnoHorario: '',
     horario: new Date().toTimeString().slice(0, 5),
     facilitador: '',

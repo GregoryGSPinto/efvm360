@@ -26,7 +26,7 @@ interface SeedUser {
 // ── Credenciais Multi-Pátio ────────────────────────────────────────────
 
 const EFVM360_USERS: SeedUser[] = [
-  // ═══ VFZ — Pátio de Tubarão / Flexal ═══
+  // ═══ VFZ — Pátio de Fazendão ═══
   { nome: 'Carlos Eduardo Silva',      matricula: 'VFZ1001', funcao: 'maquinista', turno: 'A', horarioTurno: '07-19', primaryYard: 'VFZ' },
   { nome: 'Roberto Almeida Santos',     matricula: 'VFZ1002', funcao: 'maquinista', turno: 'A', horarioTurno: '07-19', primaryYard: 'VFZ' },
   { nome: 'Marcos Vinícius Souza',      matricula: 'VFZ1003', funcao: 'maquinista', turno: 'B', horarioTurno: '19-07', primaryYard: 'VFZ' },
@@ -35,7 +35,7 @@ const EFVM360_USERS: SeedUser[] = [
   { nome: 'Ricardo Mendes Ferreira',    matricula: 'VFZ2001', funcao: 'inspetor',                                       primaryYard: 'VFZ' },
   { nome: 'Paulo Henrique Barbosa',     matricula: 'VFZ3001', funcao: 'gestor',                                         primaryYard: 'VFZ' },
 
-  // ═══ VBR — Pátio de Barão de Cocais ═══
+  // ═══ VBR — Pátio de Brucutu ═══
   { nome: 'Thiago Oliveira Costa',      matricula: 'VBR1001', funcao: 'maquinista', turno: 'A', horarioTurno: '07-19', primaryYard: 'VBR' },
   { nome: 'Lucas Martins Rocha',        matricula: 'VBR1002', funcao: 'maquinista', turno: 'A', horarioTurno: '07-19', primaryYard: 'VBR' },
   { nome: 'Gustavo Henrique Dias',      matricula: 'VBR1003', funcao: 'maquinista', turno: 'B', horarioTurno: '19-07', primaryYard: 'VBR' },
@@ -53,7 +53,7 @@ const EFVM360_USERS: SeedUser[] = [
   { nome: 'Fernando Costa Oliveira',    matricula: 'VCS2001', funcao: 'inspetor',                                       primaryYard: 'VCS' },
   { nome: 'Sérgio Magalhães Junior',    matricula: 'VCS3001', funcao: 'gestor',                                         primaryYard: 'VCS' },
 
-  // ═══ P6 — Pátio Pedro Nolasco ═══
+  // ═══ P6 — Pátio Meia ═══
   { nome: 'Adriano Batista Correia',    matricula: 'P61001',  funcao: 'maquinista', turno: 'A', horarioTurno: '07-19', primaryYard: 'P6' },
   { nome: 'Vinícius Araújo Moura',      matricula: 'P61002',  funcao: 'maquinista', turno: 'A', horarioTurno: '07-19', primaryYard: 'P6' },
   { nome: 'Renato Ferreira Lopes',      matricula: 'P61003',  funcao: 'maquinista', turno: 'B', horarioTurno: '19-07', primaryYard: 'P6' },
@@ -62,7 +62,7 @@ const EFVM360_USERS: SeedUser[] = [
   { nome: 'José Ricardo Andrade',       matricula: 'P62001',  funcao: 'inspetor',                                       primaryYard: 'P6' },
   { nome: 'Antonio Marcos Cardoso',     matricula: 'P63001',  funcao: 'gestor',                                         primaryYard: 'P6' },
 
-  // ═══ VTO — Terminal de Tubarão Outbound ═══
+  // ═══ VTO — Pátio de Timbopeba ═══
   { nome: 'Daniel Gomes Freitas',       matricula: 'VTO1001', funcao: 'maquinista', turno: 'A', horarioTurno: '07-19', primaryYard: 'VTO' },
   { nome: 'Michel Santos Prado',        matricula: 'VTO1002', funcao: 'maquinista', turno: 'A', horarioTurno: '07-19', primaryYard: 'VTO' },
   { nome: 'Felipe Nunes Barros',        matricula: 'VTO1003', funcao: 'maquinista', turno: 'B', horarioTurno: '19-07', primaryYard: 'VTO' },

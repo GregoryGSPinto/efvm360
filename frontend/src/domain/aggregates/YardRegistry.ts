@@ -58,8 +58,8 @@ export interface Yard {
 export const YARD_REGISTRY: Record<YardCode, Yard> = {
   VFZ: {
     id: 'VFZ',
-    name: 'Pátio de Tubarão / Flexal',
-    shortName: 'Flexal',
+    name: 'Pátio de Fazendão',
+    shortName: 'Fazendão',
     region: 'litoral',
     km: 0,
     tracks: [
@@ -100,8 +100,8 @@ export const YARD_REGISTRY: Record<YardCode, Yard> = {
 
   VBR: {
     id: 'VBR',
-    name: 'Pátio de Barão de Cocais',
-    shortName: 'Barão',
+    name: 'Pátio de Brucutu',
+    shortName: 'Brucutu',
     region: 'serra',
     km: 356,
     tracks: [
@@ -164,8 +164,8 @@ export const YARD_REGISTRY: Record<YardCode, Yard> = {
 
   P6: {
     id: 'P6',
-    name: 'Pátio Pedro Nolasco (Pátio 6)',
-    shortName: 'P. Nolasco',
+    name: 'Pátio Meia',
+    shortName: 'Meia',
     region: 'litoral',
     km: 15,
     tracks: [
@@ -193,8 +193,8 @@ export const YARD_REGISTRY: Record<YardCode, Yard> = {
 
   VTO: {
     id: 'VTO',
-    name: 'Terminal de Tubarão Outbound',
-    shortName: 'Tubarão Out',
+    name: 'Pátio de Timbopeba',
+    shortName: 'Timbopeba',
     region: 'litoral',
     km: 2,
     tracks: [

@@ -25,7 +25,7 @@ export const CONFIG_INICIAL: ConfiguracaoSistema = {
   versao: '3.1.0',
   // Preferências Operacionais
   preferenciasOperacionais: {
-    turnoPreferencial: '',
+    turnoPreferencial: 'D',
     idioma: 'pt-BR',
     tamanhoFonte: 'medio',
     densidadeInterface: 'confortavel',

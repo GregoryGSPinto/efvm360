@@ -1025,7 +1025,7 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
             {/* Visão Geral */}
             <div style={{ marginBottom: '24px' }}>
               <h3 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '16px' }}>🔍 Visão Geral</h3>
-              <p>O <strong>EFVM360 - Passagem de Serviço</strong> é um sistema digital desenvolvido para a <strong>Estrada de Ferro Vitória a Minas (EFVM)</strong>, com foco na digitalização e padronização do processo de passagem de serviço no Pátio do Fazendão.</p>
+              <p>O <strong>EFVM360 - Passagem de Serviço</strong> é um sistema digital desenvolvido para a <strong>Estrada de Ferro Vitória a Minas (EFVM)</strong>, com foco na digitalização e padronização do processo de passagem de serviço nos pátios da EFVM.</p>
               <p style={{ marginTop: '8px' }}>O sistema permite o registro completo de informações operacionais, garantindo continuidade, rastreabilidade e segurança nas operações ferroviárias.</p>
             </div>
 

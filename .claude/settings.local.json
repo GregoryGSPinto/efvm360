@@ -6,7 +6,8 @@
       "Bash(echo:*)",
       "Bash(echo gh CLI não encontrado ou não autenticado:*)",
       "Bash(head:*)",
-      "Bash(tail:*)"
+      "Bash(tail:*)",
+      "Bash(cd \"C:\\\\Users\\\\grego\\\\OneDrive\\\\Documentos\\\\Projetos\\\\EFVM360_ENTERPRISE_v3.2\\\\frontend\" && pnpm type-check 2>&1)"
     ]
   }
 }

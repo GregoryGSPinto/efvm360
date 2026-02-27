@@ -68,8 +68,8 @@ describe('P01 — YardRegistry', () => {
   });
 
   it('getYardName returns proper names', () => {
-    expect(getYardName('VFZ')).toContain('Tubarão');
-    expect(getYardShortName('VBR')).toBe('Barão');
+    expect(getYardName('VFZ')).toContain('Fazendão');
+    expect(getYardShortName('VBR')).toBe('Brucutu');
   });
 
   it('getAllYardCodes matches constant', () => {
