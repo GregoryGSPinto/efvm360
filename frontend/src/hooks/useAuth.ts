@@ -172,7 +172,7 @@ export function useAuth(): AuthReturn {
   const [loginForm, setLoginForm] = useState<LoginForm>({ matricula: '', senha: '' });
   const [loginErro, setLoginErro] = useState('');
   const [cadastroForm, setCadastroForm] = useState<CadastroForm>({
-    nome: '', matricula: '', funcao: '', turno: '', horarioTurno: '', senha: '', confirmarSenha: '',
+    nome: '', matricula: '', funcao: '', turno: 'D', horarioTurno: '', senha: '', confirmarSenha: '',
   });
   const [cadastroErro, setCadastroErro] = useState('');
   const [cadastroSucesso, setCadastroSucesso] = useState(false);

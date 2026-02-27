@@ -144,6 +144,7 @@ const CadastroPremium: React.FC<CadastroPremiumProps> = ({
     { value: 'A', label: 'Turno A' },
     { value: 'B', label: 'Turno B' },
     { value: 'C', label: 'Turno C' },
+    { value: 'D', label: 'Turno D' },
   ];
 
   const horarios = [
