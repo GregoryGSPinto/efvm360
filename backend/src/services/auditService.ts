@@ -79,13 +79,15 @@ export const verificarIntegridade = async (): Promise<{
   let registrosVerificados = 0;
 
   for (const reg of registros) {
+    const createdAt = reg.getDataValue('created_at');
+    const timestamp = createdAt instanceof Date ? createdAt.toISOString() : String(createdAt || '');
     const hashEsperado = hashAuditEntry(
       {
         matricula: reg.matricula,
         acao: reg.acao,
         recurso: reg.recurso,
         detalhes: reg.detalhes || undefined,
-        timestamp: reg.getDataValue('created_at')?.toISOString() || '',
+        timestamp,
       },
       hashAnterior
     );

@@ -24,13 +24,13 @@ export async function runMigration004(): Promise<void> {
       defaultValue: DataTypes.UUIDV4,
     },
     codigo: {
-      type: DataTypes.VARCHAR(5),
+      type: DataTypes.STRING(5),
       allowNull: false,
       unique: true,
       comment: 'Código curto do pátio (max 5 chars, alfanumérico)',
     },
     nome: {
-      type: DataTypes.VARCHAR(120),
+      type: DataTypes.STRING(120),
       allowNull: false,
       comment: 'Nome completo do pátio',
     },
@@ -46,7 +46,7 @@ export async function runMigration004(): Promise<void> {
       comment: 'true = pátio padrão do sistema, false = custom',
     },
     criado_por: {
-      type: DataTypes.VARCHAR(20),
+      type: DataTypes.STRING(20),
       allowNull: true,
       comment: 'Matrícula do criador (null para pátios padrão)',
     },

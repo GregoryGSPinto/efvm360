@@ -45,9 +45,9 @@ export class Patio extends Model<PatioAttributes, PatioCreationAttributes> imple
 Patio.init({
   id: { type: DataTypes.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
   uuid: { type: DataTypes.CHAR(36), allowNull: false, unique: true, defaultValue: DataTypes.UUIDV4 },
-  codigo: { type: DataTypes.VARCHAR(5), allowNull: false, unique: true },
-  nome: { type: DataTypes.VARCHAR(120), allowNull: false },
+  codigo: { type: DataTypes.STRING(5), allowNull: false, unique: true },
+  nome: { type: DataTypes.STRING(120), allowNull: false },
   ativo: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
   padrao: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
-  criado_por: { type: DataTypes.VARCHAR(20), allowNull: true },
+  criado_por: { type: DataTypes.STRING(20), allowNull: true },
 }, { sequelize, tableName: 'patios', modelName: 'Patio' });

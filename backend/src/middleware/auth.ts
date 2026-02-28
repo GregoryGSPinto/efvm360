@@ -22,7 +22,7 @@ declare global {
   }
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || 'TROCAR_EM_PRODUCAO';
+const JWT_SECRET = process.env.JWT_SECRET || '';
 
 /**
  * Middleware de autenticação — verifica JWT no header Authorization

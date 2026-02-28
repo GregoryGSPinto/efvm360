@@ -21,6 +21,8 @@ interface UsuarioAttributes {
   tentativas_login: number;
   bloqueado_ate: Date | null;
   azure_ad_oid: string | null;
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 interface PassagemAttributes {
@@ -61,6 +63,7 @@ interface AuditTrailAttributes {
   user_agent: string | null;
   hash_anterior: string | null;
   hash_registro: string;
+  created_at?: Date;
 }
 
 // ── MODELOS ──────────────────────────────────────────────────────────────
@@ -177,6 +180,7 @@ export class AuditTrail extends Model<AuditTrailAttributes, Optional<AuditTrailA
   declare user_agent: string | null;
   declare hash_anterior: string | null;
   declare hash_registro: string;
+  declare readonly created_at: Date;
 }
 
 AuditTrail.init({

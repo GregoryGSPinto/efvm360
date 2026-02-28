@@ -28,12 +28,12 @@ export async function runMigration002(): Promise<void> {
       allowNull: false,
     },
     aggregate_type: {
-      type: DataTypes.VARCHAR(50),
+      type: DataTypes.STRING(50),
       allowNull: false,
       comment: 'ServicePass, YardConfiguration, LocomotiveInspection',
     },
     event_type: {
-      type: DataTypes.VARCHAR(100),
+      type: DataTypes.STRING(100),
       allowNull: false,
       comment: 'ServicePassCreated, WeighingExcessDetected, etc.',
     },
@@ -100,7 +100,7 @@ export async function runMigration002(): Promise<void> {
       allowNull: false,
     },
     aggregate_type: {
-      type: DataTypes.VARCHAR(50),
+      type: DataTypes.STRING(50),
       allowNull: false,
     },
     version: {
@@ -138,12 +138,12 @@ export async function runMigration002(): Promise<void> {
       allowNull: false,
     },
     yard_code: {
-      type: DataTypes.VARCHAR(10),
+      type: DataTypes.STRING(10),
       allowNull: false,
       comment: 'Código curto: FZ, TO, BR, CS, P6',
     },
     yard_name: {
-      type: DataTypes.VARCHAR(200),
+      type: DataTypes.STRING(200),
       allowNull: false,
     },
     yard_type: {
@@ -156,7 +156,7 @@ export async function runMigration002(): Promise<void> {
       defaultValue: 'EFVM',
     },
     normative_ref: {
-      type: DataTypes.VARCHAR(100),
+      type: DataTypes.STRING(100),
       allowNull: false,
       comment: 'PRO-004985 Anexo XX, PRO-040960, etc.',
     },
@@ -222,11 +222,11 @@ export async function runMigration002(): Promise<void> {
       allowNull: true,
     },
     yard_id: {
-      type: DataTypes.VARCHAR(10),
+      type: DataTypes.STRING(10),
       allowNull: false,
     },
     anomaly_type: {
-      type: DataTypes.VARCHAR(100),
+      type: DataTypes.STRING(100),
       allowNull: false,
     },
     description: {
@@ -234,7 +234,7 @@ export async function runMigration002(): Promise<void> {
       allowNull: false,
     },
     location: {
-      type: DataTypes.VARCHAR(200),
+      type: DataTypes.STRING(200),
       allowNull: true,
     },
     severity: {
@@ -242,15 +242,15 @@ export async function runMigration002(): Promise<void> {
       allowNull: false,
     },
     equipment_id: {
-      type: DataTypes.VARCHAR(50),
+      type: DataTypes.STRING(50),
       allowNull: true,
     },
     normative_ref: {
-      type: DataTypes.VARCHAR(100),
+      type: DataTypes.STRING(100),
       allowNull: true,
     },
     reported_by: {
-      type: DataTypes.VARCHAR(20),
+      type: DataTypes.STRING(20),
       allowNull: false,
       comment: 'Matrícula do operador',
     },
@@ -284,7 +284,7 @@ export async function runMigration002(): Promise<void> {
       allowNull: true,
     },
     yard_id: {
-      type: DataTypes.VARCHAR(10),
+      type: DataTypes.STRING(10),
       allowNull: false,
     },
     total_weight: {
@@ -293,7 +293,7 @@ export async function runMigration002(): Promise<void> {
       comment: 'Peso total em toneladas brutas',
     },
     heaviest_wagon_id: {
-      type: DataTypes.VARCHAR(50),
+      type: DataTypes.STRING(50),
       allowNull: true,
     },
     heaviest_wagon_weight: {
@@ -301,7 +301,7 @@ export async function runMigration002(): Promise<void> {
       allowNull: true,
     },
     lightest_wagon_id: {
-      type: DataTypes.VARCHAR(50),
+      type: DataTypes.STRING(50),
       allowNull: true,
     },
     lightest_wagon_weight: {
@@ -323,7 +323,7 @@ export async function runMigration002(): Promise<void> {
       comment: 'Array de vagões com excesso: [{wagonId, weight, excess}]',
     },
     weighed_by: {
-      type: DataTypes.VARCHAR(20),
+      type: DataTypes.STRING(20),
       allowNull: false,
     },
     created_at: {
@@ -356,11 +356,11 @@ export async function runMigration002(): Promise<void> {
       allowNull: true,
     },
     yard_id: {
-      type: DataTypes.VARCHAR(10),
+      type: DataTypes.STRING(10),
       allowNull: false,
     },
     locomotive_model: {
-      type: DataTypes.VARCHAR(50),
+      type: DataTypes.STRING(50),
       allowNull: false,
     },
     locomotive_ids: {
@@ -402,7 +402,7 @@ export async function runMigration002(): Promise<void> {
       defaultValue: false,
     },
     inspected_by: {
-      type: DataTypes.VARCHAR(20),
+      type: DataTypes.STRING(20),
       allowNull: false,
     },
     started_at: {
@@ -429,7 +429,7 @@ export async function runMigration002(): Promise<void> {
       primaryKey: true,
     },
     yard_id: {
-      type: DataTypes.VARCHAR(10),
+      type: DataTypes.STRING(10),
       allowNull: false,
     },
     summary_date: {
@@ -501,7 +501,7 @@ export async function runMigration002(): Promise<void> {
 
   // ── 8. ALTER passagens — Add yard_id ──────────────────────────────────
   await qi.addColumn('passagens', 'yard_id', {
-    type: DataTypes.VARCHAR(10),
+    type: DataTypes.STRING(10),
     allowNull: true,
     comment: 'Código do pátio (FK lógica para yard_configurations)',
   });

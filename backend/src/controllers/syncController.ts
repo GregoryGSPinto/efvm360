@@ -65,9 +65,11 @@ export const sincronizarBatch = async (req: Request, res: Response): Promise<voi
 
   const results: SyncResultItem[] = [];
 
+  const user = req.user;
+
   for (const item of items) {
     try {
-      const result = await processItem(item, req.user);
+      const result = await processItem(item, user);
       results.push(result);
     } catch (err) {
       results.push({
@@ -84,12 +86,12 @@ export const sincronizarBatch = async (req: Request, res: Response): Promise<voi
 
   if (synced > 0 || conflicts > 0) {
     await auditService.registrar({
-      usuarioId: (req.user as Record<string, unknown>).id as number,
-      matricula: (req.user as Record<string, unknown>).matricula as string,
+      usuarioId: user.userId,
+      matricula: user.matricula,
       acao: 'SYNC',
       recurso: 'passagens',
       detalhes: `Batch sync: ${synced} ok, ${conflicts} conflitos, ${results.length - synced - conflicts} erros`,
-      ip: req.ip || 'unknown',
+      ipAddress: req.ip || 'unknown',
       userAgent: req.headers['user-agent'] || 'unknown',
     });
   }
@@ -102,7 +104,7 @@ export const sincronizarBatch = async (req: Request, res: Response): Promise<voi
  */
 async function processItem(
   item: SyncItem,
-  user: Record<string, unknown>,
+  user: { userId: number; uuid: string; matricula: string; funcao: string; type: string },
 ): Promise<SyncResultItem> {
   // Validate required fields
   if (!item.id || !item.type || !item.payload) {
@@ -177,12 +179,12 @@ async function processItem(
 
     // Audit
     await auditService.registrar({
-      usuarioId: user.id as number,
-      matricula: user.matricula as string,
+      usuarioId: user.userId,
+      matricula: user.matricula,
       acao: 'SYNC_PASSAGEM',
       recurso: `passagem:${item.id}`,
       detalhes: `Passagem sincronizada: turno ${item.turno || '?'} em ${item.data || '?'}. Device: ${item.deviceId || 'unknown'}`,
-      ip: 'sync',
+      ipAddress: 'sync',
       userAgent: `device:${item.deviceId || 'unknown'}`,
     });
 
@@ -230,7 +232,7 @@ export const listarConflitos = async (req: Request, res: Response): Promise<void
   }
 
   // Only supervisors and above can see conflicts
-  const funcao = (req.user as Record<string, unknown>).funcao as string;
+  const funcao = req.user.funcao;
   const allowed = ['supervisor', 'coordenador', 'administrador', 'inspetor'];
   if (!allowed.includes(funcao)) {
     res.status(403).json({ error: 'Apenas supervisores podem ver conflitos' });

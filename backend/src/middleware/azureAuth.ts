@@ -15,7 +15,7 @@ const ISSUER = `https://login.microsoftonline.com/${TENANT_ID}/v2.0`;
 const client = jwksClient({ jwksUri: `https://login.microsoftonline.com/${TENANT_ID}/discovery/v2.0/keys` });
 
 function getKey(header: jwt.JwtHeader, callback: jwt.SigningKeyCallback) {
-  client.getSigningKey(header.kid, (err, key) => {
+  client.getSigningKey(header.kid, (err: Error | null, key?: jwksClient.SigningKey) => {
     callback(err, key?.getPublicKey());
   });
 }

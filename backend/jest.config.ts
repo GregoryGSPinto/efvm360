@@ -27,7 +27,7 @@ const config: Config = {
       statements: 60,
     },
   },
-  setupFilesAfterEnv: [],
+  setupFilesAfterEnv: ['<rootDir>/__tests__/setup.ts'],
   verbose: true,
   // Longer timeout for integration tests (bcrypt is slow)
   testTimeout: 15000,

@@ -46,7 +46,7 @@ export const anonimizar = async (req: Request, res: Response): Promise<void> => 
   const hashMatricula = crypto.createHash('sha256').update(matriculaAlvo).digest('hex').substring(0, 12);
 
   await usuario.update({ nome: 'Usuário Anonimizado', matricula: `ANON_${hashMatricula}`, ativo: false, azure_ad_oid: null });
-  await AuditTrail.update({ matricula: `ANON_${hashMatricula}` }, { where: { matricula: matriculaAlvo } } as any);
+  await AuditTrail.update({ matricula: `ANON_${hashMatricula}` } as Partial<AuditTrail>, { where: { matricula: matriculaAlvo } });
 
   res.json({ message: 'Dados anonimizados com sucesso', matriculaAnonimizada: `ANON_${hashMatricula}` });
 };

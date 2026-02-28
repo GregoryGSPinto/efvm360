@@ -23,8 +23,8 @@ const mockResponse = (): Partial<Response> => {
 
 const mockNext: NextFunction = jest.fn();
 
-// JWT secret used in the middleware (default from source)
-const JWT_SECRET = process.env.JWT_SECRET || 'TROCAR_EM_PRODUCAO';
+// JWT secret — must match what the middleware uses (set in __tests__/setup.ts)
+const JWT_SECRET = process.env.JWT_SECRET || 'test-jwt-secret-for-unit-tests';
 
 // Helper: create a valid access token
 const createValidToken = (overrides: Partial<JWTPayload> = {}): string => {

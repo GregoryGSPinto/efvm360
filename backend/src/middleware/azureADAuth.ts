@@ -51,7 +51,7 @@ function getJwksClient(tenantId: string) {
 
 function getSigningKey(client: jwksClient.JwksClient, kid: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    client.getSigningKey(kid, (err, key) => {
+    client.getSigningKey(kid, (err: Error | null, key?: jwksClient.SigningKey) => {
       if (err) return reject(err);
       const signingKey = key?.getPublicKey();
       if (!signingKey) return reject(new Error('No signing key found'));

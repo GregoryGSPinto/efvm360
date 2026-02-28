@@ -11,10 +11,13 @@ import { generateSecureToken, hashToken } from '../utils/crypto';
 import sequelize from '../config/database';
 import type { JWTPayload } from '../middleware/auth';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'TROCAR_EM_PRODUCAO';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'TROCAR_REFRESH_EM_PRODUCAO';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '8h';
-const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
+if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET é obrigatório — defina no .env ou Azure Key Vault');
+if (!process.env.JWT_REFRESH_SECRET) throw new Error('JWT_REFRESH_SECRET é obrigatório — defina no .env ou Azure Key Vault');
+
+const JWT_SECRET: string = process.env.JWT_SECRET;
+const JWT_REFRESH_SECRET: string = process.env.JWT_REFRESH_SECRET;
+const JWT_EXPIRES_IN: string = process.env.JWT_EXPIRES_IN || '8h';
+const JWT_REFRESH_EXPIRES_IN: string = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
 const BCRYPT_ROUNDS = parseInt(process.env.BCRYPT_ROUNDS || '12', 10);
 const LOGIN_MAX_ATTEMPTS = parseInt(process.env.LOGIN_MAX_ATTEMPTS || '5', 10);
 const LOGIN_LOCKOUT_MINUTES = parseInt(process.env.LOGIN_LOCKOUT_MINUTES || '15', 10);
@@ -105,7 +108,7 @@ export const login = async (
   const accessToken = jwt.sign(
     { ...payload, type: 'access' } as JWTPayload,
     JWT_SECRET,
-    { expiresIn: JWT_EXPIRES_IN }
+    { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions
   );
 
   const refreshTokenRaw = generateSecureToken();
@@ -176,7 +179,7 @@ export const refreshAccessToken = async (
     type: 'access',
   };
 
-  const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions);
   const newRefreshRaw = generateSecureToken();
   const newRefreshHash = hashToken(newRefreshRaw);
 
