@@ -1372,6 +1372,7 @@ export const AdamBootChat = memo<AdamBootChatProps>(({
       {/* Botão Flutuante Arrastável (Ícone) */}
       <div
         ref={widgetRef}
+        data-tour="adamboot-btn"
         style={getWidgetStyle()}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}

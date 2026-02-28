@@ -162,4 +162,7 @@ export interface PaginaConfiguracoesProps {
   setErroAlterarSenha: (erro: string) => void;
   sucessoAlterarSenha: boolean;
   setSucessoAlterarSenha: (sucesso: boolean) => void;
+  // Tour
+  onResetarTour?: () => void;
+  onIniciarTour?: () => void;
 }

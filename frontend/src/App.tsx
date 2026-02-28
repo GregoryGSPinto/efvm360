@@ -25,6 +25,7 @@ import { useBlindagem } from './hooks/useBlindagem';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
 import { useTurnoTimer } from './hooks/useTurnoTimer';
 import { usePassagemHandlers } from './hooks/usePassagemHandlers';
+import { useTour } from './hooks/useTour';
 
 // ── Constants ───────────────────────────────────────────────────────────
 import { FUNCOES_USUARIO, STORAGE_KEYS } from './utils/constants';
@@ -34,6 +35,7 @@ import { SplashScreenPremium, LoginScreenPremium, AdamBootChat } from './compone
 import { TopNavbar } from './components/layout/TopNavbar';
 import { MobileBottomNav } from './components/layout/MobileBottomNav';
 import { OnlineIndicator } from './components/layout/OnlineIndicator';
+import { GuidedTour, TOUR_STEPS } from './components/ui/GuidedTour';
 import {
   ModuleErrorBoundary, PassagemBoundary,
   DashboardBoundary, HistoricoBoundary, ConfiguracoesBoundary, DSSBoundary,
@@ -148,6 +150,9 @@ export default function App(): JSX.Element {
   const { tempoTurnoDecorrido, obterJanelaHoraria, obterLetraTurno } = useTurnoTimer(
     dadosFormulario.cabecalho.turno || '', usuarioLogado,
   );
+
+  // ── Tour ─────────────────────────────────────────────────────────────
+  const { tourAtivo, iniciarTour, completarTour, pularTour, resetarTour } = useTour();
 
   // ── Passagem Handlers ────────────────────────────────────────────────
   const handlers = usePassagemHandlers(
@@ -376,7 +381,7 @@ export default function App(): JSX.Element {
       <a href="#efvm360-main" className="efvm360-skip-link">Pular para conteúdo</a>
 
       {/* Demo Banner */}
-      <div style={{
+      <div data-tour="demo-banner" style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 10000,
         background: '#d9a010', color: '#fff', textAlign: 'center',
         fontSize: 11, fontWeight: 700, letterSpacing: 1.5, padding: '4px 0',
@@ -429,6 +434,8 @@ export default function App(): JSX.Element {
         onLogout={realizarLogout}
         pendingCount={pendingCount}
         onlineStatus={onlineStatus.status}
+        onIniciarTour={iniciarTour}
+        tourAtivo={tourAtivo}
       />
 
       {/* Bottom Navbar — Mobile Only (shown via CSS) */}
@@ -536,6 +543,7 @@ export default function App(): JSX.Element {
                 <PaginaConfiguracoes tema={tema} temaEfetivo={temaEfetivo} styles={styles} config={config}
                   usuarioLogado={usuarioLogado} secaoConfigAtiva={secaoConfigAtiva}
                   setSecaoConfigAtiva={setSecaoConfigAtiva} setTema={setTema as (tema: string) => void}
+                  onResetarTour={resetarTour} onIniciarTour={iniciarTour}
                   atualizarPreferenciasOperacionais={atualizarPreferenciasOperacionais as (campo: string, valor: unknown) => void}
                   atualizarPreferenciasNotificacao={atualizarPreferenciasNotificacao as (campo: string, valor: boolean) => void}
                   atualizarPreferenciasAcessibilidade={atualizarPreferenciasAcessibilidade as (campo: string, valor: boolean) => void}
@@ -643,6 +651,18 @@ export default function App(): JSX.Element {
         paginaAtual={adamBoot.paginaAtual}
         completudePassagem={adamBoot.completudePassagem}
       />
+
+      {/* Guided Tour */}
+      {usuarioLogado && (
+        <GuidedTour
+          steps={TOUR_STEPS}
+          isActive={tourAtivo}
+          onComplete={completarTour}
+          onSkip={pularTour}
+          onNavigate={handleNavigate}
+          isDark={isDark}
+        />
+      )}
     </div>
   );
 }

@@ -42,6 +42,8 @@ interface TopNavbarProps {
   onLogout: () => void;
   pendingCount?: number;
   onlineStatus?: 'online' | 'offline' | 'syncing';
+  onIniciarTour?: () => void;
+  tourAtivo?: boolean;
 }
 
 // ── Component ──────────────────────────────────────────────────────────
@@ -49,6 +51,7 @@ export const TopNavbar = memo<TopNavbarProps>(({
   tema: _tema, config, onNavigate,
   usuarioLogado, funcaoLabel, onLogout, pendingCount = 0,
   onlineStatus = 'online',
+  onIniciarTour, tourAtivo = false,
 }) => {
   const location = useLocation();
   const { t } = useI18n();
@@ -101,7 +104,7 @@ export const TopNavbar = memo<TopNavbarProps>(({
   const currentPageId = PATH_TO_NAV_ID[currentPath] || 'inicial';
 
   return (
-    <header className="efvm360-topnav" role="navigation" aria-label="Navegação principal" style={{
+    <header className="efvm360-topnav" data-tour="nav-principal" role="navigation" aria-label="Navegação principal" style={{
       position: 'fixed', top: 23, left: 0, right: 0, height: 56,
       background: bg, borderBottom: `1px solid ${bd}`,
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -130,6 +133,7 @@ export const TopNavbar = memo<TopNavbarProps>(({
           return (
             <button
               key={id}
+              data-tour={`nav-${id}`}
               onClick={() => onNavigate(id)}
               style={{
                 padding: '8px 18px',
@@ -163,8 +167,30 @@ export const TopNavbar = memo<TopNavbarProps>(({
         })}
       </nav>
 
-      {/* ── RIGHT: Avatar (only dropdown in the system) ── */}
-      <div ref={avatarRef} style={{ position: 'relative', flexShrink: 0 }}>
+      {/* ── RIGHT: Tour + Avatar ── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        {/* Tour trigger button */}
+        {onIniciarTour && !tourAtivo && (
+          <button
+            data-tour="tour-btn"
+            onClick={onIniciarTour}
+            title="Tutorial do Sistema"
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: 34, height: 34, borderRadius: 8,
+              border: `1px solid ${bd}`, background: 'transparent',
+              cursor: 'pointer', fontSize: 16,
+              transition: 'all 120ms ease',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = hover}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            🎓
+          </button>
+        )}
+
+      {/* Avatar dropdown */}
+      <div ref={avatarRef} data-tour="user-menu" style={{ position: 'relative', flexShrink: 0 }}>
         {usuarioLogado && (
           <>
             <button
@@ -280,6 +306,7 @@ export const TopNavbar = memo<TopNavbarProps>(({
             )}
           </>
         )}
+      </div>
       </div>
 
       <style>{`@keyframes efvm360FadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}`}</style>

@@ -2777,7 +2777,7 @@ SEGURANÇA EM MANOBRAS
       </div>
 
       {/* AI Risk Score Widget */}
-      <div style={{ marginBottom: 16 }}>
+      <div data-tour="risco-operacional" style={{ marginBottom: 16 }}>
         <AIRiskScore tema={tema} dadosFormulario={dadosFormulario} patio={selectedYard} />
       </div>
 
@@ -2826,6 +2826,7 @@ SEGURANÇA EM MANOBRAS
       <div
         ref={secaoNavRef}
         className="efvm360-secao-nav"
+        data-tour="secao-nav"
         style={{
           display: 'flex',
           gap: '8px',

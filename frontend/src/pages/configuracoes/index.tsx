@@ -17,6 +17,7 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
     setSecaoConfigAtiva, setTema, atualizarPreferenciasOperacionais,
     atualizarPreferenciasAcessibilidade,
     atualizarAdamBoot,
+    onResetarTour, onIniciarTour,
   } = props;
 
   useI18n();
@@ -490,6 +491,27 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
               <div style={{ fontSize: '12px', color: tema.textoSecundario, marginBottom: '4px' }}>Data/Hora</div>
               <div style={{ fontWeight: 600, color: tema.texto }}>{new Date().toLocaleString('pt-BR')}</div>
             </div>
+          </div>
+        </Card>
+
+        {/* Tutorial */}
+        <Card title="🎓 Tutorial do Sistema" styles={styles}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: tema.backgroundSecundario, borderRadius: '10px', border: `1px solid ${tema.cardBorda}` }}>
+            <div>
+              <div style={{ fontWeight: 600, color: tema.texto, marginBottom: '4px' }}>Reiniciar Tutorial Guiado</div>
+              <div style={{ fontSize: '12px', color: tema.textoSecundario }}>Reveja o tour interativo que apresenta todas as funcionalidades do EFVM360</div>
+            </div>
+            <button
+              onClick={() => { onResetarTour?.(); onIniciarTour?.(); }}
+              style={{
+                padding: '10px 20px', borderRadius: 8, border: 'none',
+                background: tema.primaria, color: '#fff', cursor: 'pointer',
+                fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap',
+                transition: 'all 120ms ease',
+              }}
+            >
+              🎓 Iniciar Tour
+            </button>
           </div>
         </Card>
       </>
