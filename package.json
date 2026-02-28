@@ -1,8 +1,9 @@
 {
   "name": "efvm360",
   "private": true,
+  "packageManager": "pnpm@10.30.1",
+  "engines": { "node": ">=18" },
   "scripts": {
-    "install:frontend": "cd frontend && pnpm install",
     "build": "cd frontend && pnpm run build"
   }
 }
