@@ -1,6 +1,6 @@
 // ============================================================================
 // EFVM360 v3.2 — useTour Hook
-// Guided Tour state management with localStorage persistence
+// Guided Tour state management with sessionStorage (resets each session)
 // ============================================================================
 
 import { useState, useCallback } from 'react';
@@ -20,7 +20,7 @@ export function useTour(): UseTourReturn {
   const [tourAtivo, setTourAtivo] = useState(false);
   const [tourCompleto, setTourCompleto] = useState(() => {
     try {
-      return localStorage.getItem(STORAGE_KEY) === 'true';
+      return sessionStorage.getItem(STORAGE_KEY) === 'true';
     } catch {
       return false;
     }
@@ -34,7 +34,7 @@ export function useTour(): UseTourReturn {
     setTourAtivo(false);
     setTourCompleto(true);
     try {
-      localStorage.setItem(STORAGE_KEY, 'true');
+      sessionStorage.setItem(STORAGE_KEY, 'true');
     } catch { /* fail silently */ }
   }, []);
 
@@ -42,13 +42,13 @@ export function useTour(): UseTourReturn {
     setTourAtivo(false);
     setTourCompleto(true);
     try {
-      localStorage.setItem(STORAGE_KEY, 'true');
+      sessionStorage.setItem(STORAGE_KEY, 'true');
     } catch { /* fail silently */ }
   }, []);
 
   const resetarTour = useCallback(() => {
     try {
-      localStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem(STORAGE_KEY);
     } catch { /* fail silently */ }
     setTourCompleto(false);
   }, []);

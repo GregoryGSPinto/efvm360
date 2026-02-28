@@ -154,9 +154,15 @@ export default function App(): JSX.Element {
   // ── Tour ─────────────────────────────────────────────────────────────
   const { tourAtivo, iniciarTour, completarTour, pularTour, resetarTour } = useTour();
 
+  // ── Logout wrapper (clears tour sessionStorage) ────────────────────
+  const handleLogout = useCallback(() => {
+    try { sessionStorage.removeItem('efvm360-tour-completo'); } catch { /* fail silently */ }
+    realizarLogout();
+  }, [realizarLogout]);
+
   // Auto-start tour after login (first time only)
   useEffect(() => {
-    if (usuarioLogado && !localStorage.getItem('efvm360-tour-completo')) {
+    if (usuarioLogado && !sessionStorage.getItem('efvm360-tour-completo')) {
       const timer = setTimeout(() => iniciarTour(), 800);
       return () => clearTimeout(timer);
     }
@@ -427,7 +433,7 @@ export default function App(): JSX.Element {
               {formatarTempoRestante(tempoRestante)}
             </div>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-              <button onClick={encerrarSessao} style={{ padding: '12px 24px', borderRadius: '12px', border: `1px solid ${tema.cardBorda}`, background: 'transparent', color: tema.texto, cursor: 'pointer' }}>Sair</button>
+              <button onClick={() => { try { sessionStorage.removeItem('efvm360-tour-completo'); } catch { /* */ } encerrarSessao(); }} style={{ padding: '12px 24px', borderRadius: '12px', border: `1px solid ${tema.cardBorda}`, background: 'transparent', color: tema.texto, cursor: 'pointer' }}>Sair</button>
               <button onClick={renovarSessao} style={{ padding: '12px 24px', borderRadius: '12px', border: 'none', background: tema.primaria, color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Continuar</button>
             </div>
           </div>
@@ -440,7 +446,7 @@ export default function App(): JSX.Element {
         onNavigate={handleNavigate}
         usuarioLogado={usuarioLogado}
         funcaoLabel={getFuncaoLabel(usuarioLogado?.funcao)}
-        onLogout={realizarLogout}
+        onLogout={handleLogout}
         pendingCount={pendingCount}
         onlineStatus={onlineStatus.status}
       />
