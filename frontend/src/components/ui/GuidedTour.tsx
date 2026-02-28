@@ -88,8 +88,8 @@ export const TOUR_STEPS: TourStep[] = [
   },
   {
     id: 'conclusion',
-    title: 'Pronto! Boa Jornada! 🚂',
-    content: 'Agora voce conhece o EFVM360. Se precisar rever o tutorial, acesse Configuracoes → Geral → Reiniciar Tutorial. Bom trabalho!',
+    title: '🎉 Parabens! Tutorial Concluido!',
+    content: 'Voce completou o tour do EFVM360! Lembre-se: seguranca e prioridade absoluta em cada passagem de servico. Preencha todos os campos com atencao, comunique pendencias a equipe e registre qualquer anomalia. Boa jornada e trabalho seguro! 🚂🛡️',
   },
 ];
 
@@ -378,7 +378,7 @@ export function GuidedTour({
             background: '#007e7a', color: '#fff', fontSize: 13,
             fontWeight: 600, cursor: 'pointer',
           }}>
-            {currentStep >= steps.length - 1 ? '✓ Concluir' : 'Proximo →'}
+            {currentStep >= steps.length - 1 ? '✓ Concluir e Ir para Inicio' : 'Proximo →'}
           </button>
         </div>
       </div>

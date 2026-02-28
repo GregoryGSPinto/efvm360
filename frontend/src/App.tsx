@@ -664,7 +664,7 @@ export default function App(): JSX.Element {
         <GuidedTour
           steps={TOUR_STEPS}
           isActive={tourAtivo}
-          onComplete={completarTour}
+          onComplete={() => { completarTour(); handleNavigate('inicial'); }}
           onSkip={pularTour}
           onNavigate={handleNavigate}
           isDark={isDark}
