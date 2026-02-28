@@ -1,6 +1,7 @@
 // EFVM360 — LOGIN SCREEN — Visual Corporativo Sólido Vale S.A.
 import React, { memo, useState, useCallback } from 'react';
 import type { LoginForm, TemaEstilos, ConfiguracaoSistema } from '../types';
+import { useI18n } from '../hooks/useI18n';
 
 interface Props {
   loginForm: LoginForm; loginErro: string;
@@ -12,6 +13,7 @@ interface Props {
 export const LoginScreenPremium = memo<Props>(({
   loginForm, loginErro, onFormChange, onLogin, onCadastro, onToggleTema, tema: _tema, config,
 }) => {
+  const { t } = useI18n();
   const [show, setShow] = useState(false);
   const [foc, setFoc] = useState<string|null>(null);
   const [load, setLoad] = useState(false);
@@ -72,8 +74,8 @@ export const LoginScreenPremium = memo<Props>(({
         <div style={{ padding:'32px min(32px, 5vw) 16px', textAlign:'center' }}>
           <div style={{ fontSize:28, fontWeight:800, color:'#007e7a', letterSpacing:4, marginBottom:4 }}>EFVM<span style={{color:'#69be28'}}>360</span></div>
           <div style={{ width:44, height:3, margin:'0 auto 8px', background:'#69be28', borderRadius:2 }} />
-          <div style={{ fontSize:17, fontWeight:600, color:txt, letterSpacing:0.8, marginBottom:4 }}>PASSAGEM DE SERVIÇO</div>
-          <div style={{ fontSize:13, color:txt2 }}>{tela==='login'?'Acesso ao Sistema':'Recuperar Senha'}</div>
+          <div style={{ fontSize:17, fontWeight:600, color:txt, letterSpacing:0.8, marginBottom:4 }}>{t('login.titulo')}</div>
+          <div style={{ fontSize:13, color:txt2 }}>{tela==='login'?t('login.subtitulo'):t('login.recuperarTitulo')}</div>
         </div>
 
         {/* Body */}
@@ -89,7 +91,7 @@ export const LoginScreenPremium = memo<Props>(({
 
             <div style={ic('mat')}>
               <span style={{ padding:'0 14px', fontSize:16, opacity:0.5 }}>👤</span>
-              <input type="text" style={is} placeholder="Matrícula corporativa"
+              <input type="text" style={is} placeholder={t('login.matricula')}
                 value={loginForm.matricula}
                 onChange={e => onFormChange(p => ({...p, matricula: e.target.value}))}
                 onFocus={() => setFoc('mat')} onBlur={() => setFoc(null)} disabled={load} />
@@ -97,7 +99,7 @@ export const LoginScreenPremium = memo<Props>(({
 
             <div style={ic('pwd')}>
               <span style={{ padding:'0 14px', fontSize:16, opacity:0.5 }}>🔒</span>
-              <input type={show?'text':'password'} style={is} placeholder="Senha"
+              <input type={show?'text':'password'} style={is} placeholder={t('login.senha')}
                 value={loginForm.senha}
                 onChange={e => onFormChange(p => ({...p, senha: e.target.value}))}
                 onFocus={() => setFoc('pwd')} onBlur={() => setFoc(null)}
@@ -113,7 +115,7 @@ export const LoginScreenPremium = memo<Props>(({
                 <svg width="18" height="18" viewBox="0 0 24 24" style={{animation:'efvmSpin 1s linear infinite'}}>
                   <circle cx="12" cy="12" r="10" fill="none" stroke="#fff" strokeWidth="3" strokeDasharray="31.4 31.4" strokeLinecap="round"/>
                 </svg>
-              ) : 'ACESSAR SISTEMA'}
+              ) : t('login.acessar')}
             </button>
 
             {/* Demo Credentials Card */}
@@ -124,7 +126,7 @@ export const LoginScreenPremium = memo<Props>(({
               borderRadius:10,
             }}>
               <div style={{ fontSize:10, fontWeight:700, color:'#007e7a', textTransform:'uppercase', letterSpacing:0.8, marginBottom:8 }}>
-                🔑 Credenciais de Demonstração
+                {t('login.credenciais')}
               </div>
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6 }}>
                 {[
@@ -148,45 +150,45 @@ export const LoginScreenPremium = memo<Props>(({
                 ))}
               </div>
               <div style={{ fontSize:10, color:txt2, marginTop:8, textAlign:'center' }}>
-                Senha padrão: <span style={{ fontWeight:700, color:'#007e7a', fontFamily:'monospace' }}>123456</span>
+                {t('login.senhaPadrao')}: <span style={{ fontWeight:700, color:'#007e7a', fontFamily:'monospace' }}>123456</span>
               </div>
             </div>
 
             <div style={{ display:'flex', justifyContent:'center', gap:8, marginTop:16, fontSize:12, color:txt2 }}>
               <span style={{cursor:'pointer'}} onClick={() => setTela('rec')}
                 onMouseEnter={e=>e.currentTarget.style.color='#007e7a'}
-                onMouseLeave={e=>e.currentTarget.style.color=txt2}>Recuperar senha</span>
+                onMouseLeave={e=>e.currentTarget.style.color=txt2}>{t('login.recuperarSenha')}</span>
               <span style={{opacity:0.3}}>│</span>
               <span style={{cursor:'pointer'}} onClick={onCadastro}
                 onMouseEnter={e=>e.currentTarget.style.color='#007e7a'}
-                onMouseLeave={e=>e.currentTarget.style.color=txt2}>Solicitar acesso</span>
+                onMouseLeave={e=>e.currentTarget.style.color=txt2}>{t('login.solicitarAcesso')}</span>
             </div>
 
             <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6,
               marginTop:20, paddingTop:16, borderTop:`1px solid ${bd}`, fontSize:11, color:txt2 }}>
-              🔐 Acesso seguro e rastreável
+              {t('login.acessoSeguro')}
             </div>
           </>) : (<>
             <div style={{marginBottom:16}}>
               <span style={{cursor:'pointer',fontSize:13,color:txt2}}
                 onClick={()=>{setTela('login');setMatRec('');setRecOk(false);}}
                 onMouseEnter={e=>e.currentTarget.style.color='#007e7a'}
-                onMouseLeave={e=>e.currentTarget.style.color=txt2}>← Voltar ao login</span>
+                onMouseLeave={e=>e.currentTarget.style.color=txt2}>← {t('login.voltarLogin')}</span>
             </div>
             {!recOk ? (<>
-              <p style={{fontSize:13,marginBottom:16,color:txt2}}>Informe sua matrícula para solicitar recuperação</p>
+              <p style={{fontSize:13,marginBottom:16,color:txt2}}>{t('login.recuperarDesc')}</p>
               <div style={ic('rec')}>
                 <span style={{padding:'0 14px',fontSize:16,opacity:0.5}}>👤</span>
                 <input type="text" style={is} placeholder="Matrícula" value={matRec}
                   onChange={e=>setMatRec(e.target.value)} onFocus={()=>setFoc('rec')} onBlur={()=>setFoc(null)} />
               </div>
-              <button style={bp} onClick={()=>{if(matRec.trim())setRecOk(true);}}>SOLICITAR RECUPERAÇÃO</button>
+              <button style={bp} onClick={()=>{if(matRec.trim())setRecOk(true);}}>{t('login.solicitarRecuperacao')}</button>
             </>) : (
               <div style={{textAlign:'center',padding:20,background:dk?'rgba(105,190,40,0.08)':'rgba(105,190,40,0.05)',
                 borderRadius:10,border:'1px solid rgba(105,190,40,0.2)'}}>
                 <div style={{fontSize:36,marginBottom:12}}>✅</div>
-                <div style={{color:'#69be28',fontSize:14,fontWeight:500,marginBottom:6}}>Solicitação enviada</div>
-                <div style={{color:txt2,fontSize:12}}>Aguarde contato do suporte técnico</div>
+                <div style={{color:'#69be28',fontSize:14,fontWeight:500,marginBottom:6}}>{t('login.solicitacaoEnviada')}</div>
+                <div style={{color:txt2,fontSize:12}}>{t('login.aguardeContato')}</div>
               </div>
             )}
           </>)}
@@ -199,14 +201,14 @@ export const LoginScreenPremium = memo<Props>(({
         <div style={{ display:'flex', alignItems:'center', gap:6, fontSize:10, color:txt2 }}>
           <div style={{ width:7, height:7, borderRadius:'50%', background:'#69be28',
             boxShadow:'0 0 6px #69be28', animation:'efvmPulse 2s infinite' }} />
-          Sistema Online
+          {t('common.sistemaOnline')}
         </div>
         <button onClick={onToggleTema} style={{
           display:'flex', alignItems:'center', gap:6, padding:'6px 10px', borderRadius:8,
           background:dk?'#2a2a2a':'#e8e8e8', border:`1px solid ${bd}`,
           cursor:'pointer', fontSize:11, color:txt2, transition:'all 150ms ease',
         }}>
-          {dk?'☀️':'🌙'} {dk?'Claro':'Escuro'}
+          {dk?'☀️':'🌙'} {dk?t('login.claro'):t('login.escuro')}
         </button>
         <span style={{ fontSize:10, color:txt2 }}>v3.2</span>
       </div>

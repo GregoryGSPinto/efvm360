@@ -9,11 +9,21 @@ import { useLocation } from 'react-router-dom';
 import type { TemaEstilos, ConfiguracaoSistema, Usuario } from '../../types';
 import { OnlineStatusInline } from './OnlineIndicator';
 import { NAV_ID_TO_PATH, PATH_TO_NAV_ID, ROUTES } from '../../router/routes';
+import { useI18n } from '../../hooks/useI18n';
 
 import { getHierarchyLevelForRole } from '../../domain/aggregates/UserAggregate';
 import { HierarchyLevel } from '../../domain/contracts';
 
 // ── Navigation Definition ──────────────────────────────────────────────
+const NAV_LABEL_KEYS: Record<string, string> = {
+  passagem: 'nav.boaJornada',
+  dss: 'nav.dss',
+  analytics: 'nav.biPlus',
+  historico: 'nav.historico',
+  layout: 'nav.layout',
+  gestao: 'nav.gestao',
+};
+
 const BASE_NAV_ITEMS = [
   { id: 'passagem', label: 'Boa Jornada' },
   { id: 'dss',       label: 'DSS' },
@@ -41,6 +51,7 @@ export const TopNavbar = memo<TopNavbarProps>(({
   onlineStatus = 'online',
 }) => {
   const location = useLocation();
+  const { t } = useI18n();
   const [avatarOpen, setAvatarOpen] = useState(false);
   const avatarRef = useRef<HTMLDivElement>(null);
 
@@ -112,6 +123,7 @@ export const TopNavbar = memo<TopNavbarProps>(({
         {NAV_ITEMS.map(({ id, label }) => {
           const active = isActive(id);
           const showBadge = id === 'gestao' && pendingCount > 0;
+          const translatedLabel = NAV_LABEL_KEYS[id] ? t(NAV_LABEL_KEYS[id]) : label;
           return (
             <button
               key={id}
@@ -134,7 +146,7 @@ export const TopNavbar = memo<TopNavbarProps>(({
               onMouseEnter={e => { if (!active) e.currentTarget.style.background = hover; }}
               onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
             >
-              {label}
+              {translatedLabel}
               {showBadge && (
                 <span style={{
                   position: 'absolute', top: 2, right: 4,
@@ -164,14 +176,25 @@ export const TopNavbar = memo<TopNavbarProps>(({
               onMouseEnter={e => e.currentTarget.style.background = hover}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
-              <div style={{
-                width: 34, height: 34, borderRadius: 8,
-                background: dk ? 'rgba(0,126,122,0.25)' : 'rgba(0,126,122,0.10)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 14, fontWeight: 700, color: activeColor,
-              }}>
-                {usuarioLogado.nome.charAt(0).toUpperCase()}
-              </div>
+              {(() => {
+                const avatarSrc = (() => { try { return localStorage.getItem(`efvm360-avatar-${usuarioLogado.matricula}`) || ''; } catch { return ''; } })();
+                return avatarSrc ? (
+                  <div style={{
+                    width: 34, height: 34, borderRadius: 8, overflow: 'hidden',
+                  }}>
+                    <img src={avatarSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                ) : (
+                  <div style={{
+                    width: 34, height: 34, borderRadius: 8,
+                    background: dk ? 'rgba(0,126,122,0.25)' : 'rgba(0,126,122,0.10)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 14, fontWeight: 700, color: activeColor,
+                  }}>
+                    {usuarioLogado.nome.charAt(0).toUpperCase()}
+                  </div>
+                );
+              })()}
               <div className="efvm360-avatar-text" style={{ textAlign: 'left' }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: txt, lineHeight: 1.3 }}>
                   {usuarioLogado.nome.split(' ')[0]}
@@ -217,7 +240,7 @@ export const TopNavbar = memo<TopNavbarProps>(({
                   onMouseLeave={e => e.currentTarget.style.background =
                     currentPageId === 'perfil' ? activeBg : 'transparent'}
                 >
-                  Meu Perfil
+                  {t('nav.meuPerfil')}
                 </button>
                 <button
                   onClick={() => { onNavigate('configuracoes'); setAvatarOpen(false); }}
@@ -232,7 +255,7 @@ export const TopNavbar = memo<TopNavbarProps>(({
                   onMouseLeave={e => e.currentTarget.style.background =
                     currentPageId === 'configuracoes' ? activeBg : 'transparent'}
                 >
-                  Configuracoes
+                  {t('nav.configuracoes')}
                 </button>
                 <div style={{ borderTop: `1px solid ${bd}` }}>
                   <button
@@ -247,7 +270,7 @@ export const TopNavbar = memo<TopNavbarProps>(({
                       dk ? 'rgba(220,38,38,0.10)' : 'rgba(220,38,38,0.05)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                   >
-                    Sair do sistema
+                    {t('nav.sairSistema')}
                   </button>
                 </div>
               </div>

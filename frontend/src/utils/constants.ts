@@ -21,7 +21,7 @@ import { getYardTracks } from '../domain/aggregates/YardRegistry';
 // ============================================================================
 
 export const CONFIG_INICIAL: ConfiguracaoSistema = {
-  tema: 'claro',
+  tema: 'automatico',
   adambootAtivo: true,
   versao: '3.1.0',
   // Preferências Operacionais
