@@ -115,31 +115,14 @@ function calcDesktopPosition(rect: DOMRect, placement?: string): Record<string, 
 
 function calcMobilePosition(rect: DOMRect): Record<string, string | number> {
   const vh = window.innerHeight;
-  const gap = 16;
-  const tooltipEstHeight = 260;
   const targetCenter = rect.top + rect.height / 2;
   const targetInUpperHalf = targetCenter < vh / 2;
 
-  let top: number;
+  // Fixed positions: upper target → balloon at bottom; lower target → balloon at top
   if (targetInUpperHalf) {
-    // Tooltip below target
-    top = rect.bottom + gap;
-  } else {
-    // Tooltip above target
-    top = rect.top - gap - tooltipEstHeight;
-  }
-
-  // Clamp: don't let tooltip go off-screen
-  top = Math.max(16, Math.min(top, vh - tooltipEstHeight - 16));
-
-  // If target + tooltip don't fit at all, pin to bottom
-  const fitsAbove = rect.top - gap - tooltipEstHeight > 16;
-  const fitsBelow = rect.bottom + gap + tooltipEstHeight < vh - 16;
-  if (!fitsAbove && !fitsBelow) {
     return { bottom: 16, left: 16, right: 16, top: 'auto' };
   }
-
-  return { top, left: 16, right: 16 };
+  return { top: 80, left: 16, right: 16 };
 }
 
 function centerPosition(): Record<string, string | number> {
@@ -342,13 +325,14 @@ export function GuidedTour({
       {hasTarget && ready && (
         <div style={{
           position: 'fixed',
-          top: rect.top - 8,
-          left: rect.left - 8,
-          width: rect.width + 16,
-          height: rect.height + 16,
+          top: rect.top - (isMobile ? 12 : 8),
+          left: rect.left - (isMobile ? 12 : 8),
+          width: rect.width + (isMobile ? 24 : 16),
+          height: rect.height + (isMobile ? 24 : 16),
           borderRadius: 12,
           zIndex: 10001,
           boxShadow: '0 0 0 9999px rgba(0,0,0,0.6)',
+          border: isMobile ? '2px solid #007e7a' : 'none',
           pointerEvents: 'none',
           transition: 'all 200ms ease',
         }} />
@@ -366,7 +350,8 @@ export function GuidedTour({
           borderRadius: 16,
           padding: isMobile ? 20 : 24,
           maxWidth: isMobile ? 'none' : 380,
-          width: isMobile ? 'auto' : 'calc(100vw - 32px)',
+          width: isMobile ? 'calc(100vw - 32px)' : 'calc(100vw - 32px)',
+          ...(isMobile ? { maxHeight: 220, overflowY: 'auto' as const } : {}),
           boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
           border: `1px solid ${border}`,
           opacity: ready ? 1 : 0,
@@ -384,7 +369,7 @@ export function GuidedTour({
 
         {/* Content */}
         <div style={{
-          fontSize: 13, lineHeight: 1.6, color: txt, marginBottom: 16,
+          fontSize: 13, lineHeight: isMobile ? 1.5 : 1.6, color: txt, marginBottom: 16,
         }}>
           {step.content}
         </div>
@@ -406,40 +391,39 @@ export function GuidedTour({
           </div>
         </div>
 
-        {/* Buttons — stack on mobile if needed */}
+        {/* Buttons */}
         <div style={{
           display: 'flex',
-          flexDirection: isMobile ? 'column' : 'row',
+          flexDirection: 'row',
           justifyContent: 'space-between',
-          alignItems: isMobile ? 'stretch' : 'center',
+          alignItems: 'center',
           gap: 8,
         }}>
-          {/* Primary action first on mobile (visual order) */}
           {isMobile ? (
             <>
-              <button onClick={next} style={{
-                padding: btnPad, borderRadius: 8, border: 'none',
-                background: '#007e7a', color: '#fff', fontSize: 14,
-                fontWeight: 600, cursor: 'pointer', minHeight: 44,
+              <button onClick={onSkip} style={{
+                padding: '10px 12px', borderRadius: 8, border: 'none',
+                background: 'transparent', color: '#888', fontSize: 12,
+                fontWeight: 500, cursor: 'pointer', minHeight: 44,
               }}>
-                {isLast ? '✓ Concluir e Ir para Inicio' : 'Proximo →'}
+                Pular
               </button>
               {currentStep > 0 && (
                 <button onClick={prev} style={{
-                  padding: btnPad, borderRadius: 8, cursor: 'pointer',
-                  border: `1px solid ${border}`, background: 'transparent',
+                  padding: '10px 16px', borderRadius: 8, cursor: 'pointer',
+                  border: '1px solid #007e7a', background: 'transparent',
                   color: isDark ? '#e0e0e0' : '#333', fontSize: 13, fontWeight: 600,
                   minHeight: 44,
                 }}>
                   ← Anterior
                 </button>
               )}
-              <button onClick={onSkip} style={{
-                padding: '8px 12px', borderRadius: 8, border: 'none',
-                background: 'transparent', color: '#888', fontSize: 12,
-                fontWeight: 500, cursor: 'pointer', textAlign: 'center',
+              <button onClick={next} style={{
+                padding: '10px 20px', borderRadius: 8, border: 'none',
+                background: '#007e7a', color: '#fff', fontSize: 13,
+                fontWeight: 600, cursor: 'pointer', minHeight: 44,
               }}>
-                Pular Tutorial
+                {isLast ? '✓ Concluir' : 'Proximo →'}
               </button>
             </>
           ) : (
