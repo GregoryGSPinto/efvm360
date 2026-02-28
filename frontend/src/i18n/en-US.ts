@@ -31,7 +31,7 @@ export const enUS: TranslationMap = {
     versao: 'Version',
   },
   login: {
-    titulo: 'SERVICE HANDOVER',
+    titulo: 'SHIFT CHANGE MANAGEMENT',
     subtitulo: 'System Access',
     matricula: 'Corporate ID',
     senha: 'Password',
@@ -62,7 +62,7 @@ export const enUS: TranslationMap = {
     sairSistema: 'Sign out',
   },
   passagem: {
-    titulo: 'Service Handover',
+    titulo: 'Shift Change Management',
     cabecalho: 'Header',
     postos: 'Switching Posts',
     patioCima: 'Upper Yard',
@@ -111,8 +111,8 @@ export const enUS: TranslationMap = {
     prefNotificacao: 'Notification Preferences',
     alertasCriticos: 'Critical Alerts',
     alertasCriticosDesc: 'Risk and critical situation notifications',
-    lembretesPassagem: 'Handover Reminders',
-    lembretesPassagemDesc: 'Pending handover alerts',
+    lembretesPassagem: 'Shift Change Reminders',
+    lembretesPassagemDesc: 'Pending shift change alerts',
     avisosDSS: 'DSS Notices',
     avisosDSSDesc: 'Safety Dialogue reminders',
     notificacoesAdamBoot: 'AdamBoot Notifications',

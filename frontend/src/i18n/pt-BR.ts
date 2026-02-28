@@ -29,7 +29,7 @@ export const ptBR = {
     versao: 'Versão',
   },
   login: {
-    titulo: 'PASSAGEM DE SERVIÇO',
+    titulo: 'GESTÃO DE TROCA DE TURNO',
     subtitulo: 'Acesso ao Sistema',
     matricula: 'Matrícula corporativa',
     senha: 'Senha',
@@ -60,7 +60,7 @@ export const ptBR = {
     sairSistema: 'Sair do sistema',
   },
   passagem: {
-    titulo: 'Passagem de Serviço',
+    titulo: 'Gestão de Troca de Turno',
     cabecalho: 'Cabeçalho',
     postos: 'Postos de Manobra',
     patioCima: 'Pátio de Cima',
@@ -109,8 +109,8 @@ export const ptBR = {
     prefNotificacao: 'Preferências de Notificação',
     alertasCriticos: 'Alertas Críticos',
     alertasCriticosDesc: 'Notificações de riscos e situações críticas',
-    lembretesPassagem: 'Lembretes de Passagem de Serviço',
-    lembretesPassagemDesc: 'Avisos sobre passagens pendentes',
+    lembretesPassagem: 'Lembretes de Troca de Turno',
+    lembretesPassagemDesc: 'Avisos sobre trocas pendentes',
     avisosDSS: 'Avisos de DSS',
     avisosDSSDesc: 'Lembretes do Diálogo de Segurança',
     notificacoesAdamBoot: 'Notificações do AdamBoot',

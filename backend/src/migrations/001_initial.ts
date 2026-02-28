@@ -1,6 +1,6 @@
 // ============================================================================
 // VFZ Backend — Migração MySQL Completa
-// Cria todas as tabelas do sistema de passagem de serviço ferroviário
+// Cria todas as tabelas do sistema de gestão de troca de turno ferroviário
 // Compatível com MySQL 8.0+ e Azure Database for MySQL
 // ============================================================================
 

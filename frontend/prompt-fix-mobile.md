@@ -84,7 +84,7 @@ Para CADA resultado encontrado, aplique esta lógica:
 - Inputs: `width: 100%`
 - Funcionar em portrait e landscape
 
-### 3.3 Passagem de Serviço (PRIORIDADE MÁXIMA)
+### 3.3 Gestão de Troca de Turno (PRIORIDADE MÁXIMA)
 - Container do formulário: `width: 100%; overflow-x: hidden`
 - Todos os campos: `width: 100%` em mobile
 - Grids de campos que estão lado a lado: empilhar em 1 coluna em telas < 768px

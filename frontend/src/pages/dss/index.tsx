@@ -1,5 +1,5 @@
 // ============================================================================
-// PASSAGEM DE SERVIÇO – EFVM360
+// GESTÃO DE TROCA DE TURNO – EFVM360
 // Página de DSS - Diálogo de Saúde, Segurança e Meio Ambiente
 // CONFORMIDADE PRO-041945 Rev. 02
 // FASE 5: Pesquisa de temas, sugestão automática, integração entre turnos

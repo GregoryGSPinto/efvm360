@@ -1,6 +1,6 @@
 # CTO/CISO Code Review — Cleanup Report
 
-**Project:** EFVM Pátio 360 — Passagem de Serviço Ferroviário
+**Project:** EFVM Pátio 360 — Gestão de Troca de Turno Ferroviário
 **Client:** Vale S.A. (NYSE-listed)
 **Date:** 2026-02-23
 **Reviewer:** Automated CTO/CISO Sprint

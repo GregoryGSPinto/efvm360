@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from './helpers/auth';
 
-test.describe('Passagem de Serviço', () => {
+test.describe('Gestão de Troca de Turno', () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
     await page.click('text=Passagem');

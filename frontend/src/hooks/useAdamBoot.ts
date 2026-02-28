@@ -1,5 +1,5 @@
 // ============================================================================
-// PASSAGEM DE SERVIÇO – EFVM360
+// GESTÃO DE TROCA DE TURNO – EFVM360
 // Hook do AdamBoot v2 — Assistente IA com Claude API + fallback local
 // Context-aware, voice input (Web Speech API), operational queries
 // ============================================================================

@@ -76,8 +76,8 @@ function loadYardConfig(yardCode: string) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// UC-01: CRIAR PASSAGEM DE SERVIÇO
-// Inicia nova passagem vinculada a um pátio + turno
+// UC-01: CRIAR TROCA DE TURNO
+// Inicia nova troca de turno vinculada a um pátio + turno
 // ═══════════════════════════════════════════════════════════════════════
 
 export interface CreateServicePassInput {
@@ -441,7 +441,7 @@ export async function generateAlert(
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// UC-06: ASSINAR PASSAGEM DE SERVIÇO
+// UC-06: ASSINAR TROCA DE TURNO
 // Assinatura = Selamento. Write-once após selar.
 // ═══════════════════════════════════════════════════════════════════════
 

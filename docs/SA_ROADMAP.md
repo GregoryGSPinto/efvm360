@@ -31,7 +31,7 @@ Este é o coração. Um SA que resolve sincronização offline-first para infrae
 #### 1.1 — Sync Queue Client-Side
 ```
 Fila local persistente (IndexedDB, não localStorage)
-├── Cada passagem recebe UUID v4 no momento da criação
+├── Cada troca de turno recebe UUID v4 no momento da criação
 ├── Status: rascunho → assinada → pendente_sync → sincronizada
 ├── Timestamp de criação local (device clock)
 ├── Hash de integridade (HMAC do payload)
@@ -40,7 +40,7 @@ Fila local persistente (IndexedDB, não localStorage)
 
 **Trade-off documentável:**
 - Por que IndexedDB e não localStorage? → Capacidade (localStorage = 5MB, IndexedDB = centenas de MB), transações ACID, não bloqueia main thread
-- Por que não CRDT? → Passagem de serviço é write-once (não editável após assinatura), CRDT é overkill
+- Por que não CRDT? → Registro de troca de turno é write-once (não editável após assinatura), CRDT é overkill
 - Por que UUID no client? → Dispositivo pode estar offline por horas, não pode esperar ID do server
 
 #### 1.2 — Conflict Resolution Strategy
@@ -53,13 +53,13 @@ Estratégia: Last-Write-Wins com detecção de duplicatas
 ```
 
 **Trade-off documentável:**
-- Por que não merge automático? → Passagem de serviço é documento legal. Merge automático pode criar um documento que ninguém assinou
+- Por que não merge automático? → Registro de troca de turno é documento legal. Merge automático pode criar um documento que ninguém assinou
 - Por que LWW e não consensus? → Cenário é 1 escritor por turno. Conflito real é raro (só em edge cases como troca de dispositivo)
 
 #### 1.3 — Backend Sync Endpoint
 ```
 POST /api/v1/sync/passagens
-├── Recebe batch de passagens pendentes
+├── Recebe batch de trocas de turno pendentes
 ├── Valida integridade (HMAC)
 ├── Detecta conflitos (turno + data + pátio)
 ├── Retorna: { sincronizadas: [...], conflitos: [...], rejeitadas: [...] }
@@ -99,12 +99,12 @@ Documento único que conta a "história arquitetural":
      Decisão: MySQL (Azure Flexible Server)
      Razão: Dados são relacionais (usuário→passagem→audit). 
      Schema rígido previne corrupção. Azure Flexible Server tem HA nativo.
-     MongoDB seria melhor se passagens tivessem schema variável (não tem).
+     MongoDB seria melhor se trocas de turno tivessem schema variável (não tem).
      
    - ADR-003: Por que não Kafka para audit trail?
      Alternativas: Kafka, EventHub, append-only table
      Decisão: Append-only MySQL table com hash chain
-     Razão: Volume é baixo (~50 passagens/dia). Kafka adiciona complexidade 
+     Razão: Volume é baixo (~50 trocas de turno/dia). Kafka adiciona complexidade 
      operacional desproporcional. Hash chain garante imutabilidade sem infra extra.
      Para escalar para múltiplos pátios, migrar para EventHub.
      
@@ -133,7 +133,7 @@ Documento único que conta a "história arquitetural":
               │ (SAP S4) │            │ (leitura only)│
               └─────────┘            └───────────────┘
    
-   - ERP: exportar dados de passagem para SAP (REST ou fila)
+   - ERP: exportar dados de troca de turno para SAP (REST ou fila)
    - SCADA: ler status de equipamentos automaticamente (futuro)
    - MES: integrar com sistema de manutenção (futuro)
 
@@ -149,7 +149,7 @@ Documento único que conta a "história arquitetural":
 | Threat              | Asset           | Mitigação                        |
 |---------------------|-----------------|----------------------------------|
 | Spoofing            | Login           | JWT + bcrypt + rate limit        |
-| Tampering           | Passagem        | HMAC + hash chain audit          |
+| Tampering           | Troca de turno  | HMAC + hash chain audit          |
 | Repudiation         | Assinatura      | Audit trail + assinatura digital |
 | Info Disclosure     | Dados pessoais  | TLS + RBAC + LGPD API           |
 | Denial of Service   | API             | Rate limit + WAF + CDN           |
@@ -178,7 +178,7 @@ Azure App Insights:             ~R$ 30/mês
 Azure Blob (backups):           ~R$ 10/mês
 ───────────────────────────────────────────
 Total estimado:                 ~R$ 315/mês (~R$ 3.780/ano)
-Para 1 pátio, ~20 operadores, ~50 passagens/dia
+Para 1 pátio, ~20 operadores, ~50 trocas de turno/dia
 
 Escala para 5 pátios: +MySQL replica read, +App Service P1v3
 Estimativa: ~R$ 1.200/mês (~R$ 14.400/ano)
@@ -196,7 +196,7 @@ Estimativa: ~R$ 1.200/mês (~R$ 14.400/ano)
 
 #### 3.2 — Case Study (1 página)
 ```
-Título: "Digitalizando passagem de serviço em infraestrutura ferroviária 
+Título: "Digitalizando a gestão de troca de turno em infraestrutura ferroviária 
          crítica: arquitetura offline-first para ambiente sem conectividade"
 
 - Problema (1 parágrafo)

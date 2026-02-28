@@ -240,7 +240,7 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
                 <label style={{ ...styles.label, marginBottom: '12px' }}>Onde o AdamBoot pode atuar</label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(180px, 100%), 1fr))', gap: '10px' }}>
                   {[
-                    { key: 'passagemServico' as const, label: 'Passagem de Serviço', icon: '📋' },
+                    { key: 'passagemServico' as const, label: 'Gestão de Troca de Turno', icon: '📋' },
                     { key: 'dss' as const, label: 'DSS', icon: '🛡️' },
                     { key: 'biPlus' as const, label: 'BI+', icon: '📊' },
                     { key: 'configuracoes' as const, label: 'Configurações', icon: '⚙️' },
@@ -456,7 +456,7 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: '16px' }}>
             <div style={{ padding: '16px', background: tema.backgroundSecundario, borderRadius: '10px', border: `1px solid ${tema.cardBorda}` }}>
               <div style={{ fontSize: '12px', color: tema.textoSecundario, marginBottom: '4px' }}>Sistema</div>
-              <div style={{ fontWeight: 600, color: tema.texto }}>PASSAGEM DE SERVIÇO – EFVM360</div>
+              <div style={{ fontWeight: 600, color: tema.texto }}>GESTÃO DE TROCA DE TURNO – EFVM360</div>
             </div>
             <div style={{ padding: '16px', background: tema.backgroundSecundario, borderRadius: '10px', border: `1px solid ${tema.cardBorda}` }}>
               <div style={{ fontSize: '12px', color: tema.textoSecundario, marginBottom: '4px' }}>Versão</div>
@@ -663,7 +663,7 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
     const manualSections = [
       { id: 'visao-geral', icon: '🔍', title: 'Visão Geral' },
       { id: 'fluxo', icon: '🔄', title: 'Fluxo do Sistema' },
-      { id: 'passagem', icon: '📋', title: 'Passagem de Serviço' },
+      { id: 'passagem', icon: '📋', title: 'Gestão de Troca de Turno' },
       { id: 'dss', icon: '🛡️', title: 'DSS' },
       { id: 'bi', icon: '📊', title: 'BI+ Dashboard' },
       { id: 'adamboot', icon: '🤖', title: 'AdamBoot' },
@@ -724,7 +724,7 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
             {/* Visão Geral */}
             <div id="manual-visao-geral" data-manual-section style={{ marginBottom: '24px' }}>
               <h3 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '16px' }}>🔍 Visão Geral</h3>
-              <p>O <strong>EFVM360 - Passagem de Serviço</strong> é um sistema digital desenvolvido para a <strong>Estrada de Ferro Vitória a Minas (EFVM)</strong>, com foco na digitalização e padronização do processo de passagem de serviço nos pátios da EFVM.</p>
+              <p>O <strong>EFVM360 - Gestão de Troca de Turno</strong> é um sistema digital desenvolvido para a <strong>Estrada de Ferro Vitória a Minas (EFVM)</strong>, com foco na digitalização e padronização do processo de troca de turno nos pátios da EFVM.</p>
               <p style={{ marginTop: '8px' }}>O sistema permite o registro completo de informações operacionais, garantindo continuidade, rastreabilidade e segurança nas operações ferroviárias.</p>
               <FeedbackButtons sectionId="visao-geral" />
             </div>
@@ -735,17 +735,17 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
               <ol style={{ paddingLeft: '20px', margin: 0 }}>
                 <li style={{ marginBottom: '6px' }}><strong>Login:</strong> Acesse com sua matrícula e senha cadastrada</li>
                 <li style={{ marginBottom: '6px' }}><strong>DSS:</strong> Realize o Diálogo de Segurança, Saúde e Meio Ambiente</li>
-                <li style={{ marginBottom: '6px' }}><strong>Passagem de Serviço:</strong> Registre as informações do turno</li>
+                <li style={{ marginBottom: '6px' }}><strong>Troca de Turno:</strong> Registre as informações do turno</li>
                 <li style={{ marginBottom: '6px' }}><strong>Revisão:</strong> Valide as informações antes de finalizar</li>
-                <li><strong>Assinatura:</strong> Confirme a passagem de serviço</li>
+                <li><strong>Assinatura:</strong> Confirme a troca de turno</li>
               </ol>
               <FeedbackButtons sectionId="fluxo" />
             </div>
 
-            {/* Passagem de Serviço */}
+            {/* Gestão de Troca de Turno */}
             <div id="manual-passagem" data-manual-section style={{ marginBottom: '24px' }}>
-              <h3 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '16px' }}>📋 Passagem de Serviço</h3>
-              <p>A passagem de serviço é organizada em seções:</p>
+              <h3 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '16px' }}>📋 Gestão de Troca de Turno</h3>
+              <p>A troca de turno é organizada em seções:</p>
               <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
                 <li><strong>Identificação:</strong> Dados do empregado e turno</li>
                 <li><strong>Situação do Pátio:</strong> Estado das linhas (Cima e Baixo)</li>
@@ -842,7 +842,7 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
             {/* Logo EFVM360 */}
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>🚂</div>
             <h2 style={{ color: tema.primaria, margin: '0 0 8px', fontSize: '24px', fontWeight: 700 }}>
-              PASSAGEM DE SERVIÇO
+              GESTÃO DE TROCA DE TURNO
             </h2>
             <div style={{ fontSize: '18px', color: tema.texto, fontWeight: 600, marginBottom: '4px' }}>EFVM360</div>
             <div style={{ fontSize: '13px', color: tema.textoSecundario, marginBottom: '24px' }}>

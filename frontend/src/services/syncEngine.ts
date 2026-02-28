@@ -384,7 +384,7 @@ class SyncEngine {
   //   - Dispositivo A ficou offline, operador usou dispositivo B
   //
   //   Por que não merge automático?
-  //   Passagem de serviço é documento legal com assinatura.
+  //   Troca de turno é documento legal com assinatura.
   //   Merge criaria documento que ninguém assinou = inválido.
   //
   //   Estratégia:

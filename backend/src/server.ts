@@ -68,7 +68,7 @@ app.use(API_PREFIX, routes);
 
 app.get('/', (_req, res) => {
   res.json({
-    service: 'VFZ — Passagem de Serviço Ferroviária API',
+    service: 'VFZ — Gestão de Troca de Turno Ferroviária API',
     version: '1.0.0',
     documentation: `${API_PREFIX}/docs`,
     health: `${API_PREFIX}/health`,
@@ -129,7 +129,7 @@ const startServer = async (): Promise<void> => {
     app.listen(PORT, '0.0.0.0', () => {
       console.log('');
       console.log('══════════════════════════════════════════════════════════');
-      console.log('  VFZ Backend — Passagem de Serviço Ferroviária');
+      console.log('  VFZ Backend — Gestão de Troca de Turno Ferroviária');
       console.log('══════════════════════════════════════════════════════════');
       console.log(`  🚀 Servidor:    http://localhost:${PORT}`);
       console.log(`  📡 API:         http://localhost:${PORT}${API_PREFIX}`);

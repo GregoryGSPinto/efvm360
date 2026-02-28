@@ -2,7 +2,7 @@
   "name": "passagem-servico-efvm360",
   "packageManager": "pnpm@10.30.1",
   "version": "2.0.0",
-  "description": "Sistema Digital de Passagem de Serviço Ferroviária - VFZ",
+  "description": "Sistema Digital de Gestão de Troca de Turno Ferroviária - VFZ",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -1,5 +1,5 @@
 // ============================================================================
-// PASSAGEM DE SERVIÇO – EFVM360
+// GESTÃO DE TROCA DE TURNO – EFVM360
 // Hook de Controle de Sessão - FASE 7: Permissões e Segurança
 // Gerencia timeout (30 min), inatividade, permissões e auditoria
 // ============================================================================

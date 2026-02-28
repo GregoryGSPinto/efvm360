@@ -1,11 +1,11 @@
-# Passagem de Serviço Ferroviária
+# Gestão de Troca de Turno Ferroviária
 
 [![CI](https://github.com/vale/vfz/actions/workflows/ci.yml/badge.svg)](https://github.com/vale/vfz/actions/workflows/ci.yml)
 [![Deploy Staging](https://github.com/vale/vfz/actions/workflows/deploy-staging.yml/badge.svg)](https://github.com/vale/vfz/actions/workflows/deploy-staging.yml)
 [![Deploy Production](https://github.com/vale/vfz/actions/workflows/deploy-production.yml/badge.svg)](https://github.com/vale/vfz/actions/workflows/deploy-production.yml)
 [![Security](https://github.com/vale/vfz/actions/workflows/security-scan.yml/badge.svg)](https://github.com/vale/vfz/actions/workflows/security-scan.yml)
 
-Sistema digital de passagem de serviço para a **Estrada de Ferro Vitória a Minas (EFVM)** — Vale S.A.  
+Sistema digital de gestão de troca de turno para a **Estrada de Ferro Vitória a Minas (EFVM)** — Vale S.A.  
 **Pátio do Fazendão** | React + Express + MySQL | Azure
 
 ---

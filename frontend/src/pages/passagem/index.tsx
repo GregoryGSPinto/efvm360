@@ -1,5 +1,5 @@
 // ============================================================================
-// EFVM360 v3.2 — Página Passagem de Serviço
+// EFVM360 v3.2 — Página Gestão de Troca de Turno
 // Extraída de App.tsx renderPaginaPassagem() + section renderers
 // ============================================================================
 
@@ -1342,8 +1342,8 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
             color: tema.textoSecundario,
           }}>
             <span style={{ fontSize: '48px', display: 'block', marginBottom: '16px' }}>📋</span>
-            <p style={{ fontSize: '14px' }}>Nenhuma passagem de serviço anterior registrada.</p>
-            <p style={{ fontSize: '12px', marginTop: '8px' }}>Esta é a primeira passagem de serviço do sistema.</p>
+            <p style={{ fontSize: '14px' }}>Nenhuma troca de turno anterior registrada.</p>
+            <p style={{ fontSize: '12px', marginTop: '8px' }}>Esta é a primeira troca de turno do sistema.</p>
           </div>
         </Card>
       );
@@ -1736,7 +1736,7 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
         typeof v === 'object' && v !== null ? v.resposta : v;
       
       const conteudo = `
-PASSAGEM DE SERVIÇO - EFVM360
+GESTÃO DE TROCA DE TURNO - EFVM360
 =====================================
 AUDITORIA COMPLETA
 =====================================
@@ -1819,7 +1819,7 @@ SEGURANÇA EM MANOBRAS
           <span style={{ fontSize: '28px' }}>🔍</span>
           <div>
             <h3 style={{ margin: 0, color: tema.primaria, fontSize: '16px', fontWeight: 700 }}>
-              Auditoria da Passagem de Serviço
+              Auditoria da Troca de Turno
             </h3>
             <p style={{ margin: '4px 0 0', fontSize: '12px', color: tema.textoSecundario }}>
               Revise todas as informações antes de prosseguir. Esta tela é somente leitura.
@@ -2719,7 +2719,7 @@ SEGURANÇA EM MANOBRAS
                 
                 // Mostrar confirmação e fazer logout
                 setTimeout(() => {
-                  alert('✅ Passagem de Serviço salva com sucesso!\n\nVocê será redirecionado para a tela de login.');
+                  alert('✅ Troca de Turno salva com sucesso!\n\nVocê será redirecionado para a tela de login.');
                   realizarLogout();
                 }, 300);
               } else {

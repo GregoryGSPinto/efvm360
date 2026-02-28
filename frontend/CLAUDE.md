@@ -1,8 +1,8 @@
-# EFVM Pátio 360 — Plataforma Enterprise de Passagem de Serviço Ferroviário
+# EFVM Pátio 360 — Plataforma Enterprise de Gestão de Troca de Turno Ferroviário
 
 ## Visão Geral
 
-Sistema enterprise de passagem de serviço para o corredor ferroviário Vitória-Minas (Vale S.A.).
+Sistema enterprise de gestão de troca de turno para o corredor ferroviário Vitória-Minas (Vale S.A.).
 Digitaliza o handover operacional entre turnos em pátios ferroviários, com:
 - **DDD** (Domain-Driven Design) com 5 aggregates
 - **Event Sourcing** com 16 domain events
@@ -96,7 +96,7 @@ localStorage.clear(); sessionStorage.clear(); location.reload();
 ## Arquitetura — Regras Críticas
 
 1. **Domain é SAGRADO:** Nunca importar infrastructure, components, pages, hooks ou services dentro de `domain/`.
-2. **Passagem selada é WRITE-ONCE:** IntegrityService gera hash SHA-256 encadeado. Edição pós-selamento é bloqueada.
+2. **Troca de turno selada é WRITE-ONCE:** IntegrityService gera hash SHA-256 encadeado. Edição pós-selamento é bloqueada.
 3. **Events em past tense:** `ServicePassCreated`, `WeighingRecorded`, `AlertGenerated`.
 4. **Conflict Resolution por tipo:** APPEND-ONLY→auto_merge, WRITE-ONCE→first_writer_wins, STATE→version_check, CONFIG→server_wins.
 5. **Offline-first:** Toda operação deve funcionar sem rede. SyncEngine sincroniza quando online.

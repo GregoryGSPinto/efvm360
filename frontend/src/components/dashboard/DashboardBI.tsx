@@ -1,5 +1,5 @@
 // ============================================================================
-// PASSAGEM DE SERVIÇO – EFVM360
+// GESTÃO DE TROCA DE TURNO – EFVM360
 // Dashboard BI+ Avançado - Apache ECharts
 // FASE 6: EXPORTAÇÃO AVANÇADA + HISTÓRICO DE DOCUMENTOS
 // SOMENTE LEITURA - Análises e Visualizações
@@ -186,7 +186,7 @@ const gerarResumoTurno = (
   
   linhas.push('');
   linhas.push(`Gerado em: ${new Date().toLocaleString('pt-BR')}`);
-  linhas.push('Sistema EFVM360 - Passagem de Serviço Digital');
+  linhas.push('Sistema EFVM360 - Gestão de Troca de Turno Digital');
   
   return linhas.join('\n');
 };
@@ -203,7 +203,7 @@ const exportarExcel = (
 
   let csv = BOM;
   // Cover sheet header
-  csv += `"EFVM360 — Dashboard BI+ — Relatório de Passagem de Serviço"\n`;
+  csv += `"EFVM360 — Dashboard BI+ — Relatório de Troca de Turno"\n`;
   csv += `"EFVM — Estrada de Ferro Vitória a Minas — Vale S.A."\n`;
   csv += `"Gerado em:"${SEP}"${new Date().toLocaleString('pt-BR')}"\n`;
   csv += `"Período:"${SEP}"${registros.length > 0 ? registros[registros.length - 1]?.cabecalho.data || '-' : '-'} a ${registros[0]?.cabecalho.data || '-'}"\n`;
@@ -268,7 +268,7 @@ const exportarPDF = async (
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Passagem de Serviço EFVM360 — BI+</title>
+  <title>Gestão de Troca de Turno EFVM360 — BI+</title>
   <style>
     @page { margin: 2cm; size: A4; }
     @media print { .no-print { display: none; } }
@@ -348,7 +348,7 @@ const exportarPDF = async (
   
   <div class="footer">
     <div class="footer-main">
-      <strong>Documento exportado do sistema Passagem de Serviço EFVM360</strong><br>
+      <strong>Documento exportado do sistema Gestão de Troca de Turno EFVM360</strong><br>
       EFVM - Estrada de Ferro Vitória a Minas • Vale S.A.
     </div>
     <div class="footer-legal">
@@ -403,7 +403,7 @@ ${kpis.map(kpi => `<li><strong>${kpi.titulo}:</strong> ${kpi.valor}</li>`).join(
 <h2>Resumo Automático</h2>
 <pre>${resumo}</pre>
 <hr>
-<p><em>Sistema EFVM360 - Passagem de Serviço Digital</em></p>
+<p><em>Sistema EFVM360 - Gestão de Troca de Turno Digital</em></p>
 </body>
 </html>
   `;
@@ -514,7 +514,7 @@ const exportarBIPlus = (
 ): void => {
   const dados = {
     exportacao: {
-      sistema: 'EFVM360 - Passagem de Serviço',
+      sistema: 'EFVM360 - Gestão de Troca de Turno',
       versao: '2.0',
       dataExportacao: new Date().toISOString(),
       formato: 'BI+ Compatible',
@@ -1864,9 +1864,9 @@ export const DashboardBI = memo<DashboardAvancadoProps>(({
                 <strong>ℹ️ Informação:</strong> O documento exportado incluirá automaticamente:
               </div>
               <ul style={{ fontSize: '11px', color: tema.textoSecundario, margin: '8px 0 0', paddingLeft: '20px' }}>
-                <li>Cabeçalho: "Passagem de Serviço EFVM360 — BI+"</li>
+                <li>Cabeçalho: "Gestão de Troca de Turno EFVM360 — BI+"</li>
                 <li>Rodapé com Política de Privacidade da empresa</li>
-                <li>Texto: "Documento exportado do sistema Passagem de Serviço EFVM360"</li>
+                <li>Texto: "Documento exportado do sistema Gestão de Troca de Turno EFVM360"</li>
               </ul>
             </div>
 

@@ -1,4 +1,4 @@
-# Changelog — VFZ Passagem de Serviço
+# Changelog — VFZ Gestão de Troca de Turno
 
 Todas as mudanças notáveis no projeto estão documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
@@ -70,7 +70,7 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 ### Hardened Frontend Release
 
 #### Adicionado
-- Sistema completo de passagem de serviço com 9 seções operacionais
+- Sistema completo de troca de turno com 9 seções operacionais
 - Dashboard BI+ com KPIs operacionais (ECharts)
 - Avaliação 5S alinhada ao PGS-007091 Vale
 - DSS (Diálogo de Segurança e Saúde) com histórico
@@ -86,6 +86,6 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 ## [3.0.0] — 2025-xx-xx
 
 ### Initial Release
-- Formulário digital de passagem de serviço
+- Formulário digital de troca de turno
 - Login local com matrícula/senha
 - Persistência via localStorage

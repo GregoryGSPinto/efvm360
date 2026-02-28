@@ -6,7 +6,7 @@
  * Mantido apenas por compatibilidade com useSession.ts
  */
 // ============================================================================
-// PASSAGEM DE SERVIÇO – EFVM360
+// GESTÃO DE TROCA DE TURNO – EFVM360
 // FASE 7: Sistema de Permissões e Segurança
 // Perfis de Permissão por Função - Declarativo e Auditável
 // ============================================================================
@@ -25,7 +25,7 @@ export type PerfilUsuario =
 export type AcaoPermissao = 'visualizar' | 'editar' | 'exportar' | 'configurar';
 
 export type RecursoSistema = 
-  | 'passagem'      // Passagem de Serviço
+  | 'passagem'      // Gestão de Troca de Turno
   | 'dss'           // DSS
   | 'bi'            // BI+
   | 'historico'     // Histórico

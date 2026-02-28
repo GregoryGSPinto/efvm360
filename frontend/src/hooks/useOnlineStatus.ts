@@ -1,5 +1,5 @@
 // ============================================================================
-// EFVM360 - PASSAGEM DE SERVIÇO
+// EFVM360 - GESTÃO DE TROCA DE TURNO
 // FASE 8: Hook useOnlineStatus - Indicador de Conexão e Sincronização
 // Operação Offline-First
 // ============================================================================

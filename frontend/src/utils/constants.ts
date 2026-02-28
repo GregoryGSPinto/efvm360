@@ -1,5 +1,5 @@
 // ============================================================================
-// PASSAGEM DE SERVIÇO – EFVM360
+// GESTÃO DE TROCA DE TURNO – EFVM360
 // Constantes e Configurações
 // ============================================================================
 
@@ -98,7 +98,7 @@ export const TURNOS_HORARIOS: { value: TurnoHorario; label: string }[] = [
   { value: '19-07', label: '19:00 às 07:00 (Noturno)' },
 ];
 
-// Turnos legados para compatibilidade (Passagem de Serviço)
+// Turnos legados para compatibilidade (Gestão de Troca de Turno)
 export const TURNOS: string[] = [
   'Turno A (07:00-19:00)',
   'Turno A (19:00-07:00)',
@@ -168,7 +168,7 @@ export const FUNCOES_USUARIO: FuncaoOpcao[] = [
 export const MENU_PRINCIPAL: ItemMenu[] = [
   { id: 'inicial', label: 'Inicial', icon: '🏠' },
   { id: 'analytics', label: 'BI+', icon: '📈' },
-  { id: 'passagem', label: 'Passagem de Serviço', icon: '📋' },
+  { id: 'passagem', label: 'Gestão de Troca de Turno', icon: '📋' },
   { id: 'layout', label: 'Layout do Pátio', icon: '🗺️' },
   { id: 'historico', label: 'Histórico', icon: '📁' },
   { id: 'configuracoes', label: 'Configurações', icon: '⚙️' },

@@ -7,7 +7,7 @@ VFZ suporta dual-auth: Azure AD (SSO corporativo) + auth local (fallback). Azure
 ## 1. Registrar App no Entra ID
 
 1. Portal Azure → **Microsoft Entra ID** → App registrations → **New registration**
-2. Name: `VFZ - Passagem de Serviço`
+2. Name: `VFZ - Gestão de Troca de Turno`
 3. Supported accounts: **Single tenant** (apenas Vale)
 4. Redirect URIs:
    - SPA: `https://vfz.vale.com`

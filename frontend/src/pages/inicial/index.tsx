@@ -409,7 +409,7 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
                 style={{ ...styles.button, ...styles.buttonPrimary, width: '100%' }}
                 onClick={irParaPassagem}
               >
-                <ClipboardList size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} /> Iniciar Nova Passagem
+                <ClipboardList size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} /> Iniciar Nova Troca de Turno
               </button>
             </div>
           )}
@@ -483,7 +483,7 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
           onClick={irParaPassagem}
         >
           <ClipboardList size={28} />
-          Nova Passagem de Servico
+          Nova Troca de Turno
         </button>
         <button
           type="button"

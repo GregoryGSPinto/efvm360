@@ -134,7 +134,7 @@ export default function PaginaHistorico(props: PaginaHistoricoProps): JSX.Elemen
         .slice(0, 5);
     })();
 
-    // Ranking de Passagem de Serviço (SEM useMemo)
+    // Ranking de Troca de Turno (SEM useMemo)
     const rankingPassagem = (() => {
       const contagem: Record<string, { nome: string; matricula: string; quantidade: number; temas: Set<string> }> = {};
       
@@ -237,7 +237,7 @@ export default function PaginaHistorico(props: PaginaHistoricoProps): JSX.Elemen
           id: reg.id.toString(),
           tipo: 'PASSAGEM',
           titulo: `Passagem: ${reg.cabecalho.turno || 'Turno'}`,
-          descricao: reg.cabecalho.dss ? `DSS: ${reg.cabecalho.dss}` : 'Passagem de Serviço registrada',
+          descricao: reg.cabecalho.dss ? `DSS: ${reg.cabecalho.dss}` : 'Troca de Turno registrada',
           data: reg.cabecalho.data,
           hora: reg.cabecalho.horario,
           usuario: reg.assinaturas?.sai?.nome || 'Operador',
@@ -403,7 +403,7 @@ export default function PaginaHistorico(props: PaginaHistoricoProps): JSX.Elemen
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
             {[
               { tipo: 'DSS', icone: '💬', cor: tema.info, desc: 'Diálogo de Segurança' },
-              { tipo: 'PASSAGEM', icone: '📋', cor: tema.sucesso, desc: 'Passagem de Serviço' },
+              { tipo: 'PASSAGEM', icone: '📋', cor: tema.sucesso, desc: 'Troca de Turno' },
               { tipo: 'LOGIN', icone: '🔓', cor: tema.sucesso, desc: 'Acesso ao sistema' },
               { tipo: 'LOGOUT', icone: '🔒', cor: tema.textoSecundario, desc: 'Saída do sistema' },
             ].map(item => (
@@ -715,12 +715,12 @@ export default function PaginaHistorico(props: PaginaHistoricoProps): JSX.Elemen
           )}
         </Card>
 
-        {/* Ranking de Passagem de Serviço */}
-        <Card title="🏆 Top 5 - Maior Participação em Passagem de Serviço" styles={styles}>
+        {/* Ranking de Troca de Turno */}
+        <Card title="🏆 Top 5 - Maior Participação em Troca de Turno" styles={styles}>
           {rankingPassagem.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '32px', color: tema.textoSecundario }}>
               <div style={{ fontSize: '40px', marginBottom: '12px' }}>📊</div>
-              <div>Nenhuma passagem de serviço no período selecionado.</div>
+              <div>Nenhuma troca de turno no período selecionado.</div>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>

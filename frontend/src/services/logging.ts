@@ -1,5 +1,5 @@
 // ============================================================================
-// PASSAGEM DE SERVIÇO – EFVM360
+// GESTÃO DE TROCA DE TURNO – EFVM360
 // Serviço de Logging e Auditoria por Matrícula
 // ============================================================================
 
@@ -176,10 +176,10 @@ export const LogService = {
   sessaoRenovada: (matricula: string, nome: string) => 
     registrarLog(matricula, nome, 'SESSAO_RENOVADA', 'Sessão renovada pelo usuário'),
   
-  // Passagem de Serviço
+  // Gestão de Troca de Turno
   passagemCriada: (matricula: string, nome: string, dss: string) => 
     registrarLog(matricula, nome, 'PASSAGEM_CRIADA', 
-      `Passagem de serviço iniciada: ${dss}`,
+      `Troca de turno iniciada: ${dss}`,
       { dss }
     ),
   
@@ -191,7 +191,7 @@ export const LogService = {
   
   passagemEnviada: (matricula: string, nome: string, dss: string) => 
     registrarLog(matricula, nome, 'PASSAGEM_ENVIADA', 
-      `Passagem de serviço finalizada: ${dss}`,
+      `Troca de turno finalizada: ${dss}`,
       { dss }
     ),
   

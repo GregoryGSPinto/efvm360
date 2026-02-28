@@ -1,7 +1,7 @@
 {
-  "name": "EFVM360 — Passagem de Serviço Ferroviária",
+  "name": "EFVM360 — Gestão de Troca de Turno Ferroviária",
   "short_name": "EFVM360",
-  "description": "Sistema digital de passagem de serviço — Estrada de Ferro Vitória a Minas — Vale S.A.",
+  "description": "Sistema digital de gestão de troca de turno — Estrada de Ferro Vitória a Minas — Vale S.A.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#121212",
@@ -29,9 +29,9 @@
   ],
   "shortcuts": [
     {
-      "name": "Nova Passagem",
-      "short_name": "Passagem",
-      "description": "Iniciar nova passagem de serviço",
+      "name": "Nova Troca de Turno",
+      "short_name": "Troca",
+      "description": "Iniciar nova troca de turno",
       "url": "/?action=nova-passagem",
       "icons": [{ "src": "/adamboot.png", "sizes": "96x96" }]
     },

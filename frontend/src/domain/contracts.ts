@@ -16,7 +16,7 @@
 //   v1.0.0 — Initial contract freeze (2026-02-21)
 //
 // AGGREGATES:
-//   1. ServicePass     — A passagem de serviço (documento principal)
+//   1. ServicePass     — A troca de turno (documento principal)
 //   2. ShiftState      — Estado do turno (quem, quando, onde)
 //   3. YardCondition   — Condição do pátio (linhas, AMVs, equipamentos)
 //   4. OperationalEvent — Eventos operacionais (intervenções, manobras)
@@ -202,7 +202,7 @@ export enum MaturityLevel {
 }
 
 // ╔═══════════════════════════════════════════════════════════════════════════╗
-// ║ AGGREGATE 1: ServicePass — Passagem de Serviço                          ║
+// ║ AGGREGATE 1: ServicePass — Gestão de Troca de Turno                     ║
 // ║                                                                         ║
 // ║ O documento principal. Representa a transferência formal de              ║
 // ║ responsabilidade operacional entre dois operadores.                      ║
@@ -225,7 +225,7 @@ export interface OperatorSignature {
   deviceId?: DeviceFingerprint;
 }
 
-/** Passagem de Serviço — aggregate root */
+/** Gestão de Troca de Turno — aggregate root */
 export interface ServicePass {
   /** UUID v4 gerado no client (offline-capable, idempotent key) */
   id: UUID;

@@ -1,6 +1,6 @@
 # ============================================================================
 # VFZ v3.2 — CI Pipeline (Continuous Integration)
-# Sistema de Passagem de Serviço Ferroviária — Vale S.A.
+# Sistema de Gestão de Troca de Turno Ferroviária — Vale S.A.
 # ============================================================================
 # Trigger: push (main/staging/develop), PRs para essas branches
 # Pipeline: lint → test → build → docker validate → summary

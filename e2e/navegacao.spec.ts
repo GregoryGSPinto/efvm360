@@ -10,7 +10,7 @@ test.describe('Navegação', () => {
     await expect(page.locator('text=Visão Geral')).toBeVisible({ timeout: 5000 });
   });
 
-  test('navegar para Passagem de Serviço', async ({ page }) => {
+  test('navegar para Gestão de Troca de Turno', async ({ page }) => {
     await page.click('text=Passagem');
     await expect(page.locator('text=Cabeçalho')).toBeVisible({ timeout: 5000 });
   });

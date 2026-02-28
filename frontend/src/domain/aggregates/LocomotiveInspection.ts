@@ -119,7 +119,7 @@ export interface LocomotiveInspection {
   /** UUID da inspeção */
   id: UUID;
 
-  /** ID da passagem de serviço vinculada */
+  /** ID da troca de turno vinculada */
   servicePassId: UUID;
 
   /** ID do pátio */

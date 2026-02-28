@@ -143,7 +143,7 @@ export function evaluateAspirationRequirement(
  * - Origem específica (ex: oficina, outra ferrovia)
  * - Modelo específico (ex: BB36 cabeceira avançada)
  * - Mais de 24h parada
- * Na EFVM: checklist só se não houver passagem de serviço formal
+ * Na EFVM: checklist só se não houver troca de turno formal
  */
 export function evaluateConditionalInspection(
   locomotiveModel: string,
@@ -190,7 +190,7 @@ export function evaluateConditionalInspection(
 /**
  * Calço obrigatório em rampas. Cor amarela. Lingueta obrigatória.
  * Madeira para inflamáveis. Rampas >2%: dois calços no mesmo rodeiro.
- * Informação obrigatória na passagem de serviço.
+ * Informação obrigatória na troca de turno.
  */
 export function evaluateWedgeRequirement(
   rampGrade: number,
@@ -238,7 +238,7 @@ export function evaluateWedgeRequirement(
     violations.push({
       policyId: 'WEDGE_PASS_INFO',
       severity: 'warning',
-      message: 'Informação sobre posição e condição dos calços é obrigatória na passagem de serviço.',
+      message: 'Informação sobre posição e condição dos calços é obrigatória na troca de turno.',
       field: 'servicePass.wedgeInfo',
       normativeRef: 'PGS-005376',
       recommendedAction: 'Registrar posição e condição dos calços nos pontos de atenção',
@@ -365,7 +365,7 @@ export function evaluateSignatureImmutability(
     violations.push({
       policyId: 'SIGNATURE_IMMUTABILITY',
       severity: 'blocking',
-      message: 'Passagem de serviço selada. Edição não permitida. Utilize registro de complemento.',
+      message: 'Troca de turno selada. Edição não permitida. Utilize registro de complemento.',
       field: 'servicePass.sealed',
       normativeRef: 'Arquitetural — Event Sourcing',
       recommendedAction: 'Criar evento de complemento (AnomalyRegistered ou AlertGenerated)',

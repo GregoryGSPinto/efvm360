@@ -12,7 +12,7 @@ export interface SidebarItem {
 
 export const MENU_SIDEBAR_ITEMS: SidebarItem[] = [
   { id: 'inicial',       label: 'Dashboard',            icon: '🏠' },
-  { id: 'passagem',      label: 'Passagem de Serviço',  icon: '📋' },
+  { id: 'passagem',      label: 'Gestão de Troca de Turno',  icon: '📋' },
   { id: 'dss',           label: 'DSS',                  icon: '🛡️' },
   { id: 'analytics',     label: 'BI+',                  icon: '📊' },
   { id: 'historico',     label: 'Histórico',            icon: '📁' },

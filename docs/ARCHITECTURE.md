@@ -9,12 +9,12 @@ graph TB
     SUP[Supervisor]
     ADM[Administrador]
   end
-  VFZ[VFZ - Passagem de Serviço]
+  VFZ[VFZ - Gestão de Troca de Turno]
   AAD[Azure AD / Entra ID]
   ERP[Vale ERP/SAP - futuro]
   AI[Azure App Insights]
 
-  OP -->|Registra passagens| VFZ
+  OP -->|Registra trocas de turno| VFZ
   SUP -->|Consulta BI + histórico| VFZ
   ADM -->|Gestão de usuários| VFZ
   VFZ -->|SSO| AAD
@@ -159,7 +159,7 @@ graph TB
   ASP -->|JWKS validate| AAD
 ```
 
-## Diagrama 6: Data Flow — Passagem de Serviço
+## Diagrama 6: Data Flow — Gestão de Troca de Turno
 
 ```mermaid
 sequenceDiagram
@@ -180,7 +180,7 @@ sequenceDiagram
   OP->>SPA: Preenche formulário (9 seções)
   SPA->>SW: Cache form data (offline-first)
 
-  OP->>SPA: Assinar passagem
+  OP->>SPA: Assinar troca de turno
   SPA->>API: POST /passagens (+ assinatura HMAC)
   API->>DB: INSERT passagem + audit trail
   API->>AI: trackPassagemCriada()
@@ -197,7 +197,7 @@ sequenceDiagram
 | ADR-002 | MySQL (não PostgreSQL) | Compatibilidade com stack Vale |
 | ADR-003 | JWT + Refresh Token rotation | Sessões 8h sem reautenticação |
 | ADR-004 | Dual Auth (Azure AD + local) | SSO corporativo + fallback offline |
-| ADR-005 | HMAC em assinaturas | Integridade da passagem sem PKI |
+| ADR-005 | HMAC em assinaturas | Integridade da troca de turno sem PKI |
 | ADR-006 | Audit trail append-only com hash chain | Evidência forense imutável |
 | ADR-007 | React SPA (não SSR) | Operação offline-first |
 | ADR-008 | Blue/Green deploy com slot swap | Zero downtime em produção |

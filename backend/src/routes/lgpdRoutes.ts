@@ -108,10 +108,10 @@ router.post('/anonimizar', async (req: Request, res: Response) => {
 // Aviso de Privacidade público
 router.get('/politica', (_req: Request, res: Response) => {
   res.json({
-    sistema: 'VFZ — Passagem de Serviço Ferroviária',
+    sistema: 'VFZ — Gestão de Troca de Turno Ferroviária',
     controlador: 'Vale S.A.',
     dpo: 'dpo@vale.com',
-    finalidade: 'Registro e controle de passagens de serviço ferroviário para segurança operacional',
+    finalidade: 'Registro e controle de trocas de turno ferroviário para segurança operacional',
     baseLegal: [
       'Execução de contrato de trabalho (Art. 7, V)',
       'Cumprimento de obrigação legal/regulatória (Art. 7, II)',
@@ -120,7 +120,7 @@ router.get('/politica', (_req: Request, res: Response) => {
     dadosColetados: [
       'Nome completo e matrícula (identificação)',
       'Função/cargo (operacional)',
-      'Registros de passagem de serviço (operacional)',
+      'Registros de troca de turno (operacional)',
       'Assinaturas digitais (validação)',
       'IP e User-Agent (segurança)',
     ],

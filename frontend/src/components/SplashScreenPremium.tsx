@@ -70,7 +70,7 @@ export const SplashScreenPremium = memo<Props>(({ duration = 4000, onComplete, i
         </div>
         <div style={{ width: 44, height: 3, margin: '0 auto 8px', background: '#69be28', borderRadius: 2 }} />
         <div style={{ fontSize: 17, fontWeight: 600, color: txt, letterSpacing: 0.8, marginBottom: 4 }}>
-          PASSAGEM DE SERVIÇO
+          GESTÃO DE TROCA DE TURNO
         </div>
         <div style={{ fontSize: 13, color: txt2, marginBottom: 32 }}>
           Sistema Corporativo de Missão Crítica

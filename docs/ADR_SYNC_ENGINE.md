@@ -8,7 +8,7 @@
 
 **Status:** Accepted  
 **Date:** 2026-02-21  
-**Context:** VFZ precisa de fila persistente para passagens não sincronizadas. Dados devem sobreviver a refresh, crash, e fechamento do navegador.
+**Context:** VFZ precisa de fila persistente para trocas de turno não sincronizadas. Dados devem sobreviver a refresh, crash, e fechamento do navegador.
 
 **Decision:** Usar IndexedDB como storage para a sync queue.
 
@@ -40,7 +40,7 @@
 
 **Status:** Accepted  
 **Date:** 2026-02-21  
-**Context:** Pátio ferroviário tem conectividade intermitente. Operador não pode esperar rede para registrar passagem de turno — isso é operação crítica de segurança.
+**Context:** Pátio ferroviário tem conectividade intermitente. Operador não pode esperar rede para registrar troca de turno — isso é operação crítica de segurança.
 
 **Decision:** Arquitetura Store-and-Forward (offline-first).
 
@@ -55,11 +55,11 @@
 
 **Rationale:**
 - **Sync síncrono** falha quando não há rede — inaceitável para ferrovia
-- **CRDT** (Conflict-free Replicated Data Types) é elegante mas overkill. Passagem de serviço é write-once: uma vez assinada, não é editável. CRDT resolve merge de edições concorrentes, que não acontece aqui
-- **WebSocket** requer conexão permanente — impossível em pátio ferroviário. Adiciona complexidade de reconexão e heartbeat para cenário que não precisa de real-time (passagem é 1x a cada 12h)
+- **CRDT** (Conflict-free Replicated Data Types) é elegante mas overkill. Registro de troca de turno é write-once: uma vez assinado, não é editável. CRDT resolve merge de edições concorrentes, que não acontece aqui
+- **WebSocket** requer conexão permanente — impossível em pátio ferroviário. Adiciona complexidade de reconexão e heartbeat para cenário que não precisa de real-time (troca de turno é 1x a cada 12h)
 - **Store-and-Forward** resolve exatamente o problema: salva local, envia quando possível, garante entrega
 
-**Consistency model:** Eventual consistency com window de minutos (não horas). Aceitável porque cada turno dura 12h e há apenas 1 passagem por troca.
+**Consistency model:** Eventual consistency com window de minutos (não horas). Aceitável porque cada turno dura 12h e há apenas 1 registro por troca de turno.
 
 **Consequences:**
 - Operador vê confirmação imediata ("Salvo ✅") mesmo sem rede
@@ -101,7 +101,7 @@
 
 **Status:** Accepted  
 **Date:** 2026-02-21  
-**Context:** Dois dispositivos podem registrar passagem para o mesmo turno/data (raro, mas possível em troca de dispositivo).
+**Context:** Dois dispositivos podem registrar troca de turno para o mesmo turno/data (raro, mas possível em troca de dispositivo).
 
 **Decision:** Conflitos são detectados automaticamente e resolvidos manualmente por supervisor.
 
@@ -117,13 +117,13 @@
 | Merge automático | ✅ | ✅ (combinado) | Alto |
 
 **Rationale:**
-- Passagem de serviço é **documento legal com assinatura**
+- Registro de troca de turno é **documento legal com assinatura**
 - LWW ou FWW perde dados — inaceitável em operação ferroviária
 - Merge automático criaria documento que ninguém assinou — inválido legalmente
 - Resolução manual preserva ambas versões e dá ao supervisor a decisão
 - A versão não escolhida permanece no audit trail como "versão descartada" — auditável
 
-**Frequency estimate:** Conflitos reais < 1% das passagens (1 operador por turno, troca de dispositivo é exceção).
+**Frequency estimate:** Conflitos reais < 1% das trocas de turno (1 operador por turno, troca de dispositivo é exceção).
 
 **Consequences:**
 - Supervisor vê lista de conflitos no dashboard
@@ -137,7 +137,7 @@
 
 **Status:** Accepted  
 **Date:** 2026-02-21  
-**Context:** Passagem precisa de identificador único no momento da criação. Dispositivo pode estar offline.
+**Context:** Registro de troca de turno precisa de identificador único no momento da criação. Dispositivo pode estar offline.
 
 **Decision:** UUID v4 gerado no client-side via `crypto.randomUUID()`.
 
@@ -154,12 +154,12 @@
 - Auto-increment requer server — impossível offline
 - UUID v4 tem probabilidade de colisão de 1 em 2^122 — efetivamente zero
 - ULID é ordenável por tempo, mas adiciona dependência (ulid package) para benefício marginal neste contexto
-- Snowflake requer configuração de machine-id — complexidade desnecessária para ~50 passagens/dia
+- Snowflake requer configuração de machine-id — complexidade desnecessária para ~50 trocas de turno/dia
 
 **Trade-off accepted:** UUIDs não são ordenáveis cronologicamente → usamos `createdAt` timestamp para ordenação.
 
 **Consequences:**
-- Passagem tem ID estável desde o primeiro momento, mesmo offline
+- Registro de troca de turno tem ID estável desde o primeiro momento, mesmo offline
 - Backend usa UUID como chave de idempotência (re-sync = no-op)
 - IDs são 36 caracteres (vs 4 bytes de int) — overhead aceitável para volume baixo
 
@@ -180,7 +180,7 @@
 
 **Consequences:**
 - Cada item na fila tem `hmac` field computado com `gerarHMAC(payload)`
-- Server verifica HMAC antes de aceitar a passagem
+- Server verifica HMAC antes de aceitar a troca de turno
 - Modificação de dados na sync queue é detectável
 - Trade-off: HMAC key está no client (não é secret verdadeiro) — defesa contra tampering casual, não contra atacante sofisticado com DevTools. Segurança real vem do TLS + JWT no transporte
 
@@ -245,7 +245,7 @@
 |---------------|-------------|---------|----------|-----------|
 | Dispositivo desliga durante save | Média | Alto | IndexedDB tx rollback | Transação ACID: ou salva tudo ou nada |
 | Rede cai durante sync | Alta | Baixo | Timeout 5s | Item volta para `pending`, retry com backoff |
-| Server rejeita passagem | Baixa | Médio | Response 400/500 | Retry até MAX_RETRIES, depois `failed` para manual |
+| Server rejeita troca de turno | Baixa | Médio | Response 400/500 | Retry até MAX_RETRIES, depois `failed` para manual |
 | Conflito turno/data | Muito baixa | Médio | Server detecta | Supervisor resolve manualmente |
 | IndexedDB corrompido | Muito baixa | Alto | Catch em openDB | Fallback para localStorage queue |
 | Clock do dispositivo errado | Baixa | Baixo | Server compara | `createdAt` é informativo, server usa seu próprio clock |

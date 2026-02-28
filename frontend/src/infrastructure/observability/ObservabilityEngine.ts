@@ -85,7 +85,7 @@ export class EventReplayLogger {
   }> = [];
 
   /**
-   * Reproduz a evolução temporal de uma passagem de serviço.
+   * Reproduz a evolução temporal de uma troca de turno.
    * Retorna cada estado intermediário — ferramenta de auditoria.
    */
   async replayServicePass(

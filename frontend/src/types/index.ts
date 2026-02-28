@@ -1,5 +1,5 @@
 // ============================================================================
-// PASSAGEM DE SERVIÇO – EFVM360
+// GESTÃO DE TROCA DE TURNO – EFVM360
 // Tipos e Interfaces TypeScript
 // Sistema Digital de Operação Ferroviária
 // ============================================================================

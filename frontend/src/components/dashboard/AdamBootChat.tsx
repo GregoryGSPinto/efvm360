@@ -1,5 +1,5 @@
 // ============================================================================
-// PASSAGEM DE SERVIÇO – EFVM360
+// GESTÃO DE TROCA DE TURNO – EFVM360
 // AdamBoot - IA Central do Sistema
 // FASE 3: Widget Flutuante, Arrastável, com Machine Learning Local
 // MODO OBSERVADOR (pré-login) / MODO ATIVO (pós-login)
@@ -186,7 +186,7 @@ const gerarRecomendacoes = (memoria: AdamBootMemoryStore): AdamBootRecomendacao[
       titulo: 'Verificar pontos de atenção recorrentes',
       descricao: memoria.preferencias.pontosAtencaoComuns.slice(0, 2).join(', '),
       confianca: 0.8,
-      baseadoEm: 'Histórico de passagens',
+      baseadoEm: 'Histórico de trocas de turno',
     });
   }
   

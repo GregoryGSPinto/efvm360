@@ -1,6 +1,6 @@
 // ============================================================================
-// PASSAGEM DE SERVIÇO – EFVM360
-// Hook do Formulário de Passagem de Serviço
+// GESTÃO DE TROCA DE TURNO – EFVM360
+// Hook do Formulário de Troca de Turno
 // ============================================================================
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
@@ -361,7 +361,7 @@ export function useFormulario(): UseFormularioReturn {
     setDadosFormulario(criarEstadoInicial());
     setModoEdicao(false);
 
-    alert('✅ Passagem de serviço registrada com sucesso!');
+    alert('✅ Troca de turno registrada com sucesso!');
     return true;
   }, [dadosFormulario]);
 

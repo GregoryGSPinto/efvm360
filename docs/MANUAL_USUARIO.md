@@ -1,4 +1,4 @@
-# Manual do Usuário — VFZ Passagem de Serviço
+# Manual do Usuário — VFZ Gestão de Troca de Turno
 ## Estrada de Ferro Vitória a Minas — Pátio do Fazendão
 ### Versão 3.2
 
@@ -40,14 +40,14 @@ Após o login, você verá a Visão Geral com:
 Use a barra inferior para acessar:
 - 🏠 **Inicial** — Dashboard/Visão Geral
 - 📊 **BI+** — Painel de indicadores operacionais
-- 📝 **Passagem** — Formulário de passagem de serviço
+- 📝 **Passagem** — Formulário de troca de turno
 - 🔧 **Pátio** — Layout visual das linhas
 - 📜 **Histórico** — Registros anteriores
 - ⚙️ **Configurações** — Perfil, tema, acessibilidade
 
 ---
 
-## Capítulo 3: Passagem de Serviço
+## Capítulo 3: Gestão de Troca de Turno
 
 ### 3.1 Preenchimento do Formulário
 O formulário possui seções em ordem:
@@ -64,7 +64,7 @@ O formulário possui seções em ordem:
 ### 3.2 Preenchendo o Cabeçalho
 - Selecione o **turno** (Diurno 07-19 ou Noturno 19-07)
 - O sistema preenche automaticamente a data e calcula o tempo de turno
-- Selecione o **tema DSS** abordado na passagem
+- Selecione o **tema DSS** abordado na troca de turno
 
 ### 3.3 Linhas do Pátio
 Para cada linha, indique:
@@ -94,7 +94,7 @@ Para assinar:
 O painel BI+ mostra indicadores operacionais do pátio:
 - Ocupação de linhas por turno
 - Frequência de alertas críticos
-- Tempo médio de preenchimento de passagens
+- Tempo médio de preenchimento de trocas de turno
 - Comparativo entre turnos
 
 Estes indicadores ajudam na tomada de decisão operacional. **BI é suporte, não vigilância** — os dados são agregados e focam na operação, não no indivíduo.
@@ -104,7 +104,7 @@ Estes indicadores ajudam na tomada de decisão operacional. **BI é suporte, nã
 ## Capítulo 5: Histórico
 
 ### 5.1 Resumo
-Veja suas estatísticas: total de passagens, dias ativos, último login.
+Veja suas estatísticas: total de trocas de turno, dias ativos, último login.
 
 ### 5.2 Atividades Recentes
 Lista cronológica de todas as ações no sistema.
@@ -144,8 +144,8 @@ Edite nome e função. Altere sua senha.
 **P: O sistema funciona sem internet?**
 R: Sim, parcialmente. O formulário funciona offline e sincroniza quando a conexão retornar.
 
-**P: Posso alterar uma passagem já assinada?**
-R: Não. Passagens assinadas são registros imutáveis. Crie uma nova passagem com as correções.
+**P: Posso alterar uma troca de turno já assinada?**
+R: Não. Trocas de turno assinadas são registros imutáveis. Crie uma nova troca de turno com as correções.
 
 **P: O que fazer se esquecer a senha?**
 R: Procure o supervisor ou administrador do sistema para reset.

@@ -1,5 +1,5 @@
 // ============================================================================
-// PASSAGEM DE SERVIÇO – EFVM360
+// GESTÃO DE TROCA DE TURNO – EFVM360
 // Hook de Alertas e Análise Operacional
 // Sistema Ativo de Inteligência Operacional
 // ============================================================================

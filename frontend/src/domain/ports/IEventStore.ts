@@ -57,7 +57,7 @@ export interface ISyncQueue {
   countPending(): Promise<number>;
 }
 
-/** Interface do repositório de Passagem de Serviço */
+/** Interface do repositório de Troca de Turno */
 export interface IServicePassRepository {
   /** Salva ou atualiza uma passagem */
   save(pass: unknown): Promise<void>;

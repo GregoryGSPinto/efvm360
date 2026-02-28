@@ -19,7 +19,7 @@
 - [ ] Nenhum impacto operacional
 - [ ] Impacto baixo — funcionalidade auxiliar
 - [ ] Impacto médio — fluxo operacional afetado
-- [ ] ⚠️ Impacto alto — segurança ou passagem de serviço afetada
+- [ ] ⚠️ Impacto alto — segurança ou troca de turno afetada
 
 ## Checklist
 

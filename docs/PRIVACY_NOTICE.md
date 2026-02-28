@@ -1,10 +1,10 @@
-# Aviso de Privacidade — VFZ Passagem de Serviço
+# Aviso de Privacidade — VFZ Gestão de Troca de Turno
 
 ## Controlador
 Vale S.A. — CNPJ 33.592.510/0001-54
 
 ## O que coletamos e por quê
-O VFZ coleta seu nome, matrícula e função para identificar quem registrou cada passagem de serviço. Isso é necessário para segurança operacional ferroviária e é exigido pela regulamentação do setor.
+O VFZ coleta seu nome, matrícula e função para identificar quem registrou cada troca de turno. Isso é necessário para segurança operacional ferroviária e é exigido pela regulamentação do setor.
 
 ## Base Legal
 - Execução do contrato de trabalho (Art. 7, V)

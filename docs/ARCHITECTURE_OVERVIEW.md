@@ -1,6 +1,6 @@
 # Architecture Overview Document
 
-## VFZ — Sistema de Passagem de Serviço Ferroviária
+## VFZ — Sistema de Gestão de Troca de Turno Ferroviária
 ### Offline-First Architecture for Operational Continuity in Critical Railway Infrastructure
 
 **Versão:** 3.2  
@@ -16,7 +16,7 @@
 
 A Estrada de Ferro Vitória a Minas (EFVM) é a principal ferrovia de transporte de minério do Brasil, operando 24 horas por dia em turnos de 12 horas. A cada troca de turno, o operador que sai deve transferir ao operador que entra um registro completo do estado operacional do pátio: quais linhas estão ocupadas, quais estão interditadas, quais equipamentos apresentam defeito, quais manobras estão em andamento, e quais riscos de segurança existem.
 
-Esse registro — a **passagem de serviço** — é um documento operacional e legal. Se um incidente ocorrer, a passagem de serviço é o primeiro documento auditado. Se a informação estiver incompleta ou incorreta, as consequências são operacionais (risco à segurança) e jurídicas (responsabilização do operador).
+Esse registro — a **troca de turno** — é um documento operacional e legal. Se um incidente ocorrer, a troca de turno é o primeiro documento auditado. Se a informação estiver incompleta ou incorreta, as consequências são operacionais (risco à segurança) e jurídicas (responsabilização do operador).
 
 ### 1.2 O Problema
 
@@ -45,7 +45,7 @@ A restrição de conectividade é a mais determinante. Ela elimina qualquer arqu
 
 ### 1.4 O Requisito Central
 
-> Um sistema que funciona como se não houvesse servidor, mas que sincroniza dados quando há rede. O operador nunca deve esperar conectividade para registrar uma passagem de serviço.
+> Um sistema que funciona como se não houvesse servidor, mas que sincroniza dados quando há rede. O operador nunca deve esperar conectividade para registrar uma troca de turno.
 
 ---
 
@@ -96,7 +96,7 @@ A arquitetura não é "um app offline que às vezes conecta". É um sistema dist
 │                    PRESENTATION LAYER                        │
 │  React 18 + TypeScript + Vite                               │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐       │
-│  │ Passagem │ │Dashboard │ │Histórico │ │  Config  │       │
+│  │Troca Turno│ │Dashboard │ │Histórico │ │  Config  │       │
 │  │ (form)   │ │  (BI+)   │ │(timeline)│ │(settings)│       │
 │  └──────────┘ └──────────┘ └──────────┘ └──────────┘       │
 ├─────────────────────────────────────────────────────────────┤
@@ -161,7 +161,7 @@ A arquitetura não é "um app offline que às vezes conecta". É um sistema dist
 **Alternativas descartadas:**
 
 - **Sync síncrono:** Falha quando não há rede — inaceitável para operação ferroviária
-- **CRDT (Conflict-free Replicated Data Types):** Passagem de serviço é write-once após assinatura. CRDT resolve edição concorrente, que não ocorre neste domínio
+- **CRDT (Conflict-free Replicated Data Types):** Registro de troca de turno é write-once após assinatura. CRDT resolve edição concorrente, que não ocorre neste domínio
 - **WebSocket real-time:** Requer conexão permanente — impossível em pátio ferroviário
 
 **Trade-off aceito:** Eventual consistency. Dado pode existir no dispositivo A mas não no B por alguns minutos. Aceitável porque troca de turno acontece 1x a cada 12h.
@@ -177,7 +177,7 @@ A arquitetura não é "um app offline que às vezes conecta". É um sistema dist
 | Transações | Nenhuma | ACID |
 | Índices | Nenhum | Múltiplos |
 
-**Justificativa:** Uma passagem com dados completos pode ter 50-100KB. localStorage com 5MB limita a ~50 passagens na fila. IndexedDB não tem esse limite. Mais importante: operação síncrona bloqueia a UI thread durante salvamento — inaceitável durante troca de turno onde o operador precisa de resposta imediata.
+**Justificativa:** Um registro de troca de turno com dados completos pode ter 50-100KB. localStorage com 5MB limita a ~50 registros na fila. IndexedDB não tem esse limite. Mais importante: operação síncrona bloqueia a UI thread durante salvamento — inaceitável durante troca de turno onde o operador precisa de resposta imediata.
 
 ### 3.4 Por que SHA-256 Client-Side (e não bcrypt)?
 
@@ -191,7 +191,7 @@ A arquitetura não é "um app offline que às vezes conecta". É um sistema dist
 
 **Decisão:** MySQL 8.0 (Azure Flexible Server)
 
-**Justificativa:** Os dados são inerentemente relacionais: usuário → passagem → audit trail. O schema é rígido (mesmo formulário para todas as passagens) — não há benefício de schema flexível. MySQL com Azure Flexible Server oferece HA nativo, point-in-time recovery, e é a expertise existente da equipe de DBA da Vale.
+**Justificativa:** Os dados são inerentemente relacionais: usuário → passagem → audit trail. O schema é rígido (mesmo formulário para todas as trocas de turno) — não há benefício de schema flexível. MySQL com Azure Flexible Server oferece HA nativo, point-in-time recovery, e é a expertise existente da equipe de DBA da Vale.
 
 **Quando MongoDB seria melhor:** Se cada pátio tivesse formulários com campos diferentes (schema variável). Não é o caso — o formulário é padronizado.
 
@@ -199,7 +199,7 @@ A arquitetura não é "um app offline que às vezes conecta". É um sistema dist
 
 **Decisão:** Append-only MySQL table com hash chain SHA-256.
 
-**Justificativa:** O volume é ~50 passagens/dia e ~500 eventos de audit/dia. Kafka adiciona complexidade operacional (cluster ZooKeeper, topic management, consumer groups) para um volume que uma tabela MySQL com índice maneja trivialmente. O hash chain (cada registro contém o hash do anterior) garante imutabilidade sem infraestrutura adicional.
+**Justificativa:** O volume é ~50 trocas de turno/dia e ~500 eventos de audit/dia. Kafka adiciona complexidade operacional (cluster ZooKeeper, topic management, consumer groups) para um volume que uma tabela MySQL com índice maneja trivialmente. O hash chain (cada registro contém o hash do anterior) garante imutabilidade sem infraestrutura adicional.
 
 **Quando Kafka seria necessário:** Escala para 50+ pátios com necessidade de streaming real-time para dashboards centralizados. Nesse cenário, migrar para Azure EventHub (managed Kafka).
 
@@ -212,7 +212,7 @@ A arquitetura não é "um app offline que às vezes conecta". É um sistema dist
 | Ameaça | Vetor | Ativo em Risco | Mitigação | Residual |
 |--------|-------|---------------|-----------|----------|
 | **Spoofing** | Login falso | Sessão | JWT + bcrypt + rate limit (5 tentativas) + lockout 15min | Sem MFA offline (aceito) |
-| **Tampering** | Modificar passagem salva | Dados do formulário | HMAC no enqueue + hash chain audit + validação server-side | HMAC key no client (defesa contra tampering casual) |
+| **Tampering** | Modificar registro de troca de turno salvo | Dados do formulário | HMAC no enqueue + hash chain audit + validação server-side | HMAC key no client (defesa contra tampering casual) |
 | **Repudiation** | "Eu não assinei isso" | Assinatura digital | Audit trail append-only + timestamp + matrícula + fingerprint do device | Assinatura é hash, não certificado digital (evolução futura) |
 | **Info Disclosure** | Dados pessoais expostos | LGPD | TLS em trânsito + RBAC + API de direitos do titular | localStorage em plaintext (aceito para offline, mitiga com device policy) |
 | **DoS** | Flood de requests | API | Rate limit (100/15min) + Helmet + CORS strict | Sem WAF/CDN em MVP |
@@ -233,12 +233,12 @@ Camada 6: Runtime      → Console protection (prod) + DevTools detection + inte
 
 ## 5. Modelo de Sincronização
 
-### 5.1 Lifecycle de uma Passagem
+### 5.1 Lifecycle de uma Troca de Turno
 
 ```
   OPERADOR                         DISPOSITIVO                           SERVIDOR
      │                                │                                     │
-     │  "Salvar Passagem"             │                                     │
+     │  "Salvar Troca de Turno"       │                                     │
      │───────────────────────────────►│                                     │
      │                                │                                     │
      │                          1. Valida formulário                        │
@@ -277,7 +277,7 @@ Camada 6: Runtime      → Console protection (prod) + DevTools detection + inte
 
 ### 5.2 Detecção e Resolução de Conflitos
 
-**Quando ocorre:** Mesmo pátio + mesmo turno + mesma data = duas passagens diferentes.
+**Quando ocorre:** Mesmo pátio + mesmo turno + mesma data = duas trocas de turno diferentes.
 
 **Frequência estimada:** < 1% (1 operador por turno, conflito real só em troca de dispositivo).
 
@@ -286,10 +286,10 @@ Camada 6: Runtime      → Console protection (prod) + DevTools detection + inte
 ```
    Conflict Detection (automática)          Resolution (manual)
    ┌─────────────────────────┐          ┌──────────────────────────┐
-   │ Server recebe passagem  │          │ Supervisor vê conflito   │
+   │ Server recebe troca     │          │ Supervisor vê conflito   │
    │ Turno A, 21/02/2026     │          │ no dashboard             │
    │                         │          │                          │
-   │ Já existe passagem para │──────►   │ Visualiza ambas versões  │
+   │ Já existe troca para    │──────►   │ Visualiza ambas versões  │
    │ Turno A, 21/02/2026?    │          │                          │
    │                         │          │ Escolhe versão oficial   │
    │ SIM → status: CONFLICT  │          │                          │
@@ -298,7 +298,7 @@ Camada 6: Runtime      → Console protection (prod) + DevTools detection + inte
                                         └──────────────────────────┘
 ```
 
-**Por que não merge automático?** Passagem de serviço é documento legal com assinatura. Merge automático criaria um documento que ninguém assinou — juridicamente inválido. A decisão de qual versão é oficial pertence ao supervisor.
+**Por que não merge automático?** O registro de troca de turno é documento legal com assinatura. Merge automático criaria um documento que ninguém assinou — juridicamente inválido. A decisão de qual versão é oficial pertence ao supervisor.
 
 ### 5.3 Exponential Backoff com Jitter
 
@@ -331,7 +331,7 @@ Total após 20 tentativas: ~4 horas → marca como FAILED
 
 ### 6.2 Capacity Planning
 
-**Cenário atual:** 1 pátio, ~20 operadores, ~50 passagens/dia
+**Cenário atual:** 1 pátio, ~20 operadores, ~50 trocas de turno/dia
 
 | Recurso | Consumo Estimado | Limite |
 |---------|-----------------|--------|
@@ -371,7 +371,7 @@ Total após 20 tentativas: ~4 horas → marca como FAILED
 | ID | Risco | Prob. | Impacto | Mitigação | Status |
 |----|-------|-------|---------|-----------|--------|
 | R1 | Dispositivo perde dados (crash/limpeza) | Média | Alto | Dual storage + sync automático | ✅ Mitigado |
-| R2 | Conflito de passagem (2 devices mesmo turno) | Baixa | Médio | Detecção automática + resolução supervisor | ✅ Mitigado |
+| R2 | Conflito de troca de turno (2 devices mesmo turno) | Baixa | Médio | Detecção automática + resolução supervisor | ✅ Mitigado |
 | R3 | Rede indisponível por > 4h | Alta | Baixo | Funciona 100% offline, sync quando voltar | ✅ By design |
 | R4 | Token JWT expirado offline | Média | Baixo | Refresh token local (7d) | ✅ Mitigado |
 | R5 | Ataque XSS via campos do formulário | Baixa | Alto | Sanitização profunda + CSP headers | ✅ Mitigado |
@@ -428,7 +428,7 @@ FASE 6 ◻ Intelligence
 
 ## 9. Conclusão
 
-Este sistema resolve um problema real — a digitalização da passagem de serviço ferroviária em ambiente sem conectividade — com uma arquitetura que reconhece e abraça as restrições do domínio ao invés de lutar contra elas.
+Este sistema resolve um problema real — a digitalização da gestão de troca de turno ferroviária em ambiente sem conectividade — com uma arquitetura que reconhece e abraça as restrições do domínio ao invés de lutar contra elas.
 
 A decisão de ir offline-first não foi uma limitação — foi a decisão arquitetural central. Tudo que se seguiu (sync engine, conflict resolution, dual storage, HMAC no client) é consequência natural dessa decisão.
 

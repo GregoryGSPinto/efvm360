@@ -1,5 +1,5 @@
 // ============================================================================
-// PASSAGEM DE SERVIÇO – EFVM360
+// GESTÃO DE TROCA DE TURNO – EFVM360
 // Hook do DSS - Diálogo de Saúde, Segurança e Meio Ambiente
 // CONFORMIDADE PRO-041945 Rev. 02
 // ============================================================================
@@ -122,7 +122,7 @@ export function useDSS(): UseDSSReturn {
     return historicoDSS[0]; // Mais recente
   }, [historicoDSS]);
 
-  // Tema do DSS anterior (para exibir na Passagem de Serviço)
+  // Tema do DSS anterior (para exibir na Troca de Turno)
   const temaDSSAnterior = useMemo(() => {
     return dssAnterior?.tema || null;
   }, [dssAnterior]);
