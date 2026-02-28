@@ -1,6 +1,6 @@
 // ============================================================================
-// EFVM360 v3.2 — GuidedTour Component (Rewrite)
-// Simplified spotlight overlay + tooltip — auto-start after login
+// EFVM360 v3.2 — GuidedTour Component
+// Spotlight overlay + tooltip — responsive desktop/mobile
 // ============================================================================
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -95,9 +95,9 @@ export const TOUR_STEPS: TourStep[] = [
 
 // ── Position helpers ──────────────────────────────────────────────────────
 
-function calcPosition(rect: DOMRect, placement?: string): Record<string, string | number> {
+function calcDesktopPosition(rect: DOMRect, placement?: string): Record<string, string | number> {
   const gap = 16;
-  const halfTooltip = 190; // half of maxWidth 380
+  const halfTooltip = 190;
   const safeLeft = (cx: number) => Math.max(16, Math.min(cx - halfTooltip, window.innerWidth - 380 - 16));
 
   switch (placement) {
@@ -113,8 +113,43 @@ function calcPosition(rect: DOMRect, placement?: string): Record<string, string 
   }
 }
 
+function calcMobilePosition(rect: DOMRect): Record<string, string | number> {
+  const vh = window.innerHeight;
+  const gap = 16;
+  const tooltipEstHeight = 260;
+  const targetCenter = rect.top + rect.height / 2;
+  const targetInUpperHalf = targetCenter < vh / 2;
+
+  let top: number;
+  if (targetInUpperHalf) {
+    // Tooltip below target
+    top = rect.bottom + gap;
+  } else {
+    // Tooltip above target
+    top = rect.top - gap - tooltipEstHeight;
+  }
+
+  // Clamp: don't let tooltip go off-screen
+  top = Math.max(16, Math.min(top, vh - tooltipEstHeight - 16));
+
+  // If target + tooltip don't fit at all, pin to bottom
+  const fitsAbove = rect.top - gap - tooltipEstHeight > 16;
+  const fitsBelow = rect.bottom + gap + tooltipEstHeight < vh - 16;
+  if (!fitsAbove && !fitsBelow) {
+    return { bottom: 16, left: 16, right: 16, top: 'auto' };
+  }
+
+  return { top, left: 16, right: 16 };
+}
+
 function centerPosition(): Record<string, string | number> {
   return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+
+function getIsMobile(): boolean {
+  return typeof window !== 'undefined' && window.innerWidth < 768;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────
@@ -130,13 +165,27 @@ export function GuidedTour({
   const [currentStep, setCurrentStep] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
   const [ready, setReady] = useState(false);
+  const [isMobile, setIsMobile] = useState(getIsMobile);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timer2Ref = useRef<ReturnType<typeof setTimeout>>();
 
   const step = steps[currentStep];
   const isCenter = !step?.target;
   const progress = steps.length > 0 ? ((currentStep + 1) / steps.length) * 100 : 0;
 
-  // ── Find target and update rect ──
+  // ── Scroll to target, then measure ──
+  const scrollAndMeasure = useCallback((el: Element) => {
+    const scrollDelay = isMobile ? 400 : 150;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    clearTimeout(timer2Ref.current);
+    timer2Ref.current = setTimeout(() => {
+      const r = el.getBoundingClientRect();
+      setRect(r);
+      setReady(true);
+    }, scrollDelay);
+  }, [isMobile]);
+
+  // ── Find target ──
   const findTarget = useCallback(() => {
     if (!step?.target) {
       setRect(null);
@@ -145,18 +194,12 @@ export function GuidedTour({
     }
     const el = document.querySelector(step.target);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setTimeout(() => {
-        const r = el.getBoundingClientRect();
-        setRect(r);
-        setReady(true);
-      }, 150);
+      scrollAndMeasure(el);
     } else {
-      // Fallback: show centered if target not found
       setRect(null);
       setReady(true);
     }
-  }, [step]);
+  }, [step, scrollAndMeasure]);
 
   // ── Go to step ──
   const goToStep = useCallback((index: number) => {
@@ -167,54 +210,44 @@ export function GuidedTour({
     setRect(null);
     setCurrentStep(index);
 
-    // Navigate if needed
+    const mobile = getIsMobile();
+    const navDelay = s.page ? (mobile ? 800 : 500) : (mobile ? 200 : 100);
+
     if (s.page) {
       onNavigate(s.page);
-      // Wait for page to render
-      clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => {
-        const el = s.target ? document.querySelector(s.target) : null;
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          setTimeout(() => {
-            const r = el.getBoundingClientRect();
-            setRect(r);
-            setReady(true);
-          }, 150);
-        } else {
-          // Second attempt after more time
-          setTimeout(() => {
-            const el2 = s.target ? document.querySelector(s.target) : null;
-            if (el2) {
-              const r = el2.getBoundingClientRect();
-              setRect(r);
-            } else {
-              setRect(null); // Fallback: centered
-            }
-            setReady(true);
-          }, 500);
-        }
-      }, 500);
-    } else if (s.target) {
-      clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => {
-        const el = document.querySelector(s.target!);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          setTimeout(() => {
-            const r = el.getBoundingClientRect();
-            setRect(r);
-            setReady(true);
-          }, 150);
-        } else {
-          setRect(null);
-          setReady(true);
-        }
-      }, 100);
-    } else {
-      // Center step — no target
-      setReady(true);
     }
+
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      if (!s.target) {
+        setReady(true);
+        return;
+      }
+      const el = document.querySelector(s.target);
+      if (el) {
+        const scrollDelay = mobile ? 400 : 150;
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        clearTimeout(timer2Ref.current);
+        timer2Ref.current = setTimeout(() => {
+          const r = el.getBoundingClientRect();
+          setRect(r);
+          setReady(true);
+        }, scrollDelay);
+      } else {
+        // Retry once after extra delay
+        clearTimeout(timer2Ref.current);
+        timer2Ref.current = setTimeout(() => {
+          const el2 = s.target ? document.querySelector(s.target) : null;
+          if (el2) {
+            const r = el2.getBoundingClientRect();
+            setRect(r);
+          } else {
+            setRect(null);
+          }
+          setReady(true);
+        }, 500);
+      }
+    }, navDelay);
   }, [steps, onNavigate]);
 
   // Navigation
@@ -235,20 +268,26 @@ export function GuidedTour({
   // Reset when tour starts
   useEffect(() => {
     if (isActive) {
+      setIsMobile(getIsMobile());
       setCurrentStep(0);
       setRect(null);
       setReady(false);
-      // Initial delay for UI to settle
       const t = setTimeout(() => findTarget(), 300);
       return () => clearTimeout(t);
     }
-    return () => clearTimeout(timerRef.current);
+    return () => {
+      clearTimeout(timerRef.current);
+      clearTimeout(timer2Ref.current);
+    };
   }, [isActive]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Reposition on resize
+  // Reposition on resize + track mobile breakpoint
   useEffect(() => {
-    if (!isActive || isCenter) return;
-    const handler = () => findTarget();
+    if (!isActive) return;
+    const handler = () => {
+      setIsMobile(getIsMobile());
+      if (!isCenter) findTarget();
+    };
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
   }, [isActive, isCenter, findTarget]);
@@ -272,12 +311,25 @@ export function GuidedTour({
 
   if (!isActive || !step) return null;
 
+  // ── Position calculation ──
   const hasTarget = rect !== null;
-  const tooltipPos = hasTarget ? calcPosition(rect, step.placement) : centerPosition();
+  let tooltipPos: Record<string, string | number>;
+  if (!hasTarget) {
+    tooltipPos = centerPosition();
+  } else if (isMobile) {
+    tooltipPos = calcMobilePosition(rect);
+  } else {
+    tooltipPos = calcDesktopPosition(rect, step.placement);
+  }
+
+  // ── Button padding (bigger on mobile for touch targets) ──
+  const btnPad = isMobile ? '12px 16px' : '8px 16px';
+
+  const isLast = currentStep >= steps.length - 1;
 
   return (
     <>
-      {/* OVERLAY — dark backdrop, always visible */}
+      {/* OVERLAY */}
       <div style={{
         position: 'fixed', inset: 0, zIndex: 10000,
         background: 'rgba(0,0,0,0.6)',
@@ -286,7 +338,7 @@ export function GuidedTour({
         pointerEvents: 'auto',
       }} onClick={(e) => { e.stopPropagation(); e.preventDefault(); }} />
 
-      {/* SPOTLIGHT — cut-out hole around target */}
+      {/* SPOTLIGHT */}
       {hasTarget && ready && (
         <div style={{
           position: 'fixed',
@@ -312,18 +364,19 @@ export function GuidedTour({
           ...tooltipPos,
           background: bg,
           borderRadius: 16,
-          padding: 24,
-          maxWidth: 380,
-          width: 'calc(100vw - 32px)',
+          padding: isMobile ? 20 : 24,
+          maxWidth: isMobile ? 'none' : 380,
+          width: isMobile ? 'auto' : 'calc(100vw - 32px)',
           boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
           border: `1px solid ${border}`,
           opacity: ready ? 1 : 0,
           transition: 'opacity 200ms ease',
+          boxSizing: 'border-box',
         }}
       >
         {/* Title */}
         <div style={{
-          fontSize: 18, fontWeight: 700, color: '#007e7a',
+          fontSize: isMobile ? 16 : 18, fontWeight: 700, color: '#007e7a',
           marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8,
         }}>
           <span>🎓</span> {step.title}
@@ -353,33 +406,71 @@ export function GuidedTour({
           </div>
         </div>
 
-        {/* Buttons */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-          {currentStep > 0 ? (
-            <button onClick={prev} style={{
-              padding: '8px 16px', borderRadius: 8, cursor: 'pointer',
-              border: `1px solid ${border}`, background: 'transparent',
-              color: isDark ? '#e0e0e0' : '#333', fontSize: 13, fontWeight: 600,
-            }}>
-              ← Anterior
-            </button>
-          ) : <div />}
+        {/* Buttons — stack on mobile if needed */}
+        <div style={{
+          display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
+          justifyContent: 'space-between',
+          alignItems: isMobile ? 'stretch' : 'center',
+          gap: 8,
+        }}>
+          {/* Primary action first on mobile (visual order) */}
+          {isMobile ? (
+            <>
+              <button onClick={next} style={{
+                padding: btnPad, borderRadius: 8, border: 'none',
+                background: '#007e7a', color: '#fff', fontSize: 14,
+                fontWeight: 600, cursor: 'pointer', minHeight: 44,
+              }}>
+                {isLast ? '✓ Concluir e Ir para Inicio' : 'Proximo →'}
+              </button>
+              {currentStep > 0 && (
+                <button onClick={prev} style={{
+                  padding: btnPad, borderRadius: 8, cursor: 'pointer',
+                  border: `1px solid ${border}`, background: 'transparent',
+                  color: isDark ? '#e0e0e0' : '#333', fontSize: 13, fontWeight: 600,
+                  minHeight: 44,
+                }}>
+                  ← Anterior
+                </button>
+              )}
+              <button onClick={onSkip} style={{
+                padding: '8px 12px', borderRadius: 8, border: 'none',
+                background: 'transparent', color: '#888', fontSize: 12,
+                fontWeight: 500, cursor: 'pointer', textAlign: 'center',
+              }}>
+                Pular Tutorial
+              </button>
+            </>
+          ) : (
+            <>
+              {currentStep > 0 ? (
+                <button onClick={prev} style={{
+                  padding: btnPad, borderRadius: 8, cursor: 'pointer',
+                  border: `1px solid ${border}`, background: 'transparent',
+                  color: isDark ? '#e0e0e0' : '#333', fontSize: 13, fontWeight: 600,
+                }}>
+                  ← Anterior
+                </button>
+              ) : <div />}
 
-          <button onClick={onSkip} style={{
-            padding: '8px 12px', borderRadius: 8, border: 'none',
-            background: 'transparent', color: '#888', fontSize: 12,
-            fontWeight: 500, cursor: 'pointer',
-          }}>
-            Pular Tutorial
-          </button>
+              <button onClick={onSkip} style={{
+                padding: '8px 12px', borderRadius: 8, border: 'none',
+                background: 'transparent', color: '#888', fontSize: 12,
+                fontWeight: 500, cursor: 'pointer',
+              }}>
+                Pular Tutorial
+              </button>
 
-          <button onClick={next} style={{
-            padding: '8px 18px', borderRadius: 8, border: 'none',
-            background: '#007e7a', color: '#fff', fontSize: 13,
-            fontWeight: 600, cursor: 'pointer',
-          }}>
-            {currentStep >= steps.length - 1 ? '✓ Concluir e Ir para Inicio' : 'Proximo →'}
-          </button>
+              <button onClick={next} style={{
+                padding: btnPad, borderRadius: 8, border: 'none',
+                background: '#007e7a', color: '#fff', fontSize: 13,
+                fontWeight: 600, cursor: 'pointer',
+              }}>
+                {isLast ? '✓ Concluir e Ir para Inicio' : 'Proximo →'}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </>
