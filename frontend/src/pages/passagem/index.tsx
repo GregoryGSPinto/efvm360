@@ -6,7 +6,8 @@
 import { useState, useRef, useCallback, useMemo, useEffect, memo } from 'react';
 import type { PaginaPassagemProps } from '../types';
 import type { DadosFormulario, UsuarioCadastro, TemaEstilos } from '../../types';
-import { ChecklistSeguranca, Card, StatusBadge, AICopilotPassagem, AIRiskScore } from '../../components';
+import { ChecklistSeguranca, Card, StatusBadge, AIRiskScore } from '../../components';
+import { calcularRisco } from '../../components/operacional';
 import { TabelaPatio, TabelaEquipamentos } from '../../components/tables';
 import { SECOES_FORMULARIO, TURNOS, SENSOS_5S, NIVEIS_MATURIDADE_5S, SUGESTOES_PONTOS_ATENCAO, STORAGE_KEYS } from '../../utils/constants';
 import { ALL_YARD_CODES, getYardShortName, type YardCode } from '../../domain/aggregates/YardRegistry';
@@ -2903,17 +2904,63 @@ SEGURANÇA EM MANOBRAS
     </>
   );
 
+  // ── Risco Operacional Card ──
+  const riscoData = useMemo(() => calcularRisco(dadosFormulario), [dadosFormulario]);
+  const riscoColor = riscoData.score <= 30 ? '#69be28' : riscoData.score <= 60 ? '#edb111' : '#dc2626';
+  const riscoLabel = riscoData.score <= 30 ? 'Baixo' : riscoData.score <= 60 ? 'Moderado' : 'Alto';
+
   // ========== RENDER PRINCIPAL DO SISTEMA ==========
   return (
     <>
       {renderPaginaPassagem()}
-      {/* AI Copilot — Painel lateral colapsável */}
-      <AICopilotPassagem
-        tema={tema}
-        dadosFormulario={dadosFormulario}
-        patio={selectedYard}
-        turno={dadosFormulario.cabecalho.turno || 'D'}
-      />
+
+      {/* Risco Operacional do Turno — always visible */}
+      <div style={{ marginTop: 20 }}>
+        <Card title="" styles={styles}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="#69be28" style={{ flexShrink: 0 }}>
+              <path d="M12 0L14.59 8.41L23 11L14.59 13.59L12 22L9.41 13.59L1 11L9.41 8.41L12 0Z" />
+            </svg>
+            <span style={{ fontSize: 14, fontWeight: 700, color: tema.texto }}>Risco Operacional do Turno</span>
+            <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 8, color: riscoColor, background: `${riscoColor}15` }}>
+              {riscoLabel}
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+            {/* Circular gauge */}
+            <div style={{ position: 'relative', width: 90, height: 90, flexShrink: 0 }}>
+              <svg width={90} height={90} style={{ transform: 'rotate(-90deg)' }}>
+                <circle cx={45} cy={45} r={39} fill="none" stroke={`${riscoColor}18`} strokeWidth={8} />
+                <circle cx={45} cy={45} r={39} fill="none" stroke={riscoColor} strokeWidth={8} strokeLinecap="round"
+                  strokeDasharray={2 * Math.PI * 39} strokeDashoffset={(2 * Math.PI * 39) - (riscoData.score / 100) * (2 * Math.PI * 39)}
+                  style={{ transition: 'stroke-dashoffset 0.8s ease' }} />
+              </svg>
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: 24, fontWeight: 800, color: riscoColor, lineHeight: 1 }}>{riscoData.score}</span>
+                <span style={{ fontSize: 9, color: tema.textoSecundario }}>/100</span>
+              </div>
+            </div>
+            {/* Factors */}
+            <div style={{ flex: 1, minWidth: 200 }}>
+              {riscoData.fatores.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  {riscoData.fatores.map((f, i) => (
+                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 8px', borderRadius: 6, background: `${tema.backgroundSecundario}` }}>
+                      <span style={{ fontSize: 12, color: tema.texto }}>{f.label}: <span style={{ color: tema.textoSecundario }}>{f.descricao}</span></span>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: riscoColor, whiteSpace: 'nowrap' }}>+{f.pontos}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ fontSize: 13, color: tema.textoSecundario, margin: 0 }}>Nenhum fator de risco detectado. Preencha a passagem para ativar.</p>
+              )}
+            </div>
+          </div>
+          <div style={{ marginTop: 10, fontSize: 11, color: tema.textoSecundario, fontStyle: 'italic', textAlign: 'center' }}>
+            Este indicador não bloqueia a passagem — é informativo para apoio à decisão operacional.
+          </div>
+        </Card>
+      </div>
     </>
   );
 }

@@ -33,6 +33,9 @@ interface AdamBootChatProps {
   isListening?: boolean;
   onStartVoice?: () => void;
   onStopVoice?: () => void;
+  // Passagem mode (absorbed from AICopilotPassagem)
+  paginaAtual?: string;
+  completudePassagem?: number;
 }
 
 type TipoAnexo = 'arquivo' | 'audio' | 'imagem' | 'none';
@@ -233,6 +236,8 @@ export const AdamBootChat = memo<AdamBootChatProps>(({
   isListening,
   onStartVoice,
   onStopVoice,
+  paginaAtual,
+  completudePassagem,
 }) => {
   // ========================================
   // ESTADOS
@@ -985,6 +990,43 @@ export const AdamBootChat = memo<AdamBootChatProps>(({
             >
               💡 Ver {recomendacoes.length} sugestões do AdamBoot
             </button>
+          )}
+
+          {/* Modo Passagem — absorbed from AICopilotPassagem */}
+          {paginaAtual === 'passagem' && (
+            <div style={{ padding: '8px 12px', borderBottom: `1px solid ${tema.cardBorda}`, background: `${tema.primaria}08` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 6, background: `${tema.primaria}20`, color: tema.primaria, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  Modo Passagem
+                </span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: (completudePassagem || 0) < 40 ? '#dc2626' : (completudePassagem || 0) < 70 ? '#edb111' : '#69be28', marginLeft: 'auto' }}>
+                  {completudePassagem || 0}%
+                </span>
+              </div>
+              <div style={{ height: 4, background: tema.inputBorda, borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>
+                <div style={{
+                  height: '100%', width: `${completudePassagem || 0}%`,
+                  background: (completudePassagem || 0) < 40 ? '#dc2626' : (completudePassagem || 0) < 70 ? '#edb111' : '#69be28',
+                  borderRadius: 2, transition: 'width 0.5s ease',
+                }} />
+              </div>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {[
+                  { label: 'Completude', msg: 'completude' },
+                  { label: 'Resumo Risco', msg: 'risco' },
+                  { label: 'Pendentes', msg: 'campos pendentes' },
+                ].map(btn => (
+                  <button key={btn.msg} onClick={() => { onInputChange(btn.msg); setTimeout(onEnviar, 50); }}
+                    style={{
+                      padding: '4px 10px', borderRadius: 6, fontSize: 10, fontWeight: 600,
+                      background: tema.backgroundSecundario, color: tema.primaria,
+                      border: `1px solid ${tema.primaria}40`, cursor: 'pointer',
+                    }}>
+                    {btn.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
 
           {/* Área de mensagens */}

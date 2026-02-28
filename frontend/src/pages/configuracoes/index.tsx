@@ -3,192 +3,26 @@
 // Extraída de App.tsx renderConfiguracoes() — ~1297 linhas
 // ============================================================================
 
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
 import type { PaginaConfiguracoesProps } from '../types';
 import { SectionHeader, Card } from '../../components';
-import { STORAGE_KEYS, FUNCOES_USUARIO, TURNOS_LETRAS } from '../../utils/constants';
+import { STORAGE_KEYS } from '../../utils/constants';
 import GerenciamentoPatios from './GerenciamentoPatios';
 import { useI18n } from '../../hooks/useI18n';
-import type { Locale } from '../../hooks/useI18n';
 import { obterPerfil, setNivelOverride, resetarPerfil, getTopPaginas } from '../../services/AdamBootService';
 
 export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JSX.Element {
   const {
     tema, temaEfetivo, styles, config, usuarioLogado, secaoConfigAtiva,
     setSecaoConfigAtiva, setTema, atualizarPreferenciasOperacionais,
-    atualizarPreferenciasNotificacao, atualizarPreferenciasAcessibilidade,
-    atualizarAdamBoot, atualizarPerfilExtendido,
-    mostrarAlterarSenha, setMostrarAlterarSenha, senhaAtual, setSenhaAtual,
-    novaSenha, setNovaSenha, confirmarNovaSenha, setConfirmarNovaSenha,
-    erroAlterarSenha, setErroAlterarSenha, sucessoAlterarSenha, setSucessoAlterarSenha,
+    atualizarPreferenciasAcessibilidade,
+    atualizarAdamBoot,
   } = props;
 
-  const { t, setIdioma, locale } = useI18n();
+  useI18n();
 
-  // ── Avatar state ──
-  const [avatarMode, setAvatarMode] = useState<'idle' | 'camera' | 'preview'>('idle');
-  const [capturedImage, setCapturedImage] = useState<string>('');
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-
-  // ── Intensification state ──
   const matricula = usuarioLogado?.matricula || '';
-  const intensificacaoKey = `efvm360-intensificacao-${matricula}`;
-  const [intensificacao, setIntensificacao] = useState(() => {
-    try {
-      const saved = localStorage.getItem(intensificacaoKey);
-      if (saved) { const p = JSON.parse(saved); return p.texto || ''; }
-    } catch { /* ignore */ }
-    return '';
-  });
-  const [intensificacaoSalva, setIntensificacaoSalva] = useState(false);
-  const [ultimaAtualizacao, setUltimaAtualizacao] = useState(() => {
-    try {
-      const saved = localStorage.getItem(intensificacaoKey);
-      if (saved) { const p = JSON.parse(saved); return p.timestamp || ''; }
-    } catch { /* ignore */ }
-    return '';
-  });
 
-  // ── Avatar helpers ──
-  const avatarKey = `efvm360-avatar-${matricula}`;
-  const [savedAvatar, setSavedAvatar] = useState(() => {
-    try { return localStorage.getItem(avatarKey) || ''; } catch { return ''; }
-  });
-
-  const stopCamera = useCallback(() => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(t => t.stop());
-      streamRef.current = null;
-    }
-  }, []);
-
-  const startCamera = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
-      setAvatarMode('camera');
-    } catch {
-      alert('Nao foi possivel acessar a camera');
-    }
-  }, []);
-
-  const capturePhoto = useCallback(() => {
-    if (!videoRef.current || !canvasRef.current) return;
-    const canvas = canvasRef.current;
-    const video = videoRef.current;
-    canvas.width = 200;
-    canvas.height = 200;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    const size = Math.min(video.videoWidth, video.videoHeight);
-    const sx = (video.videoWidth - size) / 2;
-    const sy = (video.videoHeight - size) / 2;
-    ctx.drawImage(video, sx, sy, size, size, 0, 0, 200, 200);
-    setCapturedImage(canvas.toDataURL('image/jpeg', 0.8));
-    stopCamera();
-    setAvatarMode('preview');
-  }, [stopCamera]);
-
-  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = 200;
-        canvas.height = 200;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        const size = Math.min(img.width, img.height);
-        const sx = (img.width - size) / 2;
-        const sy = (img.height - size) / 2;
-        ctx.drawImage(img, sx, sy, size, size, 0, 0, 200, 200);
-        setCapturedImage(canvas.toDataURL('image/jpeg', 0.8));
-        setAvatarMode('preview');
-      };
-      img.src = reader.result as string;
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
-  }, []);
-
-  const confirmAvatar = useCallback(() => {
-    if (capturedImage) {
-      localStorage.setItem(avatarKey, capturedImage);
-      setSavedAvatar(capturedImage);
-    }
-    setCapturedImage('');
-    setAvatarMode('idle');
-  }, [capturedImage, avatarKey]);
-
-  const cancelAvatar = useCallback(() => {
-    stopCamera();
-    setCapturedImage('');
-    setAvatarMode('idle');
-  }, [stopCamera]);
-
-  const removeAvatar = useCallback(() => {
-    localStorage.removeItem(avatarKey);
-    setSavedAvatar('');
-  }, [avatarKey]);
-
-  // Cleanup camera on unmount
-  useEffect(() => { return () => { stopCamera(); }; }, [stopCamera]);
-
-  // ── Missing functions (were in App.tsx scope) ──
-  // Password requirements check
-  const senhaRequisitos = useMemo(() => ({
-    minimo: novaSenha.length >= 6,
-    maiuscula: /[A-Z]/.test(novaSenha),
-    numero: /\d/.test(novaSenha),
-    confere: novaSenha === confirmarNovaSenha && confirmarNovaSenha.length > 0,
-  }), [novaSenha, confirmarNovaSenha]);
-
-  const senhaValida = senhaRequisitos.minimo && senhaRequisitos.maiuscula && senhaRequisitos.numero && senhaRequisitos.confere;
-
-  const handleAlterarSenha = useCallback(() => {
-    setErroAlterarSenha('');
-    // Validate current password
-    try {
-      const usuarios: Array<{ matricula: string; senha?: string }> = JSON.parse(localStorage.getItem(STORAGE_KEYS.USUARIOS) || '[]');
-      const user = usuarios.find((u) => u.matricula === usuarioLogado?.matricula);
-      if (!user) {
-        setErroAlterarSenha('Usuário não encontrado');
-        return;
-      }
-      if (user.senha !== senhaAtual) {
-        setErroAlterarSenha(t('config.senhaAtualIncorreta'));
-        return;
-      }
-      if (!novaSenha || novaSenha.length < 6) {
-        setErroAlterarSenha(t('config.senhaMinimo'));
-        return;
-      }
-      if (novaSenha !== confirmarNovaSenha) {
-        setErroAlterarSenha(t('config.senhasNaoConferem'));
-        return;
-      }
-      const idx = usuarios.findIndex((u) => u.matricula === usuarioLogado?.matricula);
-      if (idx !== -1) {
-        usuarios[idx].senha = novaSenha;
-        localStorage.setItem(STORAGE_KEYS.USUARIOS, JSON.stringify(usuarios));
-        setSucessoAlterarSenha(true);
-        setSenhaAtual(''); setNovaSenha(''); setConfirmarNovaSenha('');
-      }
-    } catch { setErroAlterarSenha('Erro ao alterar senha'); }
-  }, [novaSenha, confirmarNovaSenha, senhaAtual, usuarioLogado, t]);
-
-  const podeVisualizar = useCallback((_modulo: string) => true, []);
-  const podeExportar = useCallback((_modulo: string) => true, []);
   const registrarAuditoria = useCallback((_tipo: string, _modulo: string, _desc: string) => {}, []);
   const exportarAuditTrail = useCallback(() => {
     try {
@@ -214,7 +48,6 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
 
     // FASE 7: Menu lateral de navegação das configurações com controle de permissão
     const menuConfiguracaoBase = [
-      { id: 'perfil' as const, icon: '👤', label: 'Perfil do Usuário', sempreVisivel: true },
       { id: 'aparencia' as const, icon: '🎨', label: 'Aparência', sempreVisivel: true },
       { id: 'acessibilidade' as const, icon: '♿', label: 'Acessibilidade', sempreVisivel: true },
       { id: 'adamboot' as const, icon: '🤖', label: 'AdamBoot (IA)', sempreVisivel: true },
@@ -224,7 +57,7 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
       { id: 'patios' as const, icon: '🏗️', label: 'Gerenciar Pátios', sempreVisivel: false, requerPerfil: ['inspetor', 'gestor', 'administrador'] },
       { id: 'avancado' as const, icon: '🔧', label: 'Avançado', sempreVisivel: false, requerPerfil: ['gestor', 'administrador'] },
     ];
-    
+
     // FASE 7: Filtrar menu - itens não permitidos ficam OCULTOS (não desabilitados)
     const menuConfiguracao = menuConfiguracaoBase.filter(item => {
       if (item.sempreVisivel) return true;
@@ -233,621 +66,6 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
       }
       return false;
     });
-
-    // Avatares disponíveis
-    const avataresPadrao = [
-      { id: 'operador', emoji: '👷', label: 'Operador' },
-      { id: 'supervisor', emoji: '👨‍💼', label: 'Supervisor' },
-      { id: 'maquinista', emoji: '🚂', label: 'Maquinista' },
-      { id: 'tecnico', emoji: '🔧', label: 'Técnico' },
-      { id: 'engenheiro', emoji: '👨‍🔬', label: 'Engenheiro' },
-      { id: 'neutro', emoji: '👤', label: 'Neutro' },
-    ];
-
-    // ==================== PERFIL DO USUÁRIO ====================
-    const renderPerfilUsuario = () => (
-      <>
-        {/* 1. Identificação Pessoal */}
-        <Card title="📋 Identificação Pessoal" styles={styles}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(250px, 100%), 1fr))', gap: '16px' }}>
-            <div>
-              <label style={styles.label}>Nome Completo</label>
-              <input
-                type="text"
-                style={{ ...styles.input, background: tema.backgroundSecundario }}
-                value={usuarioLogado?.nome || ''}
-                disabled
-                title="Campo não editável"
-              />
-              <span style={{ fontSize: '11px', color: tema.textoSecundario }}>🔒 Não editável</span>
-            </div>
-            <div>
-              <label style={styles.label}>Nome Social (opcional)</label>
-              <input
-                type="text"
-                style={styles.input}
-                placeholder="Como prefere ser chamado..."
-                value={config.perfilExtendido.nomeSocial}
-                onChange={(e) => atualizarPerfilExtendido('nomeSocial', e.target.value)}
-              />
-            </div>
-            <div>
-              <label style={styles.label}>Matrícula</label>
-              <input
-                type="text"
-                style={{ ...styles.input, background: tema.backgroundSecundario }}
-                value={usuarioLogado?.matricula || ''}
-                disabled
-                title="Campo não editável"
-              />
-              <span style={{ fontSize: '11px', color: tema.textoSecundario }}>🔒 Não editável</span>
-            </div>
-            <div>
-              <label style={styles.label}>Função / Cargo</label>
-              <input
-                type="text"
-                style={{ ...styles.input, background: tema.backgroundSecundario }}
-                value={FUNCOES_USUARIO.find(f => f.value === usuarioLogado?.funcao)?.label || usuarioLogado?.funcao || ''}
-                disabled
-                title="Campo não editável"
-              />
-              <span style={{ fontSize: '11px', color: tema.textoSecundario }}>🔒 Não editável</span>
-            </div>
-            <div>
-              <label style={styles.label}>Turno Cadastrado</label>
-              <input
-                type="text"
-                style={{ ...styles.input, background: tema.backgroundSecundario }}
-                value={usuarioLogado?.turno ? `Turno ${usuarioLogado.turno} (${usuarioLogado.horarioTurno === '07-19' ? '07:00-19:00' : '19:00-07:00'})` : 'Não definido'}
-                disabled
-                title="Campo não editável"
-              />
-              <span style={{ fontSize: '11px', color: tema.textoSecundario }}>🔒 Não editável</span>
-            </div>
-            <div>
-              <label style={styles.label}>Unidade / Local</label>
-              <input
-                type="text"
-                style={styles.input}
-                placeholder="Ex: Pátio do Fazendão"
-                value={config.perfilExtendido.unidade}
-                onChange={(e) => atualizarPerfilExtendido('unidade', e.target.value)}
-              />
-            </div>
-            <div>
-              <label style={styles.label}>Área / Setor</label>
-              <input
-                type="text"
-                style={styles.input}
-                placeholder="Ex: Operação Ferroviária"
-                value={config.perfilExtendido.area}
-                onChange={(e) => atualizarPerfilExtendido('area', e.target.value)}
-              />
-            </div>
-            <div>
-              <label style={styles.label}>E-mail Corporativo</label>
-              <input
-                type="email"
-                style={styles.input}
-                placeholder="seu.email@vale.com"
-                value={config.perfilExtendido.emailCorporativo}
-                onChange={(e) => atualizarPerfilExtendido('emailCorporativo', e.target.value)}
-              />
-            </div>
-            <div>
-              <label style={styles.label}>Telefone (opcional)</label>
-              <input
-                type="tel"
-                style={styles.input}
-                placeholder="(XX) XXXXX-XXXX"
-                value={config.perfilExtendido.telefone}
-                onChange={(e) => atualizarPerfilExtendido('telefone', e.target.value)}
-              />
-            </div>
-          </div>
-        </Card>
-
-        {/* 2. Foto e Avatar */}
-        <Card title={`📷 ${t('config.fotoAvatar')}`} styles={styles}>
-          <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', alignItems: 'flex-start' }}>
-            {/* Preview do Avatar */}
-            <div style={{ textAlign: 'center' }}>
-              <div
-                style={{
-                  width: '120px',
-                  height: '120px',
-                  borderRadius: '50%',
-                  background: `linear-gradient(135deg, ${tema.primaria} 0%, ${tema.primariaHover} 100%)`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '48px',
-                  margin: '0 auto 12px',
-                  border: `3px solid ${tema.cardBorda}`,
-                  boxShadow: tema.cardSombra,
-                  overflow: 'hidden',
-                }}
-              >
-                {savedAvatar
-                  ? <img src={savedAvatar} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                  : config.perfilExtendido.fotoUrl
-                    ? <img src={config.perfilExtendido.fotoUrl} alt="Foto" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                    : avataresPadrao.find(a => a.id === config.perfilExtendido.avatarPadrao)?.emoji || '👤'
-                }
-              </div>
-              <span style={{ fontSize: '12px', color: tema.textoSecundario }}>
-                {config.perfilExtendido.nomeSocial || usuarioLogado?.nome || 'Usuário'}
-              </span>
-            </div>
-
-            {/* Camera/Upload/Preview area */}
-            <div style={{ flex: 1, minWidth: '240px' }}>
-              {avatarMode === 'idle' && (
-                <>
-                  {/* Action buttons */}
-                  <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
-                    <button
-                      style={{ ...styles.button, padding: '10px 18px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', background: tema.primaria, color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}
-                      onClick={startCamera}
-                    >
-                      📷 {t('config.camera')}
-                    </button>
-                    <button
-                      style={{ ...styles.button, padding: '10px 18px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', background: tema.backgroundSecundario, color: tema.texto, border: `1px solid ${tema.cardBorda}`, borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      📁 {t('config.upload')}
-                    </button>
-                    {savedAvatar && (
-                      <button
-                        style={{ ...styles.button, padding: '10px 18px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', background: `${tema.perigo}15`, color: tema.perigo, border: `1px solid ${tema.perigo}40`, borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }}
-                        onClick={removeAvatar}
-                      >
-                        🗑️ {t('config.removerFoto')}
-                      </button>
-                    )}
-                  </div>
-                  <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileUpload} />
-
-                  {/* Avatar selection */}
-                  <label style={styles.label}>{t('config.escolhaAvatar')}</label>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
-                    {avataresPadrao.map((avatar) => (
-                      <button
-                        key={avatar.id}
-                        style={{
-                          width: '60px', height: '60px', borderRadius: '12px',
-                          border: `2px solid ${config.perfilExtendido.avatarPadrao === avatar.id && !savedAvatar ? tema.primaria : tema.cardBorda}`,
-                          background: config.perfilExtendido.avatarPadrao === avatar.id && !savedAvatar ? `${tema.primaria}20` : tema.backgroundSecundario,
-                          fontSize: '28px', cursor: 'pointer', display: 'flex', flexDirection: 'column',
-                          alignItems: 'center', justifyContent: 'center', gap: '2px', transition: 'all 0.2s ease',
-                        }}
-                        onClick={() => {
-                          atualizarPerfilExtendido('avatarPadrao', avatar.id);
-                          atualizarPerfilExtendido('fotoUrl', '');
-                          removeAvatar();
-                        }}
-                        title={avatar.label}
-                      >
-                        {avatar.emoji}
-                        <span style={{ fontSize: '8px', color: tema.textoSecundario }}>{avatar.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-
-              {avatarMode === 'camera' && (
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ width: '200px', height: '200px', borderRadius: '50%', overflow: 'hidden', margin: '0 auto 12px', border: `3px solid ${tema.primaria}` }}>
-                    <video ref={videoRef} autoPlay playsInline muted style={{ width: '200px', height: '200px', objectFit: 'cover' }} />
-                  </div>
-                  <canvas ref={canvasRef} style={{ display: 'none' }} />
-                  <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                    <button style={{ ...styles.button, padding: '10px 20px', background: tema.primaria, color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }} onClick={capturePhoto}>
-                      📸 {t('config.capturar')}
-                    </button>
-                    <button style={{ ...styles.button, padding: '10px 20px', background: tema.backgroundSecundario, color: tema.texto, border: `1px solid ${tema.cardBorda}`, borderRadius: '10px', cursor: 'pointer' }} onClick={cancelAvatar}>
-                      {t('common.cancelar')}
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {avatarMode === 'preview' && capturedImage && (
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ width: '200px', height: '200px', borderRadius: '50%', overflow: 'hidden', margin: '0 auto 12px', border: `3px solid ${tema.sucesso}` }}>
-                    <img src={capturedImage} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  </div>
-                  <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                    <button style={{ ...styles.button, padding: '10px 20px', background: tema.sucesso, color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 600 }} onClick={confirmAvatar}>
-                      ✅ {t('config.usarFoto')}
-                    </button>
-                    <button style={{ ...styles.button, padding: '10px 20px', background: tema.backgroundSecundario, color: tema.texto, border: `1px solid ${tema.cardBorda}`, borderRadius: '10px', cursor: 'pointer' }} onClick={cancelAvatar}>
-                      🔄 {t('config.novaCaptura')}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </Card>
-
-        {/* 3. Preferências Operacionais */}
-        <Card title="⚙️ Preferências Operacionais" styles={styles}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: '20px' }}>
-            <div>
-              <label style={styles.label}>Turno Preferencial</label>
-              <select
-                style={styles.select}
-                value={config.preferenciasOperacionais.turnoPreferencial}
-                onChange={(e) => atualizarPreferenciasOperacionais('turnoPreferencial', e.target.value)}
-              >
-                <option value="">Nenhuma preferência</option>
-                {TURNOS_LETRAS.map((t) => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label style={styles.label}>Idioma do Sistema</label>
-              <select
-                style={styles.select}
-                value={locale}
-                onChange={(e) => {
-                  const newLocale = e.target.value as Locale;
-                  atualizarPreferenciasOperacionais('idioma', newLocale);
-                  setIdioma(newLocale);
-                }}
-              >
-                <option value="pt-BR">Portugues (Brasil)</option>
-                <option value="en-US">English (US)</option>
-              </select>
-            </div>
-            <div>
-              <label style={styles.label}>Tamanho da Fonte</label>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                {[
-                  { value: 'pequeno' as const, label: 'A', size: '12px' },
-                  { value: 'medio' as const, label: 'A', size: '16px' },
-                  { value: 'grande' as const, label: 'A', size: '20px' },
-                ].map((opt) => (
-                  <button
-                    key={opt.value}
-                    style={{
-                      ...styles.button,
-                      flex: 1,
-                      fontSize: opt.size,
-                      fontWeight: 600,
-                      background: config.preferenciasOperacionais.tamanhoFonte === opt.value ? tema.primaria : tema.buttonInativo,
-                      color: config.preferenciasOperacionais.tamanhoFonte === opt.value ? '#fff' : tema.texto,
-                      border: `2px solid ${config.preferenciasOperacionais.tamanhoFonte === opt.value ? tema.primaria : tema.cardBorda}`,
-                    }}
-                    onClick={() => atualizarPreferenciasOperacionais('tamanhoFonte', opt.value)}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label style={styles.label}>Densidade da Interface</label>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                {[
-                  { value: 'compacta' as const, label: '▪️ Compacta' },
-                  { value: 'confortavel' as const, label: '▫️ Confortável' },
-                ].map((opt) => (
-                  <button
-                    key={opt.value}
-                    style={{
-                      ...styles.button,
-                      flex: 1,
-                      background: config.preferenciasOperacionais.densidadeInterface === opt.value ? tema.primaria : tema.buttonInativo,
-                      color: config.preferenciasOperacionais.densidadeInterface === opt.value ? '#fff' : tema.texto,
-                      border: `2px solid ${config.preferenciasOperacionais.densidadeInterface === opt.value ? tema.primaria : tema.cardBorda}`,
-                    }}
-                    onClick={() => atualizarPreferenciasOperacionais('densidadeInterface', opt.value)}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div style={{ gridColumn: 'span 2' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: tema.backgroundSecundario, borderRadius: '10px' }}>
-                <div>
-                  <div style={{ fontWeight: 600, color: tema.texto }}>Exibir Tooltips e Dicas</div>
-                  <div style={{ fontSize: '12px', color: tema.textoSecundario }}>Mostrar dicas ao passar o mouse sobre elementos</div>
-                </div>
-                <button
-                  style={{
-                    padding: '8px 20px',
-                    borderRadius: '20px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontWeight: 600,
-                    background: config.preferenciasOperacionais.exibirTooltips ? tema.sucesso : tema.buttonInativo,
-                    color: config.preferenciasOperacionais.exibirTooltips ? '#fff' : tema.texto,
-                  }}
-                  onClick={() => atualizarPreferenciasOperacionais('exibirTooltips', !config.preferenciasOperacionais.exibirTooltips)}
-                >
-                  {config.preferenciasOperacionais.exibirTooltips ? 'Ativo' : 'Inativo'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* 4. Preferências de Notificação */}
-        <Card title={`🔔 ${t('config.prefNotificacao')}`} styles={styles}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {[
-              { key: 'alertasCriticos' as const, label: t('config.alertasCriticos'), desc: t('config.alertasCriticosDesc'), icon: '🚨' },
-              { key: 'lembretesPassagem' as const, label: t('config.lembretesPassagem'), desc: t('config.lembretesPassagemDesc'), icon: '📋' },
-              { key: 'avisosDSS' as const, label: t('config.avisosDSS'), desc: t('config.avisosDSSDesc'), icon: '🛡️' },
-              { key: 'notificacoesAdamBoot' as const, label: t('config.notificacoesAdamBoot'), desc: t('config.notificacoesAdamBootDesc'), icon: '🤖' },
-            ].map((item) => (
-              <div
-                key={item.key}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '14px 16px',
-                  background: tema.backgroundSecundario,
-                  borderRadius: '10px',
-                  border: `1px solid ${tema.cardBorda}`,
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ fontSize: '20px' }}>{item.icon}</span>
-                  <div>
-                    <div style={{ fontWeight: 600, color: tema.texto }}>{item.label}</div>
-                    <div style={{ fontSize: '12px', color: tema.textoSecundario }}>{item.desc}</div>
-                  </div>
-                </div>
-                <button
-                  style={{
-                    padding: '8px 20px',
-                    borderRadius: '20px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontWeight: 600,
-                    background: config.preferenciasNotificacao[item.key] ? tema.sucesso : tema.buttonInativo,
-                    color: config.preferenciasNotificacao[item.key] ? '#fff' : tema.texto,
-                  }}
-                  onClick={async () => {
-                    const newValue = !config.preferenciasNotificacao[item.key];
-                    if (newValue && item.key === 'alertasCriticos') {
-                      if ('Notification' in window) {
-                        const perm = await Notification.requestPermission();
-                        if (perm !== 'granted') {
-                          return;
-                        }
-                      }
-                    }
-                    atualizarPreferenciasNotificacao(item.key, newValue);
-                    try { localStorage.setItem('efvm360-notificacoes', JSON.stringify({ ...config.preferenciasNotificacao, [item.key]: newValue })); } catch { /* ignore */ }
-                  }}
-                >
-                  {config.preferenciasNotificacao[item.key] ? t('common.ativo') : t('common.inativo')}
-                </button>
-              </div>
-            ))}
-          </div>
-          {!('Notification' in window) && (
-            <div style={{ marginTop: '12px', padding: '10px', background: `${tema.aviso}10`, borderRadius: '8px', border: `1px solid ${tema.aviso}30`, fontSize: '12px', color: tema.aviso }}>
-              Este navegador nao suporta notificacoes push.
-            </div>
-          )}
-        </Card>
-
-        {/* 5. Segurança e Sessão */}
-        <Card title="🔐 Segurança e Sessão" styles={styles}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: '16px', marginBottom: '20px' }}>
-            <div style={{ padding: '16px', background: tema.backgroundSecundario, borderRadius: '10px', border: `1px solid ${tema.cardBorda}` }}>
-              <div style={{ fontSize: '12px', color: tema.textoSecundario, marginBottom: '4px' }}>Último Login</div>
-              <div style={{ fontWeight: 600, color: tema.texto }}>
-                {config.perfilExtendido.ultimoLogin 
-                  ? new Date(config.perfilExtendido.ultimoLogin).toLocaleString('pt-BR')
-                  : 'Primeira sessão'
-                }
-              </div>
-            </div>
-            <div style={{ padding: '16px', background: tema.backgroundSecundario, borderRadius: '10px', border: `1px solid ${tema.cardBorda}` }}>
-              <div style={{ fontSize: '12px', color: tema.textoSecundario, marginBottom: '4px' }}>Sessão Atual</div>
-              <div style={{ fontWeight: 600, color: tema.sucesso }}>✅ Ativa</div>
-            </div>
-            <div style={{ padding: '16px', background: tema.backgroundSecundario, borderRadius: '10px', border: `1px solid ${tema.cardBorda}` }}>
-              <div style={{ fontSize: '12px', color: tema.textoSecundario, marginBottom: '4px' }}>Dispositivo</div>
-              <div style={{ fontWeight: 600, color: tema.texto }}>
-                {/Mobile|Android|iPhone/i.test(navigator.userAgent) ? '📱 Mobile' : '💻 Desktop'}
-              </div>
-            </div>
-          </div>
-
-          {!mostrarAlterarSenha ? (
-            <button
-              style={{ ...styles.button, ...styles.buttonSecondary, width: '100%' }}
-              onClick={() => setMostrarAlterarSenha(true)}
-            >
-              🔑 Alterar Senha
-            </button>
-          ) : (
-            <div style={{ padding: '20px', background: tema.backgroundSecundario, borderRadius: '12px', border: `1px solid ${tema.cardBorda}` }}>
-              <h4 style={{ color: tema.texto, marginBottom: '16px' }}>🔑 Alterar Senha</h4>
-              
-              {erroAlterarSenha && (
-                <div style={{ padding: '10px', background: `${tema.perigo}15`, border: `1px solid ${tema.perigo}40`, borderRadius: '8px', marginBottom: '12px', color: tema.perigo, fontSize: '13px' }}>
-                  ⚠️ {erroAlterarSenha}
-                </div>
-              )}
-              {sucessoAlterarSenha && (
-                <div style={{ padding: '10px', background: `${tema.sucesso}15`, border: `1px solid ${tema.sucesso}40`, borderRadius: '8px', marginBottom: '12px', color: tema.sucesso, fontSize: '13px' }}>
-                  ✅ Senha alterada com sucesso!
-                </div>
-              )}
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div>
-                  <label style={styles.label}>Senha Atual</label>
-                  <input type="password" style={styles.input} value={senhaAtual} onChange={(e) => setSenhaAtual(e.target.value)} placeholder="Digite sua senha atual" />
-                </div>
-                <div>
-                  <label style={styles.label}>Nova Senha</label>
-                  <input type="password" style={styles.input} value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} placeholder="Digite a nova senha" />
-                </div>
-                {/* Password requirements visual */}
-                {novaSenha && (
-                  <div style={{ padding: '10px 12px', background: tema.backgroundSecundario, borderRadius: '8px', border: `1px solid ${tema.cardBorda}` }}>
-                    <div style={{ fontSize: '10px', color: tema.textoSecundario, fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase' }}>Requisitos da senha:</div>
-                    {[
-                      { label: 'Mínimo 6 caracteres', ok: novaSenha.length >= 6 },
-                      { label: 'Contém letra maiúscula', ok: /[A-Z]/.test(novaSenha) },
-                      { label: 'Contém número', ok: /\d/.test(novaSenha) },
-                      { label: 'Senhas conferem', ok: novaSenha === confirmarNovaSenha && confirmarNovaSenha.length > 0 },
-                    ].map((req, i) => (
-                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: req.ok ? tema.sucesso : tema.textoSecundario, marginBottom: 3 }}>
-                        <span style={{ fontSize: '12px' }}>{req.ok ? '✅' : '⬜'}</span>
-                        {req.label}
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <div>
-                  <label style={styles.label}>Confirmar Nova Senha</label>
-                  <input type="password" style={styles.input} value={confirmarNovaSenha} onChange={(e) => setConfirmarNovaSenha(e.target.value)} placeholder="Confirme a nova senha" />
-                </div>
-                <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                  <button style={{ ...styles.button, ...styles.buttonSecondary, flex: 1 }} onClick={() => { setMostrarAlterarSenha(false); setSenhaAtual(''); setNovaSenha(''); setConfirmarNovaSenha(''); setErroAlterarSenha(''); }}>
-                    Cancelar
-                  </button>
-                  <button style={{ ...styles.button, ...styles.buttonPrimary, flex: 1, opacity: senhaValida ? 1 : 0.5, cursor: senhaValida ? 'pointer' : 'not-allowed' }} onClick={handleAlterarSenha} disabled={!senhaValida}>
-                    {t('config.confirmarAlteracao')}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </Card>
-
-        {/* 6. Acessos e Permissões - FASE 7: Baseado no perfil de permissão */}
-        <Card title="🔓 Acessos e Permissões" styles={styles}>
-          <div style={{ padding: '16px', background: `${tema.info}10`, borderRadius: '10px', border: `1px solid ${tema.info}30`, marginBottom: '16px' }}>
-            <span style={{ color: tema.info, fontSize: '13px' }}>
-              ℹ️ As permissões são definidas pela sua função no sistema ({perfil ? perfil.charAt(0).toUpperCase() + perfil.slice(1) : 'Carregando...'}) e não podem ser alteradas.
-            </span>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(180px, 100%), 1fr))', gap: '12px' }}>
-            {[
-              { label: 'Passagem de Serviço', allowed: podeVisualizar('passagem') },
-              { label: 'DSS', allowed: podeVisualizar('dss') },
-              { label: 'Dashboard BI+', allowed: podeVisualizar('bi') },
-              { label: 'Histórico', allowed: podeVisualizar('historico') },
-              { label: 'Configurações', allowed: podeVisualizar('configuracoes') },
-              { label: 'Exportar Relatórios', allowed: podeExportar('passagem') },
-              { label: 'Auditoria', allowed: podeVisualizar('auditoria') },
-              { label: 'Administração', allowed: podeVisualizar('usuarios') },
-            ].map((perm, idx) => (
-              <div
-                key={idx}
-                style={{
-                  padding: '12px',
-                  background: tema.backgroundSecundario,
-                  borderRadius: '8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  border: `1px solid ${tema.cardBorda}`,
-                }}
-              >
-                <span style={{ color: perm.allowed ? tema.sucesso : tema.perigo }}>{perm.allowed ? '✅' : '🔒'}</span>
-                <span style={{ color: tema.texto, fontSize: '13px' }}>{perm.label}</span>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* 7. Histórico Pessoal */}
-        <Card title="📊 Histórico Pessoal (Resumo)" styles={styles}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(150px, 100%), 1fr))', gap: '16px' }}>
-            <div style={{ padding: '20px', background: `${tema.primaria}15`, borderRadius: '12px', textAlign: 'center', border: `1px solid ${tema.primaria}30` }}>
-              <div style={{ fontSize: '32px', fontWeight: 700, color: tema.primaria }}>{historicoTurnos.filter((h: { assinaturas: { sai: { matricula: string }; entra: { matricula: string } } }) => h.assinaturas.sai.matricula === usuarioLogado?.matricula || h.assinaturas.entra.matricula === usuarioLogado?.matricula).length}</div>
-              <div style={{ fontSize: '12px', color: tema.textoSecundario }}>Passagens de Serviço</div>
-            </div>
-            <div style={{ padding: '20px', background: `${tema.info}15`, borderRadius: '12px', textAlign: 'center', border: `1px solid ${tema.info}30` }}>
-              <div style={{ fontSize: '32px', fontWeight: 700, color: tema.info }}>{historicoDSS?.length || 0}</div>
-              <div style={{ fontSize: '12px', color: tema.textoSecundario }}>DSS Realizados</div>
-            </div>
-            <div style={{ padding: '20px', background: `${tema.sucesso}15`, borderRadius: '12px', textAlign: 'center', border: `1px solid ${tema.sucesso}30` }}>
-              <div style={{ fontSize: '14px', fontWeight: 600, color: tema.sucesso }}>
-                {historicoTurnos[0]?.timestamp 
-                  ? new Date(historicoTurnos[0].timestamp).toLocaleDateString('pt-BR')
-                  : 'Nenhuma'
-                }
-              </div>
-              <div style={{ fontSize: '12px', color: tema.textoSecundario }}>Última Atividade</div>
-            </div>
-          </div>
-        </Card>
-
-        {/* 8. Intensificação Pessoal */}
-        <Card title={`🎯 ${t('config.intensificacao')}`} styles={styles}>
-          <div style={{ fontSize: '12px', color: tema.textoSecundario, marginBottom: '12px' }}>
-            {t('config.intensificacaoDesc')}
-          </div>
-          <textarea
-            style={{
-              ...styles.input,
-              minHeight: '120px',
-              resize: 'vertical',
-              fontFamily: 'inherit',
-              lineHeight: 1.6,
-            }}
-            maxLength={500}
-            placeholder={t('config.intensificacaoPlaceholder')}
-            value={intensificacao}
-            onChange={(e) => {
-              setIntensificacao(e.target.value);
-              setIntensificacaoSalva(false);
-            }}
-          />
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
-            <span style={{ fontSize: '11px', color: tema.textoSecundario }}>
-              {intensificacao.length}/500 {t('config.caracteres')}
-            </span>
-            {ultimaAtualizacao && (
-              <span style={{ fontSize: '11px', color: tema.textoSecundario }}>
-                {t('config.ultimaAtualizacao')}: {new Date(ultimaAtualizacao).toLocaleString(locale === 'en-US' ? 'en-US' : 'pt-BR')}
-              </span>
-            )}
-          </div>
-          <div style={{ display: 'flex', gap: '12px', marginTop: '12px', alignItems: 'center' }}>
-            <button
-              style={{
-                ...styles.button,
-                padding: '10px 24px',
-                background: intensificacaoSalva ? tema.sucesso : tema.primaria,
-                color: '#fff',
-                border: 'none',
-                borderRadius: '10px',
-                cursor: 'pointer',
-                fontWeight: 600,
-                transition: 'all 150ms ease',
-              }}
-              onClick={() => {
-                const now = new Date().toISOString();
-                localStorage.setItem(intensificacaoKey, JSON.stringify({ texto: intensificacao, timestamp: now }));
-                setUltimaAtualizacao(now);
-                setIntensificacaoSalva(true);
-              }}
-            >
-              {intensificacaoSalva ? `✅ ${t('config.intensificacaoSalva')}` : `💾 ${t('common.salvar')}`}
-            </button>
-          </div>
-        </Card>
-      </>
-    );
 
     // ==================== APARÊNCIA ====================
     const renderAparencia = () => (
@@ -1383,41 +601,6 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
           </div>
         </Card>
 
-        {/* Daltonism Mode */}
-        <Card title="🎨 Modo Daltonismo" styles={styles}>
-          <div style={{ fontSize: '12px', color: tema.textoSecundario, marginBottom: '14px' }}>
-            Adapta as cores do sistema para pessoas com deficiência na percepção de cores.
-          </div>
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-            {[
-              { value: 'nenhum', label: 'Padrão', desc: 'Cores normais', preview: ['#dc2626','#16a34a','#d9a010'] },
-              { value: 'protanopia', label: 'Protanopia', desc: 'Dificuldade com vermelho', preview: ['#b0b000','#0070b0','#d9a010'] },
-              { value: 'deuteranopia', label: 'Deuteranopia', desc: 'Dificuldade com verde', preview: ['#dc2626','#0070b0','#d9a010'] },
-              { value: 'tritanopia', label: 'Tritanopia', desc: 'Dificuldade com azul', preview: ['#dc2626','#16a34a','#b000b0'] },
-            ].map(opt => {
-              const prefAcc = config.preferenciasAcessibilidade as unknown as Record<string, unknown>;
-              const active = prefAcc.daltonismo === opt.value ||
-                (!(prefAcc.daltonismo) && opt.value === 'nenhum');
-              return (
-                <button key={opt.value} style={{
-                  flex: 1, minWidth: 120, padding: '14px', borderRadius: 10, cursor: 'pointer',
-                  border: `2px solid ${active ? tema.primaria : tema.cardBorda}`,
-                  background: active ? `${tema.primaria}12` : tema.backgroundSecundario,
-                  textAlign: 'center', transition: 'all 150ms ease',
-                }} onClick={() => atualizarPreferenciasAcessibilidade('daltonismo', opt.value as unknown as boolean)}>
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: 4, marginBottom: 6 }}>
-                    {opt.preview.map((c, i) => (
-                      <div key={i} style={{ width: 16, height: 16, borderRadius: 4, background: c }} />
-                    ))}
-                  </div>
-                  <div style={{ fontWeight: 600, color: active ? tema.primaria : tema.texto, fontSize: 12 }}>{opt.label}</div>
-                  <div style={{ fontSize: 10, color: tema.textoSecundario }}>{opt.desc}</div>
-                </button>
-              );
-            })}
-          </div>
-        </Card>
-
         {/* Device Info */}
         <Card title="📱 Informações do Dispositivo" styles={styles}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(180px, 100%), 1fr))', gap: 12 }}>
@@ -1822,6 +1005,102 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
     );
 
     // ==================== AVANÇADO ====================
+    // ── Import state ──
+    const importFileRef = useRef<HTMLInputElement>(null);
+    const [importPreview, setImportPreview] = useState<{ keys: string[]; totalKeys: number } | null>(null);
+    const [importData, setImportData] = useState<Record<string, string> | null>(null);
+    const [importErro, setImportErro] = useState('');
+    const [importSucesso, setImportSucesso] = useState(false);
+
+    const handleImportFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      setImportErro(''); setImportSucesso(false); setImportPreview(null);
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result as string);
+          if (!parsed || typeof parsed !== 'object') throw new Error('Formato inválido');
+          // Validate: must have efvm360-related keys or known structure
+          const keys = Object.keys(parsed);
+          if (keys.length === 0) throw new Error('Arquivo vazio');
+          setImportPreview({ keys, totalKeys: keys.length });
+          setImportData(parsed);
+        } catch (err) {
+          setImportErro(`Erro ao ler arquivo: ${err instanceof Error ? err.message : 'formato inválido'}`);
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    }, []);
+
+    const confirmarImport = useCallback(() => {
+      if (!importData) return;
+      try {
+        for (const [key, value] of Object.entries(importData)) {
+          if (typeof value === 'string') {
+            localStorage.setItem(key, value);
+          } else {
+            localStorage.setItem(key, JSON.stringify(value));
+          }
+        }
+        setImportSucesso(true); setImportPreview(null); setImportData(null);
+        registrarAuditoria('IMPORT_BACKUP', 'avancado', `${Object.keys(importData).length} chaves importadas`);
+        setTimeout(() => window.location.reload(), 1500);
+      } catch {
+        setImportErro('Erro ao aplicar importação');
+      }
+    }, [importData, registrarAuditoria]);
+
+    const exportarJSON = useCallback(() => {
+      const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = `efvm360_config_${new Date().toISOString().split('T')[0]}.json`; a.click();
+      URL.revokeObjectURL(a.href);
+    }, [config]);
+
+    const exportarCSV = useCallback(() => {
+      const rows: string[] = ['tipo,data,turno,patio,matricula'];
+      for (const h of historicoTurnos) {
+        rows.push(`passagem,${h.timestamp || ''},${h.turno || ''},${h.patio || ''},${h.assinaturas?.sai?.matricula || ''}`);
+      }
+      for (const d of historicoDSS) {
+        rows.push(`dss,${d.data || ''},${d.turno || ''},,`);
+      }
+      const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = `efvm360_dados_${new Date().toISOString().split('T')[0]}.csv`; a.click();
+      URL.revokeObjectURL(a.href);
+    }, [historicoTurnos, historicoDSS]);
+
+    const exportarBackupCompleto = useCallback(() => {
+      const backup: Record<string, string> = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('efvm360')) {
+          backup[key] = localStorage.getItem(key) || '';
+        }
+      }
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = `efvm360_backup_completo_${new Date().toISOString().split('T')[0]}.json`; a.click();
+      URL.revokeObjectURL(a.href);
+      registrarAuditoria('EXPORT_BACKUP', 'avancado', `${Object.keys(backup).length} chaves exportadas`);
+    }, [registrarAuditoria]);
+
+    const exportarAuditCSV = useCallback(() => {
+      const trail = exportarAuditTrail();
+      const entries = Array.isArray(trail) ? trail : [];
+      const rows = ['timestamp,tipo,modulo,descricao'];
+      for (const e of entries) {
+        rows.push(`${e.timestamp || ''},${e.tipo || ''},${e.modulo || ''},"${(e.descricao || '').replace(/"/g, '""')}"`);
+      }
+      const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = `efvm360_audit_${new Date().toISOString().split('T')[0]}.csv`; a.click();
+      URL.revokeObjectURL(a.href);
+    }, [exportarAuditTrail]);
+
     const renderAvancado = () => (
       <>
         <Card title="🔧 Configurações Avançadas" styles={styles}>
@@ -1844,24 +1123,6 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
             <button
               style={{ ...styles.button, ...styles.buttonSecondary, width: '100%', justifyContent: 'flex-start', gap: '12px' }}
               onClick={() => {
-                const dados = {
-                  config: localStorage.getItem(STORAGE_KEYS.CONFIG),
-                  usuario: localStorage.getItem(STORAGE_KEYS.USUARIO),
-                };
-                const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `vfz_backup_${new Date().toISOString().split('T')[0]}.json`;
-                a.click();
-              }}
-            >
-              💾 Exportar Configurações
-            </button>
-            <button
-              style={{ ...styles.button, ...styles.buttonSecondary, width: '100%', justifyContent: 'flex-start', gap: '12px' }}
-              onClick={() => {
-                // Modo debug seguro — apenas metadados, sem dados sensíveis
                 const info = {
                   versao: '3.2',
                   tema: config.tema,
@@ -1877,22 +1138,78 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
             >
               🐛 Modo Debug (Console)
             </button>
-            <button
-              style={{ ...styles.button, ...styles.buttonSecondary, width: '100%', justifyContent: 'flex-start', gap: '12px' }}
-              onClick={() => {
-                const trail = exportarAuditTrail();
-                const blob = new Blob([trail], { type: 'application/json' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `vfz_audit_trail_${new Date().toISOString().split('T')[0]}.json`;
-                link.click();
-                URL.revokeObjectURL(link.href);
-                registrarAuditoria('PASSAGEM_EXPORTADA', 'audit-trail', `Eventos: ${totalEventosAudit}`);
-              }}
-            >
-              🛡️ Exportar Audit Trail ({totalEventosAudit} eventos)
+          </div>
+        </Card>
+
+        {/* Enterprise Export */}
+        <Card title="📤 Exportar Dados" styles={styles}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: 12 }}>
+            <button style={{ ...styles.button, ...styles.buttonSecondary, padding: '14px', flexDirection: 'column', gap: 6, textAlign: 'center' }} onClick={exportarJSON}>
+              <span style={{ fontSize: 20 }}>📋</span>
+              <span style={{ fontWeight: 600, fontSize: 13 }}>JSON Configurações</span>
+              <span style={{ fontSize: 11, color: tema.textoSecundario }}>Exporta objeto config</span>
+            </button>
+            <button style={{ ...styles.button, ...styles.buttonSecondary, padding: '14px', flexDirection: 'column', gap: 6, textAlign: 'center' }} onClick={exportarCSV}>
+              <span style={{ fontSize: 20 }}>📊</span>
+              <span style={{ fontWeight: 600, fontSize: 13 }}>CSV Dados Operacionais</span>
+              <span style={{ fontSize: 11, color: tema.textoSecundario }}>{historicoTurnos.length} passagens + {historicoDSS.length} DSS</span>
+            </button>
+            <button style={{ ...styles.button, ...styles.buttonSecondary, padding: '14px', flexDirection: 'column', gap: 6, textAlign: 'center' }} onClick={exportarBackupCompleto}>
+              <span style={{ fontSize: 20 }}>💾</span>
+              <span style={{ fontWeight: 600, fontSize: 13 }}>Backup Completo</span>
+              <span style={{ fontSize: 11, color: tema.textoSecundario }}>Todas as chaves efvm360-*</span>
+            </button>
+            <button style={{ ...styles.button, ...styles.buttonSecondary, padding: '14px', flexDirection: 'column', gap: 6, textAlign: 'center' }} onClick={exportarAuditCSV}>
+              <span style={{ fontSize: 20 }}>🛡️</span>
+              <span style={{ fontWeight: 600, fontSize: 13 }}>Audit Trail CSV</span>
+              <span style={{ fontSize: 11, color: tema.textoSecundario }}>{totalEventosAudit} eventos</span>
             </button>
           </div>
+        </Card>
+
+        {/* Enterprise Import */}
+        <Card title="📥 Importar Backup" styles={styles}>
+          <div style={{ padding: 14, background: `${tema.aviso}08`, borderRadius: 10, border: `1px solid ${tema.aviso}20`, marginBottom: 16, fontSize: 12, color: tema.aviso }}>
+            ⚠️ A importação sobrescreve os dados existentes. Faça um backup antes de importar.
+          </div>
+          <input ref={importFileRef} type="file" accept=".json" style={{ display: 'none' }} onChange={handleImportFile} />
+          <button style={{ ...styles.button, ...styles.buttonSecondary, width: '100%', gap: 8 }} onClick={() => importFileRef.current?.click()}>
+            📁 Selecionar arquivo .json para importar
+          </button>
+
+          {importErro && (
+            <div style={{ marginTop: 12, padding: 10, background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: 8, fontSize: 12, color: '#dc2626' }}>
+              {importErro}
+            </div>
+          )}
+
+          {importSucesso && (
+            <div style={{ marginTop: 12, padding: 10, background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 8, fontSize: 12, color: '#16a34a' }}>
+              ✅ Importação realizada com sucesso! Recarregando...
+            </div>
+          )}
+
+          {importPreview && (
+            <div style={{ marginTop: 12, padding: 14, background: tema.backgroundSecundario, borderRadius: 10, border: `1px solid ${tema.cardBorda}` }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: tema.texto, marginBottom: 8 }}>Pré-visualização da importação</div>
+              <div style={{ fontSize: 12, color: tema.textoSecundario, marginBottom: 8 }}>
+                {importPreview.totalKeys} chave{importPreview.totalKeys !== 1 ? 's' : ''} encontrada{importPreview.totalKeys !== 1 ? 's' : ''}:
+              </div>
+              <div style={{ maxHeight: 120, overflowY: 'auto', marginBottom: 12, padding: 8, background: tema.card, borderRadius: 6, border: `1px solid ${tema.cardBorda}` }}>
+                {importPreview.keys.map((k, i) => (
+                  <div key={i} style={{ fontSize: 11, fontFamily: 'monospace', color: tema.textoSecundario, padding: '2px 0' }}>{k}</div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button style={{ ...styles.buttonPrimary, padding: '8px 20px', fontSize: 12, borderRadius: 8, cursor: 'pointer' }} onClick={confirmarImport}>
+                  Confirmar Importação
+                </button>
+                <button style={{ ...styles.buttonSecondary, padding: '8px 20px', fontSize: 12, borderRadius: 8, cursor: 'pointer' }} onClick={() => { setImportPreview(null); setImportData(null); }}>
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
         </Card>
       </>
     );
@@ -1950,7 +1267,6 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
 
           {/* Conteúdo */}
           <div style={{ flex: 1, minWidth: '300px' }}>
-            {secaoConfigAtiva === 'perfil' && renderPerfilUsuario()}
             {secaoConfigAtiva === 'aparencia' && renderAparencia()}
             {secaoConfigAtiva === 'acessibilidade' && renderAcessibilidade()}
             {secaoConfigAtiva === 'adamboot' && renderAdamBoot()}

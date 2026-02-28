@@ -210,7 +210,7 @@ export default function App(): JSX.Element {
   }, [navigate]);
 
   // ── Page-local state ─────────────────────────────────────────────────
-  const [secaoConfigAtiva, setSecaoConfigAtiva] = useState<'perfil' | 'aparencia' | 'acessibilidade' | 'adamboot' | 'geral' | 'manual' | 'sobre' | 'avancado' | 'patios'>('perfil');
+  const [secaoConfigAtiva, setSecaoConfigAtiva] = useState<'aparencia' | 'acessibilidade' | 'adamboot' | 'geral' | 'manual' | 'sobre' | 'avancado' | 'patios'>('aparencia');
   const [secaoHistoricoAtiva, setSecaoHistoricoAtiva] = useState<'resumo' | 'atividades' | 'dss-temas' | 'rankings'>('resumo');
   const [filtroTemaHistorico, setFiltroTemaHistorico] = useState<string>('todos');
   const [filtroPeriodoHistorico, setFiltroPeriodoHistorico] = useState<'7dias' | '30dias' | '90dias' | 'todos'>('30dias');
@@ -563,7 +563,15 @@ export default function App(): JSX.Element {
             <Route path={ROUTES.PERFIL} element={
               <ModuleErrorBoundary module="perfil">
                 <PaginaPerfil tema={tema} styles={styles} config={config}
-                  usuarioLogado={usuarioLogado} />
+                  usuarioLogado={usuarioLogado}
+                  atualizarPerfilExtendido={atualizarPerfilExtendido as (campo: string, valor: string) => void}
+                  atualizarPreferenciasOperacionais={atualizarPreferenciasOperacionais as (campo: string, valor: unknown) => void}
+                  mostrarAlterarSenha={handlers.mostrarAlterarSenha} setMostrarAlterarSenha={handlers.setMostrarAlterarSenha}
+                  senhaAtual={handlers.senhaAtual} setSenhaAtual={handlers.setSenhaAtual}
+                  novaSenha={handlers.novaSenha} setNovaSenha={handlers.setNovaSenha}
+                  confirmarNovaSenha={handlers.confirmarNovaSenha} setConfirmarNovaSenha={handlers.setConfirmarNovaSenha}
+                  erroAlterarSenha={handlers.erroAlterarSenha} setErroAlterarSenha={handlers.setErroAlterarSenha}
+                  sucessoAlterarSenha={handlers.sucessoAlterarSenha} setSucessoAlterarSenha={handlers.setSucessoAlterarSenha} />
               </ModuleErrorBoundary>
             } />
 
@@ -632,6 +640,8 @@ export default function App(): JSX.Element {
         isListening={adamBoot.isListening}
         onStartVoice={adamBoot.startVoice}
         onStopVoice={adamBoot.stopVoice}
+        paginaAtual={adamBoot.paginaAtual}
+        completudePassagem={adamBoot.completudePassagem}
       />
     </div>
   );

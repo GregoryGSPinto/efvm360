@@ -144,7 +144,6 @@ export const LoginScreenPremium = memo<Props>(({
                   { mat: 'VFZ2001', role: 'Inspetor', pwd: '123456' },
                   { mat: 'VFZ3001', role: 'Gestor', pwd: '123456' },
                   { mat: 'ADM9001', role: 'Admin', pwd: '123456' },
-                  { mat: 'SUP0001', role: 'Suporte', pwd: 'suporte360' },
                 ].map(c => (
                   <button key={c.mat} type="button" style={{
                     padding:'6px 10px', borderRadius:6, border:`1px solid ${dk?'#333':'#e0e0e0'}`,
@@ -162,7 +161,6 @@ export const LoginScreenPremium = memo<Props>(({
               </div>
               <div style={{ fontSize:10, color:txt2, marginTop:8, textAlign:'center' }}>
                 {t('login.senhaPadrao')}: <span style={{ fontWeight:700, color:'#007e7a', fontFamily:'monospace' }}>123456</span>
-                <span style={{ opacity:0.5 }}> | SUP: </span><span style={{ fontWeight:700, color:'#007e7a', fontFamily:'monospace' }}>suporte360</span>
               </div>
             </div>
 
@@ -182,7 +180,7 @@ export const LoginScreenPremium = memo<Props>(({
             </div>
 
             <div style={{ fontSize:10, color:txt2, textAlign:'center', padding:16 }}>
-              © 2025 Vale S.A. — Todos os direitos reservados
+              © 2026 Gregory Guimaraes — Todos os direitos reservados
             </div>
           </>) : (<>
             <div style={{marginBottom:16}}>

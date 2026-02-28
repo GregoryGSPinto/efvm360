@@ -23,36 +23,6 @@ const SCOPED_CSS = `
 .efvm-pulse-dot {
   animation: efvm-pulse 1.4s ease-in-out infinite;
 }
-@keyframes efvm-marquee {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
-}
-.efvm-demo-banner {
-  position: sticky;
-  top: 0;
-  z-index: 500;
-  background: linear-gradient(90deg, #E53935 0%, #FFCC00 50%, #E53935 100%);
-  background-size: 200% 100%;
-  animation: efvm-banner-bg 6s ease-in-out infinite;
-  overflow: hidden;
-  padding: 8px 0;
-  margin: -24px -24px 20px -24px;
-  box-shadow: 0 2px 8px rgba(229,57,53,0.3);
-}
-@keyframes efvm-banner-bg {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-.efvm-demo-banner-text {
-  display: inline-block;
-  white-space: nowrap;
-  animation: efvm-marquee 15s linear infinite;
-  color: #fff;
-  font-weight: 700;
-  font-size: 14px;
-  letter-spacing: 1px;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-}
 .efvm-dash-grid-stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -181,12 +151,6 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
     <>
       <style>{SCOPED_CSS}</style>
 
-      {/* ── DEMO BANNER: Animated Marquee ──────────────────────────────── */}
-      <div className="efvm-demo-banner">
-        <div className="efvm-demo-banner-text">
-          &#x26A0;&#xFE0F; Software em Modo Demo &mdash; Ambiente de Demonstracao &nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp; &#x26A0;&#xFE0F; Software em Modo Demo &mdash; Ambiente de Demonstracao &nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp; &#x26A0;&#xFE0F; Software em Modo Demo &mdash; Ambiente de Demonstracao
-        </div>
-      </div>
 
       {/* ── HEADER: Greeting ──────────────────────────────────────────── */}
       <div

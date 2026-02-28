@@ -19,7 +19,7 @@ interface RiskNarrativeResponse {
   nivel: 'alto' | 'medio' | 'baixo';
 }
 
-interface RiskFactor {
+export interface RiskFactor {
   label: string;
   pontos: number;
   descricao: string;
@@ -35,7 +35,7 @@ function SparkleIcon({ size = 14, color = '#69be28' }: { size?: number; color?: 
 
 // ── Deterministic Risk Calculation ──────────────────────────────────────
 
-function calcularRisco(dados: DadosFormulario): { score: number; fatores: RiskFactor[] } {
+export function calcularRisco(dados: DadosFormulario): { score: number; fatores: RiskFactor[] } {
   const fatores: RiskFactor[] = [];
   let score = 0;
 

@@ -600,6 +600,13 @@ export interface HistoricoDSS extends DadosDSS {
 // INTERFACES DE GERENCIAMENTO DE PÁTIOS
 // ============================================================================
 
+export interface LinhaPatioInfo {
+  nome: string;
+  status: 'livre' | 'ocupada' | 'interditada';
+  comprimento: number;
+  capacidade: number;
+}
+
 export interface PatioInfo {
   codigo: string;
   nome: string;
@@ -608,6 +615,7 @@ export interface PatioInfo {
   criadoEm: string;
   atualizadoEm?: string;
   criadoPor?: string;
+  linhas?: LinhaPatioInfo[];
 }
 
 // Re-exportar tipos do dashboard

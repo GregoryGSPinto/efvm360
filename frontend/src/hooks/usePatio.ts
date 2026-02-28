@@ -4,7 +4,7 @@
 // ============================================================================
 
 import { useState, useCallback, useMemo } from 'react';
-import type { PatioInfo } from '../types';
+import type { PatioInfo, LinhaPatioInfo } from '../types';
 import { STORAGE_KEYS, PATIOS_PADRAO } from '../utils/constants';
 
 // ── Helpers ─────────────────────────────────────────────────────────────
@@ -120,6 +120,44 @@ export function usePatio() {
     return p?.nome || codigo;
   }, [patios]);
 
+  const adicionarLinha = useCallback((codigoPatio: string, linha: LinhaPatioInfo): { ok: boolean; erro?: string } => {
+    const atuais = carregarPatios();
+    const idx = atuais.findIndex(p => p.codigo === codigoPatio);
+    if (idx === -1) return { ok: false, erro: 'Pátio não encontrado' };
+    const linhas = atuais[idx].linhas || [];
+    if (linhas.some(l => l.nome === linha.nome)) return { ok: false, erro: 'Linha já existe neste pátio' };
+    atuais[idx] = { ...atuais[idx], linhas: [...linhas, linha], atualizadoEm: new Date().toISOString() };
+    persistirPatios(atuais);
+    setPatios(atuais);
+    return { ok: true };
+  }, []);
+
+  const editarLinha = useCallback((codigoPatio: string, indexLinha: number, dados: Partial<LinhaPatioInfo>): { ok: boolean } => {
+    const atuais = carregarPatios();
+    const idx = atuais.findIndex(p => p.codigo === codigoPatio);
+    if (idx === -1) return { ok: false };
+    const linhas = [...(atuais[idx].linhas || [])];
+    if (indexLinha < 0 || indexLinha >= linhas.length) return { ok: false };
+    linhas[indexLinha] = { ...linhas[indexLinha], ...dados };
+    atuais[idx] = { ...atuais[idx], linhas, atualizadoEm: new Date().toISOString() };
+    persistirPatios(atuais);
+    setPatios(atuais);
+    return { ok: true };
+  }, []);
+
+  const removerLinha = useCallback((codigoPatio: string, indexLinha: number): { ok: boolean } => {
+    const atuais = carregarPatios();
+    const idx = atuais.findIndex(p => p.codigo === codigoPatio);
+    if (idx === -1) return { ok: false };
+    const linhas = [...(atuais[idx].linhas || [])];
+    if (indexLinha < 0 || indexLinha >= linhas.length) return { ok: false };
+    linhas.splice(indexLinha, 1);
+    atuais[idx] = { ...atuais[idx], linhas, atualizadoEm: new Date().toISOString() };
+    persistirPatios(atuais);
+    setPatios(atuais);
+    return { ok: true };
+  }, []);
+
   return {
     patios,
     patiosAtivos,
@@ -128,5 +166,8 @@ export function usePatio() {
     desativarPatio,
     ativarPatio,
     getPatioNome,
+    adicionarLinha,
+    editarLinha,
+    removerLinha,
   };
 }
