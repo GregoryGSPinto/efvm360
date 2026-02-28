@@ -375,6 +375,16 @@ export default function App(): JSX.Element {
       {/* Skip to content (a11y) */}
       <a href="#efvm360-main" className="efvm360-skip-link">Pular para conteúdo</a>
 
+      {/* Demo Banner */}
+      <div style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 10000,
+        background: '#d9a010', color: '#fff', textAlign: 'center',
+        fontSize: 11, fontWeight: 700, letterSpacing: 1.5, padding: '4px 0',
+        textTransform: 'uppercase',
+      }}>
+        VERSAO DEMONSTRACAO — Dados fictícios para validacao
+      </div>
+
       {/* Toast Notification */}
       {toastMsg && (
         <div role="alert" aria-live="assertive" style={{
@@ -436,7 +446,7 @@ export default function App(): JSX.Element {
         overflowY: 'auto',
         maxWidth: 1400,
         width: '100%',
-        margin: '56px auto 0',
+        margin: '79px auto 0',
         boxSizing: 'border-box',
       }}>
 

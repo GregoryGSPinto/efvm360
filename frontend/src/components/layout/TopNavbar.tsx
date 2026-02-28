@@ -102,7 +102,7 @@ export const TopNavbar = memo<TopNavbarProps>(({
 
   return (
     <header className="efvm360-topnav" role="navigation" aria-label="Navegação principal" style={{
-      position: 'fixed', top: 0, left: 0, right: 0, height: 56,
+      position: 'fixed', top: 23, left: 0, right: 0, height: 56,
       background: bg, borderBottom: `1px solid ${bd}`,
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: '0 24px', zIndex: 1000,

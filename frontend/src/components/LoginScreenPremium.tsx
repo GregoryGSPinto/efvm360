@@ -11,7 +11,7 @@ interface Props {
 }
 
 export const LoginScreenPremium = memo<Props>(({
-  loginForm, loginErro, onFormChange, onLogin, onCadastro, onToggleTema, tema: _tema, config,
+  loginForm, loginErro, onFormChange, onLogin, onCadastro, tema: _tema, config,
 }) => {
   const { t } = useI18n();
   const [show, setShow] = useState(false);
@@ -63,6 +63,16 @@ export const LoginScreenPremium = memo<Props>(({
         @keyframes efvmPulse{0%,100%{opacity:1}50%{opacity:.5}}
         input::placeholder{color:${txt2}}
       `}</style>
+
+      {/* Demo Banner */}
+      <div style={{
+        position:'absolute', top:0, left:0, right:0, zIndex:10,
+        background:'#d9a010', color:'#fff', textAlign:'center',
+        fontSize:11, fontWeight:700, letterSpacing:1.5, padding:'4px 0',
+        textTransform:'uppercase',
+      }}>
+        VERSAO DEMONSTRACAO — Dados fictícios para validacao
+      </div>
 
       <div style={{
         width:400, maxWidth:'90%', background:cardBg, borderRadius:16,
@@ -170,6 +180,10 @@ export const LoginScreenPremium = memo<Props>(({
               marginTop:20, paddingTop:16, borderTop:`1px solid ${bd}`, fontSize:11, color:txt2 }}>
               {t('login.acessoSeguro')}
             </div>
+
+            <div style={{ fontSize:10, color:txt2, textAlign:'center', padding:16 }}>
+              © 2025 Vale S.A. — Todos os direitos reservados
+            </div>
           </>) : (<>
             <div style={{marginBottom:16}}>
               <span style={{cursor:'pointer',fontSize:13,color:txt2}}
@@ -205,13 +219,6 @@ export const LoginScreenPremium = memo<Props>(({
             boxShadow:'0 0 6px #69be28', animation:'efvmPulse 2s infinite' }} />
           {t('common.sistemaOnline')}
         </div>
-        <button onClick={onToggleTema} style={{
-          display:'flex', alignItems:'center', gap:6, padding:'6px 10px', borderRadius:8,
-          background:dk?'#2a2a2a':'#e8e8e8', border:`1px solid ${bd}`,
-          cursor:'pointer', fontSize:11, color:txt2, transition:'all 150ms ease',
-        }}>
-          {dk?'☀️':'🌙'} {dk?t('login.claro'):t('login.escuro')}
-        </button>
         <span style={{ fontSize:10, color:txt2 }}>v3.2</span>
       </div>
     </div>
