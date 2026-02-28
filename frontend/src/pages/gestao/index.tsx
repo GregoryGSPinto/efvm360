@@ -3,7 +3,7 @@
 // Inspetor: métricas da equipe | Gestor: métricas + controles admin
 // ============================================================================
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import type { TemaEstilos, ConfiguracaoSistema, Usuario } from '../../types';
 import { Card } from '../../components';
 import { usePermissions } from '../../hooks/usePermissions';
@@ -27,10 +27,42 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
   const yardCode = (usuarioLogado?.primaryYard || 'VFZ') as YardCode;
   const { teamPerformance, yardPerformance, userRanking } = useProjections(yardCode, usuarioLogado?.matricula);
 
-  const [secao, setSecao] = useState<'dashboard' | 'equipe' | 'cadastros' | 'senhas' | 'usuarios'>('dashboard');
+  const [secao, setSecao] = useState<'dashboard' | 'equipe' | 'cadastros' | 'senhas' | 'usuarios' | 'auditoria'>('dashboard');
   const [refreshKey, setRefreshKey] = useState(0);
 
   const refresh = useCallback(() => setRefreshKey(k => k + 1), []);
+
+  // ── Audit trail state ──
+  const [auditFiltroTipo, setAuditFiltroTipo] = useState<string>('todos');
+  const [auditPagina, setAuditPagina] = useState(0);
+  const AUDIT_PER_PAGE = 15;
+  const auditLinkRef = useRef<HTMLAnchorElement>(null);
+
+  interface AuditEntry { timestamp: string; tipo: string; area: string; detalhe: string; usuario?: string; }
+  const auditTrail = useMemo<AuditEntry[]>(() => {
+    try {
+      const raw: AuditEntry[] = JSON.parse(localStorage.getItem('efvm360-equip-audit') || '[]');
+      const session: AuditEntry[] = JSON.parse(sessionStorage.getItem('efvm360_audit') || '[]');
+      return [...raw, ...session].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    } catch { return []; }
+  }, [refreshKey]);
+  const auditTipos = useMemo(() => Array.from(new Set(auditTrail.map(e => e.tipo))), [auditTrail]);
+  const auditFiltrado = useMemo(() => auditFiltroTipo === 'todos' ? auditTrail : auditTrail.filter(e => e.tipo === auditFiltroTipo), [auditTrail, auditFiltroTipo]);
+  const auditPaginado = useMemo(() => auditFiltrado.slice(auditPagina * AUDIT_PER_PAGE, (auditPagina + 1) * AUDIT_PER_PAGE), [auditFiltrado, auditPagina]);
+  const auditTotalPaginas = Math.max(1, Math.ceil(auditFiltrado.length / AUDIT_PER_PAGE));
+
+  const exportarAuditCSV = useCallback(() => {
+    const header = 'Timestamp,Tipo,Area,Detalhe,Usuario\n';
+    const rows = auditFiltrado.map(e => `"${e.timestamp}","${e.tipo}","${e.area}","${(e.detalhe || '').replace(/"/g, '""')}","${e.usuario || ''}"`).join('\n');
+    const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    if (auditLinkRef.current) {
+      auditLinkRef.current.href = url;
+      auditLinkRef.current.download = `audit_trail_${new Date().toISOString().split('T')[0]}.csv`;
+      auditLinkRef.current.click();
+      URL.revokeObjectURL(url);
+    }
+  }, [auditFiltrado]);
 
   // ── Data ──
   const pendingRegistrations = useMemo(() => getPendingRegistrations(isAdmin ? undefined : yardCode), [yardCode, refreshKey, isAdmin]);
@@ -108,6 +140,9 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
             </button>
             <button style={tabStyle(secao === 'usuarios')} onClick={() => setSecao('usuarios')}>
               ⚙️ Usuários
+            </button>
+            <button style={tabStyle(secao === 'auditoria')} onClick={() => setSecao('auditoria')}>
+              🛡️ Auditoria {auditTrail.length > 0 && <span style={{ fontSize: 10, color: tema.textoSecundario, marginLeft: 4 }}>({auditTrail.length})</span>}
             </button>
           </>
         )}
@@ -450,6 +485,110 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
             </tbody>
           </table>
         </Card>
+      )}
+
+      {/* ── SEÇÃO: Auditoria ── */}
+      {secao === 'auditoria' && isGestor && (
+        <>
+          {/* Hidden download anchor */}
+          <a ref={auditLinkRef} style={{ display: 'none' }} />
+
+          <Card title={`🛡️ Audit Trail (${auditFiltrado.length} registros)`} styles={styles}>
+            {/* Filters + Export */}
+            <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+              <select
+                value={auditFiltroTipo}
+                onChange={(e) => { setAuditFiltroTipo(e.target.value); setAuditPagina(0); }}
+                style={{
+                  padding: '8px 12px', borderRadius: 8, fontSize: 12,
+                  border: `1px solid ${tema.cardBorda}`, background: tema.backgroundSecundario,
+                  color: tema.texto, cursor: 'pointer',
+                }}
+              >
+                <option value="todos">Todos os tipos</option>
+                {auditTipos.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+              <button
+                onClick={exportarAuditCSV}
+                disabled={auditFiltrado.length === 0}
+                style={{
+                  padding: '8px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                  background: tema.primaria, color: '#fff', fontSize: 12, fontWeight: 600,
+                  opacity: auditFiltrado.length === 0 ? 0.5 : 1,
+                }}
+              >
+                📥 Exportar CSV
+              </button>
+              <span style={{ fontSize: 11, color: tema.textoSecundario, marginLeft: 'auto' }}>
+                Página {auditPagina + 1} de {auditTotalPaginas}
+              </span>
+            </div>
+
+            {/* Table */}
+            {auditFiltrado.length === 0 ? (
+              <div style={{ padding: 24, textAlign: 'center', color: tema.textoSecundario, fontSize: 13 }}>
+                Nenhum registro de auditoria encontrado
+              </div>
+            ) : (
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                  <thead>
+                    <tr style={{ borderBottom: `2px solid ${tema.cardBorda}` }}>
+                      <th style={{ textAlign: 'left', padding: 8, color: tema.textoSecundario, whiteSpace: 'nowrap' }}>Data/Hora</th>
+                      <th style={{ textAlign: 'left', padding: 8, color: tema.textoSecundario }}>Tipo</th>
+                      <th style={{ textAlign: 'left', padding: 8, color: tema.textoSecundario }}>Área</th>
+                      <th style={{ textAlign: 'left', padding: 8, color: tema.textoSecundario }}>Detalhe</th>
+                      <th style={{ textAlign: 'left', padding: 8, color: tema.textoSecundario }}>Usuário</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {auditPaginado.map((entry, i) => (
+                      <tr key={i} style={{ borderBottom: `1px solid ${tema.cardBorda}20` }}>
+                        <td style={{ padding: 8, color: tema.textoSecundario, fontFamily: 'monospace', whiteSpace: 'nowrap', fontSize: 11 }}>
+                          {new Date(entry.timestamp).toLocaleString('pt-BR')}
+                        </td>
+                        <td style={{ padding: 8 }}>
+                          <span style={{
+                            padding: '2px 8px', borderRadius: 4, fontSize: 10, fontWeight: 600,
+                            background: entry.tipo === 'LOGIN' ? '#dbeafe' : entry.tipo.includes('EXPORT') ? '#fef3c7' : `${tema.primaria}15`,
+                            color: entry.tipo === 'LOGIN' ? '#1d4ed8' : entry.tipo.includes('EXPORT') ? '#92400e' : tema.primaria,
+                          }}>{entry.tipo}</span>
+                        </td>
+                        <td style={{ padding: 8, color: tema.texto, fontSize: 12 }}>{entry.area}</td>
+                        <td style={{ padding: 8, color: tema.textoSecundario, fontSize: 12, maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.detalhe}</td>
+                        <td style={{ padding: 8, color: tema.textoSecundario, fontFamily: 'monospace', fontSize: 11 }}>{entry.usuario || '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Pagination */}
+            {auditTotalPaginas > 1 && (
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16 }}>
+                <button
+                  disabled={auditPagina === 0}
+                  onClick={() => setAuditPagina(p => p - 1)}
+                  style={{
+                    padding: '6px 14px', borderRadius: 6, border: `1px solid ${tema.cardBorda}`,
+                    background: tema.backgroundSecundario, color: tema.texto, cursor: auditPagina === 0 ? 'not-allowed' : 'pointer',
+                    fontSize: 12, opacity: auditPagina === 0 ? 0.5 : 1,
+                  }}
+                >← Anterior</button>
+                <button
+                  disabled={auditPagina >= auditTotalPaginas - 1}
+                  onClick={() => setAuditPagina(p => p + 1)}
+                  style={{
+                    padding: '6px 14px', borderRadius: 6, border: `1px solid ${tema.cardBorda}`,
+                    background: tema.backgroundSecundario, color: tema.texto, cursor: auditPagina >= auditTotalPaginas - 1 ? 'not-allowed' : 'pointer',
+                    fontSize: 12, opacity: auditPagina >= auditTotalPaginas - 1 ? 0.5 : 1,
+                  }}
+                >Próxima →</button>
+              </div>
+            )}
+          </Card>
+        </>
       )}
     </div>
   );

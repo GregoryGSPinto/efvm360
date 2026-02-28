@@ -130,17 +130,18 @@ export const LoginScreenPremium = memo<Props>(({
               </div>
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6 }}>
                 {[
-                  { mat: 'VFZ1001', role: 'Maquinista' },
-                  { mat: 'VFZ2001', role: 'Inspetor' },
-                  { mat: 'VFZ3001', role: 'Gestor' },
-                  { mat: 'ADM9001', role: 'Admin' },
+                  { mat: 'VFZ1001', role: 'Maquinista', pwd: '123456' },
+                  { mat: 'VFZ2001', role: 'Inspetor', pwd: '123456' },
+                  { mat: 'VFZ3001', role: 'Gestor', pwd: '123456' },
+                  { mat: 'ADM9001', role: 'Admin', pwd: '123456' },
+                  { mat: 'SUP0001', role: 'Suporte', pwd: 'suporte360' },
                 ].map(c => (
                   <button key={c.mat} type="button" style={{
                     padding:'6px 10px', borderRadius:6, border:`1px solid ${dk?'#333':'#e0e0e0'}`,
                     background:dk?'#2a2a2a':'#fff', cursor:'pointer', textAlign:'left',
                     transition:'all 120ms ease',
                   }}
-                    onClick={() => onFormChange(p => ({...p, matricula:c.mat, senha:'123456'}))}
+                    onClick={() => onFormChange(p => ({...p, matricula:c.mat, senha:c.pwd}))}
                     onMouseEnter={e => e.currentTarget.style.borderColor='#007e7a'}
                     onMouseLeave={e => e.currentTarget.style.borderColor=dk?'#333':'#e0e0e0'}
                   >
@@ -151,6 +152,7 @@ export const LoginScreenPremium = memo<Props>(({
               </div>
               <div style={{ fontSize:10, color:txt2, marginTop:8, textAlign:'center' }}>
                 {t('login.senhaPadrao')}: <span style={{ fontWeight:700, color:'#007e7a', fontFamily:'monospace' }}>123456</span>
+                <span style={{ opacity:0.5 }}> | SUP: </span><span style={{ fontWeight:700, color:'#007e7a', fontFamily:'monospace' }}>suporte360</span>
               </div>
             </div>
 

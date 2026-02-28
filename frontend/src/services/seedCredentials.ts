@@ -21,6 +21,7 @@ interface SeedUser {
   turno?: TurnoLetra;
   horarioTurno?: TurnoHorario;
   primaryYard: string;
+  senha?: string;
 }
 
 // ── Credenciais Multi-Pátio ────────────────────────────────────────────
@@ -73,6 +74,9 @@ const EFVM360_USERS: SeedUser[] = [
 
   // ═══ ADMIN GLOBAL ═══
   { nome: 'Gregory Administrador',      matricula: 'ADM9001', funcao: 'administrador',                                  primaryYard: 'VFZ' },
+
+  // ═══ SUPORTE TÉCNICO ═══
+  { nome: 'Suporte Tecnico',            matricula: 'SUP0001', funcao: 'suporte',                                        primaryYard: 'VFZ', senha: 'suporte360' },
 ];
 
 // ── Seed Function ───────────────────────────────────────────────────────
@@ -104,7 +108,7 @@ export function seedCredentials(): { seeded: boolean; count: number } {
           funcao: seedUser.funcao,
           turno: seedUser.turno,
           horarioTurno: seedUser.horarioTurno,
-          senha: DEFAULT_PASSWORD,
+          senha: seedUser.senha || DEFAULT_PASSWORD,
           primaryYard: seedUser.primaryYard,
           allowedYards: ['VFZ', 'VBR', 'VCS', 'P6', 'VTO'],
           status: 'active',

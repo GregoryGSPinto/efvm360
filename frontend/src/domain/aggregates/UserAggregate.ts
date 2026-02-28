@@ -41,6 +41,7 @@ const ROLE_HIERARCHY_MAP: Record<string, HierarchyLevel> = {
   gestor: HierarchyLevel.MANAGEMENT,
   coordenador: HierarchyLevel.MANAGEMENT,
   administrador: HierarchyLevel.ADMIN,
+  suporte: HierarchyLevel.ADMIN,
 };
 
 export function getHierarchyLevelForRole(role: string): HierarchyLevel {

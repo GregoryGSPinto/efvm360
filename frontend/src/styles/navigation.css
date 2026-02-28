@@ -37,3 +37,85 @@
 /* ── Scrollbar hiding for horizontal scroll containers ───────────────── */
 .efvm360-scroll-hide::-webkit-scrollbar { display: none; }
 .efvm360-scroll-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ============================================================================
+   EFVM360 — Accessibility
+   ============================================================================ */
+
+/* ── Focus-visible — keyboard navigation indicator ─────────────────── */
+*:focus-visible {
+  outline: 3px solid #007e7a !important;
+  outline-offset: 2px !important;
+  border-radius: 4px;
+}
+
+/* ── High Contrast mode (.efvm360-high-contrast on <html>) ──────────── */
+.efvm360-high-contrast {
+  --hc-text: #000000;
+  --hc-bg: #ffffff;
+  --hc-border: #000000;
+}
+
+.efvm360-high-contrast body {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+.efvm360-high-contrast button,
+.efvm360-high-contrast input,
+.efvm360-high-contrast select,
+.efvm360-high-contrast textarea {
+  border: 2px solid #000000 !important;
+  color: #000000 !important;
+}
+
+.efvm360-high-contrast a,
+.efvm360-high-contrast button {
+  text-decoration: underline;
+}
+
+.efvm360-high-contrast [style*="background"] {
+  filter: contrast(1.3);
+}
+
+/* ── Reduced Motion (.efvm360-reduced-motion on <html>) ────────────── */
+.efvm360-reduced-motion *,
+.efvm360-reduced-motion *::before,
+.efvm360-reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* ── Auto-detect: prefers-reduced-motion ───────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Skip to content (hidden until focused) ────────────────────────── */
+.efvm360-skip-link {
+  position: absolute;
+  top: -100%;
+  left: 16px;
+  z-index: 10001;
+  padding: 12px 24px;
+  background: #007e7a;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 0 0 8px 8px;
+  text-decoration: none;
+  transition: top 150ms ease;
+}
+
+.efvm360-skip-link:focus {
+  top: 0;
+}

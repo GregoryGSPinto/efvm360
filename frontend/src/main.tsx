@@ -10,9 +10,13 @@ import App from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { I18nProvider } from './i18n';
 import { migrateStorageKeys } from './utils/constants';
+import { inicializarCaptura } from './services/ErrorReportService';
 
 // Migracao de storage ANTES do React renderizar (vfz-* → efvm360-*)
 migrateStorageKeys();
+
+// Inicializar captura global de erros
+inicializarCaptura();
 
 // Renderiza a aplicacao com ErrorBoundary global + Router
 ReactDOM.createRoot(document.getElementById('root')!).render(

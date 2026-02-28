@@ -16,6 +16,7 @@ export const ROUTES = {
   GESTAO: '/gestao',
   PERFIL: '/perfil',
   CONFIGURACOES: '/configuracoes',
+  SUPORTE: '/suporte',
 } as const;
 
 /** Map legacy nav IDs (from sidebar/nav items) → URL paths */
@@ -29,6 +30,7 @@ export const NAV_ID_TO_PATH: Record<string, string> = {
   gestao: ROUTES.GESTAO,
   perfil: ROUTES.PERFIL,
   configuracoes: ROUTES.CONFIGURACOES,
+  suporte: ROUTES.SUPORTE,
 };
 
 /** Map URL paths → legacy nav IDs (for AdamBoot sync, badges, etc.) */

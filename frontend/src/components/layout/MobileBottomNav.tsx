@@ -43,7 +43,10 @@ export const MobileBottomNav = memo<MobileBottomNavProps>(({
     ...(hierarchyLevel >= HierarchyLevel.INSPECTION
       ? [{ id: 'gestao', label: 'Gestao', icon: '\uD83D\uDC65' }]
       : []),
-  ], [hierarchyLevel]);
+    ...(userRole === 'suporte'
+      ? [{ id: 'suporte', label: 'Suporte', icon: '\uD83D\uDEE0\uFE0F' }]
+      : []),
+  ], [hierarchyLevel, userRole]);
 
   const bg = dk ? '#1a1a1a' : '#ffffff';
   const bd = dk ? '#2a2a2a' : '#e8e8e8';
@@ -59,7 +62,7 @@ export const MobileBottomNav = memo<MobileBottomNavProps>(({
   };
 
   return (
-    <nav className="efvm360-mobilenav" style={{
+    <nav className="efvm360-mobilenav" aria-label="Navegação mobile" style={{
       position: 'fixed',
       bottom: 0,
       left: 0,

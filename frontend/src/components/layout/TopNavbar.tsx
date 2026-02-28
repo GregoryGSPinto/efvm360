@@ -62,6 +62,9 @@ export const TopNavbar = memo<TopNavbarProps>(({
     ...(hierarchyLevel >= HierarchyLevel.INSPECTION
       ? [{ id: 'gestao', label: 'Gestao' }]
       : []),
+    ...(usuarioLogado?.funcao === 'suporte'
+      ? [{ id: 'suporte', label: 'Suporte' }]
+      : []),
   ];
 
   const dk = config.tema === 'escuro' ||
@@ -98,7 +101,7 @@ export const TopNavbar = memo<TopNavbarProps>(({
   const currentPageId = PATH_TO_NAV_ID[currentPath] || 'inicial';
 
   return (
-    <header className="efvm360-topnav" style={{
+    <header className="efvm360-topnav" role="navigation" aria-label="Navegação principal" style={{
       position: 'fixed', top: 0, left: 0, right: 0, height: 56,
       background: bg, borderBottom: `1px solid ${bd}`,
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',

@@ -10,6 +10,7 @@ import { STORAGE_KEYS, FUNCOES_USUARIO, TURNOS_LETRAS } from '../../utils/consta
 import GerenciamentoPatios from './GerenciamentoPatios';
 import { useI18n } from '../../hooks/useI18n';
 import type { Locale } from '../../hooks/useI18n';
+import { obterPerfil, setNivelOverride, resetarPerfil, getTopPaginas } from '../../services/AdamBootService';
 
 export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JSX.Element {
   const {
@@ -1169,6 +1170,63 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
             </>
           )}
         </Card>
+
+        {/* AdamBoot Proficiency Level */}
+        {(() => {
+          const perfil = obterPerfil(matricula);
+          const topPags = getTopPaginas(perfil, 5);
+          const nivelColor = perfil.nivelProficiencia === 'avancado' ? '#16a34a' : perfil.nivelProficiencia === 'intermediario' ? '#d9a010' : '#6366f1';
+          const nivelLabel = perfil.nivelProficiencia === 'avancado' ? 'Avancado' : perfil.nivelProficiencia === 'intermediario' ? 'Intermediario' : 'Iniciante';
+          const progresso = Math.min(100, Math.round((perfil.totalSessoes / 20) * 100));
+          return (
+            <Card title="📊 Nível de Proficiência" styles={styles}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+                <div style={{ width: 56, height: 56, borderRadius: '50%', background: `${nivelColor}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `2px solid ${nivelColor}` }}>
+                  <span style={{ fontSize: 24 }}>{perfil.nivelProficiencia === 'avancado' ? '🏆' : perfil.nivelProficiencia === 'intermediario' ? '📈' : '🌱'}</span>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, fontSize: 16, color: nivelColor }}>{nivelLabel}</div>
+                  <div style={{ fontSize: 12, color: tema.textoSecundario }}>{perfil.totalSessoes} sessoes · {perfil.acoesRealizadas} acoes</div>
+                  <div style={{ marginTop: 6, height: 6, background: tema.backgroundSecundario, borderRadius: 3, overflow: 'hidden' }}>
+                    <div style={{ width: `${progresso}%`, height: '100%', background: nivelColor, borderRadius: 3, transition: 'width 300ms ease' }} />
+                  </div>
+                  <div style={{ fontSize: 10, color: tema.textoSecundario, marginTop: 2 }}>{progresso}% para avancado (20 sessoes)</div>
+                </div>
+              </div>
+
+              {topPags.length > 0 && (
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: tema.texto, marginBottom: 8 }}>Paginas mais acessadas</div>
+                  {topPags.map((tp) => (
+                    <div key={tp.pagina} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 12 }}>
+                      <span style={{ color: tema.texto }}>{tp.pagina}</span>
+                      <span style={{ color: tema.textoSecundario, fontFamily: 'monospace' }}>{tp.visitas}x</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <select
+                  style={{ ...styles.select, flex: 1 }}
+                  value={perfil.nivelOverride || ''}
+                  onChange={(e) => { setNivelOverride(matricula, (e.target.value || null) as 'iniciante' | 'intermediario' | 'avancado' | null); }}
+                >
+                  <option value="">Auto-detectado</option>
+                  <option value="iniciante">Forcar: Iniciante</option>
+                  <option value="intermediario">Forcar: Intermediario</option>
+                  <option value="avancado">Forcar: Avancado</option>
+                </select>
+                <button
+                  style={{ padding: '8px 16px', borderRadius: 8, border: `1px solid ${tema.perigo}`, background: 'transparent', color: tema.perigo, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}
+                  onClick={() => { if (confirm('Resetar perfil AdamBoot?')) resetarPerfil(matricula); }}
+                >
+                  Resetar
+                </button>
+              </div>
+            </Card>
+          );
+        })()}
       </>
     );
 
@@ -1397,8 +1455,48 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
     );
 
     // ==================== MANUAL DO SOFTWARE ====================
+    const manualSections = [
+      { id: 'visao-geral', icon: '🔍', title: 'Visão Geral' },
+      { id: 'fluxo', icon: '🔄', title: 'Fluxo do Sistema' },
+      { id: 'passagem', icon: '📋', title: 'Passagem de Serviço' },
+      { id: 'dss', icon: '🛡️', title: 'DSS' },
+      { id: 'bi', icon: '📊', title: 'BI+ Dashboard' },
+      { id: 'adamboot', icon: '🤖', title: 'AdamBoot' },
+      { id: 'config', icon: '⚙️', title: 'Configurações' },
+      { id: 'boas-praticas', icon: '✅', title: 'Boas Práticas' },
+    ];
+
+    const FeedbackButtons = ({ sectionId }: { sectionId: string }) => {
+      const key = `efvm360-manual-feedback-${sectionId}`;
+      const [voted, setVoted] = useState(() => { try { return localStorage.getItem(key) || ''; } catch { return ''; } });
+      const vote = (v: string) => { localStorage.setItem(key, v); setVoted(v); };
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, paddingTop: 8, borderTop: `1px solid ${tema.cardBorda}30` }}>
+          <span style={{ fontSize: 11, color: tema.textoSecundario }}>Foi útil?</span>
+          <button onClick={() => vote('sim')} style={{ padding: '2px 10px', borderRadius: 12, border: `1px solid ${voted === 'sim' ? tema.sucesso : tema.cardBorda}`, background: voted === 'sim' ? `${tema.sucesso}15` : 'transparent', cursor: 'pointer', fontSize: 11, color: voted === 'sim' ? tema.sucesso : tema.textoSecundario }}>👍 Sim</button>
+          <button onClick={() => vote('nao')} style={{ padding: '2px 10px', borderRadius: 12, border: `1px solid ${voted === 'nao' ? tema.perigo : tema.cardBorda}`, background: voted === 'nao' ? `${tema.perigo}15` : 'transparent', cursor: 'pointer', fontSize: 11, color: voted === 'nao' ? tema.perigo : tema.textoSecundario }}>👎 Não</button>
+        </div>
+      );
+    };
+
     const renderManual = () => (
-      <>
+      <div style={{ display: 'flex', gap: 16 }}>
+        {/* Sidebar Index */}
+        <div style={{ width: 180, minWidth: 140, position: 'sticky', top: 20, height: 'fit-content', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: tema.textoSecundario, textTransform: 'uppercase', letterSpacing: 0.8, padding: '8px 10px' }}>Índice</div>
+          {manualSections.map(s => (
+            <button key={s.id} onClick={() => document.getElementById(`manual-${s.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              style={{ padding: '6px 10px', borderRadius: 6, border: 'none', background: 'transparent', cursor: 'pointer', textAlign: 'left', fontSize: 12, color: tema.texto, display: 'flex', alignItems: 'center', gap: 6 }}
+              onMouseEnter={e => { e.currentTarget.style.background = `${tema.primaria}10`; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+            >
+              <span style={{ fontSize: 14 }}>{s.icon}</span> {s.title}
+            </button>
+          ))}
+        </div>
+
+        {/* Content */}
+        <div style={{ flex: 1 }}>
         <Card title="📖 Manual do Software EFVM360" styles={styles}>
           {/* Search box */}
           <div style={{ marginBottom: '16px' }}>
@@ -1419,14 +1517,15 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
           <div style={{ fontSize: '13px', color: tema.texto, lineHeight: 1.7 }}>
 
             {/* Visão Geral */}
-            <div data-manual-section style={{ marginBottom: '24px' }}>
+            <div id="manual-visao-geral" data-manual-section style={{ marginBottom: '24px' }}>
               <h3 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '16px' }}>🔍 Visão Geral</h3>
               <p>O <strong>EFVM360 - Passagem de Serviço</strong> é um sistema digital desenvolvido para a <strong>Estrada de Ferro Vitória a Minas (EFVM)</strong>, com foco na digitalização e padronização do processo de passagem de serviço nos pátios da EFVM.</p>
               <p style={{ marginTop: '8px' }}>O sistema permite o registro completo de informações operacionais, garantindo continuidade, rastreabilidade e segurança nas operações ferroviárias.</p>
+              <FeedbackButtons sectionId="visao-geral" />
             </div>
 
             {/* Fluxo do Sistema */}
-            <div data-manual-section style={{ marginBottom: '24px' }}>
+            <div id="manual-fluxo" data-manual-section style={{ marginBottom: '24px' }}>
               <h3 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '16px' }}>🔄 Fluxo do Sistema</h3>
               <ol style={{ paddingLeft: '20px', margin: 0 }}>
                 <li style={{ marginBottom: '6px' }}><strong>Login:</strong> Acesse com sua matrícula e senha cadastrada</li>
@@ -1435,10 +1534,11 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
                 <li style={{ marginBottom: '6px' }}><strong>Revisão:</strong> Valide as informações antes de finalizar</li>
                 <li><strong>Assinatura:</strong> Confirme a passagem de serviço</li>
               </ol>
+              <FeedbackButtons sectionId="fluxo" />
             </div>
 
             {/* Passagem de Serviço */}
-            <div data-manual-section style={{ marginBottom: '24px' }}>
+            <div id="manual-passagem" data-manual-section style={{ marginBottom: '24px' }}>
               <h3 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '16px' }}>📋 Passagem de Serviço</h3>
               <p>A passagem de serviço é organizada em seções:</p>
               <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
@@ -1450,10 +1550,11 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
                 <li><strong>Segurança em Manobras:</strong> Informações críticas de segurança</li>
                 <li><strong>Assinatura:</strong> Confirmação dos empregados envolvidos</li>
               </ul>
+              <FeedbackButtons sectionId="passagem" />
             </div>
 
             {/* DSS */}
-            <div data-manual-section style={{ marginBottom: '24px' }}>
+            <div id="manual-dss" data-manual-section style={{ marginBottom: '24px' }}>
               <h3 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '16px' }}>🛡️ DSS - Diálogo de Segurança</h3>
               <p>O DSS (Diálogo de Segurança, Saúde e Meio Ambiente) segue a norma <strong>PRO-041945 Rev. 02</strong> e deve ser realizado:</p>
               <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
@@ -1461,10 +1562,11 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
                 <li>Semanalmente/mensalmente para atividades administrativas</li>
               </ul>
               <p style={{ marginTop: '8px' }}>Registre sempre: tema abordado, facilitador, participantes e observações relevantes.</p>
+              <FeedbackButtons sectionId="dss-manual" />
             </div>
 
             {/* BI+ */}
-            <div data-manual-section style={{ marginBottom: '24px' }}>
+            <div id="manual-bi" data-manual-section style={{ marginBottom: '24px' }}>
               <h3 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '16px' }}>📊 BI+ Dashboard</h3>
               <p>O painel de Business Intelligence apresenta indicadores operacionais em tempo real:</p>
               <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
@@ -1473,10 +1575,11 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
                 <li>Indicadores de segurança e alertas</li>
                 <li>Gráficos de tendências operacionais</li>
               </ul>
+              <FeedbackButtons sectionId="bi" />
             </div>
 
             {/* AdamBoot */}
-            <div data-manual-section style={{ marginBottom: '24px' }}>
+            <div id="manual-adamboot" data-manual-section style={{ marginBottom: '24px' }}>
               <h3 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '16px' }}>🤖 AdamBoot - Assistente Inteligente</h3>
               <p>O <strong>AdamBoot</strong> é o assistente de IA do EFVM360 que auxilia o operador em tempo real:</p>
               <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
@@ -1486,10 +1589,11 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
                 <li>Respostas a dúvidas operacionais</li>
               </ul>
               <p style={{ marginTop: '8px' }}>Você pode ajustar o nível de intervenção do AdamBoot nas Configurações.</p>
+              <FeedbackButtons sectionId="adamboot-manual" />
             </div>
 
             {/* Configurações */}
-            <div data-manual-section style={{ marginBottom: '24px' }}>
+            <div id="manual-config" data-manual-section style={{ marginBottom: '24px' }}>
               <h3 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '16px' }}>⚙️ Configurações</h3>
               <p>Personalize sua experiência nas configurações:</p>
               <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
@@ -1498,10 +1602,11 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
                 <li><strong>Acessibilidade:</strong> Alto contraste e redução de animações</li>
                 <li><strong>AdamBoot:</strong> Nível de interação da IA</li>
               </ul>
+              <FeedbackButtons sectionId="config-manual" />
             </div>
 
             {/* Boas Práticas */}
-            <div data-manual-section style={{ marginBottom: '16px' }}>
+            <div id="manual-boas-praticas" data-manual-section style={{ marginBottom: '16px' }}>
               <h3 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '16px' }}>✅ Boas Práticas</h3>
               <ul style={{ paddingLeft: '20px', margin: 0 }}>
                 <li style={{ marginBottom: '6px' }}>Preencha todas as informações com atenção</li>
@@ -1510,6 +1615,7 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
                 <li style={{ marginBottom: '6px' }}>Mantenha comunicação clara com a equipe</li>
                 <li>Em caso de dúvidas, consulte o AdamBoot ou seu supervisor</li>
               </ul>
+              <FeedbackButtons sectionId="boas-praticas" />
             </div>
           </div>
         </Card>
@@ -1519,7 +1625,8 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
             📌 <strong>Importante:</strong> Este manual não substitui normas e procedimentos corporativos oficiais. Em caso de divergência, prevalecem os documentos normativos da empresa.
           </span>
         </div>
-      </>
+        </div>
+      </div>
     );
 
     // ==================== SOBRE O SISTEMA ====================
@@ -1629,6 +1736,79 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
                 <div style={{ fontSize: '10px', color: tema.textoSecundario }}>{tech.version}</div>
               </div>
             ))}
+          </div>
+        </Card>
+
+        {/* Changelog */}
+        <Card title="📋 Changelog" styles={styles}>
+          <div style={{ position: 'relative', paddingLeft: 20 }}>
+            {[
+              { version: '3.2.0', date: '2025-12', title: 'Sprint 2 — Enterprise', items: ['Avatar camera/upload/crop', 'i18n PT-BR + EN-US', 'AdamBoot adaptativo por proficiencia', 'RBAC PermissionGuard', 'Suporte Tecnico (SUP0001)', 'Audit Trail na Gestao', 'Acessibilidade (alto contraste, atalhos)'] },
+              { version: '3.1.0', date: '2025-11', title: 'Sprint 1 — Organizacional', items: ['Hierarquia multi-patio', 'Equipes e ranking', 'Aprovacao de cadastros e senhas', 'Dashboard BI executivo'] },
+              { version: '3.0.0', date: '2025-10', title: 'Enterprise Foundation', items: ['DDD + Event Sourcing + CQRS', 'IntegrityService SHA-256', 'IndexedDB offline-first', 'SyncEngine com resolucao de conflitos'] },
+              { version: '2.0.0', date: '2025-08', title: 'DSS + Historico', items: ['DSS PRO-041945 Rev. 02', 'Historico de passagens e DSS', 'AdamBoot assistente IA'] },
+              { version: '1.0.0', date: '2025-06', title: 'MVP', items: ['Passagem de servico digital', 'Login e cadastro', 'Layout do patio'] },
+            ].map((release, i) => (
+              <div key={release.version} style={{ marginBottom: 20, position: 'relative' }}>
+                <div style={{ position: 'absolute', left: -24, top: 4, width: 10, height: 10, borderRadius: '50%', background: i === 0 ? tema.primaria : tema.cardBorda }} />
+                {i < 4 && <div style={{ position: 'absolute', left: -20, top: 14, width: 2, height: 'calc(100% + 8px)', background: tema.cardBorda }} />}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                  <span style={{ fontWeight: 700, color: i === 0 ? tema.primaria : tema.texto, fontSize: 14 }}>v{release.version}</span>
+                  <span style={{ fontSize: 11, color: tema.textoSecundario }}>{release.date}</span>
+                </div>
+                <div style={{ fontWeight: 600, color: tema.texto, fontSize: 13, marginBottom: 4 }}>{release.title}</div>
+                <ul style={{ paddingLeft: 16, margin: 0, fontSize: 12, color: tema.textoSecundario }}>
+                  {release.items.map((item, j) => <li key={j} style={{ marginBottom: 2 }}>{item}</li>)}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Privacy Policy */}
+        <Card title="🔒 Política de Privacidade" styles={styles}>
+          <div style={{ fontSize: 13, color: tema.texto, lineHeight: 1.7 }}>
+            <p><strong>EFVM360 — Política de Privacidade e Proteção de Dados</strong></p>
+            <p style={{ marginTop: 8 }}>Em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei 13.709/2018), informamos:</p>
+            <ul style={{ paddingLeft: 20, margin: '8px 0' }}>
+              <li><strong>Dados coletados:</strong> Nome, matrícula, função, turno e ações operacionais no sistema.</li>
+              <li><strong>Finalidade:</strong> Segurança ferroviária, auditoria operacional e melhoria contínua de processos.</li>
+              <li><strong>Base legal:</strong> Execução de contrato de trabalho e cumprimento de obrigação legal/regulatória.</li>
+              <li><strong>Armazenamento:</strong> Dados armazenados localmente (offline-first) e sincronizados quando online. Dados sensíveis protegidos por SHA-256.</li>
+              <li><strong>Compartilhamento:</strong> Dados não são compartilhados com terceiros. Acesso restrito por hierarquia RBAC.</li>
+              <li><strong>Seus direitos:</strong> Acesso, correção, portabilidade, anonimização e exclusão. Contato: dpo@vale.com</li>
+            </ul>
+            <p style={{ marginTop: 8, fontSize: 11, color: tema.textoSecundario }}>Última atualização: Dezembro 2025 | Versão 1.0</p>
+          </div>
+        </Card>
+
+        {/* Terms of Use */}
+        <Card title="📜 Termos de Uso" styles={styles}>
+          <div style={{ fontSize: 13, color: tema.texto, lineHeight: 1.7 }}>
+            <p><strong>Termos e Condições de Uso — EFVM360</strong></p>
+            <ol style={{ paddingLeft: 20, margin: '8px 0' }}>
+              <li style={{ marginBottom: 6 }}><strong>Aceitação:</strong> Ao acessar o EFVM360, o usuário concorda com estes termos e com a Política de Privacidade.</li>
+              <li style={{ marginBottom: 6 }}><strong>Uso autorizado:</strong> O sistema é de uso exclusivo de colaboradores Vale S.A. autorizados, para fins operacionais ferroviários.</li>
+              <li style={{ marginBottom: 6 }}><strong>Responsabilidades:</strong> O usuário é responsável pela veracidade das informações registradas e pela segurança de suas credenciais.</li>
+              <li style={{ marginBottom: 6 }}><strong>Auditoria:</strong> Todas as ações são registradas em audit trail para fins de segurança e conformidade.</li>
+              <li style={{ marginBottom: 6 }}><strong>Propriedade intelectual:</strong> O software é propriedade da Vale S.A. Uso, cópia ou distribuição não autorizada é proibida.</li>
+              <li><strong>Alterações:</strong> Os termos podem ser atualizados. Alterações entram em vigor imediatamente após publicação.</li>
+            </ol>
+            <p style={{ marginTop: 8, fontSize: 11, color: tema.textoSecundario }}>Versão dos Termos: 1.0.0 | Vigência: Junho 2025</p>
+          </div>
+        </Card>
+
+        {/* License */}
+        <Card title="📄 Licença" styles={styles}>
+          <div style={{ fontSize: 13, color: tema.texto, lineHeight: 1.7 }}>
+            <p><strong>Licença de Uso Interno — Vale S.A.</strong></p>
+            <p style={{ marginTop: 8 }}>Este software é licenciado exclusivamente para uso interno da Vale S.A. e suas subsidiárias. Todos os direitos reservados.</p>
+            <div style={{ marginTop: 12, padding: 12, background: tema.backgroundSecundario, borderRadius: 8, border: `1px solid ${tema.cardBorda}`, fontFamily: 'monospace', fontSize: 11, color: tema.textoSecundario }}>
+              Copyright (c) 2025 Vale S.A.<br />
+              Todos os direitos reservados.<br />
+              Uso restrito a colaboradores autorizados.<br />
+              Proibida distribuição, cópia ou modificação sem autorização expressa.
+            </div>
           </div>
         </Card>
 

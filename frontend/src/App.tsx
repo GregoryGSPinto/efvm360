@@ -50,12 +50,14 @@ const PaginaPerfil = lazy(() => import('./pages/perfil'));
 const PaginaLayoutPatio = lazy(() => import('./pages/layout-patio'));
 const PaginaHistorico = lazy(() => import('./pages/historico'));
 const PaginaConfiguracoes = lazy(() => import('./pages/configuracoes'));
+const PaginaSuporte = lazy(() => import('./pages/suporte'));
 
 // ── Organizational Services ─────────────────────────────────────────────
 import { seedTeams } from './services/teamPerformanceService';
 import { getPendingRegistrations, getPendingPasswordResets } from './services/approvalService';
 import { getHierarchyLevelForRole } from './domain/aggregates/UserAggregate';
 import { HierarchyLevel } from './domain/contracts';
+import { registrarAcesso } from './services/AdamBootService';
 
 import './styles/navigation.css';
 
@@ -66,7 +68,7 @@ function getFuncaoLabel(funcao?: string): string {
     maquinista: 'Maquinista', operador: 'Operador', oficial: 'Oficial',
     oficial_operacao: 'Oficial de Operacao', inspetor: 'Inspetor',
     gestor: 'Gestor', supervisor: 'Supervisor', coordenador: 'Coordenador',
-    administrador: 'Administrador',
+    administrador: 'Administrador', suporte: 'Suporte Tecnico',
   };
   return map[funcao || ''] || funcao || 'Operador';
 }
@@ -158,6 +160,28 @@ export default function App(): JSX.Element {
     document.body.style.background = isDark ? '#121212' : '#f5f5f5';
   }, [isDark]);
 
+  // ── Accessibility class sync ───────────────────────────────────────
+  useEffect(() => {
+    const root = document.documentElement;
+    if (config.preferenciasAcessibilidade.altoContraste) root.classList.add('efvm360-high-contrast');
+    else root.classList.remove('efvm360-high-contrast');
+    if (config.preferenciasAcessibilidade.reducaoAnimacoes) root.classList.add('efvm360-reduced-motion');
+    else root.classList.remove('efvm360-reduced-motion');
+  }, [config.preferenciasAcessibilidade.altoContraste, config.preferenciasAcessibilidade.reducaoAnimacoes]);
+
+  // ── Keyboard shortcuts (Alt+1..5, Alt+/) ───────────────────────────
+  const [showShortcuts, setShowShortcuts] = useState(false);
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (!e.altKey || !usuarioLogado) return;
+      const map: Record<string, string> = { '1': 'passagem', '2': 'dss', '3': 'analytics', '4': 'gestao', '5': 'configuracoes' };
+      if (map[e.key]) { e.preventDefault(); navigate(NAV_ID_TO_PATH[map[e.key]] || '/'); }
+      if (e.key === '/') { e.preventDefault(); setShowShortcuts(p => !p); }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [navigate, usuarioLogado]);
+
   // ── Seed de credenciais ja executado via useAuth (executarSeed v4) ──
 
   // ── Navigation (React Router) ─────────────────────────────────────────
@@ -171,10 +195,13 @@ export default function App(): JSX.Element {
     [location.pathname],
   );
 
-  // Sync AdamBoot with current page on route changes
+  // Sync AdamBoot with current page on route changes + track proficiency
   useEffect(() => {
     adamBoot.setPaginaAtual(currentPageId);
-  }, [currentPageId, adamBoot.setPaginaAtual]);
+    if (usuarioLogado?.matricula) {
+      registrarAcesso(usuarioLogado.matricula, currentPageId);
+    }
+  }, [currentPageId, adamBoot.setPaginaAtual, usuarioLogado?.matricula]);
 
   // Navigate by legacy nav ID (used by TopNavbar, MobileBottomNav)
   const handleNavigate = useCallback((id: string) => {
@@ -345,9 +372,12 @@ export default function App(): JSX.Element {
       display: 'flex', flexDirection: 'column',
     }}>
 
+      {/* Skip to content (a11y) */}
+      <a href="#efvm360-main" className="efvm360-skip-link">Pular para conteúdo</a>
+
       {/* Toast Notification */}
       {toastMsg && (
-        <div style={{
+        <div role="alert" aria-live="assertive" style={{
           position: 'fixed', top: 72, left: '50%', transform: 'translateX(-50%)',
           zIndex: 9998, padding: '12px 28px', borderRadius: 12,
           background: isDark ? '#1a3a38' : '#e6f7f6',
@@ -400,7 +430,7 @@ export default function App(): JSX.Element {
       />
 
       {/* Main Content — Below header, above mobile nav */}
-      <main className="efvm360-main-content" style={{
+      <main id="efvm360-main" className="efvm360-main-content" aria-live="polite" style={{
         flex: 1,
         padding: '24px 24px 60px',
         overflowY: 'auto',
@@ -527,12 +557,46 @@ export default function App(): JSX.Element {
               </ModuleErrorBoundary>
             } />
 
+            {/* Suporte */}
+            <Route path={ROUTES.SUPORTE} element={
+              <ModuleErrorBoundary module="suporte">
+                <PaginaSuporte tema={tema} styles={styles} config={config}
+                  usuarioLogado={usuarioLogado} />
+              </ModuleErrorBoundary>
+            } />
+
             {/* Catch-all → redirect to home */}
             <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
           </Routes>
         </Suspense>
 
       </main>
+
+      {/* Keyboard Shortcuts Overlay */}
+      {showShortcuts && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}
+          onClick={() => setShowShortcuts(false)}>
+          <div style={{ background: tema.card, borderRadius: 16, padding: 28, maxWidth: 360, width: '90%', border: `1px solid ${tema.cardBorda}` }}
+            onClick={e => e.stopPropagation()}>
+            <h3 style={{ color: tema.texto, margin: '0 0 16px', fontSize: 16 }}>Atalhos de Teclado</h3>
+            {[
+              { keys: 'Alt + 1', desc: 'Passagem de Servico' },
+              { keys: 'Alt + 2', desc: 'DSS' },
+              { keys: 'Alt + 3', desc: 'BI+' },
+              { keys: 'Alt + 4', desc: 'Gestao' },
+              { keys: 'Alt + 5', desc: 'Configuracoes' },
+              { keys: 'Alt + /', desc: 'Mostrar/Ocultar atalhos' },
+            ].map(s => (
+              <div key={s.keys} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: `1px solid ${tema.cardBorda}` }}>
+                <kbd style={{ fontFamily: 'monospace', background: tema.backgroundSecundario, padding: '2px 8px', borderRadius: 4, fontSize: 12, color: tema.texto, border: `1px solid ${tema.cardBorda}` }}>{s.keys}</kbd>
+                <span style={{ fontSize: 13, color: tema.textoSecundario }}>{s.desc}</span>
+              </div>
+            ))}
+            <button style={{ marginTop: 16, padding: '8px 20px', borderRadius: 8, border: 'none', background: tema.primaria, color: '#fff', cursor: 'pointer', fontWeight: 600, width: '100%' }}
+              onClick={() => setShowShortcuts(false)}>Fechar</button>
+          </div>
+        </div>
+      )}
 
       {/* Online Indicator — Floating bottom-right */}
       <OnlineIndicator

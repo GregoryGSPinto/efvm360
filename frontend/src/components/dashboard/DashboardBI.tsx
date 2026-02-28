@@ -32,6 +32,7 @@ import {
 } from './EChartsComponents';
 import { CardKPI } from './Graficos';
 import AIInsightChart from './AIInsightChart';
+import { PermissionGuard } from '../ui/PermissionGuard';
 
 // ============================================================================
 // TIPOS
@@ -1510,7 +1511,10 @@ export const DashboardBI = memo<DashboardAvancadoProps>(({
 
       {/* DOCUMENTOS EXPORTADOS - HISTÓRICO */}
       {abaAtiva === 'exportacoes' && (
-        <>
+        <PermissionGuard
+          perfisPermitidos={['inspetor', 'gestor', 'administrador', 'suporte', 'supervisor', 'coordenador']}
+          mensagemBloqueio="Exportação disponível para Inspetor, Gestor ou Administrador"
+        >
           {/* Cabeçalho */}
           <div
             style={{
@@ -1664,7 +1668,7 @@ export const DashboardBI = memo<DashboardAvancadoProps>(({
               </div>
             )}
           </div>
-        </>
+        </PermissionGuard>
       )}
 
       {/* MODAL DE EXPORTAÇÃO AVANÇADA */}

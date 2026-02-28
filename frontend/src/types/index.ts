@@ -11,7 +11,7 @@ export type StatusLinha = 'livre' | 'ocupada' | 'interditada';
 export type PosicaoAMV = 'normal' | 'reversa';
 
 // Funções de usuário
-export type FuncaoUsuario = 'maquinista' | 'oficial' | 'inspetor' | 'supervisor' | 'gestor' | 'administrador' | 'outra';
+export type FuncaoUsuario = 'maquinista' | 'oficial' | 'inspetor' | 'supervisor' | 'gestor' | 'administrador' | 'suporte' | 'outra';
 
 // Tema do sistema
 export type TemaConfig = 'claro' | 'escuro';
