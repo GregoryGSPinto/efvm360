@@ -480,6 +480,23 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
                   <label style={styles.label}>Nova Senha</label>
                   <input type="password" style={styles.input} value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} placeholder="Digite a nova senha" />
                 </div>
+                {/* Password requirements visual */}
+                {novaSenha && (
+                  <div style={{ padding: '10px 12px', background: tema.backgroundSecundario, borderRadius: '8px', border: `1px solid ${tema.cardBorda}` }}>
+                    <div style={{ fontSize: '10px', color: tema.textoSecundario, fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase' }}>Requisitos da senha:</div>
+                    {[
+                      { label: 'Mínimo 6 caracteres', ok: novaSenha.length >= 6 },
+                      { label: 'Contém letra maiúscula', ok: /[A-Z]/.test(novaSenha) },
+                      { label: 'Contém número', ok: /\d/.test(novaSenha) },
+                      { label: 'Senhas conferem', ok: novaSenha === confirmarNovaSenha && confirmarNovaSenha.length > 0 },
+                    ].map((req, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: req.ok ? tema.sucesso : tema.textoSecundario, marginBottom: 3 }}>
+                        <span style={{ fontSize: '12px' }}>{req.ok ? '✅' : '⬜'}</span>
+                        {req.label}
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <div>
                   <label style={styles.label}>Confirmar Nova Senha</label>
                   <input type="password" style={styles.input} value={confirmarNovaSenha} onChange={(e) => setConfirmarNovaSenha(e.target.value)} placeholder="Confirme a nova senha" />
@@ -608,6 +625,38 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
               </div>
             </div>
           )}
+        </Card>
+
+        {/* Font Size — Functional */}
+        <Card title="🔤 Tamanho da Fonte" styles={styles}>
+          <div style={{ marginBottom: '12px', fontSize: '12px', color: tema.textoSecundario }}>
+            Ajuste o tamanho base da fonte do sistema.
+          </div>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+            {[
+              { value: 'pequena', label: 'A', size: '12px', desc: 'Pequena' },
+              { value: 'normal', label: 'A', size: '14px', desc: 'Normal' },
+              { value: 'grande', label: 'A', size: '16px', desc: 'Grande' },
+              { value: 'extra', label: 'A', size: '18px', desc: 'Extra Grande' },
+            ].map(opt => {
+              const active = (config.preferenciasOperacionais?.tamanhoFonte || 'normal') === opt.value;
+              return (
+                <button key={opt.value} style={{
+                  flex: 1, minWidth: 80, padding: '14px 10px', borderRadius: 10, cursor: 'pointer',
+                  border: `2px solid ${active ? tema.primaria : tema.cardBorda}`,
+                  background: active ? `${tema.primaria}15` : tema.backgroundSecundario,
+                  textAlign: 'center', transition: 'all 150ms ease',
+                }} onClick={() => {
+                  atualizarPreferenciasOperacionais('tamanhoFonte', opt.value);
+                  document.documentElement.style.fontSize = opt.size;
+                }}>
+                  <div style={{ fontSize: opt.size, fontWeight: 700, color: active ? tema.primaria : tema.texto, marginBottom: 4 }}>{opt.label}</div>
+                  <div style={{ fontSize: '10px', color: tema.textoSecundario }}>{opt.desc}</div>
+                  {active && <div style={{ fontSize: '10px', color: tema.primaria, fontWeight: 600, marginTop: 4 }}>✓ Ativo</div>}
+                </button>
+              );
+            })}
+          </div>
         </Card>
 
         <Card title="👁️ Preview do Tema" styles={styles}>
@@ -1004,6 +1053,63 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
           </div>
         </Card>
 
+        {/* Daltonism Mode */}
+        <Card title="🎨 Modo Daltonismo" styles={styles}>
+          <div style={{ fontSize: '12px', color: tema.textoSecundario, marginBottom: '14px' }}>
+            Adapta as cores do sistema para pessoas com deficiência na percepção de cores.
+          </div>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            {[
+              { value: 'nenhum', label: 'Padrão', desc: 'Cores normais', preview: ['#dc2626','#16a34a','#d9a010'] },
+              { value: 'protanopia', label: 'Protanopia', desc: 'Dificuldade com vermelho', preview: ['#b0b000','#0070b0','#d9a010'] },
+              { value: 'deuteranopia', label: 'Deuteranopia', desc: 'Dificuldade com verde', preview: ['#dc2626','#0070b0','#d9a010'] },
+              { value: 'tritanopia', label: 'Tritanopia', desc: 'Dificuldade com azul', preview: ['#dc2626','#16a34a','#b000b0'] },
+            ].map(opt => {
+              const prefAcc = config.preferenciasAcessibilidade as unknown as Record<string, unknown>;
+              const active = prefAcc.daltonismo === opt.value ||
+                (!(prefAcc.daltonismo) && opt.value === 'nenhum');
+              return (
+                <button key={opt.value} style={{
+                  flex: 1, minWidth: 120, padding: '14px', borderRadius: 10, cursor: 'pointer',
+                  border: `2px solid ${active ? tema.primaria : tema.cardBorda}`,
+                  background: active ? `${tema.primaria}12` : tema.backgroundSecundario,
+                  textAlign: 'center', transition: 'all 150ms ease',
+                }} onClick={() => atualizarPreferenciasAcessibilidade('daltonismo', opt.value as unknown as boolean)}>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: 4, marginBottom: 6 }}>
+                    {opt.preview.map((c, i) => (
+                      <div key={i} style={{ width: 16, height: 16, borderRadius: 4, background: c }} />
+                    ))}
+                  </div>
+                  <div style={{ fontWeight: 600, color: active ? tema.primaria : tema.texto, fontSize: 12 }}>{opt.label}</div>
+                  <div style={{ fontSize: 10, color: tema.textoSecundario }}>{opt.desc}</div>
+                </button>
+              );
+            })}
+          </div>
+        </Card>
+
+        {/* Device Info */}
+        <Card title="📱 Informações do Dispositivo" styles={styles}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(180px, 100%), 1fr))', gap: 12 }}>
+            {[
+              { label: 'Navegador', value: (() => { const ua = navigator.userAgent; if (ua.includes('Chrome')) return 'Chrome'; if (ua.includes('Firefox')) return 'Firefox'; if (ua.includes('Safari')) return 'Safari'; return 'Outro'; })() },
+              { label: 'Plataforma', value: navigator.platform || 'Desconhecida' },
+              { label: 'Tela', value: `${window.screen.width}x${window.screen.height}` },
+              { label: 'Pixel Ratio', value: `${window.devicePixelRatio || 1}x` },
+              { label: 'Online', value: navigator.onLine ? 'Sim' : 'Não' },
+              { label: 'Idioma', value: navigator.language },
+            ].map((info, i) => (
+              <div key={i} style={{
+                padding: 12, background: tema.backgroundSecundario, borderRadius: 8,
+                border: `1px solid ${tema.cardBorda}`,
+              }}>
+                <div style={{ fontSize: 10, color: tema.textoSecundario, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>{info.label}</div>
+                <div style={{ fontWeight: 600, color: tema.texto, fontSize: 13, fontFamily: 'monospace' }}>{info.value}</div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
         <Card title="💡 Dicas de Acessibilidade" styles={styles}>
           <div style={{ fontSize: '13px', color: tema.texto, lineHeight: 1.6 }}>
             <p style={{ marginBottom: '12px' }}>O sistema EFVM360 foi projetado seguindo diretrizes de acessibilidade para garantir o uso por todos os colaboradores.</p>
@@ -1022,17 +1128,33 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
     const renderManual = () => (
       <>
         <Card title="📖 Manual do Software EFVM360" styles={styles}>
+          {/* Search box */}
+          <div style={{ marginBottom: '16px' }}>
+            <input
+              type="text"
+              style={{ ...styles.input, fontSize: '13px' }}
+              placeholder="🔍 Buscar no manual..."
+              onChange={(e) => {
+                const sections = document.querySelectorAll('[data-manual-section]');
+                const term = e.target.value.toLowerCase();
+                sections.forEach((el) => {
+                  const content = (el as HTMLElement).textContent?.toLowerCase() || '';
+                  (el as HTMLElement).style.display = !term || content.includes(term) ? 'block' : 'none';
+                });
+              }}
+            />
+          </div>
           <div style={{ fontSize: '13px', color: tema.texto, lineHeight: 1.7 }}>
-            
+
             {/* Visão Geral */}
-            <div style={{ marginBottom: '24px' }}>
+            <div data-manual-section style={{ marginBottom: '24px' }}>
               <h3 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '16px' }}>🔍 Visão Geral</h3>
               <p>O <strong>EFVM360 - Passagem de Serviço</strong> é um sistema digital desenvolvido para a <strong>Estrada de Ferro Vitória a Minas (EFVM)</strong>, com foco na digitalização e padronização do processo de passagem de serviço nos pátios da EFVM.</p>
               <p style={{ marginTop: '8px' }}>O sistema permite o registro completo de informações operacionais, garantindo continuidade, rastreabilidade e segurança nas operações ferroviárias.</p>
             </div>
 
             {/* Fluxo do Sistema */}
-            <div style={{ marginBottom: '24px' }}>
+            <div data-manual-section style={{ marginBottom: '24px' }}>
               <h3 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '16px' }}>🔄 Fluxo do Sistema</h3>
               <ol style={{ paddingLeft: '20px', margin: 0 }}>
                 <li style={{ marginBottom: '6px' }}><strong>Login:</strong> Acesse com sua matrícula e senha cadastrada</li>
@@ -1044,7 +1166,7 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
             </div>
 
             {/* Passagem de Serviço */}
-            <div style={{ marginBottom: '24px' }}>
+            <div data-manual-section style={{ marginBottom: '24px' }}>
               <h3 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '16px' }}>📋 Passagem de Serviço</h3>
               <p>A passagem de serviço é organizada em seções:</p>
               <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
@@ -1059,7 +1181,7 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
             </div>
 
             {/* DSS */}
-            <div style={{ marginBottom: '24px' }}>
+            <div data-manual-section style={{ marginBottom: '24px' }}>
               <h3 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '16px' }}>🛡️ DSS - Diálogo de Segurança</h3>
               <p>O DSS (Diálogo de Segurança, Saúde e Meio Ambiente) segue a norma <strong>PRO-041945 Rev. 02</strong> e deve ser realizado:</p>
               <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
@@ -1070,7 +1192,7 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
             </div>
 
             {/* BI+ */}
-            <div style={{ marginBottom: '24px' }}>
+            <div data-manual-section style={{ marginBottom: '24px' }}>
               <h3 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '16px' }}>📊 BI+ Dashboard</h3>
               <p>O painel de Business Intelligence apresenta indicadores operacionais em tempo real:</p>
               <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
@@ -1082,7 +1204,7 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
             </div>
 
             {/* AdamBoot */}
-            <div style={{ marginBottom: '24px' }}>
+            <div data-manual-section style={{ marginBottom: '24px' }}>
               <h3 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '16px' }}>🤖 AdamBoot - Assistente Inteligente</h3>
               <p>O <strong>AdamBoot</strong> é o assistente de IA do EFVM360 que auxilia o operador em tempo real:</p>
               <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
@@ -1095,7 +1217,7 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
             </div>
 
             {/* Configurações */}
-            <div style={{ marginBottom: '24px' }}>
+            <div data-manual-section style={{ marginBottom: '24px' }}>
               <h3 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '16px' }}>⚙️ Configurações</h3>
               <p>Personalize sua experiência nas configurações:</p>
               <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
@@ -1107,7 +1229,7 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
             </div>
 
             {/* Boas Práticas */}
-            <div style={{ marginBottom: '16px' }}>
+            <div data-manual-section style={{ marginBottom: '16px' }}>
               <h3 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '16px' }}>✅ Boas Práticas</h3>
               <ul style={{ paddingLeft: '20px', margin: 0 }}>
                 <li style={{ marginBottom: '6px' }}>Preencha todas as informações com atenção</li>
@@ -1210,6 +1332,31 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
               <div style={{ fontSize: '11px', color: tema.textoSecundario, marginBottom: '4px' }}>Ano</div>
               <div style={{ fontWeight: 600, color: tema.texto, fontSize: '13px' }}>2025</div>
             </div>
+          </div>
+        </Card>
+
+        {/* Stack Tecnológico */}
+        <Card title="🔧 Stack Tecnológico" styles={styles}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(140px, 100%), 1fr))', gap: '10px' }}>
+            {[
+              { label: 'React', version: '18.3', icon: '⚛️' },
+              { label: 'TypeScript', version: '5.x', icon: '🔷' },
+              { label: 'Vite', version: '6.x', icon: '⚡' },
+              { label: 'DDD', version: 'Event Sourcing', icon: '🏛️' },
+              { label: 'CQRS', version: 'EventProjector', icon: '📊' },
+              { label: 'IndexedDB', version: 'Offline-first', icon: '💾' },
+              { label: 'SHA-256', version: 'IntegrityService', icon: '🔐' },
+              { label: 'RBAC', version: '4 Níveis', icon: '🛡️' },
+            ].map((tech, i) => (
+              <div key={i} style={{
+                padding: '12px', background: tema.backgroundSecundario, borderRadius: '10px',
+                border: `1px solid ${tema.cardBorda}`, textAlign: 'center',
+              }}>
+                <div style={{ fontSize: '20px', marginBottom: '4px' }}>{tech.icon}</div>
+                <div style={{ fontWeight: 600, color: tema.texto, fontSize: '12px' }}>{tech.label}</div>
+                <div style={{ fontSize: '10px', color: tema.textoSecundario }}>{tech.version}</div>
+              </div>
+            ))}
           </div>
         </Card>
 

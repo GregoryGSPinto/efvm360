@@ -1,23 +1,27 @@
 // ============================================================================
-// EFVM360 — BottomNavigation — Navegação Inferior Mobile (< 768px)
+// EFVM360 — BottomNavigation — Navegacao Inferior Mobile (< 768px)
+// NOTE: This component is NOT actively used. MobileBottomNav is the active one.
+// Kept for reference. Uses React Router for active state.
 // ============================================================================
 import { memo } from 'react';
+import { useLocation } from 'react-router-dom';
 import type { TemaEstilos, ConfiguracaoSistema } from '../../types';
 import type { NavItem } from './useNavItems';
+import { NAV_ID_TO_PATH, ROUTES } from '../../router/routes';
 
 interface BottomNavigationProps {
   tema: TemaEstilos;
   config: ConfiguracaoSistema;
   navItems: NavItem[];
-  paginaAtiva: string;
-  mostrarPaginaDSS: boolean;
   onNavigate: (id: string) => void;
 }
 
 export const BottomNavigation = memo<BottomNavigationProps>(({
-  tema, config, navItems, paginaAtiva, mostrarPaginaDSS, onNavigate,
+  tema, config, navItems, onNavigate,
 }) => {
+  const location = useLocation();
   const isDark = config.tema === 'escuro';
+  const currentPath = location.pathname;
 
   return (
     <nav
@@ -42,7 +46,8 @@ export const BottomNavigation = memo<BottomNavigationProps>(({
       }}
     >
       {navItems.map(item => {
-        const isActive = paginaAtiva === item.id || (item.id === 'dss' && mostrarPaginaDSS);
+        const targetPath = NAV_ID_TO_PATH[item.id] || `/${item.id}`;
+        const isActive = currentPath === targetPath || (item.id === 'dss' && currentPath === ROUTES.DSS);
         return (
           <button
             key={`bnav-${item.id}`}
@@ -79,7 +84,7 @@ export const BottomNavigation = memo<BottomNavigationProps>(({
               textTransform: 'uppercase',
               whiteSpace: 'nowrap',
             }}>
-              {item.label.length > 10 ? item.label.slice(0, 8) + '…' : item.label}
+              {item.label.length > 10 ? item.label.slice(0, 8) + '\u2026' : item.label}
             </span>
             {item.badgeDyn && item.badgeDyn > 0 && (
               <span style={{

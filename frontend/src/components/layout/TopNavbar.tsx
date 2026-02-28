@@ -2,10 +2,13 @@
 // EFVM360 — TopNavbar — Enterprise Flat Navigation (Desktop/Tablet)
 // Left: Logo | Center: Flat nav links | Right: Avatar dropdown
 // No submenus. Single-click access to all modules.
+// Uses React Router for navigation and active state detection.
 // ============================================================================
 import { memo, useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import type { TemaEstilos, ConfiguracaoSistema, Usuario } from '../../types';
 import { OnlineStatusInline } from './OnlineIndicator';
+import { NAV_ID_TO_PATH, PATH_TO_NAV_ID, ROUTES } from '../../router/routes';
 
 import { getHierarchyLevelForRole } from '../../domain/aggregates/UserAggregate';
 import { HierarchyLevel } from '../../domain/contracts';
@@ -15,7 +18,7 @@ const BASE_NAV_ITEMS = [
   { id: 'passagem', label: 'Boa Jornada' },
   { id: 'dss',       label: 'DSS' },
   { id: 'analytics', label: 'BI+' },
-  { id: 'historico', label: 'Histórico' },
+  { id: 'historico', label: 'Historico' },
   { id: 'layout',    label: 'Layout' },
 ];
 
@@ -23,8 +26,6 @@ const BASE_NAV_ITEMS = [
 interface TopNavbarProps {
   tema: TemaEstilos;
   config: ConfiguracaoSistema;
-  paginaAtiva: string;
-  mostrarPaginaDSS: boolean;
   onNavigate: (id: string) => void;
   usuarioLogado: Usuario | null;
   funcaoLabel: string;
@@ -35,19 +36,20 @@ interface TopNavbarProps {
 
 // ── Component ──────────────────────────────────────────────────────────
 export const TopNavbar = memo<TopNavbarProps>(({
-  tema: _tema, config, paginaAtiva, mostrarPaginaDSS, onNavigate,
+  tema: _tema, config, onNavigate,
   usuarioLogado, funcaoLabel, onLogout, pendingCount = 0,
   onlineStatus = 'online',
 }) => {
+  const location = useLocation();
   const [avatarOpen, setAvatarOpen] = useState(false);
   const avatarRef = useRef<HTMLDivElement>(null);
 
-  // Build nav items — add "Gestão" if user has inspection level or higher
+  // Build nav items — add "Gestao" if user has inspection level or higher
   const hierarchyLevel = getHierarchyLevelForRole(usuarioLogado?.funcao || '');
   const NAV_ITEMS = [
     ...BASE_NAV_ITEMS,
     ...(hierarchyLevel >= HierarchyLevel.INSPECTION
-      ? [{ id: 'gestao', label: 'Gestão' }]
+      ? [{ id: 'gestao', label: 'Gestao' }]
       : []),
   ];
 
@@ -72,13 +74,17 @@ export const TopNavbar = memo<TopNavbarProps>(({
   const activeColor = '#007e7a';
   const activeBg    = dk ? 'rgba(0,126,122,0.15)' : 'rgba(0,126,122,0.08)';
 
-  // ── Active state logic ──
+  // ── Active state logic (derived from URL) ──
+  const currentPath = location.pathname;
   const isActive = (id: string): boolean => {
-    if (id === 'dss') return mostrarPaginaDSS;
-    if (id === 'passagem') return (paginaAtiva === 'passagem' || paginaAtiva === 'inicial') && !mostrarPaginaDSS;
-    if (id === 'gestao') return paginaAtiva === 'gestao' && !mostrarPaginaDSS;
-    return paginaAtiva === id && !mostrarPaginaDSS;
+    const targetPath = NAV_ID_TO_PATH[id];
+    if (id === 'dss') return currentPath === ROUTES.DSS;
+    if (id === 'passagem') return currentPath === ROUTES.PASSAGEM || currentPath === ROUTES.HOME;
+    return currentPath === targetPath;
   };
+
+  // Derive active page for avatar dropdown highlight
+  const currentPageId = PATH_TO_NAV_ID[currentPath] || 'inicial';
 
   return (
     <header className="efvm360-topnav" style={{
@@ -202,31 +208,31 @@ export const TopNavbar = memo<TopNavbarProps>(({
                   onClick={() => { onNavigate('perfil'); setAvatarOpen(false); }}
                   style={{
                     display: 'block', width: '100%', padding: '10px 16px', border: 'none',
-                    background: paginaAtiva === 'perfil' ? activeBg : 'transparent',
-                    color: paginaAtiva === 'perfil' ? activeColor : txt,
+                    background: currentPageId === 'perfil' ? activeBg : 'transparent',
+                    color: currentPageId === 'perfil' ? activeColor : txt,
                     fontSize: 13, fontWeight: 500, textAlign: 'left', cursor: 'pointer',
                     transition: 'background 100ms ease',
                   }}
                   onMouseEnter={e => e.currentTarget.style.background = hover}
                   onMouseLeave={e => e.currentTarget.style.background =
-                    paginaAtiva === 'perfil' ? activeBg : 'transparent'}
+                    currentPageId === 'perfil' ? activeBg : 'transparent'}
                 >
-                  👤  Meu Perfil
+                  Meu Perfil
                 </button>
                 <button
                   onClick={() => { onNavigate('configuracoes'); setAvatarOpen(false); }}
                   style={{
                     display: 'block', width: '100%', padding: '10px 16px', border: 'none',
-                    background: paginaAtiva === 'configuracoes' ? activeBg : 'transparent',
-                    color: paginaAtiva === 'configuracoes' ? activeColor : txt,
+                    background: currentPageId === 'configuracoes' ? activeBg : 'transparent',
+                    color: currentPageId === 'configuracoes' ? activeColor : txt,
                     fontSize: 13, fontWeight: 500, textAlign: 'left', cursor: 'pointer',
                     transition: 'background 100ms ease',
                   }}
                   onMouseEnter={e => e.currentTarget.style.background = hover}
                   onMouseLeave={e => e.currentTarget.style.background =
-                    paginaAtiva === 'configuracoes' ? activeBg : 'transparent'}
+                    currentPageId === 'configuracoes' ? activeBg : 'transparent'}
                 >
-                  ⚙️  Configurações
+                  Configuracoes
                 </button>
                 <div style={{ borderTop: `1px solid ${bd}` }}>
                   <button
@@ -241,7 +247,7 @@ export const TopNavbar = memo<TopNavbarProps>(({
                       dk ? 'rgba(220,38,38,0.10)' : 'rgba(220,38,38,0.05)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                   >
-                    🚪 Sair do sistema
+                    Sair do sistema
                   </button>
                 </div>
               </div>

@@ -3,13 +3,107 @@
 // Extraída de App.tsx renderPaginaPassagem() + section renderers
 // ============================================================================
 
-import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
+import { useState, useRef, useCallback, useMemo, useEffect, memo } from 'react';
 import type { PaginaPassagemProps } from '../types';
-import type { DadosFormulario, UsuarioCadastro } from '../../types';
+import type { DadosFormulario, UsuarioCadastro, TemaEstilos } from '../../types';
 import { ChecklistSeguranca, Card, StatusBadge, AICopilotPassagem, AIRiskScore } from '../../components';
 import { TabelaPatio, TabelaEquipamentos } from '../../components/tables';
 import { SECOES_FORMULARIO, TURNOS, SENSOS_5S, NIVEIS_MATURIDADE_5S, SUGESTOES_PONTOS_ATENCAO, STORAGE_KEYS } from '../../utils/constants';
 import { ALL_YARD_CODES, getYardShortName, type YardCode } from '../../domain/aggregates/YardRegistry';
+import type { StylesObject } from '../../hooks/useStyles';
+
+// ── ItemSegurancaSimNao — Extracted to avoid inline re-creation ──────
+interface ItemSegurancaSimNaoProps {
+  label: string;
+  campo: string;
+  valor: { resposta: boolean | null; observacao: string } | boolean | null;
+  observacao?: string;
+  onChangeValor: (val: boolean) => void;
+  onChangeObs?: (obs: string) => void;
+  mostrarDetalhesQuandoSim?: boolean;
+  detalhesRender?: () => JSX.Element;
+  tema: TemaEstilos;
+  styles: StylesObject;
+}
+
+const ItemSegurancaSimNao = memo<ItemSegurancaSimNaoProps>(({
+  label,
+  campo: _campo,
+  valor,
+  observacao,
+  onChangeValor,
+  onChangeObs,
+  mostrarDetalhesQuandoSim = false,
+  detalhesRender,
+  tema,
+  styles,
+}) => {
+  const resposta = typeof valor === 'object' && valor !== null ? valor.resposta : valor;
+  const obs = typeof valor === 'object' && valor !== null ? valor.observacao : observacao || '';
+  const showDetails = mostrarDetalhesQuandoSim && resposta === true && !!detalhesRender;
+
+  return (
+    <div style={{
+      padding: '16px',
+      background: tema.backgroundSecundario,
+      borderRadius: '12px',
+      border: `1px solid ${tema.cardBorda}`,
+      marginBottom: '16px',
+    }}>
+      <label style={{ ...styles.label, marginBottom: '12px', display: 'block' }}>{label} *</label>
+      <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
+        {[
+          { value: true, label: '✓ Sim', color: tema.aviso },
+          { value: false, label: '✗ Não', color: tema.sucesso },
+        ].map((opt) => (
+          <button
+            key={String(opt.value)}
+            type="button"
+            style={{
+              ...styles.button,
+              flex: 1,
+              background: resposta === opt.value ? opt.color : tema.buttonInativo,
+              color: resposta === opt.value ? '#fff' : tema.texto,
+              border: `2px solid ${resposta === opt.value ? opt.color : tema.cardBorda}`,
+              fontWeight: resposta === opt.value ? 700 : 400,
+            }}
+            onClick={() => onChangeValor(opt.value)}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Detalhes adicionais — CSS transition for smooth accordion */}
+      <div style={{
+        overflow: 'hidden',
+        maxHeight: showDetails ? '500px' : '0px',
+        opacity: showDetails ? 1 : 0,
+        transition: 'max-height 350ms ease, opacity 250ms ease',
+      }}
+        onClick={e => e.stopPropagation()}
+      >
+        {detalhesRender && detalhesRender()}
+      </div>
+
+      {/* Observação sempre visível */}
+      <div style={{ marginTop: '12px' }}>
+        <label style={{ fontSize: '11px', color: tema.textoSecundario, marginBottom: '4px', display: 'block' }}>
+          📝 Observação (opcional)
+        </label>
+        <input
+          type="text"
+          style={{ ...styles.input, fontSize: '13px' }}
+          placeholder="Adicione uma observação..."
+          value={obs}
+          onChange={(e) => onChangeObs && onChangeObs(e.target.value)}
+        />
+      </div>
+    </div>
+  );
+});
+
+ItemSegurancaSimNao.displayName = 'ItemSegurancaSimNao';
 
 export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element {
   const {
@@ -781,6 +875,9 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
               onUpdate={atualizarEquipamento}
               styles={styles}
               tema={tema}
+              userRole={usuarioLogado?.funcao}
+              userName={usuarioLogado?.nome}
+              userMatricula={usuarioLogado?.matricula}
             />
           </Card>
         );
@@ -1382,82 +1479,6 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
   const renderSecaoSeguranca = (): JSX.Element => {
     const seg = dadosFormulario.segurancaManobras;
 
-    // Componente para item Sim/Não com observação
-    const ItemSegurancaSimNao = ({
-      label,
-      campo: _campo,
-      valor,
-      observacao,
-      onChangeValor,
-      onChangeObs,
-      mostrarDetalhesQuandoSim = false,
-      detalhesRender
-    }: {
-      label: string;
-      campo: string;
-      valor: { resposta: boolean | null; observacao: string } | boolean | null;
-      observacao?: string;
-      onChangeValor: (val: boolean) => void;
-      onChangeObs?: (obs: string) => void;
-      mostrarDetalhesQuandoSim?: boolean;
-      detalhesRender?: () => JSX.Element;
-    }) => {
-      // Compatibilidade com formato antigo e novo
-      const resposta = typeof valor === 'object' && valor !== null ? valor.resposta : valor;
-      const obs = typeof valor === 'object' && valor !== null ? valor.observacao : observacao || '';
-
-      return (
-        <div style={{
-          padding: '16px',
-          background: tema.backgroundSecundario,
-          borderRadius: '12px',
-          border: `1px solid ${tema.cardBorda}`,
-          marginBottom: '16px',
-        }}>
-          <label style={{ ...styles.label, marginBottom: '12px', display: 'block' }}>{label} *</label>
-          <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
-            {[
-              { value: true, label: '✓ Sim', color: tema.aviso },
-              { value: false, label: '✗ Não', color: tema.sucesso },
-            ].map((opt) => (
-              <button
-                key={String(opt.value)}
-                type="button"
-                style={{
-                  ...styles.button,
-                  flex: 1,
-                  background: resposta === opt.value ? opt.color : tema.buttonInativo,
-                  color: resposta === opt.value ? '#fff' : tema.texto,
-                  border: `2px solid ${resposta === opt.value ? opt.color : tema.cardBorda}`,
-                  fontWeight: resposta === opt.value ? 700 : 400,
-                }}
-                onClick={() => onChangeValor(opt.value)}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Detalhes adicionais quando Sim */}
-          {mostrarDetalhesQuandoSim && resposta === true && detalhesRender && detalhesRender()}
-
-          {/* Observação sempre visível */}
-          <div style={{ marginTop: '12px' }}>
-            <label style={{ fontSize: '11px', color: tema.textoSecundario, marginBottom: '4px', display: 'block' }}>
-              📝 Observação (opcional)
-            </label>
-            <input
-              type="text"
-              style={{ ...styles.input, fontSize: '13px' }}
-              placeholder="Adicione uma observação..."
-              value={obs}
-              onChange={(e) => onChangeObs && onChangeObs(e.target.value)}
-            />
-          </div>
-        </div>
-      );
-    };
-
     return (
       <>
         <Card title="🛡️ Segurança em Manobras" styles={styles}>
@@ -1467,6 +1488,7 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
 
           {/* 1. Houve Manobras Críticas */}
           <ItemSegurancaSimNao
+            tema={tema} styles={styles}
             label="1. Houve manobras críticas no turno?"
             campo="houveManobras"
             valor={seg.houveManobras}
@@ -1505,6 +1527,7 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
 
           {/* 2. Freios Verificados */}
           <ItemSegurancaSimNao
+            tema={tema} styles={styles}
             label="2. Freios verificados na entrega do turno?"
             campo="freiosVerificados"
             valor={seg.freiosVerificados}
@@ -1549,6 +1572,7 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
 
           {/* 3. Ponto Crítico */}
           <ItemSegurancaSimNao
+            tema={tema} styles={styles}
             label="3. Existe ponto crítico para o próximo turno?"
             campo="pontoCritico"
             valor={seg.pontoCritico}
@@ -1571,6 +1595,7 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
 
           {/* 4. Linha Livre */}
           <ItemSegurancaSimNao
+            tema={tema} styles={styles}
             label="4. Linha livre para movimentação?"
             campo="linhaLivre"
             valor={seg.linhaLivre}
@@ -1581,6 +1606,7 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
 
           {/* 5. Comunicação Realizada */}
           <ItemSegurancaSimNao
+            tema={tema} styles={styles}
             label="5. Comunicação operacional realizada?"
             campo="comunicacaoRealizada"
             valor={seg.comunicacaoRealizada}
@@ -1624,6 +1650,7 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
 
           {/* 6. Restrição Operacional */}
           <ItemSegurancaSimNao
+            tema={tema} styles={styles}
             label="6. Existe restrição operacional ativa?"
             campo="restricaoAtiva"
             valor={seg.restricaoAtiva}

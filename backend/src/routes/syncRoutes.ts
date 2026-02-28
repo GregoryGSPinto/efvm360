@@ -4,12 +4,13 @@
 
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth';
+import { sincronizarBatchValidator, handleValidationErrors } from '../middleware/validators';
 import * as syncCtrl from '../controllers/syncController';
 
 const router = Router();
 
 // POST /api/v1/sync/passagens — Batch sync (offline-first)
-router.post('/passagens', authenticate, syncCtrl.sincronizarBatch);
+router.post('/passagens', authenticate, sincronizarBatchValidator, handleValidationErrors, syncCtrl.sincronizarBatch);
 
 // GET /api/v1/sync/status — Sync diagnostics
 router.get('/status', authenticate, syncCtrl.statusSync);

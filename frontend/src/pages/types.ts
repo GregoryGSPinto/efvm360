@@ -64,9 +64,7 @@ export interface PaginaInicialProps {
   temaDSSAnterior: string;
   obterLetraTurno: () => string;
   obterJanelaHoraria: () => string;
-  setPaginaAtiva: (pagina: string) => void;
   setSecaoFormulario: (secao: string) => void;
-  setMostrarPaginaDSS: (show: boolean) => void;
   usuarioLogado?: Usuario | null;
 }
 

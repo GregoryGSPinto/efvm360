@@ -116,6 +116,42 @@ export const LoginScreenPremium = memo<Props>(({
               ) : 'ACESSAR SISTEMA'}
             </button>
 
+            {/* Demo Credentials Card */}
+            <div style={{
+              marginTop:16, padding:'12px 16px',
+              background: dk ? 'rgba(0,126,122,0.08)' : 'rgba(0,126,122,0.04)',
+              border:`1px solid ${dk ? 'rgba(0,126,122,0.25)' : 'rgba(0,126,122,0.15)'}`,
+              borderRadius:10,
+            }}>
+              <div style={{ fontSize:10, fontWeight:700, color:'#007e7a', textTransform:'uppercase', letterSpacing:0.8, marginBottom:8 }}>
+                🔑 Credenciais de Demonstração
+              </div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6 }}>
+                {[
+                  { mat: 'VFZ1001', role: 'Maquinista' },
+                  { mat: 'VFZ2001', role: 'Inspetor' },
+                  { mat: 'VFZ3001', role: 'Gestor' },
+                  { mat: 'ADM9001', role: 'Admin' },
+                ].map(c => (
+                  <button key={c.mat} type="button" style={{
+                    padding:'6px 10px', borderRadius:6, border:`1px solid ${dk?'#333':'#e0e0e0'}`,
+                    background:dk?'#2a2a2a':'#fff', cursor:'pointer', textAlign:'left',
+                    transition:'all 120ms ease',
+                  }}
+                    onClick={() => onFormChange(p => ({...p, matricula:c.mat, senha:'123456'}))}
+                    onMouseEnter={e => e.currentTarget.style.borderColor='#007e7a'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor=dk?'#333':'#e0e0e0'}
+                  >
+                    <div style={{ fontSize:12, fontWeight:600, color:txt, fontFamily:'monospace' }}>{c.mat}</div>
+                    <div style={{ fontSize:10, color:txt2 }}>{c.role}</div>
+                  </button>
+                ))}
+              </div>
+              <div style={{ fontSize:10, color:txt2, marginTop:8, textAlign:'center' }}>
+                Senha padrão: <span style={{ fontWeight:700, color:'#007e7a', fontFamily:'monospace' }}>123456</span>
+              </div>
+            </div>
+
             <div style={{ display:'flex', justifyContent:'center', gap:8, marginTop:16, fontSize:12, color:txt2 }}>
               <span style={{cursor:'pointer'}} onClick={() => setTela('rec')}
                 onMouseEnter={e=>e.currentTarget.style.color='#007e7a'}

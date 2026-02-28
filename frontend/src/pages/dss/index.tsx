@@ -50,8 +50,13 @@ export const PaginaDSS: React.FC<PaginaDSSProps> = ({ tema, styles, onVoltar, su
   const [mostrarHistorico, setMostrarHistorico] = useState(false);
   const [mensagemSucesso, setMensagemSucesso] = useState('');
   const [erroTemaDuplicado, setErroTemaDuplicado] = useState('');
+  const [erroTopicoDuplicado, setErroTopicoDuplicado] = useState('');
   const [buscaTema, setBuscaTema] = useState('');
   const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
+  // Experience layer state
+  const [experiencias, setExperiencias] = useState<Array<{ autor: string; texto: string; data: string }>>([]);
+  const [novaExperiencia, setNovaExperiencia] = useState('');
+  const [mostrarFormExperiencia, setMostrarFormExperiencia] = useState(false);
 
   // Categorias de temas
   const categoriasTemas = useMemo(() => {
@@ -107,15 +112,41 @@ export const PaginaDSS: React.FC<PaginaDSSProps> = ({ tema, styles, onVoltar, su
     };
   }, [buscaTema, temasGlobais]);
 
+  // Verificar tópico duplicado no mesmo tema (case-insensitive)
+  const verificarTopicoDuplicado = (topico: string): boolean => {
+    if (!topico.trim() || !dadosDSS.tema) return false;
+    const topicoNorm = topico.trim().toLowerCase().replace(/\s+/g, ' ');
+    const temaNorm = dadosDSS.tema.trim().toLowerCase().replace(/\s+/g, ' ');
+    return historicoDSS.some(dss =>
+      dss.tema.trim().toLowerCase().replace(/\s+/g, ' ') === temaNorm &&
+      (dss.topico || '').trim().toLowerCase().replace(/\s+/g, ' ') === topicoNorm
+    );
+  };
+
   const handleSalvar = () => {
     if (dadosDSS.temaPersonalizado && verificarTemaDuplicado(dadosDSS.tema)) {
       setErroTemaDuplicado('Tema já existe no histórico. Por favor, escolha um tema diferente.');
       return;
     }
-    
+    if (dadosDSS.topico && verificarTopicoDuplicado(dadosDSS.topico)) {
+      setErroTopicoDuplicado('⚠️ Tópico já registrado neste tema');
+      return;
+    }
+
     if (salvarDSS()) {
       setMensagemSucesso('DSS registrado com sucesso!');
       setErroTemaDuplicado('');
+      setErroTopicoDuplicado('');
+      // Save experiences with DSS
+      if (experiencias.length > 0) {
+        try {
+          const key = `efvm360-dss-experiencias-${Date.now()}`;
+          localStorage.setItem(key, JSON.stringify({ tema: dadosDSS.tema, experiencias }));
+        } catch { /* quota exceeded */ }
+      }
+      setExperiencias([]);
+      setNovaExperiencia('');
+      setMostrarFormExperiencia(false);
       setTimeout(() => setMensagemSucesso(''), 3000);
     }
   };
@@ -709,11 +740,29 @@ export const PaginaDSS: React.FC<PaginaDSSProps> = ({ tema, styles, onVoltar, su
             </label>
             <input
               type="text"
-              style={styles.input}
+              style={{
+                ...styles.input,
+                borderColor: erroTopicoDuplicado ? tema.perigo : undefined,
+              }}
               placeholder="Ex: Procedimento de bloqueio, Uso de EPI específico..."
               value={dadosDSS.topico || ''}
-              onChange={(e) => atualizarTopico(e.target.value)}
+              onChange={(e) => {
+                atualizarTopico(e.target.value);
+                if (verificarTopicoDuplicado(e.target.value)) {
+                  setErroTopicoDuplicado('⚠️ Tópico já registrado neste tema');
+                } else {
+                  setErroTopicoDuplicado('');
+                }
+              }}
             />
+            {erroTopicoDuplicado && (
+              <div style={{
+                color: tema.perigo, fontSize: '11px', marginTop: '6px',
+                padding: '6px 10px', background: `${tema.perigo}15`, borderRadius: '6px',
+              }}>
+                {erroTopicoDuplicado}
+              </div>
+            )}
             <div style={{ fontSize: '10px', color: tema.textoSecundario, marginTop: '4px' }}>
               💡 O tópico ajuda a especificar o assunto abordado dentro do tema selecionado.
             </div>
@@ -803,6 +852,98 @@ export const PaginaDSS: React.FC<PaginaDSSProps> = ({ tema, styles, onVoltar, su
             />
           </div>
         </div>
+      </div>
+
+      {/* CARD 5 - Camada de Experiências */}
+      <div style={cardStyle}>
+        <h3 style={cardTitleStyle}>
+          💡 5. Experiências Compartilhadas
+          <span style={{ fontSize: '11px', fontWeight: 400, color: tema.textoSecundario, marginLeft: '8px' }}>
+            (opcional)
+          </span>
+        </h3>
+        <div style={{ fontSize: '12px', color: tema.textoSecundario, marginBottom: '14px' }}>
+          Compartilhe vivências práticas relacionadas ao tema discutido.
+        </div>
+
+        {/* Lista de experiências adicionadas */}
+        {experiencias.length > 0 && (
+          <div style={{ marginBottom: '14px' }}>
+            {experiencias.map((exp, idx) => (
+              <div key={idx} style={{
+                padding: '12px', marginBottom: '8px',
+                background: `${tema.primaria}08`, border: `1px solid ${tema.primaria}25`,
+                borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px',
+              }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '13px', color: tema.texto }}>{exp.texto}</div>
+                  <div style={{ fontSize: '10px', color: tema.textoSecundario, marginTop: '4px' }}>
+                    {exp.autor} · {exp.data}
+                  </div>
+                </div>
+                <button type="button" onClick={() => setExperiencias(prev => prev.filter((_, i) => i !== idx))}
+                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: tema.perigo, fontSize: '14px', padding: '2px 6px' }}>
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Form para nova experiência */}
+        {mostrarFormExperiencia ? (
+          <div style={{
+            padding: '14px', background: tema.backgroundSecundario,
+            borderRadius: '10px', border: `1px solid ${tema.cardBorda}`,
+          }}>
+            <label style={styles.label}>Descreva sua experiência</label>
+            <textarea
+              style={styles.textarea}
+              placeholder="Ex: Na semana passada, ao realizar o bloqueio do AMV-15, percebi que..."
+              value={novaExperiencia}
+              onChange={(e) => setNovaExperiencia(e.target.value)}
+              rows={3}
+            />
+            <div style={{ display: 'flex', gap: '8px', marginTop: '10px', justifyContent: 'flex-end' }}>
+              <button type="button" onClick={() => { setMostrarFormExperiencia(false); setNovaExperiencia(''); }}
+                style={{ ...styles.button, padding: '8px 16px', background: tema.buttonInativo, color: tema.texto, border: `1px solid ${tema.cardBorda}`, fontSize: '12px' }}>
+                Cancelar
+              </button>
+              <button type="button"
+                onClick={() => {
+                  if (novaExperiencia.trim()) {
+                    setExperiencias(prev => [...prev, {
+                      autor: dadosDSS.identificacao.facilitador || 'Anônimo',
+                      texto: novaExperiencia.trim(),
+                      data: new Date().toLocaleDateString('pt-BR'),
+                    }]);
+                    setNovaExperiencia('');
+                    setMostrarFormExperiencia(false);
+                  }
+                }}
+                disabled={!novaExperiencia.trim()}
+                style={{
+                  ...styles.button, padding: '8px 16px', fontSize: '12px', fontWeight: 600,
+                  background: novaExperiencia.trim() ? tema.primaria : tema.buttonInativo,
+                  color: novaExperiencia.trim() ? '#fff' : tema.textoSecundario,
+                  border: 'none', cursor: novaExperiencia.trim() ? 'pointer' : 'not-allowed',
+                }}>
+                ✓ Adicionar
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button type="button"
+            onClick={() => setMostrarFormExperiencia(true)}
+            style={{
+              ...styles.button, width: '100%', padding: '12px',
+              background: `${tema.primaria}10`, color: tema.primaria,
+              border: `2px dashed ${tema.primaria}40`, fontWeight: 600, fontSize: '13px',
+              cursor: 'pointer', borderRadius: '10px',
+            }}>
+            + Adicionar Experiência
+          </button>
+        )}
       </div>
 
       {/* Disclaimer */}

@@ -4,8 +4,10 @@
 // ============================================================================
 
 import { useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { PaginaInicialProps } from '../types';
 import { GaugeCircular, StatCard, AlertaCard, ProgressBar } from '../../components/ui';
+import { ROUTES } from '../../router/routes';
 import {
   Sun, Moon, Calendar, TrainFront, MessageCircle, FileText,
   AlertTriangle, CheckCircle, ClipboardList, FolderOpen, ArrowRight, BarChart3,
@@ -20,6 +22,36 @@ const SCOPED_CSS = `
 }
 .efvm-pulse-dot {
   animation: efvm-pulse 1.4s ease-in-out infinite;
+}
+@keyframes efvm-marquee {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+.efvm-demo-banner {
+  position: sticky;
+  top: 0;
+  z-index: 500;
+  background: linear-gradient(90deg, #E53935 0%, #FFCC00 50%, #E53935 100%);
+  background-size: 200% 100%;
+  animation: efvm-banner-bg 6s ease-in-out infinite;
+  overflow: hidden;
+  padding: 8px 0;
+  margin: -24px -24px 20px -24px;
+  box-shadow: 0 2px 8px rgba(229,57,53,0.3);
+}
+@keyframes efvm-banner-bg {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.efvm-demo-banner-text {
+  display: inline-block;
+  white-space: nowrap;
+  animation: efvm-marquee 15s linear infinite;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 .efvm-dash-grid-stats {
   display: grid;
@@ -79,9 +111,11 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
   const {
     tema, styles, dadosFormulario, historicoTurnos, historicoDSS,
     alertasCriticos, estatisticasPatio, tempoTurnoDecorrido, temaDSSAnterior,
-    obterLetraTurno, obterJanelaHoraria, setPaginaAtiva, setSecaoFormulario,
-    setMostrarPaginaDSS, usuarioLogado,
+    obterLetraTurno, obterJanelaHoraria, setSecaoFormulario,
+    usuarioLogado,
   } = props;
+
+  const navigate = useNavigate();
 
   // ── Memoized values ───────────────────────────────────────────────────
 
@@ -122,21 +156,21 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
   // ── Memoized callbacks ────────────────────────────────────────────────
 
   const irParaPassagem = useCallback(() => {
-    setPaginaAtiva('passagem');
+    navigate(ROUTES.PASSAGEM);
     setSecaoFormulario('cabecalho');
-  }, [setPaginaAtiva, setSecaoFormulario]);
+  }, [navigate, setSecaoFormulario]);
 
   const continuarPassagem = useCallback(() => {
-    setPaginaAtiva('passagem');
-  }, [setPaginaAtiva]);
+    navigate(ROUTES.PASSAGEM);
+  }, [navigate]);
 
   const abrirDSS = useCallback(() => {
-    setMostrarPaginaDSS(true);
-  }, [setMostrarPaginaDSS]);
+    navigate(ROUTES.DSS);
+  }, [navigate]);
 
   const abrirBI = useCallback(() => {
-    setPaginaAtiva('analytics');
-  }, [setPaginaAtiva]);
+    navigate(ROUTES.ANALYTICS);
+  }, [navigate]);
 
   // ── Derived state ─────────────────────────────────────────────────────
 
@@ -146,6 +180,13 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
   return (
     <>
       <style>{SCOPED_CSS}</style>
+
+      {/* ── DEMO BANNER: Animated Marquee ──────────────────────────────── */}
+      <div className="efvm-demo-banner">
+        <div className="efvm-demo-banner-text">
+          &#x26A0;&#xFE0F; Software em Modo Demo &mdash; Ambiente de Demonstracao &nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp; &#x26A0;&#xFE0F; Software em Modo Demo &mdash; Ambiente de Demonstracao &nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp; &#x26A0;&#xFE0F; Software em Modo Demo &mdash; Ambiente de Demonstracao
+        </div>
+      </div>
 
       {/* ── HEADER: Greeting ──────────────────────────────────────────── */}
       <div
@@ -500,6 +541,21 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
           BI+ Avancado
         </button>
       </div>
+
+      {/* ── FOOTER ──────────────────────────────────────────────────── */}
+      <footer style={{
+        marginTop: 32,
+        padding: '20px 0 8px',
+        borderTop: `1px solid ${tema.cardBorda}`,
+        textAlign: 'center',
+      }}>
+        <div style={{ fontSize: 12, color: tema.textoSecundario, lineHeight: 1.8 }}>
+          &copy; 2025 EFVM360 Enterprise &mdash; Todos os direitos reservados
+        </div>
+        <div style={{ fontSize: 11, color: tema.textoSecundario, opacity: 0.7 }}>
+          Desenvolvido por Gregory Guimaraes
+        </div>
+      </footer>
     </>
   );
 }

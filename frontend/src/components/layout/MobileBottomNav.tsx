@@ -1,27 +1,28 @@
 // ============================================================================
 // EFVM360 — MobileBottomNav — Fixed Bottom Navigation Bar
 // Mobile-native pattern: icon + label, 44px touch targets, no submenus
+// Uses React Router for active state detection.
 // ============================================================================
 import { memo, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import type { TemaEstilos, ConfiguracaoSistema } from '../../types';
 import { getHierarchyLevelForRole } from '../../domain/aggregates/UserAggregate';
 import { HierarchyLevel } from '../../domain/contracts';
+import { NAV_ID_TO_PATH, ROUTES } from '../../router/routes';
 
 // ── Navigation Items ───────────────────────────────────────────────────
 const BASE_NAV_ITEMS = [
-  { id: 'passagem', label: 'Boa Jornada', icon: '🚂' },
-  { id: 'dss',       label: 'DSS',         icon: '🛡️' },
-  { id: 'analytics', label: 'BI+',         icon: '📊' },
-  { id: 'historico', label: 'Histórico',    icon: '📋' },
-  { id: 'layout',    label: 'Layout',       icon: '🗺️' },
+  { id: 'passagem', label: 'Boa Jornada', icon: '\uD83D\uDE82' },
+  { id: 'dss',       label: 'DSS',         icon: '\uD83D\uDEE1\uFE0F' },
+  { id: 'analytics', label: 'BI+',         icon: '\uD83D\uDCCA' },
+  { id: 'historico', label: 'Historico',    icon: '\uD83D\uDCCB' },
+  { id: 'layout',    label: 'Layout',       icon: '\uD83D\uDDFA\uFE0F' },
 ];
 
 // ── Props ──────────────────────────────────────────────────────────────
 interface MobileBottomNavProps {
   tema: TemaEstilos;
   config: ConfiguracaoSistema;
-  paginaAtiva: string;
-  mostrarPaginaDSS: boolean;
   onNavigate: (id: string) => void;
   userRole?: string;
   pendingCount?: number;
@@ -29,9 +30,10 @@ interface MobileBottomNavProps {
 
 // ── Component ──────────────────────────────────────────────────────────
 export const MobileBottomNav = memo<MobileBottomNavProps>(({
-  tema: _tema, config, paginaAtiva, mostrarPaginaDSS, onNavigate,
+  tema: _tema, config, onNavigate,
   userRole = '', pendingCount = 0,
 }) => {
+  const location = useLocation();
   const dk = config.tema === 'escuro' ||
     (config.tema === 'automatico' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
 
@@ -39,7 +41,7 @@ export const MobileBottomNav = memo<MobileBottomNavProps>(({
   const NAV_ITEMS = useMemo(() => [
     ...BASE_NAV_ITEMS,
     ...(hierarchyLevel >= HierarchyLevel.INSPECTION
-      ? [{ id: 'gestao', label: 'Gestão', icon: '👥' }]
+      ? [{ id: 'gestao', label: 'Gestao', icon: '\uD83D\uDC65' }]
       : []),
   ], [hierarchyLevel]);
 
@@ -48,11 +50,12 @@ export const MobileBottomNav = memo<MobileBottomNavProps>(({
   const txt2 = dk ? '#777' : '#999';
   const activeColor = '#007e7a';
 
+  // Active state derived from URL path
+  const currentPath = location.pathname;
   const isActive = (id: string): boolean => {
-    if (id === 'dss') return mostrarPaginaDSS;
-    if (id === 'passagem') return (paginaAtiva === 'passagem' || paginaAtiva === 'inicial') && !mostrarPaginaDSS;
-    if (id === 'gestao') return paginaAtiva === 'gestao' && !mostrarPaginaDSS;
-    return paginaAtiva === id && !mostrarPaginaDSS;
+    if (id === 'dss') return currentPath === ROUTES.DSS;
+    if (id === 'passagem') return currentPath === ROUTES.PASSAGEM || currentPath === ROUTES.HOME;
+    return currentPath === (NAV_ID_TO_PATH[id] || `/${id}`);
   };
 
   return (

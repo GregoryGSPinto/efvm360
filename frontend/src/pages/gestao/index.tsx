@@ -27,7 +27,7 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
   const yardCode = (usuarioLogado?.primaryYard || 'VFZ') as YardCode;
   const { teamPerformance, yardPerformance, userRanking } = useProjections(yardCode, usuarioLogado?.matricula);
 
-  const [secao, setSecao] = useState<'equipe' | 'cadastros' | 'senhas' | 'usuarios'>('equipe');
+  const [secao, setSecao] = useState<'dashboard' | 'equipe' | 'cadastros' | 'senhas' | 'usuarios'>('dashboard');
   const [refreshKey, setRefreshKey] = useState(0);
 
   const refresh = useCallback(() => setRefreshKey(k => k + 1), []);
@@ -92,6 +92,9 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
 
       {/* Navigation tabs */}
       <div style={{ display: 'flex', gap: 4, marginBottom: 20, overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
+        <button style={tabStyle(secao === 'dashboard')} onClick={() => setSecao('dashboard')}>
+          📈 Dashboard
+        </button>
         <button style={tabStyle(secao === 'equipe')} onClick={() => setSecao('equipe')}>
           📊 Equipe
         </button>
@@ -109,6 +112,170 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
           </>
         )}
       </div>
+
+      {/* ── SEÇÃO: Dashboard Executivo ── */}
+      {secao === 'dashboard' && (
+        <>
+          {/* KPI Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: 14, marginBottom: 20 }}>
+            {[
+              { label: 'Score Operacional', value: `${yardPerformance.avgScore}%`, icon: '🎯',
+                color: yardPerformance.avgScore >= 70 ? '#16a34a' : yardPerformance.avgScore >= 40 ? '#d9a010' : '#dc2626',
+                trend: yardPerformance.avgScore >= 70 ? '↑' : '→' },
+              { label: 'Boa Jornadas', value: String(yardPerformance.handoverCount), icon: '🚂',
+                color: '#007e7a', trend: '↑' },
+              { label: 'DSS Realizados', value: String(yardPerformance.dssCount), icon: '🛡️',
+                color: '#6366f1', trend: '↑' },
+              { label: 'Equipes Ativas', value: String(yardPerformance.totalTeams), icon: '👥',
+                color: '#0891b2', trend: '→' },
+              { label: 'Total Membros', value: String(yardPerformance.totalUsers), icon: '👤',
+                color: '#7c3aed', trend: '→' },
+              { label: 'Pendências', value: String(pendingRegistrations.length + pendingPasswords.length), icon: '📋',
+                color: (pendingRegistrations.length + pendingPasswords.length) > 0 ? '#dc2626' : '#16a34a',
+                trend: (pendingRegistrations.length + pendingPasswords.length) > 0 ? '!' : '✓' },
+            ].map((kpi, i) => (
+              <div key={i} style={{
+                background: tema.card, borderRadius: 14, padding: 18,
+                border: `1px solid ${tema.cardBorda}`, position: 'relative', overflow: 'hidden',
+              }}>
+                <div style={{ position: 'absolute', top: 10, right: 12, fontSize: 28, opacity: 0.15 }}>{kpi.icon}</div>
+                <div style={{ fontSize: 10, color: tema.textoSecundario, textTransform: 'uppercase', fontWeight: 600, letterSpacing: 0.5, marginBottom: 6 }}>
+                  {kpi.label}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                  <span style={{ fontSize: 28, fontWeight: 800, color: kpi.color }}>{kpi.value}</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: kpi.color }}>{kpi.trend}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Alertas Inteligentes */}
+          <Card title="🔔 Alertas Inteligentes" styles={styles}>
+            <div style={{ display: 'grid', gap: 10 }}>
+              {pendingRegistrations.length > 0 && (
+                <div style={{
+                  padding: '12px 16px', borderRadius: 10, display: 'flex', alignItems: 'center', gap: 12,
+                  background: `${tema.aviso}10`, border: `1px solid ${tema.aviso}30`,
+                }}>
+                  <span style={{ fontSize: 20 }}>📥</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600, color: tema.texto, fontSize: 13 }}>
+                      {pendingRegistrations.length} cadastro(s) aguardando aprovação
+                    </div>
+                    <div style={{ fontSize: 11, color: tema.textoSecundario }}>Acesse a aba Cadastros para aprovar</div>
+                  </div>
+                  <button onClick={() => setSecao('cadastros')} style={{
+                    padding: '6px 12px', borderRadius: 6, border: 'none', cursor: 'pointer',
+                    background: tema.aviso, color: '#fff', fontSize: 11, fontWeight: 600,
+                  }}>Ver →</button>
+                </div>
+              )}
+              {pendingPasswords.length > 0 && (
+                <div style={{
+                  padding: '12px 16px', borderRadius: 10, display: 'flex', alignItems: 'center', gap: 12,
+                  background: `${tema.info}10`, border: `1px solid ${tema.info}30`,
+                }}>
+                  <span style={{ fontSize: 20 }}>🔑</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600, color: tema.texto, fontSize: 13 }}>
+                      {pendingPasswords.length} troca(s) de senha pendente(s)
+                    </div>
+                    <div style={{ fontSize: 11, color: tema.textoSecundario }}>Revise as solicitações</div>
+                  </div>
+                  <button onClick={() => setSecao('senhas')} style={{
+                    padding: '6px 12px', borderRadius: 6, border: 'none', cursor: 'pointer',
+                    background: tema.info, color: '#fff', fontSize: 11, fontWeight: 600,
+                  }}>Ver →</button>
+                </div>
+              )}
+              {yardPerformance.avgScore < 50 && (
+                <div style={{
+                  padding: '12px 16px', borderRadius: 10, display: 'flex', alignItems: 'center', gap: 12,
+                  background: `${tema.perigo}10`, border: `1px solid ${tema.perigo}30`,
+                }}>
+                  <span style={{ fontSize: 20 }}>⚠️</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600, color: tema.texto, fontSize: 13 }}>
+                      Score médio abaixo de 50%
+                    </div>
+                    <div style={{ fontSize: 11, color: tema.textoSecundario }}>Recomenda-se ação corretiva nas equipes</div>
+                  </div>
+                </div>
+              )}
+              {pendingRegistrations.length === 0 && pendingPasswords.length === 0 && yardPerformance.avgScore >= 50 && (
+                <div style={{
+                  padding: '16px', borderRadius: 10, textAlign: 'center',
+                  background: `${tema.sucesso}08`, border: `1px solid ${tema.sucesso}25`,
+                }}>
+                  <span style={{ fontSize: 24 }}>✅</span>
+                  <div style={{ fontWeight: 600, color: tema.sucesso, fontSize: 13, marginTop: 6 }}>
+                    Tudo em dia! Nenhuma pendência.
+                  </div>
+                </div>
+              )}
+            </div>
+          </Card>
+
+          {/* Visão Rápida - Top Performers */}
+          {userRanking.length > 0 && (
+            <Card title="🏆 Top 5 — Visão Rápida" styles={styles}>
+              {userRanking.slice(0, 5).map((u, i) => (
+                <div key={u.matricula} style={{
+                  display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0',
+                  borderBottom: i < 4 ? `1px solid ${tema.cardBorda}20` : 'none',
+                }}>
+                  <span style={{ fontSize: 18, width: 28, textAlign: 'center' }}>
+                    {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`}
+                  </span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600, color: tema.texto, fontSize: 13 }}>{u.matricula}</div>
+                    <div style={{ fontSize: 11, color: tema.textoSecundario }}>
+                      {u.handoversCompleted} Boa Jornadas · {u.dssApproved} DSS
+                    </div>
+                  </div>
+                  <div style={{
+                    padding: '4px 12px', borderRadius: 20, fontWeight: 700, fontSize: 13,
+                    background: u.overallScore >= 70 ? '#dcfce7' : u.overallScore >= 40 ? '#fef9c3' : '#fef2f2',
+                    color: u.overallScore >= 70 ? '#16a34a' : u.overallScore >= 40 ? '#a16207' : '#dc2626',
+                  }}>
+                    {u.overallScore}%
+                  </div>
+                </div>
+              ))}
+            </Card>
+          )}
+
+          {/* Centro de Decisões — Quick Actions */}
+          <Card title="⚡ Centro de Decisões" styles={styles}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(150px, 100%), 1fr))', gap: 10 }}>
+              {[
+                { label: 'Aprovar Cadastros', icon: '📥', action: () => setSecao('cadastros'), count: pendingRegistrations.length },
+                { label: 'Revisar Senhas', icon: '🔑', action: () => setSecao('senhas'), count: pendingPasswords.length },
+                { label: 'Ver Equipe', icon: '👥', action: () => setSecao('equipe'), count: 0 },
+                { label: 'Listar Usuários', icon: '⚙️', action: () => setSecao('usuarios'), count: 0 },
+              ].map((act, i) => (
+                <button key={i} onClick={act.action} style={{
+                  padding: '14px', borderRadius: 10, border: `1px solid ${tema.cardBorda}`,
+                  background: tema.card, cursor: 'pointer', textAlign: 'center',
+                  transition: 'all 120ms ease', position: 'relative',
+                }}>
+                  <div style={{ fontSize: 24, marginBottom: 6 }}>{act.icon}</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: tema.texto }}>{act.label}</div>
+                  {act.count > 0 && (
+                    <span style={{
+                      position: 'absolute', top: 6, right: 6,
+                      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                      minWidth: 18, height: 18, borderRadius: 9, padding: '0 4px',
+                      background: '#dc2626', color: '#fff', fontSize: 10, fontWeight: 700,
+                    }}>{act.count}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </Card>
+        </>
+      )}
 
       {/* ── SEÇÃO: Equipe ── */}
       {secao === 'equipe' && (

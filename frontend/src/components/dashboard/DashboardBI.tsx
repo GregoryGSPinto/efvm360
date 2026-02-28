@@ -46,7 +46,7 @@ interface DashboardAvancadoProps {
 }
 
 // Tipo para formato de exportação
-type FormatoExportacao = 'excel' | 'pdf' | 'word' | 'powerpoint' | 'bi-plus';
+type FormatoExportacao = 'excel' | 'pdf' | 'csv' | 'word' | 'powerpoint' | 'bi-plus';
 
 // Interface para seleção de exportação avançada
 interface SelecaoExportacao {
@@ -190,39 +190,67 @@ const gerarResumoTurno = (
   return linhas.join('\n');
 };
 
-// Exportar para Excel (CSV como fallback)
+// Exportar para Excel (CSV com formatação profissional + separador de ponto-e-vírgula)
 const exportarExcel = (
   registros: RegistroHistorico[],
   kpis: ReturnType<typeof calcularKPIs>,
   resumo: string
 ): void => {
-  // Cabeçalho
-  let csv = 'DASHBOARD EFVM360 - EXPORTAÇÃO EXCEL\n\n';
-  
-  // Resumo
-  csv += 'RESUMO DO TURNO\n';
-  csv += resumo.replace(/\n/g, '\n') + '\n\n';
-  
+  // UTF-8 BOM for proper encoding in Excel
+  const BOM = '\uFEFF';
+  const SEP = ';';
+
+  let csv = BOM;
+  // Cover sheet header
+  csv += `"EFVM360 — Dashboard BI+ — Relatório de Passagem de Serviço"\n`;
+  csv += `"EFVM — Estrada de Ferro Vitória a Minas — Vale S.A."\n`;
+  csv += `"Gerado em:"${SEP}"${new Date().toLocaleString('pt-BR')}"\n`;
+  csv += `"Período:"${SEP}"${registros.length > 0 ? registros[registros.length - 1]?.cabecalho.data || '-' : '-'} a ${registros[0]?.cabecalho.data || '-'}"\n`;
+  csv += `"Total de Registros:"${SEP}"${registros.length}"\n`;
+  csv += '\n';
+
   // KPIs
-  csv += 'INDICADORES PRINCIPAIS\n';
-  csv += 'Indicador;Valor\n';
+  csv += `"INDICADORES PRINCIPAIS"\n`;
+  csv += `"Indicador"${SEP}"Valor"\n`;
   kpis.forEach(kpi => {
-    csv += `${kpi.titulo};${kpi.valor}\n`;
+    csv += `"${kpi.titulo}"${SEP}"${kpi.valor}"\n`;
   });
   csv += '\n';
-  
+
+  // Resumo
+  csv += `"RESUMO EXECUTIVO"\n`;
+  csv += `"${resumo.replace(/"/g, '""').replace(/\n/g, ' | ')}"\n`;
+  csv += '\n';
+
   // Dados detalhados
-  csv += 'DADOS DETALHADOS\n';
-  csv += 'Data;Turno;Manobras;Restrição;Risco\n';
+  csv += `"DADOS DETALHADOS"\n`;
+  csv += `"Data"${SEP}"Turno"${SEP}"Horário"${SEP}"Manobras Críticas"${SEP}"Restrição Ativa"${SEP}"Risco (%)"${SEP}"Pátio"\n`;
   registros.forEach(r => {
-    csv += `${r.cabecalho.data};${r.cabecalho.turno};${r.segurancaManobras.houveManobras ? 'Sim' : 'Não'};${r.segurancaManobras.restricaoAtiva ? 'Sim' : 'Não'};${r.pontuacaoRisco || 0}%\n`;
+    csv += `"${r.cabecalho.data}"${SEP}"${r.cabecalho.turno}"${SEP}"${r.cabecalho.horario || '-'}"${SEP}"${r.segurancaManobras.houveManobras ? 'Sim' : 'Não'}"${SEP}"${r.segurancaManobras.restricaoAtiva ? 'Sim' : 'Não'}"${SEP}"${r.pontuacaoRisco || 0}"${SEP}"${(r.cabecalho as unknown as Record<string, string>).patio || 'VFZ'}"\n`;
   });
-  
-  // Download
+  csv += '\n';
+  csv += `"© ${new Date().getFullYear()} EFVM360 Enterprise — Todos os direitos reservados"\n`;
+
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = `dashboard_vfz_${new Date().toISOString().split('T')[0]}.csv`;
+  link.download = `EFVM360_BI_${new Date().toISOString().split('T')[0]}.csv`;
+  link.click();
+};
+
+// Exportar CSV puro (semicolons + UTF-8 BOM)
+const exportarCSV = (registros: RegistroHistorico[]): void => {
+  const BOM = '\uFEFF';
+  const SEP = ';';
+  let csv = BOM;
+  csv += `"Data"${SEP}"Turno"${SEP}"Horário"${SEP}"Manobras"${SEP}"Restrição"${SEP}"Risco"${SEP}"Pátio"\n`;
+  registros.forEach(r => {
+    csv += `"${r.cabecalho.data}"${SEP}"${r.cabecalho.turno}"${SEP}"${r.cabecalho.horario || ''}"${SEP}"${r.segurancaManobras.houveManobras ? 'Sim' : 'Não'}"${SEP}"${r.segurancaManobras.restricaoAtiva ? 'Sim' : 'Não'}"${SEP}"${r.pontuacaoRisco || 0}%"${SEP}"${(r.cabecalho as unknown as Record<string, string>).patio || 'VFZ'}"\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `EFVM360_dados_${new Date().toISOString().split('T')[0]}.csv`;
   link.click();
 };
 
@@ -241,38 +269,46 @@ const exportarPDF = async (
   <meta charset="UTF-8">
   <title>Passagem de Serviço EFVM360 — BI+</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 40px; color: #333; }
+    @page { margin: 2cm; size: A4; }
+    @media print { .no-print { display: none; } }
+    body { font-family: 'Segoe UI', Arial, sans-serif; margin: 40px; color: #333; font-size: 12px; line-height: 1.5; }
     h1 { color: #007e7a; border-bottom: 3px solid #007e7a; padding-bottom: 10px; }
-    h2 { color: #333; margin-top: 30px; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #007e7a; }
-    .header-title { font-size: 24px; font-weight: bold; color: #007e7a; }
-    .header-subtitle { font-size: 12px; color: #666; }
-    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 20px 0; }
-    .kpi-card { background: #f5f5f5; padding: 20px; border-radius: 8px; text-align: center; border-left: 4px solid #007e7a; }
-    .kpi-value { font-size: 32px; font-weight: bold; color: #007e7a; }
-    .kpi-label { font-size: 12px; color: #666; }
-    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-    th { background: #007e7a; color: white; }
-    .resumo { background: #f9f9f9; padding: 20px; border-radius: 8px; white-space: pre-line; }
-    .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #007e7a; }
-    .footer-main { text-align: center; font-size: 12px; color: #666; margin-bottom: 10px; }
-    .footer-legal { font-size: 10px; color: #999; text-align: justify; line-height: 1.5; }
-    .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+    h2 { color: #333; margin-top: 30px; font-size: 16px; border-bottom: 1px solid #e0e0e0; padding-bottom: 6px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 16px 20px; border-bottom: 3px solid #007e7a; background: linear-gradient(135deg, #f0faf9, #fff); border-radius: 8px 8px 0 0; }
+    .header-title { font-size: 22px; font-weight: bold; color: #007e7a; }
+    .header-subtitle { font-size: 11px; color: #666; margin-top: 4px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 20px 0; }
+    .kpi-card { background: #f8fffe; padding: 18px; border-radius: 8px; text-align: center; border-left: 4px solid #007e7a; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .kpi-value { font-size: 28px; font-weight: bold; color: #007e7a; }
+    .kpi-label { font-size: 11px; color: #666; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 11px; }
+    th, td { border: 1px solid #ddd; padding: 8px 10px; text-align: left; }
+    th { background: #007e7a; color: white; font-size: 10px; text-transform: uppercase; letter-spacing: 0.3px; }
+    tr:nth-child(even) td { background: #f8fffe; }
+    tr:hover td { background: #e6f7f6; }
+    .resumo { background: #f9f9f9; padding: 20px; border-radius: 8px; white-space: pre-line; border-left: 3px solid #69be28; }
+    .footer { margin-top: 40px; padding-top: 20px; border-top: 3px solid #007e7a; }
+    .footer-main { text-align: center; font-size: 11px; color: #666; margin-bottom: 10px; }
+    .footer-legal { font-size: 9px; color: #999; text-align: justify; line-height: 1.5; }
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
     .badge-success { background: #d4edda; color: #155724; }
     .badge-warning { background: #fff3cd; color: #856404; }
     .badge-danger { background: #f8d7da; color: #721c24; }
+    .page-number { position: fixed; bottom: 1cm; right: 1cm; font-size: 9px; color: #999; }
+    .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-30deg); font-size: 80px; color: rgba(0,126,122,0.03); font-weight: 800; pointer-events: none; }
   </style>
 </head>
 <body>
+  <div class="watermark">EFVM360</div>
   <div class="header">
     <div>
-      <div class="header-title">📊 Passagem de Serviço EFVM360 — BI+</div>
-      <div class="header-subtitle">Dashboard de Business Intelligence • Relatório Analítico</div>
+      <div class="header-title">EFVM<span style="color:#69be28">360</span> — BI+ Dashboard</div>
+      <div class="header-subtitle">Estrada de Ferro Vitória a Minas — Vale S.A. · Relatório Analítico</div>
     </div>
     <div style="text-align: right;">
-      <div style="font-size: 11px; color: #666;">Gerado em:</div>
-      <div style="font-weight: bold; color: #007e7a;">${new Date().toLocaleString('pt-BR')}</div>
+      <div style="font-size: 10px; color: #666;">Gerado em:</div>
+      <div style="font-weight: bold; color: #007e7a; font-size: 13px;">${new Date().toLocaleString('pt-BR')}</div>
+      <div style="font-size: 9px; color: #999; margin-top: 2px;">${registros.length} registro(s)</div>
     </div>
   </div>
   
@@ -321,7 +357,7 @@ const exportarPDF = async (
       A reprodução ou distribuição não autorizada é proibida. 
       Em caso de dúvidas, consulte a área de Compliance ou o gestor responsável.
       <br><br>
-      <em>Sistema EFVM360 v2.0 • © ${new Date().getFullYear()} Vale S.A. - Todos os direitos reservados</em>
+      <em>Sistema EFVM360 v3.2 Enterprise • © ${new Date().getFullYear()} Vale S.A. - Todos os direitos reservados</em>
     </div>
   </div>
 </body>
@@ -723,11 +759,14 @@ export const DashboardBI = memo<DashboardAvancadoProps>(({
         case 'powerpoint':
           exportarPowerPoint(kpis, estatisticas, resumo);
           break;
+        case 'csv':
+          exportarCSV(registrosFiltrados);
+          break;
         case 'bi-plus':
           exportarBIPlus(registrosFiltrados, filtros, kpis, estatisticas);
           break;
       }
-      
+
       // Salvar no histórico de exportações
       salvarExportacao({
         tipo: 'BI+',
@@ -780,6 +819,9 @@ export const DashboardBI = memo<DashboardAvancadoProps>(({
           break;
         case 'excel':
           exportarExcel(registrosFiltrados, kpis, resumo);
+          break;
+        case 'csv':
+          exportarCSV(registrosFiltrados);
           break;
         case 'word':
           exportarWord(resumo, kpis, estatisticas);
@@ -908,7 +950,8 @@ export const DashboardBI = memo<DashboardAvancadoProps>(({
                 </div>
                 {[
                   { id: 'bi-plus' as FormatoExportacao, label: 'BI+ (JSON)', icone: '📊' },
-                  { id: 'excel' as FormatoExportacao, label: 'Excel (CSV)', icone: '📗' },
+                  { id: 'excel' as FormatoExportacao, label: 'Excel', icone: '📗' },
+                  { id: 'csv' as FormatoExportacao, label: 'CSV', icone: '📋' },
                   { id: 'pdf' as FormatoExportacao, label: 'PDF', icone: '📕' },
                   { id: 'word' as FormatoExportacao, label: 'Word', icone: '📘' },
                   { id: 'powerpoint' as FormatoExportacao, label: 'PowerPoint', icone: '📙' },
@@ -1775,6 +1818,7 @@ export const DashboardBI = memo<DashboardAvancadoProps>(({
                 {[
                   { id: 'pdf', label: 'PDF', icone: '📕' },
                   { id: 'excel', label: 'Excel', icone: '📗' },
+                  { id: 'csv', label: 'CSV', icone: '📋' },
                   { id: 'word', label: 'Word', icone: '📘' },
                   { id: 'powerpoint', label: 'PowerPoint', icone: '📙' },
                   { id: 'bi-plus', label: 'BI+ JSON', icone: '📊' },

@@ -7,7 +7,18 @@
       "Bash(echo gh CLI não encontrado ou não autenticado:*)",
       "Bash(head:*)",
       "Bash(tail:*)",
-      "Bash(cd \"C:\\\\Users\\\\grego\\\\OneDrive\\\\Documentos\\\\Projetos\\\\EFVM360_ENTERPRISE_v3.2\\\\frontend\" && pnpm type-check 2>&1)"
+      "Bash(cd \"C:\\\\Users\\\\grego\\\\OneDrive\\\\Documentos\\\\Projetos\\\\EFVM360_ENTERPRISE_v3.2\\\\frontend\" && pnpm type-check 2>&1)",
+      "Bash(find:*)",
+      "Bash(cd /Users/user_pc/Projetos/efvm360/backend && npx tsc --noEmit 2>&1)",
+      "Bash(cd /Users/user_pc/Projetos/efvm360/backend && npm install 2>&1)",
+      "Bash(./node_modules/.bin/tsc:*)",
+      "Bash(./node_modules/.bin/jest:*)",
+      "Bash(npx tsc:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm test:*)",
+      "Bash(grep:*)",
+      "Bash(pnpm type-check:*)",
+      "Bash(git add:*)"
     ]
   }
 }

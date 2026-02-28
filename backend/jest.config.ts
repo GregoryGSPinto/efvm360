@@ -19,7 +19,7 @@ const config: Config = {
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'text-summary', 'lcov', 'clover'],
-  coverageThresholds: {
+  coverageThreshold: {
     global: {
       branches: 50,
       functions: 60,
@@ -27,7 +27,7 @@ const config: Config = {
       statements: 60,
     },
   },
-  setupFilesAfterFramework: [],
+  setupFilesAfterEnv: [],
   verbose: true,
   // Longer timeout for integration tests (bcrypt is slow)
   testTimeout: 15000,
