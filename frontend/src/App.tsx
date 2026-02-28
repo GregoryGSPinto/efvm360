@@ -154,6 +154,15 @@ export default function App(): JSX.Element {
   // ── Tour ─────────────────────────────────────────────────────────────
   const { tourAtivo, iniciarTour, completarTour, pularTour, resetarTour } = useTour();
 
+  // Auto-start tour after login (first time only)
+  useEffect(() => {
+    if (usuarioLogado && !localStorage.getItem('efvm360-tour-completo')) {
+      const timer = setTimeout(() => iniciarTour(), 800);
+      return () => clearTimeout(timer);
+    }
+    return undefined;
+  }, [usuarioLogado]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Passagem Handlers ────────────────────────────────────────────────
   const handlers = usePassagemHandlers(
     usuarioLogado as UsuarioCadastro | null, dadosFormulario.cabecalho as unknown as { matriculaEntra?: string; matriculaSai?: string }, historicoDSS, registrarAuditoria as unknown as (tipo: string, area: string, detalhe: string) => void,
@@ -434,8 +443,6 @@ export default function App(): JSX.Element {
         onLogout={realizarLogout}
         pendingCount={pendingCount}
         onlineStatus={onlineStatus.status}
-        onIniciarTour={iniciarTour}
-        tourAtivo={tourAtivo}
       />
 
       {/* Bottom Navbar — Mobile Only (shown via CSS) */}
