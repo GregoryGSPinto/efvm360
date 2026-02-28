@@ -1,0 +1,8 @@
+{
+  "name": "efvm360",
+  "private": true,
+  "scripts": {
+    "install:frontend": "cd frontend && pnpm install",
+    "build": "cd frontend && pnpm run build"
+  }
+}
