@@ -12,6 +12,5 @@ RUN npm run build
 
 EXPOSE 3001
 
-# Em produção: CMD ["node", "dist/server.js"]
-# Em dev: CMD com ts-node-dev
-CMD ["npm", "run", "dev"]
+# Produção: usa código compilado; Dev: usar docker-compose command override
+CMD ["node", "dist/server.js"]

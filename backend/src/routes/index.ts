@@ -90,6 +90,35 @@ router.get('/patios/todos', authenticate, authorize('inspetor', 'gestor', 'admin
 router.post('/patios', authenticate, authorize('inspetor', 'gestor', 'administrador'), criarPatioValidator, handleValidationErrors, patiosCtrl.criar);
 router.patch('/patios/:codigo', authenticate, authorize('inspetor', 'gestor', 'administrador'), atualizarPatioValidator, handleValidationErrors, patiosCtrl.atualizar);
 
+// ── DSS (Diálogo de Segurança) ──────────────────────────────────────────
+import * as dssCtrl from '../controllers/dssController';
+router.get('/dss', authenticate, dssCtrl.listar);
+router.get('/dss/:uuid', authenticate, uuidParamValidator, handleValidationErrors, dssCtrl.obter);
+router.post('/dss', authenticate, dssCtrl.salvar);
+
+// ── BI+ (Dashboard KPIs) ────────────────────────────────────────────────
+import * as biCtrl from '../controllers/biController';
+router.get('/bi/kpis', authenticate, biCtrl.kpis);
+router.get('/bi/resumo-yard', authenticate, authorize('inspetor'), biCtrl.resumoYard);
+
+// ── GESTÃO (Aprovações) ─────────────────────────────────────────────────
+import * as gestaoCtrl from '../controllers/gestaoController';
+router.get('/gestao/cadastros', authenticate, authorize('gestor'), gestaoCtrl.listarCadastros);
+router.post('/gestao/cadastros/:uuid/aprovar', authenticate, authorize('gestor'), uuidParamValidator, handleValidationErrors, gestaoCtrl.aprovarCadastro);
+router.post('/gestao/cadastros/:uuid/rejeitar', authenticate, authorize('gestor'), uuidParamValidator, handleValidationErrors, gestaoCtrl.rejeitarCadastro);
+router.get('/gestao/senha-resets', authenticate, authorize('gestor'), gestaoCtrl.listarSenhaResets);
+router.post('/gestao/senha-resets/:uuid/aprovar', authenticate, authorize('gestor'), uuidParamValidator, handleValidationErrors, gestaoCtrl.aprovarSenhaReset);
+
+// ── ADAMBOOT (Proficiency) ──────────────────────────────────────────────
+import * as adambootCtrl from '../controllers/adambootController';
+router.get('/adamboot/perfil/:matricula?', authenticate, adambootCtrl.obterPerfil);
+router.post('/adamboot/acesso', authenticate, adambootCtrl.registrarAcesso);
+
+// ── CONFIGURAÇÕES DO USUÁRIO ────────────────────────────────────────────
+import * as configCtrl from '../controllers/configController';
+router.get('/config', authenticate, configCtrl.obter);
+router.patch('/config', authenticate, configCtrl.atualizar);
+
 // ── SYNC (Offline-First) ─────────────────────────────────────────────────
 import syncRoutes from './syncRoutes';
 router.use('/sync', syncRoutes);

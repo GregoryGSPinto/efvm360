@@ -197,11 +197,163 @@ AuditTrail.init({
 
 export { Patio } from './Patio';
 
+// ── DSS ─────────────────────────────────────────────────────────────────
+
+interface DSSAttributes {
+  id: number;
+  uuid: string;
+  data: string;
+  turno: string;
+  tema: string;
+  facilitador_id: number | null;
+  facilitador_matricula: string;
+  patio_codigo: string | null;
+  observacoes: string | null;
+  experiencias_compartilhadas: object | null;
+  topicos: object | null;
+  participantes: object | null;
+  passagem_uuid: string | null;
+  status: string;
+}
+
+export class DSS extends Model<DSSAttributes, Optional<DSSAttributes, 'id' | 'uuid' | 'status' | 'facilitador_id' | 'patio_codigo' | 'observacoes' | 'experiencias_compartilhadas' | 'topicos' | 'participantes' | 'passagem_uuid'>> implements DSSAttributes {
+  declare id: number; declare uuid: string; declare data: string; declare turno: string;
+  declare tema: string; declare facilitador_id: number | null; declare facilitador_matricula: string;
+  declare patio_codigo: string | null; declare observacoes: string | null;
+  declare experiencias_compartilhadas: object | null; declare topicos: object | null;
+  declare participantes: object | null; declare passagem_uuid: string | null; declare status: string;
+}
+
+DSS.init({
+  id: { type: DataTypes.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
+  uuid: { type: DataTypes.CHAR(36), allowNull: false, unique: true, defaultValue: DataTypes.UUIDV4 },
+  data: { type: DataTypes.DATEONLY, allowNull: false },
+  turno: { type: DataTypes.STRING(1), allowNull: false },
+  tema: { type: DataTypes.STRING(200), allowNull: false },
+  facilitador_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: true },
+  facilitador_matricula: { type: DataTypes.STRING(20), allowNull: false },
+  patio_codigo: { type: DataTypes.STRING(5), allowNull: true },
+  observacoes: { type: DataTypes.TEXT, allowNull: true },
+  experiencias_compartilhadas: { type: DataTypes.JSON, allowNull: true },
+  topicos: { type: DataTypes.JSON, allowNull: true },
+  participantes: { type: DataTypes.JSON, allowNull: true },
+  passagem_uuid: { type: DataTypes.CHAR(36), allowNull: true },
+  status: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'rascunho' },
+}, { sequelize, tableName: 'dss', modelName: 'DSS' });
+
+// ── CADASTROS PENDENTES ─────────────────────────────────────────────────
+
+interface CadastroPendenteAttributes {
+  id: number; uuid: string; nome: string; matricula: string; funcao: string;
+  turno: string | null; horario_turno: string | null; patio_codigo: string | null;
+  senha_hash: string; status: string; aprovado_por: string | null; motivo_rejeicao: string | null;
+}
+
+export class CadastroPendente extends Model<CadastroPendenteAttributes, Optional<CadastroPendenteAttributes, 'id' | 'uuid' | 'status' | 'turno' | 'horario_turno' | 'patio_codigo' | 'aprovado_por' | 'motivo_rejeicao'>> implements CadastroPendenteAttributes {
+  declare id: number; declare uuid: string; declare nome: string; declare matricula: string;
+  declare funcao: string; declare turno: string | null; declare horario_turno: string | null;
+  declare patio_codigo: string | null; declare senha_hash: string; declare status: string;
+  declare aprovado_por: string | null; declare motivo_rejeicao: string | null;
+}
+
+CadastroPendente.init({
+  id: { type: DataTypes.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
+  uuid: { type: DataTypes.CHAR(36), allowNull: false, unique: true, defaultValue: DataTypes.UUIDV4 },
+  nome: { type: DataTypes.STRING(120), allowNull: false },
+  matricula: { type: DataTypes.STRING(20), allowNull: false },
+  funcao: { type: DataTypes.STRING(30), allowNull: false, defaultValue: 'operador' },
+  turno: { type: DataTypes.STRING(1), allowNull: true },
+  horario_turno: { type: DataTypes.STRING(10), allowNull: true },
+  patio_codigo: { type: DataTypes.STRING(5), allowNull: true },
+  senha_hash: { type: DataTypes.STRING(255), allowNull: false },
+  status: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'pendente' },
+  aprovado_por: { type: DataTypes.STRING(20), allowNull: true },
+  motivo_rejeicao: { type: DataTypes.TEXT, allowNull: true },
+}, { sequelize, tableName: 'cadastros_pendentes', modelName: 'CadastroPendente' });
+
+// ── SENHA RESETS ────────────────────────────────────────────────────────
+
+interface SenhaResetAttributes {
+  id: number; uuid: string; usuario_id: number | null; matricula: string;
+  status: string; aprovado_por: string | null; nova_senha_hash: string | null;
+}
+
+export class SenhaReset extends Model<SenhaResetAttributes, Optional<SenhaResetAttributes, 'id' | 'uuid' | 'usuario_id' | 'status' | 'aprovado_por' | 'nova_senha_hash'>> implements SenhaResetAttributes {
+  declare id: number; declare uuid: string; declare usuario_id: number | null;
+  declare matricula: string; declare status: string; declare aprovado_por: string | null;
+  declare nova_senha_hash: string | null;
+}
+
+SenhaReset.init({
+  id: { type: DataTypes.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
+  uuid: { type: DataTypes.CHAR(36), allowNull: false, unique: true, defaultValue: DataTypes.UUIDV4 },
+  usuario_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: true },
+  matricula: { type: DataTypes.STRING(20), allowNull: false },
+  status: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'pendente' },
+  aprovado_por: { type: DataTypes.STRING(20), allowNull: true },
+  nova_senha_hash: { type: DataTypes.STRING(255), allowNull: true },
+}, { sequelize, tableName: 'senha_resets', modelName: 'SenhaReset' });
+
+// ── USUARIO CONFIG ──────────────────────────────────────────────────────
+
+interface UsuarioConfigAttributes {
+  id: number; usuario_id: number; tema: string; idioma: string;
+  preferencias_operacionais: object | null; preferencias_notificacao: object | null;
+  preferencias_acessibilidade: object | null; adamboot_config: object | null;
+}
+
+export class UsuarioConfig extends Model<UsuarioConfigAttributes, Optional<UsuarioConfigAttributes, 'id' | 'tema' | 'idioma' | 'preferencias_operacionais' | 'preferencias_notificacao' | 'preferencias_acessibilidade' | 'adamboot_config'>> implements UsuarioConfigAttributes {
+  declare id: number; declare usuario_id: number; declare tema: string; declare idioma: string;
+  declare preferencias_operacionais: object | null; declare preferencias_notificacao: object | null;
+  declare preferencias_acessibilidade: object | null; declare adamboot_config: object | null;
+}
+
+UsuarioConfig.init({
+  id: { type: DataTypes.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
+  usuario_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false, unique: true },
+  tema: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'automatico' },
+  idioma: { type: DataTypes.STRING(5), allowNull: false, defaultValue: 'pt-BR' },
+  preferencias_operacionais: { type: DataTypes.JSON, allowNull: true },
+  preferencias_notificacao: { type: DataTypes.JSON, allowNull: true },
+  preferencias_acessibilidade: { type: DataTypes.JSON, allowNull: true },
+  adamboot_config: { type: DataTypes.JSON, allowNull: true },
+}, { sequelize, tableName: 'usuario_config', modelName: 'UsuarioConfig' });
+
+// ── ADAMBOOT PERFIS ─────────────────────────────────────────────────────
+
+interface AdamBootPerfilAttributes {
+  id: number; usuario_id: number; matricula: string; total_sessoes: number;
+  paginas_visitadas: object | null; acoes_realizadas: number;
+  nivel_proficiencia: string; ultimo_acesso: Date | null;
+}
+
+export class AdamBootPerfil extends Model<AdamBootPerfilAttributes, Optional<AdamBootPerfilAttributes, 'id' | 'total_sessoes' | 'paginas_visitadas' | 'acoes_realizadas' | 'nivel_proficiencia' | 'ultimo_acesso'>> implements AdamBootPerfilAttributes {
+  declare id: number; declare usuario_id: number; declare matricula: string;
+  declare total_sessoes: number; declare paginas_visitadas: object | null;
+  declare acoes_realizadas: number; declare nivel_proficiencia: string;
+  declare ultimo_acesso: Date | null;
+}
+
+AdamBootPerfil.init({
+  id: { type: DataTypes.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
+  usuario_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false, unique: true },
+  matricula: { type: DataTypes.STRING(20), allowNull: false },
+  total_sessoes: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false, defaultValue: 0 },
+  paginas_visitadas: { type: DataTypes.JSON, allowNull: true },
+  acoes_realizadas: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false, defaultValue: 0 },
+  nivel_proficiencia: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'iniciante' },
+  ultimo_acesso: { type: DataTypes.DATE, allowNull: true },
+}, { sequelize, tableName: 'adamboot_perfis', modelName: 'AdamBootPerfil' });
+
 // ── RELACIONAMENTOS ──────────────────────────────────────────────────────
 
 Passagem.belongsTo(Usuario, { as: 'operadorSai', foreignKey: 'operador_sai_id' });
 Passagem.belongsTo(Usuario, { as: 'operadorEntra', foreignKey: 'operador_entra_id' });
 AuditTrail.belongsTo(Usuario, { as: 'usuario', foreignKey: 'usuario_id' });
+DSS.belongsTo(Usuario, { as: 'facilitador', foreignKey: 'facilitador_id' });
+SenhaReset.belongsTo(Usuario, { as: 'usuario', foreignKey: 'usuario_id' });
+UsuarioConfig.belongsTo(Usuario, { as: 'usuario', foreignKey: 'usuario_id' });
+AdamBootPerfil.belongsTo(Usuario, { as: 'usuario', foreignKey: 'usuario_id' });
 
 import { Patio as PatioModel } from './Patio';
-export default { Usuario, Passagem, AuditTrail, Patio: PatioModel };
+export default { Usuario, Passagem, AuditTrail, Patio: PatioModel, DSS, CadastroPendente, SenhaReset, UsuarioConfig, AdamBootPerfil };

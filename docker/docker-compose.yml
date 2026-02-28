@@ -52,6 +52,7 @@ services:
       JWT_SECRET: dev-jwt-secret-trocar-em-producao-mínimo-64-chars-aleatorios
       JWT_REFRESH_SECRET: dev-refresh-secret-trocar-em-producao-mínimo-64-chars-aleatorios
       CORS_ORIGIN: http://localhost:5173,http://localhost:3000
+    command: ["npm", "run", "dev"]
     depends_on:
       mysql:
         condition: service_healthy
@@ -61,7 +62,7 @@ services:
   # ── Frontend (Vite dev) ────────────────────────────────────────────────
   frontend:
     build:
-      context: ./efvm360
+      context: ./frontend
       dockerfile: Dockerfile
     container_name: vfz-frontend
     restart: unless-stopped
@@ -71,7 +72,7 @@ services:
       VITE_API_URL: http://localhost:3001/api/v1
       VITE_ENV: development
     volumes:
-      - ./efvm360/src:/app/src
+      - ./frontend/src:/app/src
     depends_on:
       - backend
 
