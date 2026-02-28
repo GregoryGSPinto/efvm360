@@ -2776,11 +2776,6 @@ SEGURANÇA EM MANOBRAS
         ))}
       </div>
 
-      {/* AI Risk Score Widget */}
-      <div data-tour="risco-operacional" style={{ marginBottom: 16 }}>
-        <AIRiskScore tema={tema} dadosFormulario={dadosFormulario} patio={selectedYard} />
-      </div>
-
       {/* Indicador modo edição */}
       {modoEdicao && (
         <div
@@ -2866,6 +2861,11 @@ SEGURANÇA EM MANOBRAS
       </div>
 
       {renderSecaoFormulario()}
+
+      {/* AI Risk Score Widget — v3.2: moved to bottom of form */}
+      <div data-tour="risco-operacional" style={{ marginTop: 16, marginBottom: 16 }}>
+        <AIRiskScore tema={tema} dadosFormulario={dadosFormulario} patio={selectedYard} />
+      </div>
 
       {/* Navegação */}
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>

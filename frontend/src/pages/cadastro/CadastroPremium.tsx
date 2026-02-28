@@ -5,7 +5,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { usePatio } from '../../hooks/usePatio';
 
 // Funções NÃO disponíveis para auto-cadastro (requerem nomeação por gestor/admin)
-const FUNCOES_BLOQUEADAS_CADASTRO = ['administrador', 'supervisor', 'gestor', 'coordenador', 'outra'];
+const FUNCOES_BLOQUEADAS_CADASTRO = ['supervisor', 'gestor', 'coordenador', 'outra'];
 
 interface CadastroPremiumProps {
   cadastroForm: Record<string, string>;

@@ -127,7 +127,7 @@ interface TabelaEquipamentosProps {
   userMatricula?: string;
 }
 
-const ROLES_CAN_EDIT_EQUIP = new Set(['inspetor', 'gestor', 'administrador', 'coordenador', 'supervisor', 'oficial_operacao']);
+const ROLES_CAN_EDIT_EQUIP = new Set(['inspetor', 'gestor', 'coordenador', 'supervisor', 'oficial_operacao']);
 
 export const TabelaEquipamentos = memo<TabelaEquipamentosProps>(({
   equipamentos,

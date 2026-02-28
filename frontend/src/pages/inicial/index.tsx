@@ -104,7 +104,6 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
       maquinista: 'Maquinista', operador: 'Operador', oficial: 'Oficial',
       oficial_operacao: 'Oficial de Operacao', inspetor: 'Inspetor',
       gestor: 'Gestor', supervisor: 'Supervisor', coordenador: 'Coordenador',
-      administrador: 'Administrador',
     };
     return map[usuarioLogado.funcao] || usuarioLogado.funcao;
   }, [usuarioLogado?.funcao]);

@@ -160,6 +160,7 @@ interface AuthReturn {
   realizarLogin: () => Promise<void>;
   realizarCadastro: () => Promise<void>;
   realizarLogout: () => void;
+  realizarTrocaSenha: (novaSenha: string) => Promise<boolean>;
 }
 
 export function useAuth(): AuthReturn {
@@ -313,7 +314,14 @@ export function useAuth(): AuthReturn {
 
       localStorage.setItem(STORAGE_KEYS.USUARIO, JSON.stringify(dadosUsuario));
       setUsuarioLogado(dadosUsuario);
-      setTelaAtual('sistema');
+
+      // v3.2: Check if user must change password (after password reset approval)
+      if (found.mustChangePassword) {
+        setTelaAtual('trocarSenha');
+      } else {
+        setTelaAtual('sistema');
+      }
+
       // Limpa formulário de login (zera senha da memória)
       setLoginForm({ matricula: '', senha: '' });
       try { LogService.login(dadosUsuario.matricula, dadosUsuario.nome); } catch {}
@@ -374,6 +382,30 @@ export function useAuth(): AuthReturn {
     setTimeout(() => { setTelaAtual('login'); setCadastroSucesso(false); }, 3000);
   }, [cadastroForm]);
 
+  // ========== TROCA DE SENHA FORÇADA (v3.2) ==========
+  const realizarTrocaSenha = useCallback(async (novaSenha: string): Promise<boolean> => {
+    if (!usuarioLogado) return false;
+    try {
+      let usuarios: UsuarioCadastro[] = [];
+      try { usuarios = JSON.parse(localStorage.getItem(STORAGE_KEYS.USUARIOS) || '[]'); } catch { return false; }
+      const idx = usuarios.findIndex(u => u.matricula === usuarioLogado.matricula);
+      if (idx === -1) return false;
+
+      // Hash the new password
+      const novoHash = await hashSenha(novaSenha, usuarioLogado.matricula);
+      usuarios[idx].senhaHash = novoHash;
+      delete (usuarios[idx] as unknown as Record<string, unknown>).senha;
+      delete (usuarios[idx] as unknown as Record<string, unknown>).mustChangePassword;
+      localStorage.setItem(STORAGE_KEYS.USUARIOS, JSON.stringify(usuarios));
+
+      // Proceed to sistema
+      setTelaAtual('sistema');
+      return true;
+    } catch {
+      return false;
+    }
+  }, [usuarioLogado]);
+
   // ========== LOGOUT ==========
   const realizarLogout = useCallback(() => {
     if (usuarioLogado) LogService.logout(usuarioLogado.matricula, usuarioLogado.nome);
@@ -385,6 +417,6 @@ export function useAuth(): AuthReturn {
   return {
     telaAtual, usuarioLogado, loginForm, cadastroForm, loginErro, cadastroErro, cadastroSucesso,
     setTelaAtual, setLoginForm, setCadastroForm, setLoginErro, setCadastroErro,
-    realizarLogin, realizarCadastro, realizarLogout,
+    realizarLogin, realizarCadastro, realizarLogout, realizarTrocaSenha,
   };
 }

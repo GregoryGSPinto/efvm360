@@ -1,7 +1,9 @@
 // EFVM360 — LOGIN SCREEN — Visual Corporativo Sólido Vale S.A.
 import React, { memo, useState, useCallback } from 'react';
-import type { LoginForm, TemaEstilos, ConfiguracaoSistema } from '../types';
+import type { LoginForm, TemaEstilos, ConfiguracaoSistema, UsuarioCadastro } from '../types';
 import { useI18n } from '../hooks/useI18n';
+import { requestPasswordReset } from '../services/approvalService';
+import type { YardCode } from '../domain/aggregates/YardRegistry';
 
 interface Props {
   loginForm: LoginForm; loginErro: string;
@@ -20,6 +22,7 @@ export const LoginScreenPremium = memo<Props>(({
   const [tela, setTela] = useState<'login'|'rec'>('login');
   const [matRec, setMatRec] = useState('');
   const [recOk, setRecOk] = useState(false);
+  const [recErro, setRecErro] = useState('');
 
   const dk = config.tema === 'escuro' || (config.tema === 'automatico' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
 
@@ -145,8 +148,8 @@ export const LoginScreenPremium = memo<Props>(({
                 {[
                   { mat: 'VFZ1001', role: 'Maquinista', pwd: '123456' },
                   { mat: 'VFZ2001', role: 'Inspetor', pwd: '123456' },
-                  { mat: 'VFZ3001', role: 'Gestor', pwd: '123456' },
-                  { mat: 'ADM9001', role: 'Admin', pwd: '123456' },
+                  { mat: 'VFZ1005', role: 'Oficial', pwd: '123456' },
+                  { mat: 'ADM9001', role: 'Gestor', pwd: '123456' },
                 ].map(c => (
                   <button key={c.mat} type="button" style={{
                     padding:'6px 10px', borderRadius:6, border:`1px solid ${dk?'#333':'#e0e0e0'}`,
@@ -194,12 +197,30 @@ export const LoginScreenPremium = memo<Props>(({
             </div>
             {!recOk ? (<>
               <p style={{fontSize:13,marginBottom:16,color:txt2}}>{t('login.recuperarDesc')}</p>
+              {recErro && (
+                <div style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 14px',
+                  background:dk?'rgba(220,38,38,0.10)':'rgba(220,38,38,0.05)',
+                  border:'1px solid rgba(220,38,38,0.2)', borderRadius:8, marginBottom:14, fontSize:13, color:'#dc2626' }}>
+                  {recErro}
+                </div>
+              )}
               <div style={ic('rec')}>
                 <span style={{padding:'0 14px',fontSize:16,opacity:0.5}}>👤</span>
                 <input type="text" style={is} placeholder="Matrícula" value={matRec}
-                  onChange={e=>setMatRec(e.target.value)} onFocus={()=>setFoc('rec')} onBlur={()=>setFoc(null)} />
+                  onChange={e=>{setMatRec(e.target.value);setRecErro('');}} onFocus={()=>setFoc('rec')} onBlur={()=>setFoc(null)} />
               </div>
-              <button style={bp} onClick={()=>{if(matRec.trim())setRecOk(true);}}>{t('login.solicitarRecuperacao')}</button>
+              <button style={bp} onClick={()=>{
+                const mat = matRec.trim().toUpperCase();
+                if(!mat){ setRecErro('Informe sua matrícula'); return; }
+                try {
+                  const usuarios: UsuarioCadastro[] = JSON.parse(localStorage.getItem('efvm360-usuarios') || '[]');
+                  const found = usuarios.find(u => u.matricula === mat);
+                  if(!found){ setRecErro('Matrícula não encontrada no sistema'); return; }
+                  const yard = (found.primaryYard || 'VFZ') as YardCode;
+                  requestPasswordReset(mat, yard, '123456');
+                  setRecOk(true);
+                } catch { setRecErro('Erro ao processar solicitação'); }
+              }}>{t('login.solicitarRecuperacao')}</button>
             </>) : (
               <div style={{textAlign:'center',padding:20,background:dk?'rgba(105,190,40,0.08)':'rgba(105,190,40,0.05)',
                 borderRadius:10,border:'1px solid rgba(105,190,40,0.2)'}}>

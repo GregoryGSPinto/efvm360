@@ -70,7 +70,7 @@ function getFuncaoLabel(funcao?: string): string {
     maquinista: 'Maquinista', operador: 'Operador', oficial: 'Oficial',
     oficial_operacao: 'Oficial de Operacao', inspetor: 'Inspetor',
     gestor: 'Gestor', supervisor: 'Supervisor', coordenador: 'Coordenador',
-    administrador: 'Administrador', suporte: 'Suporte Tecnico',
+    suporte: 'Suporte Tecnico',
   };
   return map[funcao || ''] || funcao || 'Operador';
 }
@@ -81,6 +81,91 @@ function RouteFallback({ tema }: { tema: { textoSecundario: string } }) {
   return (
     <div style={{ padding: 40, textAlign: 'center', color: tema.textoSecundario }}>
       Carregando...
+    </div>
+  );
+}
+
+// ============================================================================
+// v3.2: FORCED PASSWORD CHANGE SCREEN
+// ============================================================================
+
+function TrocaSenhaScreen({ tema, isDark, onTrocar }: {
+  tema: { texto: string; textoSecundario: string; card: string; cardBorda: string; primaria: string; input: string; inputBorda: string; buttonInativo: string };
+  isDark: boolean; onTrocar: (s: string) => Promise<boolean>;
+}) {
+  const [nova, setNova] = useState('');
+  const [confirma, setConfirma] = useState('');
+  const [erro, setErro] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const bg = isDark ? '#121212' : '#f5f5f5';
+  const cardBg = isDark ? '#1e1e1e' : '#ffffff';
+  const bd = isDark ? '#333' : '#e5e5e5';
+  const inBg = isDark ? '#2a2a2a' : '#f5f5f5';
+
+  const doChange = async () => {
+    setErro('');
+    if (!nova.trim()) { setErro('Informe a nova senha'); return; }
+    if (nova.length < 4) { setErro('Senha: mínimo 4 caracteres'); return; }
+    if (nova === '123456') { setErro('Escolha uma senha diferente da temporária'); return; }
+    if (nova !== confirma) { setErro('As senhas não conferem'); return; }
+    setLoading(true);
+    const ok = await onTrocar(nova);
+    setLoading(false);
+    if (!ok) setErro('Erro ao alterar senha. Tente novamente.');
+  };
+
+  const inpStyle: CSSProperties = {
+    width: '100%', padding: '14px 16px', background: inBg, border: `2px solid ${bd}`,
+    borderRadius: 10, fontSize: 14, color: tema.texto, outline: 'none', boxSizing: 'border-box',
+  };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: bg }}>
+      <div style={{
+        width: 400, maxWidth: '90%', background: cardBg, borderRadius: 16,
+        border: `1px solid ${bd}`, boxShadow: isDark ? '0 16px 48px rgba(0,0,0,0.4)' : '0 16px 48px rgba(0,0,0,0.06)',
+        padding: '32px min(32px, 5vw)',
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: 24 }}>
+          <div style={{ fontSize: 28, fontWeight: 800, color: '#007e7a', letterSpacing: 4, marginBottom: 4 }}>EFVM<span style={{ color: '#69be28' }}>360</span></div>
+          <div style={{ width: 44, height: 3, margin: '0 auto 12px', background: '#69be28', borderRadius: 2 }} />
+          <div style={{ fontSize: 36, marginBottom: 8 }}>🔐</div>
+          <div style={{ fontSize: 17, fontWeight: 600, color: tema.texto, marginBottom: 4 }}>Troca de Senha Obrigatória</div>
+          <div style={{ fontSize: 13, color: tema.textoSecundario }}>
+            Sua senha foi redefinida. Crie uma nova senha para continuar.
+          </div>
+        </div>
+
+        {erro && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px',
+            background: isDark ? 'rgba(220,38,38,0.10)' : 'rgba(220,38,38,0.05)',
+            border: '1px solid rgba(220,38,38,0.2)', borderRadius: 8, marginBottom: 14, fontSize: 13, color: '#dc2626',
+          }}>
+            {erro}
+          </div>
+        )}
+
+        <div style={{ marginBottom: 14 }}>
+          <label style={{ fontSize: 12, fontWeight: 600, color: tema.textoSecundario, marginBottom: 4, display: 'block' }}>Nova Senha</label>
+          <input type="password" style={inpStyle} value={nova} onChange={e => { setNova(e.target.value); setErro(''); }} placeholder="Mínimo 4 caracteres" />
+        </div>
+        <div style={{ marginBottom: 20 }}>
+          <label style={{ fontSize: 12, fontWeight: 600, color: tema.textoSecundario, marginBottom: 4, display: 'block' }}>Confirmar Nova Senha</label>
+          <input type="password" style={inpStyle} value={confirma} onChange={e => { setConfirma(e.target.value); setErro(''); }}
+            placeholder="Repita a nova senha" onKeyDown={e => e.key === 'Enter' && !loading && doChange()} />
+        </div>
+
+        <button onClick={doChange} disabled={loading} style={{
+          width: '100%', padding: '14px 28px', borderRadius: 10, border: 'none',
+          background: '#007e7a', color: '#fff', fontSize: 14, fontWeight: 600,
+          letterSpacing: 0.8, cursor: loading ? 'wait' : 'pointer',
+          boxShadow: '0 2px 10px rgba(0,126,122,0.2)',
+        }}>
+          {loading ? 'Salvando...' : 'Definir Nova Senha'}
+        </button>
+      </div>
     </div>
   );
 }
@@ -98,7 +183,7 @@ export default function App(): JSX.Element {
     telaAtual, usuarioLogado, loginForm, cadastroForm,
     loginErro, cadastroErro, cadastroSucesso,
     setTelaAtual: _setTelaAtual, setLoginForm, setCadastroForm, setLoginErro, setCadastroErro,
-    realizarLogin, realizarCadastro, realizarLogout,
+    realizarLogin, realizarCadastro, realizarLogout, realizarTrocaSenha,
   } = useAuth();
 
   // ── Session ──────────────────────────────────────────────────────────
@@ -275,9 +360,9 @@ export default function App(): JSX.Element {
     if (level < HierarchyLevel.MANAGEMENT) return 0;
     try {
       const yard = usuarioLogado?.primaryYard as YardCode | undefined;
-      const isAdmin = level >= HierarchyLevel.ADMIN;
-      const regs = getPendingRegistrations(isAdmin ? undefined : yard as YardCode | undefined).length;
-      const pwds = getPendingPasswordResets(isAdmin ? undefined : yard as YardCode | undefined).length;
+      const isGestor = level >= HierarchyLevel.MANAGEMENT;
+      const regs = getPendingRegistrations(isGestor ? yard as YardCode | undefined : undefined).length;
+      const pwds = getPendingPasswordResets(isGestor ? yard as YardCode | undefined : undefined).length;
       return regs + pwds;
     } catch { return 0; }
   }, [usuarioLogado, currentPageId]); // currentPageId dep to refresh on nav
@@ -354,6 +439,11 @@ export default function App(): JSX.Element {
         onVoltar={() => { navigate(ROUTES.LOGIN); setCadastroErro(''); }}
         onToggleTema={alternarTema} tema={tema as unknown as Record<string, string>} config={config as unknown as Record<string, unknown>} />
     );
+  }
+
+  // v3.2: Forced password change gate
+  if (telaAtual === 'trocarSenha' && usuarioLogado) {
+    return <TrocaSenhaScreen tema={tema} isDark={isDark} onTrocar={realizarTrocaSenha} />;
   }
 
   // Terms acceptance gate

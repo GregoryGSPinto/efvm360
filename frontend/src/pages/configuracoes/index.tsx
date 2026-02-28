@@ -55,8 +55,8 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
       { id: 'geral' as const, icon: '⚙️', label: 'Geral', sempreVisivel: true },
       { id: 'manual' as const, icon: '📖', label: 'Manual', sempreVisivel: true },
       { id: 'sobre' as const, icon: 'ℹ️', label: 'Sobre', sempreVisivel: true },
-      { id: 'patios' as const, icon: '🏗️', label: 'Gerenciar Pátios', sempreVisivel: false, requerPerfil: ['inspetor', 'gestor', 'administrador'] },
-      { id: 'avancado' as const, icon: '🔧', label: 'Avançado', sempreVisivel: false, requerPerfil: ['gestor', 'administrador'] },
+      { id: 'patios' as const, icon: '🏗️', label: 'Gerenciar Pátios', sempreVisivel: false, requerPerfil: ['inspetor', 'gestor'] },
+      { id: 'avancado' as const, icon: '🔧', label: 'Avançado', sempreVisivel: false, requerPerfil: ['gestor'] },
     ];
 
     // FASE 7: Filtrar menu - itens não permitidos ficam OCULTOS (não desabilitados)

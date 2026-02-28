@@ -741,9 +741,19 @@ export const AdamBootChat = memo<AdamBootChatProps>(({
               />
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 700, fontSize: '14px' }}>AdamBoot</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontWeight: 700, fontSize: '14px' }}>AdamBoot</span>
+                {/* v3.2: Learning indicator badge */}
+                <span style={{
+                  fontSize: 8, fontWeight: 700, padding: '2px 6px', borderRadius: 6,
+                  background: memoria.estatisticas.sessoes > 20 ? 'rgba(105,190,40,0.3)' : memoria.estatisticas.sessoes >= 5 ? 'rgba(217,160,16,0.3)' : 'rgba(255,255,255,0.2)',
+                  color: '#fff', letterSpacing: 0.5, textTransform: 'uppercase',
+                }}>
+                  {memoria.estatisticas.sessoes > 20 ? 'Avançado' : memoria.estatisticas.sessoes >= 5 ? 'Intermediário' : 'Iniciante'}
+                </span>
+              </div>
               <div style={{ fontSize: '10px', opacity: 0.9 }}>
-                IA Central • {memoria.estatisticas.totalInteracoes} interações
+                IA Central • {memoria.estatisticas.totalInteracoes} interações • {memoria.estatisticas.sessoes} sessões
               </div>
             </div>
             

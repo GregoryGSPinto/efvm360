@@ -72,8 +72,8 @@ const EFVM360_USERS: SeedUser[] = [
   { nome: 'Gilberto Souza Braga',       matricula: 'VTO2001', funcao: 'inspetor',                                       primaryYard: 'VTO' },
   { nome: 'Osvaldo Ramos Teixeira',     matricula: 'VTO3001', funcao: 'gestor',                                         primaryYard: 'VTO' },
 
-  // ═══ ADMIN GLOBAL ═══
-  { nome: 'Gregory Administrador',      matricula: 'ADM9001', funcao: 'administrador',                                  primaryYard: 'VFZ' },
+  // ═══ GESTOR GLOBAL (antigo admin) ═══
+  { nome: 'Gregory Gestor',             matricula: 'ADM9001', funcao: 'gestor',                                         primaryYard: 'VFZ' },
 
   // ═══ SUPORTE TÉCNICO ═══
   { nome: 'Suporte Tecnico',            matricula: 'SUP0001', funcao: 'suporte',                                        primaryYard: 'VFZ', senha: 'suporte360' },

@@ -30,6 +30,9 @@ export default function GerenciamentoPatios({ styles, tema }: GerenciamentoPatio
   const [editandoCodigo, setEditandoCodigo] = useState<string | null>(null);
   const [editandoNome, setEditandoNome] = useState('');
 
+  // ── Confirmation modal state (v3.2) ──
+  const [confirmar, setConfirmar] = useState<{ tipo: 'desativar' | 'removerLinha'; codigo: string; idx?: number; nome?: string } | null>(null);
+
   // ── Line management state ──
   const [expandidoCodigo, setExpandidoCodigo] = useState<string | null>(null);
   const [novaLinhaNome, setNovaLinhaNome] = useState('');
@@ -52,8 +55,13 @@ export default function GerenciamentoPatios({ styles, tema }: GerenciamentoPatio
   }, [editandoNome, editarPatio]);
 
   const handleToggleAtivo = useCallback((codigo: string, ativoAtual: boolean) => {
-    if (ativoAtual) desativarPatio(codigo); else ativarPatio(codigo);
-  }, [desativarPatio, ativarPatio]);
+    if (ativoAtual) {
+      const p = patios.find(x => x.codigo === codigo);
+      setConfirmar({ tipo: 'desativar', codigo, nome: p?.nome || codigo });
+    } else {
+      ativarPatio(codigo);
+    }
+  }, [patios, ativarPatio]);
 
   const handleAdicionarLinha = useCallback((codigoPatio: string) => {
     if (!novaLinhaNome.trim()) { setErroLinha('Nome da linha é obrigatório'); return; }
@@ -239,7 +247,7 @@ export default function GerenciamentoPatios({ styles, tema }: GerenciamentoPatio
                                       value={linha.capacidade} onChange={e => editarLinha(patio.codigo, idx, { capacidade: Number(e.target.value) || 0 })} />
                                   </td>
                                   <td style={{ ...styles.td, padding: '6px 8px', textAlign: 'center' }}>
-                                    <button onClick={() => removerLinha(patio.codigo, idx)}
+                                    <button onClick={() => setConfirmar({ tipo: 'removerLinha', codigo: patio.codigo, idx, nome: linha.nome })}
                                       style={{ background: 'rgba(220,38,38,0.08)', color: '#dc2626', border: '1px solid rgba(220,38,38,0.2)', borderRadius: 6, padding: '4px 10px', fontSize: 11, cursor: 'pointer' }}>
                                       Remover
                                     </button>
@@ -310,6 +318,48 @@ export default function GerenciamentoPatios({ styles, tema }: GerenciamentoPatio
           </div>
         )}
       </div>
+
+      {/* v3.2: Confirmation Modal */}
+      {confirmar && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+        }} onClick={() => setConfirmar(null)}>
+          <div style={{
+            background: tema.card, borderRadius: 16, padding: '28px 32px', maxWidth: 400, width: '90%',
+            border: `1px solid ${tema.cardBorda}`, boxShadow: '0 16px 48px rgba(0,0,0,0.2)',
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: 24, textAlign: 'center', marginBottom: 12 }}>
+              {confirmar.tipo === 'desativar' ? '⚠️' : '🗑️'}
+            </div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: tema.texto, textAlign: 'center', marginBottom: 8 }}>
+              {confirmar.tipo === 'desativar' ? 'Desativar Pátio?' : 'Remover Linha?'}
+            </div>
+            <div style={{ fontSize: 13, color: tema.textoSecundario, textAlign: 'center', marginBottom: 20 }}>
+              {confirmar.tipo === 'desativar'
+                ? `Tem certeza que deseja desativar o pátio "${confirmar.nome}"? Ele não aparecerá mais no seletor.`
+                : `Tem certeza que deseja remover a linha "${confirmar.nome}"? Esta ação não pode ser desfeita.`}
+            </div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button onClick={() => setConfirmar(null)} style={{
+                padding: '10px 24px', borderRadius: 8, border: `1px solid ${tema.cardBorda}`,
+                background: tema.backgroundSecundario, color: tema.texto, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+              }}>Cancelar</button>
+              <button onClick={() => {
+                if (confirmar.tipo === 'desativar') desativarPatio(confirmar.codigo);
+                else if (confirmar.tipo === 'removerLinha' && confirmar.idx !== undefined) removerLinha(confirmar.codigo, confirmar.idx);
+                setConfirmar(null);
+              }} style={{
+                padding: '10px 24px', borderRadius: 8, border: 'none',
+                background: '#dc2626', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+              }}>
+                {confirmar.tipo === 'desativar' ? 'Sim, Desativar' : 'Sim, Remover'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

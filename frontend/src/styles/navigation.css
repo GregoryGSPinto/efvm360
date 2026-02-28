@@ -34,6 +34,49 @@
   .efvm360-grid-responsive-4 { grid-template-columns: 1fr !important; }
 }
 
+/* ── v3.2: Small Mobile (375-390px viewports) ──────────────────────── */
+@media (max-width: 767px) {
+  .efvm360-main-content {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+}
+
+@media (max-width: 390px) {
+  /* Tighter padding for narrow screens */
+  .efvm360-main-content {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  /* Reduce card padding */
+  .efvm360-card-compact {
+    padding: 12px !important;
+  }
+
+  /* Tables: horizontal scroll */
+  .efvm360-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* KPI cards: single column */
+  .efvm360-kpi-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* Section nav: smaller buttons */
+  .efvm360-secao-nav button {
+    padding: 8px 12px !important;
+    font-size: 11px !important;
+  }
+
+  /* Font size adjustments */
+  h1 { font-size: 18px !important; }
+  h2 { font-size: 16px !important; }
+  h3 { font-size: 14px !important; }
+}
+
 /* ── Scrollbar hiding for horizontal scroll containers ───────────────── */
 .efvm360-scroll-hide::-webkit-scrollbar { display: none; }
 .efvm360-scroll-hide { -ms-overflow-style: none; scrollbar-width: none; }

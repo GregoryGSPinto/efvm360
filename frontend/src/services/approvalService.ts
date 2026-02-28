@@ -159,11 +159,13 @@ export function approvePasswordReset(requestId: string, approverMatricula: strin
     req.reviewedAt = new Date().toISOString();
     localStorage.setItem(STORAGE_KEYS.PASSWORD_REQUESTS, JSON.stringify(requests));
 
-    // Apply password change
+    // Apply password change — set temp password and force change on next login
     const usuarios = JSON.parse(localStorage.getItem(STORAGE_KEYS.USUARIOS) || '[]');
     const userIdx = usuarios.findIndex((u: { matricula: string }) => u.matricula === req.matricula);
     if (userIdx !== -1) {
       usuarios[userIdx].senha = req.newPassword;
+      delete usuarios[userIdx].senhaHash; // Clear hash so plaintext is used
+      usuarios[userIdx].mustChangePassword = true;
       localStorage.setItem(STORAGE_KEYS.USUARIOS, JSON.stringify(usuarios));
     }
     return true;

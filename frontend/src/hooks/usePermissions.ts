@@ -100,7 +100,7 @@ export function usePermissions(usuarioLogado?: { funcao?: string; matricula?: st
     podeVisualizar,
     podeGerenciar,
     podeVerEquipe: userProfile ? canViewTeamPage(userProfile) : false,
-    isAdmin: (userProfile?.hierarchyLevel || 0) >= HierarchyLevel.ADMIN,
+    isAdmin: (userProfile?.hierarchyLevel || 0) >= HierarchyLevel.MANAGEMENT, // v3.2: gestor is top
     isGestor: (userProfile?.hierarchyLevel || 0) >= HierarchyLevel.MANAGEMENT,
     isInspetor: (userProfile?.hierarchyLevel || 0) >= HierarchyLevel.INSPECTION,
   };

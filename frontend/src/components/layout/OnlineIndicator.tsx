@@ -50,6 +50,7 @@ export const OnlineIndicator = memo<Props>(({ status, pendingCount, isDark }) =>
 OnlineIndicator.displayName = 'OnlineIndicator';
 
 // ── Mobile Inline Badge (for TopNavbar) ──
+// v3.2: On mobile, show ONLY the green dot (no text label)
 export const OnlineStatusInline = memo<Props>(({ status }) => {
   const color = status === 'online' ? '#0A7F5A' : status === 'offline' ? '#dc2626' : '#d9a010';
   const label = status === 'online' ? 'Online' : status === 'offline' ? 'Offline' : 'Sync...';
@@ -69,9 +70,12 @@ export const OnlineStatusInline = memo<Props>(({ status }) => {
         boxShadow: `0 0 4px ${color}`,
         animation: status === 'syncing' ? 'efvm360Pulse 1.5s infinite' : 'none',
       }} />
-      {label}
+      <span className="efvm360-online-label">{label}</span>
       <style>{`
-        @media(max-width:767px){.efvm360-online-mobile{display:inline-flex !important;}}
+        @media(max-width:767px){
+          .efvm360-online-mobile{display:inline-flex !important;}
+          .efvm360-online-label{display:none !important;}
+        }
       `}</style>
     </span>
   );

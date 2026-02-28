@@ -1,6 +1,7 @@
 // ============================================================================
 // EFVM PÁTIO 360 — RBAC Policy
 // Controle de acesso por papel + pátio
+// v3.2 — Admin removido, Gestor herda todas as permissões
 // ============================================================================
 
 import { SystemAction, HierarchyLevel } from '../contracts';
@@ -28,26 +29,22 @@ const INSPECTION_ACTIONS: SystemAction[] = [
   SystemAction.APPROVE_DSS,
   SystemAction.VIEW_TEAM,
   SystemAction.EXPORT_REPORTS,
+  SystemAction.APPROVE_PASSWORD_RESET,
 ];
 
 const MANAGEMENT_ACTIONS: SystemAction[] = [
   ...INSPECTION_ACTIONS,
   SystemAction.MANAGE_TEAM,
   SystemAction.APPROVE_REGISTRATION,
-  SystemAction.APPROVE_PASSWORD_RESET,
   SystemAction.TRANSFER_USER,
   SystemAction.SUSPEND_USER,
   SystemAction.VIEW_AUDIT_TRAIL,
+  SystemAction.EXPORT_AUDIT_TRAIL,
+  SystemAction.EDIT_SYSTEM_CONFIG,
 ];
 
 const TECHNICAL_ACTIONS: SystemAction[] = [
   ...MANAGEMENT_ACTIONS,
-  SystemAction.EXPORT_AUDIT_TRAIL,
-];
-
-const ADMIN_ACTIONS: SystemAction[] = [
-  ...TECHNICAL_ACTIONS,
-  SystemAction.EDIT_SYSTEM_CONFIG,
 ];
 
 const PERMISSION_MAP: Record<number, SystemAction[]> = {
@@ -55,7 +52,6 @@ const PERMISSION_MAP: Record<number, SystemAction[]> = {
   [HierarchyLevel.INSPECTION]: INSPECTION_ACTIONS,
   [HierarchyLevel.MANAGEMENT]: MANAGEMENT_ACTIONS,
   [HierarchyLevel.TECHNICAL]: TECHNICAL_ACTIONS,
-  [HierarchyLevel.ADMIN]: ADMIN_ACTIONS,
 };
 
 // ── Context for yard-scoped actions ────────────────────────────────────
@@ -83,12 +79,9 @@ export function hasPermission(
 ): boolean {
   // Get allowed actions for this hierarchy level
   const allowed = PERMISSION_MAP[user.hierarchyLevel] || OPERATIVE_ACTIONS;
-  
+
   // Check if action is in the allowed list
   if (!allowed.includes(action)) return false;
-
-  // Admin bypasses all context checks
-  if (user.hierarchyLevel >= HierarchyLevel.ADMIN) return true;
 
   // Technical support bypasses yard checks for password reset
   if (user.hierarchyLevel >= HierarchyLevel.TECHNICAL && action === SystemAction.APPROVE_PASSWORD_RESET) {
@@ -101,7 +94,7 @@ export function hasPermission(
       return canManageUser(user, context.targetUser);
     }
     if (context.yardCode) {
-      return user.primaryYard === context.yardCode || user.hierarchyLevel >= HierarchyLevel.ADMIN;
+      return user.primaryYard === context.yardCode;
     }
   }
 

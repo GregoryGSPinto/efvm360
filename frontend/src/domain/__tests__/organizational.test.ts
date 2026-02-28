@@ -85,23 +85,17 @@ describe('P02 — UserAggregate', () => {
   let maqVBR: UserProfile;
   let inspVBR: UserProfile;
   let gestVBR: UserProfile;
-  let gestVCS: UserProfile;
-  let admin: UserProfile;
-
   beforeEach(() => {
     maqVBR = createUserProfile({ matricula: 'VBR1001', nome: 'Op VBR', funcao: 'maquinista', primaryYard: 'VBR' });
     inspVBR = createUserProfile({ matricula: 'VBR2001', nome: 'Insp VBR', funcao: 'inspetor', primaryYard: 'VBR' });
     gestVBR = createUserProfile({ matricula: 'VBR3001', nome: 'Gest VBR', funcao: 'gestor', primaryYard: 'VBR' });
-    gestVCS = createUserProfile({ matricula: 'VCS3001', nome: 'Gest VCS', funcao: 'gestor', primaryYard: 'VCS' });
-    admin = createUserProfile({ matricula: 'ADM9001', nome: 'Admin', funcao: 'administrador', primaryYard: 'VFZ' });
   });
 
   it('hierarchy levels map correctly', () => {
     expect(getHierarchyLevelForRole('maquinista')).toBe(HierarchyLevel.OPERATIVE);
     expect(getHierarchyLevelForRole('inspetor')).toBe(HierarchyLevel.INSPECTION);
     expect(getHierarchyLevelForRole('gestor')).toBe(HierarchyLevel.MANAGEMENT);
-    expect(getHierarchyLevelForRole('supervisor')).toBe(HierarchyLevel.TECHNICAL);
-    expect(getHierarchyLevelForRole('administrador')).toBe(HierarchyLevel.ADMIN);
+    expect(getHierarchyLevelForRole('supervisor')).toBe(HierarchyLevel.MANAGEMENT);
   });
 
   it('createUserProfile sets all fields', () => {
@@ -120,18 +114,13 @@ describe('P02 — UserAggregate', () => {
     expect(canManageUser(gestVBR, maqVCS)).toBe(false);
   });
 
-  it('gestor CANNOT manage another gestor', () => {
+  it('gestor CAN manage another gestor in same yard', () => {
     const gest2 = createUserProfile({ matricula: 'VBR3002', nome: 'G2', funcao: 'gestor', primaryYard: 'VBR' });
-    expect(canManageUser(gestVBR, gest2)).toBe(false);
+    expect(canManageUser(gestVBR, gest2)).toBe(true);
   });
 
   it('inspetor CANNOT manage gestor', () => {
     expect(canManageUser(inspVBR, gestVBR)).toBe(false);
-  });
-
-  it('admin CAN manage anyone', () => {
-    expect(canManageUser(admin, gestVBR)).toBe(true);
-    expect(canManageUser(admin, gestVCS)).toBe(true);
   });
 
   it('any user can operate in any yard', () => {
@@ -143,7 +132,6 @@ describe('P02 — UserAggregate', () => {
   it('canApproveRegistration respects yard', () => {
     expect(canApproveRegistration(gestVBR, 'VBR')).toBe(true);
     expect(canApproveRegistration(gestVBR, 'VCS')).toBe(false);
-    expect(canApproveRegistration(admin, 'VCS')).toBe(true);
   });
 
   it('canApprovePasswordReset — supervisor can approve any', () => {
@@ -162,13 +150,10 @@ describe('P03 — RBACPolicy', () => {
   let maq: UserProfile;
   let insp: UserProfile;
   let gest: UserProfile;
-  let adm: UserProfile;
-
   beforeEach(() => {
     maq = createUserProfile({ matricula: 'VFZ1001', nome: 'Maq', funcao: 'maquinista', primaryYard: 'VFZ' });
     insp = createUserProfile({ matricula: 'VFZ2001', nome: 'Insp', funcao: 'inspetor', primaryYard: 'VFZ' });
     gest = createUserProfile({ matricula: 'VFZ3001', nome: 'Gest', funcao: 'gestor', primaryYard: 'VFZ' });
-    adm = createUserProfile({ matricula: 'ADM9001', nome: 'Adm', funcao: 'administrador', primaryYard: 'VFZ' });
   });
 
   it('maquinista CAN create/sign handover', () => {
@@ -201,8 +186,8 @@ describe('P03 — RBACPolicy', () => {
     expect(hasPermission(gest, SystemAction.SUSPEND_USER)).toBe(true);
   });
 
-  it('gestor CANNOT edit system config', () => {
-    expect(hasPermission(gest, SystemAction.EDIT_SYSTEM_CONFIG)).toBe(false);
+  it('gestor CAN edit system config (v3.2 — inherits admin)', () => {
+    expect(hasPermission(gest, SystemAction.EDIT_SYSTEM_CONFIG)).toBe(true);
   });
 
   it('gestor VFZ CANNOT manage VCS yard', () => {
@@ -211,12 +196,6 @@ describe('P03 — RBACPolicy', () => {
 
   it('gestor VFZ CAN manage own yard', () => {
     expect(canManageTeam(gest, 'VFZ')).toBe(true);
-  });
-
-  it('admin CAN do everything including cross-yard', () => {
-    expect(hasPermission(adm, SystemAction.EDIT_SYSTEM_CONFIG)).toBe(true);
-    expect(canManageTeam(adm, 'VCS')).toBe(true);
-    expect(canManageTeam(adm, 'VBR')).toBe(true);
   });
 
   it('gestor with target user same yard → allowed', () => {

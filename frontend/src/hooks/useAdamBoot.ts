@@ -221,8 +221,42 @@ export function useAdamBoot(
       }
       if (msg.includes('ajuda') || msg.includes('como')) {
         return paginaAtual === 'passagem'
-          ? 'Posso ajudar com: completude, validar, risco, pendentes, linhas, equipamentos, intervenções, manobras, resumo do turno.'
-          : 'Posso ajudar com: linhas, equipamentos, intervenções, manobras, segurança, resumo do turno, e qualquer dúvida operacional.';
+          ? 'Posso ajudar com: completude, validar, risco, pendentes, linhas, equipamentos, intervenções, manobras, resumo do turno, DSS, AMV, freio, comunicação.'
+          : 'Posso ajudar com: linhas, equipamentos, intervenções, manobras, segurança, resumo do turno, DSS, AMV, freio, comunicação, e qualquer dúvida operacional.';
+      }
+
+      // v3.2: Expanded keyword dictionary
+      if (msg.includes('amv') || msg.includes('aparelho de mudança')) {
+        return 'AMV (Aparelho de Mudança de Via): Verifique posição (normal/reversa) no layout do pátio. Confirme com CCO antes de manobrar. Nunca movimente sem autorização.';
+      }
+      if (msg.includes('dss') || msg.includes('diálogo') || msg.includes('saúde e segurança')) {
+        return 'DSS (Diálogo de Saúde e Segurança): Obrigatório antes do início de cada turno. Acesse o módulo DSS no menu para registrar. PRO-041945 Rev. 02.';
+      }
+      if (msg.includes('freio') || msg.includes('calço') || msg.includes('sapata')) {
+        const freios = dadosFormulario.segurancaManobras.freiosVerificados;
+        if (freios?.resposta === true) return 'Freios verificados e em condições. Confirme calços/sapatas antes de cada manobra.';
+        if (freios?.resposta === false) return '⚠️ Freios NÃO verificados. Ação obrigatória antes de qualquer movimentação.';
+        return 'Freios: Campo não preenchido. Verifique freios automático, independente e manuais/calços.';
+      }
+      if (msg.includes('comunicação') || msg.includes('cco') || msg.includes('cpt') || msg.includes('rádio')) {
+        const com = dadosFormulario.segurancaManobras.comunicacaoRealizada;
+        if (com?.resposta === true) return 'Comunicação operacional confirmada (CCO/CPT, OOF, Op. Silo).';
+        return 'Confirme comunicação com CCO/CPT, OOF e Operador de Silo antes de prosseguir.';
+      }
+      if (msg.includes('ponto') && msg.includes('atenção')) {
+        const pontos = dadosFormulario.pontosAtencao.filter(p => p.trim());
+        return pontos.length > 0
+          ? `Pontos de atenção registrados (${pontos.length}): ${pontos.join('; ')}.`
+          : 'Nenhum ponto de atenção registrado. Considere adicionar observações relevantes para o próximo turno.';
+      }
+      if (msg.includes('5s') || msg.includes('maturidade') || msg.includes('sala')) {
+        return 'Avaliação 5S: Seiri (utilização), Seiton (organização), Seiso (limpeza), Seiketsu (padronização), Shitsuke (disciplina). Registre no formulário.';
+      }
+      if (msg.includes('assinatura') || msg.includes('assinar') || msg.includes('confirmar passagem')) {
+        const { pct } = completudeData;
+        return pct >= 100
+          ? 'Passagem 100% preenchida. Ambos operadores (saída e entrada) devem assinar para finalizar.'
+          : `Completude: ${pct}%. Complete todos os campos obrigatórios antes de assinar.`;
       }
 
       return ''; // No local match → will try Claude

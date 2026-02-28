@@ -21,12 +21,12 @@ describe('permissions.ts', () => {
       expect(mapearFuncaoParaPerfil('supervisor')).toBe('gestor');
     });
 
-    it('deve mapear administrador → administrador', () => {
-      expect(mapearFuncaoParaPerfil('administrador')).toBe('administrador');
+    it('deve mapear administrador → gestor (v3.2: admin removido)', () => {
+      expect(mapearFuncaoParaPerfil('administrador')).toBe('gestor');
     });
 
-    it('deve mapear admin → administrador', () => {
-      expect(mapearFuncaoParaPerfil('admin')).toBe('administrador');
+    it('deve mapear admin → gestor (v3.2)', () => {
+      expect(mapearFuncaoParaPerfil('admin')).toBe('gestor');
     });
 
     it('deve mapear função desconhecida → operador (padrão seguro)', () => {
@@ -49,9 +49,9 @@ describe('permissions.ts', () => {
       expect(verificarPermissao('operador', 'passagem', 'exportar')).toBe(false);
     });
 
-    it('administrador pode configurar tudo', () => {
-      expect(verificarPermissao('administrador', 'sistema', 'configurar')).toBe(true);
-      expect(verificarPermissao('administrador', 'usuarios', 'editar')).toBe(true);
+    it('gestor pode configurar tudo (v3.2: herda admin)', () => {
+      expect(verificarPermissao('gestor', 'sistema', 'configurar')).toBe(true);
+      expect(verificarPermissao('gestor', 'usuarios', 'editar')).toBe(true);
     });
   });
 
@@ -64,9 +64,9 @@ describe('permissions.ts', () => {
       expect(verificarAcessoRota('operador', 'usuarios')).toBe(false);
     });
 
-    it('administrador pode acessar todas as rotas', () => {
-      expect(verificarAcessoRota('administrador', 'sistema')).toBe(true);
-      expect(verificarAcessoRota('administrador', 'auditoria')).toBe(true);
+    it('gestor pode acessar todas as rotas (v3.2: herda admin)', () => {
+      expect(verificarAcessoRota('gestor', 'sistema')).toBe(true);
+      expect(verificarAcessoRota('gestor', 'auditoria')).toBe(true);
     });
   });
 
@@ -84,12 +84,11 @@ describe('permissions.ts', () => {
   });
 
   describe('Hierarquia', () => {
-    it('deve respeitar hierarquia: operador(1) < oficial(2) < inspetor(3) < gestor(4) < administrador(5)', () => {
+    it('deve respeitar hierarquia: operador(1) < oficial(2) < inspetor(3) < gestor(4) — v3.2', () => {
       expect(PERFIS_PERMISSAO.operador.nivel).toBe(1);
       expect(PERFIS_PERMISSAO.oficial.nivel).toBe(2);
       expect(PERFIS_PERMISSAO.inspetor.nivel).toBe(3);
       expect(PERFIS_PERMISSAO.gestor.nivel).toBe(4);
-      expect(PERFIS_PERMISSAO.administrador.nivel).toBe(5);
     });
 
     it('verificarNivelHierarquico verifica nível correto', () => {

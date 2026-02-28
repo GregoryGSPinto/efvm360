@@ -63,6 +63,33 @@ export default function PaginaPerfil({
   const funcaoLabel = FUNCOES_USUARIO.find(f => f.value === usuarioLogado?.funcao)?.label || usuarioLogado?.funcao || '';
   const scoreColor = score >= 80 ? '#16a34a' : score >= 50 ? '#d9a010' : '#dc2626';
 
+  // v3.2: Editable nome and turno
+  const [editNome, setEditNome] = useState(usuarioLogado?.nome || '');
+  const [editTurno, setEditTurno] = useState(usuarioLogado?.turno || '');
+  const [perfilSalvo, setPerfilSalvo] = useState(false);
+
+  const salvarPerfilEditavel = useCallback(() => {
+    if (!usuarioLogado?.matricula) return;
+    try {
+      // Update in usuarios list
+      const usuarios = JSON.parse(localStorage.getItem(STORAGE_KEYS.USUARIOS) || '[]');
+      const idx = usuarios.findIndex((u: { matricula: string }) => u.matricula === usuarioLogado.matricula);
+      if (idx !== -1) {
+        if (editNome.trim()) usuarios[idx].nome = editNome.trim();
+        if (editTurno) usuarios[idx].turno = editTurno;
+        localStorage.setItem(STORAGE_KEYS.USUARIOS, JSON.stringify(usuarios));
+      }
+      // Update current user in localStorage
+      const current = JSON.parse(localStorage.getItem(STORAGE_KEYS.USUARIO) || '{}');
+      if (editNome.trim()) current.nome = editNome.trim();
+      if (editTurno) current.turno = editTurno;
+      localStorage.setItem(STORAGE_KEYS.USUARIO, JSON.stringify(current));
+
+      setPerfilSalvo(true);
+      setTimeout(() => setPerfilSalvo(false), 3000);
+    } catch { /* ignore */ }
+  }, [usuarioLogado, editNome, editTurno]);
+
   // ── Avatar state ──
   const matricula = usuarioLogado?.matricula || '';
   const avatarKey = `efvm360-avatar-${matricula}`;
@@ -290,8 +317,7 @@ export default function PaginaPerfil({
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(250px, 100%), 1fr))', gap: 16 }}>
           <div>
             <label style={styles.label}>Nome Completo</label>
-            <input type="text" style={{ ...styles.input, background: tema.backgroundSecundario }} value={usuarioLogado?.nome || ''} disabled title="Campo não editável" />
-            <span style={{ fontSize: 11, color: tema.textoSecundario }}>🔒 Não editável</span>
+            <input type="text" style={styles.input} value={editNome} onChange={e => { setEditNome(e.target.value); setPerfilSalvo(false); }} placeholder="Seu nome completo" />
           </div>
           <div>
             <label style={styles.label}>Nome Social (opcional)</label>
@@ -308,9 +334,11 @@ export default function PaginaPerfil({
             <span style={{ fontSize: 11, color: tema.textoSecundario }}>🔒 Não editável</span>
           </div>
           <div>
-            <label style={styles.label}>Turno Cadastrado</label>
-            <input type="text" style={{ ...styles.input, background: tema.backgroundSecundario }} value={usuarioLogado?.turno ? `Turno ${usuarioLogado.turno} (${usuarioLogado.horarioTurno === '07-19' ? '07:00-19:00' : '19:00-07:00'})` : 'Não definido'} disabled title="Campo não editável" />
-            <span style={{ fontSize: 11, color: tema.textoSecundario }}>🔒 Não editável</span>
+            <label style={styles.label}>Turno</label>
+            <select style={styles.select || styles.input} value={editTurno} onChange={e => { setEditTurno(e.target.value); setPerfilSalvo(false); }}>
+              <option value="">Selecione</option>
+              {TURNOS_LETRAS.map(tl => <option key={tl.value} value={tl.value}>{tl.label}</option>)}
+            </select>
           </div>
           <div>
             <label style={styles.label}>Unidade / Local</label>
@@ -327,6 +355,21 @@ export default function PaginaPerfil({
           <div>
             <label style={styles.label}>Telefone (opcional)</label>
             <input type="tel" style={styles.input} placeholder="(XX) XXXXX-XXXX" value={config.perfilExtendido.telefone} onChange={e => atualizarPerfilExtendido('telefone', e.target.value)} />
+          </div>
+          {/* Save button for editable fields */}
+          <div style={{ gridColumn: '1 / -1', marginTop: 8 }}>
+            {perfilSalvo && (
+              <div style={{ padding: 10, background: `${tema.sucesso}15`, border: `1px solid ${tema.sucesso}40`, borderRadius: 8, marginBottom: 12, color: tema.sucesso, fontSize: 13 }}>Perfil atualizado com sucesso!</div>
+            )}
+            <button
+              onClick={salvarPerfilEditavel}
+              style={{
+                padding: '10px 24px', borderRadius: 10, border: 'none', cursor: 'pointer',
+                background: perfilSalvo ? tema.sucesso : tema.primaria, color: '#fff', fontWeight: 600, fontSize: 13,
+              }}
+            >
+              {perfilSalvo ? 'Salvo!' : 'Salvar Alteracoes'}
+            </button>
           </div>
         </div>
       </Card>

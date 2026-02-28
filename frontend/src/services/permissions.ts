@@ -15,12 +15,11 @@
 // TIPOS DE PERMISSÃO
 // ============================================================================
 
-export type PerfilUsuario = 
+export type PerfilUsuario =
   | 'operador'      // Maquinista, operador básico
   | 'oficial'       // Oficial de Operação
   | 'inspetor'      // Inspetor
-  | 'gestor'        // Gestor
-  | 'administrador';// Administrador do sistema
+  | 'gestor';       // Gestor (herda permissões do antigo admin)
 
 export type AcaoPermissao = 'visualizar' | 'editar' | 'exportar' | 'configurar';
 
@@ -114,30 +113,11 @@ export const PERFIS_PERMISSAO: Record<PerfilUsuario, PerfilPermissoes> = {
     acoesEspeciais: ['visualizar_passagens', 'realizar_dss', 'exportar_relatorios', 'visualizar_auditoria'],
   },
 
-  // GESTOR
+  // GESTOR — Herda TODAS as permissões do antigo admin (v3.2)
   gestor: {
     nome: 'Gestor',
-    descricao: 'Gestor operacional da área',
+    descricao: 'Gestor operacional com acesso total',
     nivel: 4,
-    permissoes: {
-      passagem: { visualizar: true, editar: true, exportar: true, configurar: true },
-      dss: { visualizar: true, editar: true, exportar: true, configurar: true },
-      bi: { visualizar: true, editar: true, exportar: true, configurar: true },
-      historico: { visualizar: true, editar: false, exportar: true, configurar: false },
-      configuracoes: { visualizar: true, editar: true, exportar: true, configurar: true },
-      usuarios: { visualizar: true, editar: false, exportar: false, configurar: false },
-      auditoria: { visualizar: true, editar: false, exportar: true, configurar: false },
-      sistema: { visualizar: true, editar: false, exportar: false, configurar: false },
-    },
-    rotasPermitidas: ['inicial', 'passagem', 'dss', 'bi', 'historico', 'configuracoes', 'layout', 'usuarios'],
-    acoesEspeciais: ['registrar_passagem', 'realizar_dss', 'exportar_relatorios', 'visualizar_auditoria', 'configurar_bi', 'visualizar_usuarios'],
-  },
-
-  // ADMINISTRADOR
-  administrador: {
-    nome: 'Administrador',
-    descricao: 'Administrador do sistema com acesso total',
-    nivel: 5,
     permissoes: {
       passagem: { visualizar: true, editar: true, exportar: true, configurar: true },
       dss: { visualizar: true, editar: true, exportar: true, configurar: true },
@@ -167,11 +147,12 @@ export const mapearFuncaoParaPerfil = (funcao: string): PerfilUsuario => {
     'gestor': 'gestor',
     'supervisor': 'gestor',
     'coordenador': 'gestor',
-    'administrador': 'administrador',
-    'admin': 'administrador',
+    'administrador': 'gestor', // Admin removido v3.2 — mapeia para gestor
+    'admin': 'gestor',
+    'suporte': 'gestor',
     'outra': 'operador', // Padrão seguro
   };
-  
+
   return mapeamento[funcao.toLowerCase()] || 'operador';
 };
 
@@ -219,7 +200,7 @@ export const verificarAcaoEspecial = (
   const perfilConfig = PERFIS_PERMISSAO[perfil];
   if (!perfilConfig) return false;
   
-  // Administrador tem todas as ações
+  // Gestor tem todas as ações
   if (perfilConfig.acoesEspeciais.includes('*')) return true;
   
   return perfilConfig.acoesEspeciais.includes(acao);

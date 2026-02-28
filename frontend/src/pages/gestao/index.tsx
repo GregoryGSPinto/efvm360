@@ -23,7 +23,7 @@ interface PaginaGestaoProps {
 }
 
 export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGestaoProps) {
-  const { isGestor, isAdmin } = usePermissions(usuarioLogado);
+  const { isGestor, isInspetor } = usePermissions(usuarioLogado);
   const yardCode = (usuarioLogado?.primaryYard || 'VFZ') as YardCode;
   const { teamPerformance, yardPerformance, userRanking } = useProjections(yardCode, usuarioLogado?.matricula);
 
@@ -65,15 +65,15 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
   }, [auditFiltrado]);
 
   // ── Data ──
-  const pendingRegistrations = useMemo(() => getPendingRegistrations(isAdmin ? undefined : yardCode), [yardCode, refreshKey, isAdmin]);
-  const pendingPasswords = useMemo(() => getPendingPasswordResets(isAdmin ? undefined : yardCode), [yardCode, refreshKey, isAdmin]);
+  const pendingRegistrations = useMemo(() => getPendingRegistrations(isGestor ? undefined : yardCode), [yardCode, refreshKey, isGestor]);
+  const pendingPasswords = useMemo(() => getPendingPasswordResets(isGestor ? undefined : yardCode), [yardCode, refreshKey, isGestor]);
   const usuarios = useMemo(() => {
     try {
       const all: Usuario[] = JSON.parse(localStorage.getItem('efvm360-usuarios') || '[]');
-      if (isAdmin) return all;
+      if (isGestor) return all;
       return all.filter((u) => u.primaryYard === yardCode);
     } catch { return [] as Usuario[]; }
-  }, [yardCode, refreshKey, isAdmin]);
+  }, [yardCode, refreshKey, isGestor]);
 
   // ── Handlers ──
   const handleApproveReg = useCallback((id: string) => {
@@ -118,7 +118,7 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
           👥 Gestão de Equipe
         </h1>
         <p style={{ color: tema.textoSecundario, fontSize: 13, margin: 0 }}>
-          {getYardName(yardCode)} {isAdmin && '(Visão Global)'}
+          {getYardName(yardCode)} {isGestor && '(Visão Global)'}
         </p>
       </div>
 
@@ -130,21 +130,28 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
         <button style={tabStyle(secao === 'equipe')} onClick={() => setSecao('equipe')}>
           📊 Equipe
         </button>
+        {/* Gestão de Pessoas — apenas gestor */}
         {isGestor && (
           <>
             <button style={tabStyle(secao === 'cadastros')} onClick={() => setSecao('cadastros')}>
               📥 Cadastros {badge(pendingRegistrations.length)}
             </button>
-            <button style={tabStyle(secao === 'senhas')} onClick={() => setSecao('senhas')}>
-              🔑 Senhas {badge(pendingPasswords.length)}
-            </button>
             <button style={tabStyle(secao === 'usuarios')} onClick={() => setSecao('usuarios')}>
               ⚙️ Usuários
             </button>
-            <button style={tabStyle(secao === 'auditoria')} onClick={() => setSecao('auditoria')}>
-              🛡️ Auditoria {auditTrail.length > 0 && <span style={{ fontSize: 10, color: tema.textoSecundario, marginLeft: 4 }}>({auditTrail.length})</span>}
-            </button>
           </>
+        )}
+        {/* Senhas — gestor e inspetor */}
+        {isInspetor && (
+          <button style={tabStyle(secao === 'senhas')} onClick={() => setSecao('senhas')}>
+            🔑 Senhas {badge(pendingPasswords.length)}
+          </button>
+        )}
+        {/* Gestão Técnica — inspetor */}
+        {isInspetor && (
+          <button style={tabStyle(secao === 'auditoria')} onClick={() => setSecao('auditoria')}>
+            🛡️ Auditoria {auditTrail.length > 0 && <span style={{ fontSize: 10, color: tema.textoSecundario, marginLeft: 4 }}>({auditTrail.length})</span>}
+          </button>
         )}
       </div>
 
@@ -419,8 +426,8 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
         </Card>
       )}
 
-      {/* ── SEÇÃO: Senhas Pendentes ── */}
-      {secao === 'senhas' && isGestor && (
+      {/* ── SEÇÃO: Senhas Pendentes — gestor e inspetor ── */}
+      {secao === 'senhas' && isInspetor && (
         <Card title={`🔑 Solicitações de Troca de Senha (${pendingPasswords.length} pendentes)`} styles={styles}>
           {pendingPasswords.length === 0 ? (
             <p style={{ color: tema.textoSecundario, fontSize: 13, textAlign: 'center', padding: 20 }}>
@@ -487,8 +494,8 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
         </Card>
       )}
 
-      {/* ── SEÇÃO: Auditoria ── */}
-      {secao === 'auditoria' && isGestor && (
+      {/* ── SEÇÃO: Auditoria — gestor e inspetor ── */}
+      {secao === 'auditoria' && isInspetor && (
         <>
           {/* Hidden download anchor */}
           <a ref={auditLinkRef} style={{ display: 'none' }} />

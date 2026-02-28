@@ -1512,8 +1512,8 @@ export const DashboardBI = memo<DashboardAvancadoProps>(({
       {/* DOCUMENTOS EXPORTADOS - HISTÓRICO */}
       {abaAtiva === 'exportacoes' && (
         <PermissionGuard
-          perfisPermitidos={['inspetor', 'gestor', 'administrador', 'suporte', 'supervisor', 'coordenador']}
-          mensagemBloqueio="Exportação disponível para Inspetor, Gestor ou Administrador"
+          perfisPermitidos={['inspetor', 'gestor', 'suporte', 'supervisor', 'coordenador']}
+          mensagemBloqueio="Exportação disponível para Inspetor ou Gestor"
         >
           {/* Cabeçalho */}
           <div

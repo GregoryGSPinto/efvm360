@@ -11,13 +11,13 @@ export type StatusLinha = 'livre' | 'ocupada' | 'interditada';
 export type PosicaoAMV = 'normal' | 'reversa';
 
 // Funções de usuário
-export type FuncaoUsuario = 'maquinista' | 'oficial' | 'inspetor' | 'supervisor' | 'gestor' | 'administrador' | 'suporte' | 'outra';
+export type FuncaoUsuario = 'maquinista' | 'oficial' | 'inspetor' | 'supervisor' | 'gestor' | 'suporte' | 'outra';
 
 // Tema do sistema
 export type TemaConfig = 'claro' | 'escuro';
 
 // Tela atual (autenticação)
-export type TelaAtual = 'login' | 'cadastro' | 'sistema';
+export type TelaAtual = 'login' | 'cadastro' | 'sistema' | 'trocarSenha';
 
 // Tipo de manobra
 export type TipoManobra = '' | 'engate' | 'recuo' | 'recomposicao' | 'vagoes-intercalados';
@@ -285,6 +285,8 @@ export interface UsuarioCadastro extends Usuario {
   };
   // Campos de aprovação (v1.1.0)
   aprovadoPor?: string;
+  // v3.2: Forçar troca de senha no próximo login
+  mustChangePassword?: boolean;
 }
 
 // Versão atual dos termos de uso

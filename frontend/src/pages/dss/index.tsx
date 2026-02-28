@@ -226,43 +226,44 @@ export const PaginaDSS: React.FC<PaginaDSSProps> = ({ tema, styles, onVoltar, su
 
   return (
     <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <button
-            type="button"
-            onClick={onVoltar}
-            style={{
-              ...styles.button,
-              padding: '10px 16px',
-              background: tema.buttonInativo,
-              color: tema.texto,
-              border: `1px solid ${tema.cardBorda}`,
-            }}
-          >
-            ← Voltar
-          </button>
-          <div>
-            <h1 style={{ color: tema.texto, fontSize: '22px', fontWeight: 700, margin: 0 }}>
-              💬 DSS - Diálogo de Saúde, Segurança e Meio Ambiente
-            </h1>
-            <p style={{ color: tema.textoSecundario, fontSize: '12px', margin: '4px 0 0' }}>
-              PRO-041945 Rev. 02 • Espaço de diálogo aberto e participativo
-            </p>
-          </div>
-        </div>
+      {/* Header — Botão voltar ACIMA do título */}
+      <div style={{ marginBottom: '20px' }}>
         <button
           type="button"
-          onClick={() => setMostrarHistorico(!mostrarHistorico)}
+          onClick={onVoltar}
           style={{
             ...styles.button,
             padding: '10px 16px',
-            background: mostrarHistorico ? tema.primaria : tema.buttonInativo,
-            color: mostrarHistorico ? '#fff' : tema.texto,
+            background: tema.buttonInativo,
+            color: tema.texto,
+            border: `1px solid ${tema.cardBorda}`,
+            marginBottom: '12px',
           }}
         >
-          📋 Histórico ({historicoDSS.length})
+          ← Voltar
         </button>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <h1 style={{ color: tema.texto, fontSize: '22px', fontWeight: 700, margin: 0 }}>
+              DSS - Dialogo de Saude, Seguranca e Meio Ambiente
+            </h1>
+            <p style={{ color: tema.textoSecundario, fontSize: '12px', margin: '4px 0 0' }}>
+              PRO-041945 Rev. 02 - Espaco de dialogo aberto e participativo
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setMostrarHistorico(!mostrarHistorico)}
+            style={{
+              ...styles.button,
+              padding: '10px 16px',
+              background: mostrarHistorico ? tema.primaria : tema.buttonInativo,
+              color: mostrarHistorico ? '#fff' : tema.texto,
+            }}
+          >
+            Historico ({historicoDSS.length})
+          </button>
+        </div>
       </div>
 
       {/* Mensagem de sucesso */}

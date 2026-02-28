@@ -153,12 +153,9 @@ export const EQUIPAMENTOS_PADRAO: Equipamento[] = [
 
 export const FUNCOES_USUARIO: FuncaoOpcao[] = [
   { value: 'maquinista', label: 'Maquinista' },
-  { value: 'oficial', label: 'Oficial de Operação' },
   { value: 'inspetor', label: 'Inspetor' },
-  { value: 'supervisor', label: 'Supervisor' },
+  { value: 'oficial', label: 'Oficial de Operação' },
   { value: 'gestor', label: 'Gestor' },
-  { value: 'administrador', label: 'Administrador' },
-  { value: 'outra', label: 'Outra' },
 ];
 
 // ============================================================================

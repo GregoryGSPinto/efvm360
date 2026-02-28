@@ -78,7 +78,7 @@ export enum ShiftWindow {
   NIGHT = '19-07',
 }
 
-/** Função/cargo do operador */
+/** Função/cargo do operador (v3.2 — admin removido) */
 export enum OperatorRole {
   MACHINIST = 'maquinista',
   OPERATOR = 'operador',
@@ -88,7 +88,6 @@ export enum OperatorRole {
   MANAGER = 'gestor',
   SUPERVISOR = 'supervisor',
   COORDINATOR = 'coordenador',
-  ADMINISTRATOR = 'administrador',
 }
 
 /** Código do pátio operacional (v1.1.0) */
@@ -107,13 +106,12 @@ export enum YardRegionEnum {
   LITORAL = 'litoral',
 }
 
-/** Nível hierárquico de autoridade (v1.1.0) */
+/** Nível hierárquico de autoridade (v3.2 — admin removido) */
 export enum HierarchyLevel {
   OPERATIVE = 1,     // Maquinista, Oficial
   INSPECTION = 2,    // Inspetor
-  MANAGEMENT = 3,    // Gestor
-  TECHNICAL = 4,     // Suporte Técnico / Supervisor
-  ADMIN = 5,         // Administrador
+  MANAGEMENT = 3,    // Gestor (herda permissões do antigo admin)
+  TECHNICAL = 4,     // Suporte Técnico
 }
 
 /** Status do usuário no sistema (v1.1.0) */
