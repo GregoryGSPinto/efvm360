@@ -135,8 +135,11 @@ export const LoginScreenPremium = memo<Props>(({
               border:`1px solid ${dk ? 'rgba(0,126,122,0.25)' : 'rgba(0,126,122,0.15)'}`,
               borderRadius:10,
             }}>
-              <div style={{ fontSize:10, fontWeight:700, color:'#007e7a', textTransform:'uppercase', letterSpacing:0.8, marginBottom:8 }}>
+              <div style={{ fontSize:10, fontWeight:700, color:'#007e7a', textTransform:'uppercase', letterSpacing:0.8, marginBottom:4 }}>
                 {t('login.credenciais')}
+              </div>
+              <div style={{ fontSize:12, fontWeight:500, color:txt2, textAlign:'center', marginBottom:8 }}>
+                👆 Clique em uma credencial abaixo para preencher automaticamente, depois clique em Acessar o Sistema
               </div>
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6 }}>
                 {[
