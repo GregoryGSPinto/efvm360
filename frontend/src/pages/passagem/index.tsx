@@ -15,6 +15,7 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { usePatio } from '../../hooks/usePatio';
 import { useEquipamentos } from '../../hooks/useEquipamentos';
 import type { StylesObject } from '../../hooks/useStyles';
+import { validarSecao, gerarResumoCopilot, type AlertaCopilot, type ResumoCopilot } from '../../components/AdamBot/AdamBotCopilot';
 
 // ── ItemSegurancaSimNao — Extracted to avoid inline re-creation ──────
 interface ItemSegurancaSimNaoProps {
@@ -143,6 +144,12 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
   const secaoNavRef = useRef<HTMLDivElement>(null);
   const [turnoAnteriorExpandido, setTurnoAnteriorExpandido] = useState(true);
 
+  // ── Copilot state ──
+  const [copilotAlertas, setCopilotAlertas] = useState<AlertaCopilot[]>([]);
+  const [copilotResumo, setCopilotResumo] = useState<ResumoCopilot | null>(null);
+  const [copilotMinimizado, setCopilotMinimizado] = useState(false);
+  const secaoAnteriorRef = useRef<string>(secaoFormulario);
+
   // Auto-scroll active section tab into view
   useEffect(() => {
     const container = secaoNavRef.current;
@@ -151,6 +158,46 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
     if (activeBtn) {
       activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     }
+  }, [secaoFormulario]);
+
+  // ── Copilot: validar ao mudar de seção ──
+  useEffect(() => {
+    const secaoSaindo = secaoAnteriorRef.current;
+    secaoAnteriorRef.current = secaoFormulario;
+    if (secaoSaindo === secaoFormulario) return;
+
+    const alertas = validarSecao(secaoSaindo, dadosFormulario);
+    setCopilotAlertas(alertas);
+
+    const bloqueante = alertas.find(a => a.nivel === 'bloqueante');
+    if (bloqueante && 'speechSynthesis' in window) {
+      const utt = new SpeechSynthesisUtterance(bloqueante.mensagemVoz);
+      utt.lang = 'pt-BR';
+      utt.rate = 1.1;
+      speechSynthesis.speak(utt);
+    }
+
+    if (secaoFormulario === 'assinaturas') {
+      const secoesIds = SECOES_FORMULARIO.map(s => s.id);
+      const resumo = gerarResumoCopilot(dadosFormulario, secoesIds);
+      setCopilotResumo(resumo);
+      if ('speechSynthesis' in window) {
+        const utt = new SpeechSynthesisUtterance(resumo.textoVoz);
+        utt.lang = 'pt-BR';
+        utt.rate = 1.1;
+        speechSynthesis.speak(utt);
+      }
+    } else {
+      setCopilotResumo(null);
+    }
+
+    const timer = setTimeout(() => setCopilotAlertas([]), 8000);
+    return () => clearTimeout(timer);
+  }, [secaoFormulario, dadosFormulario]);
+
+  // Reset copilot minimizado ao mudar de seção
+  useEffect(() => {
+    setCopilotMinimizado(false);
   }, [secaoFormulario]);
 
   // ── Permissions & Patio ──
@@ -3222,6 +3269,63 @@ SEGURANÇA EM MANOBRAS
       </div>
 
       {renderSecaoFormulario()}
+
+      {/* Copilot Alert Banner */}
+      {copilotAlertas.length > 0 && !copilotMinimizado && (
+        <div style={{
+          position: 'sticky', bottom: 80, zIndex: 100,
+          margin: '12px 0', padding: '14px 18px', borderRadius: 14,
+          background: copilotAlertas.some(a => a.nivel === 'bloqueante')
+            ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.12)',
+          border: `1px solid ${copilotAlertas.some(a => a.nivel === 'bloqueante') ? '#ef4444' : '#f59e0b'}40`,
+          backdropFilter: 'blur(8px)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <span style={{ fontSize: 16 }}>🤖</span>
+            <span style={{ fontWeight: 700, fontSize: 13, color: tema.texto, flex: 1 }}>AdamBot — Copiloto</span>
+            <button onClick={() => setCopilotMinimizado(true)} style={{
+              background: 'transparent', border: 'none', cursor: 'pointer',
+              color: tema.textoSecundario, fontSize: 16, padding: '2px 6px',
+            }}>✕</button>
+          </div>
+          {copilotAlertas.map((alerta, i) => (
+            <div key={i} style={{
+              display: 'flex', alignItems: 'flex-start', gap: 6,
+              padding: '4px 0', fontSize: 12, color: tema.texto,
+            }}>
+              <span>{alerta.nivel === 'bloqueante' ? '🔴' : '🟡'}</span>
+              <span>{alerta.mensagem}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Copilot Resumo — seção assinaturas */}
+      {copilotResumo && secaoFormulario === 'assinaturas' && (
+        <div style={{
+          margin: '0 0 16px', padding: '16px 20px', borderRadius: 14,
+          background: copilotResumo.pronto ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
+          border: `1px solid ${copilotResumo.pronto ? '#22c55e' : '#ef4444'}30`,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            <span style={{ fontSize: 16 }}>🤖</span>
+            <span style={{ fontWeight: 700, fontSize: 14, color: tema.texto }}>Resumo do Copiloto</span>
+            <span style={{
+              fontSize: 10, padding: '2px 10px', borderRadius: 999, fontWeight: 700, color: '#fff',
+              background: copilotResumo.pronto ? '#22c55e' : '#ef4444',
+            }}>
+              {copilotResumo.pronto ? 'PRONTO P/ ASSINAR' : `${copilotResumo.alertasBloqueantes} BLOQUEANTE(S)`}
+            </span>
+          </div>
+          <div style={{ fontSize: 11, color: tema.textoSecundario, marginBottom: 8 }}>
+            {copilotResumo.secoesCompletas}/{copilotResumo.secoesTotal} seções OK
+            {copilotResumo.alertasAviso > 0 && ` · ${copilotResumo.alertasAviso} aviso(s)`}
+          </div>
+          {copilotResumo.texto.split('\n').map((linha, i) => (
+            <div key={i} style={{ fontSize: 12, color: tema.texto, padding: '2px 0' }}>{linha}</div>
+          ))}
+        </div>
+      )}
 
       {/* Navegação */}
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
