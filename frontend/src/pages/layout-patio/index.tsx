@@ -14,12 +14,11 @@ import { usePatio } from '../../hooks/usePatio';
 export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.Element {
   const { tema, styles, usuarioLogado } = props;
   const { isGestor, isInspetor } = usePermissions(usuarioLogado);
-  const { patiosAtivos, criarPatio: criarPatioHook, editarCategoriasPatio, editarAmvsPatio } = usePatio();
+  const { patiosAtivos, criarPatio: criarPatioHook, excluirPatio, renomearPatio, editarCategoriasPatio, editarAmvsPatio } = usePatio();
   const canSelectYard = isGestor || isInspetor;
-  const allowedYards: string[] = usuarioLogado?.allowedYards || [usuarioLogado?.primaryYard || ''];
   const defaultYard = (usuarioLogado?.primaryYard || 'VFZ') as YardCode;
   const [selectedYard, setSelectedYard] = useState<YardCode>(defaultYard);
-  const canEditSelectedYard = (isGestor || isInspetor) && allowedYards.includes(selectedYard);
+  const canEditSelectedYard = isGestor || isInspetor;
 
   // ── Create Patio Modal ──
   const [showCriarPatioModal, setShowCriarPatioModal] = useState(false);
@@ -71,11 +70,6 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
 
   const salvarEdicao = useCallback(() => {
     if (!editingYard) return;
-    const allowed = usuarioLogado?.allowedYards || [usuarioLogado?.primaryYard || ''];
-    if (!allowed.includes(editingYard)) {
-      setEditErro('Sem permissão para editar este pátio.');
-      return;
-    }
     const cats = categoriasEditadas[editingYard];
     if (!cats || cats.length === 0) {
       setEditErro('O pátio deve ter pelo menos 1 categoria.');
@@ -239,6 +233,63 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
     }
   }, [autoEditYard, patiosAtivos, iniciarEdicao]);
 
+  // ── Rename Patio ──
+  const [editandoNome, setEditandoNome] = useState(false);
+  const [novoNomePatio, setNovoNomePatio] = useState('');
+
+  const iniciarEdicaoNome = () => {
+    setNovoNomePatio(patioSelecionado?.nome || '');
+    setEditandoNome(true);
+  };
+
+  const salvarNome = () => {
+    if (!selectedYard || !novoNomePatio.trim()) {
+      setEditandoNome(false);
+      return;
+    }
+    const result = renomearPatio(selectedYard, novoNomePatio);
+    if (result.ok) {
+      setEditandoNome(false);
+    } else {
+      alert(result.erro || 'Erro ao renomear.');
+    }
+  };
+
+  const cancelarEdicaoNome = () => {
+    setEditandoNome(false);
+    setNovoNomePatio('');
+  };
+
+  // ── Delete Patio ──
+  const handleExcluirPatio = () => {
+    if (!selectedYard || !patioSelecionado) return;
+    const nome = patioSelecionado.nome;
+
+    const confirm1 = window.confirm(
+      `Tem certeza que deseja EXCLUIR o pátio "${nome}" (${selectedYard})?\n\n` +
+      `Esta ação é IRREVERSÍVEL. Todas as categorias, linhas e AMVs serão perdidos.`
+    );
+    if (!confirm1) return;
+
+    const digitado = window.prompt(
+      `Para confirmar a exclusão, digite o código do pátio: ${selectedYard}`
+    );
+    if (digitado?.trim().toUpperCase() !== selectedYard.toUpperCase()) {
+      alert('Código incorreto. Exclusão cancelada.');
+      return;
+    }
+
+    const result = excluirPatio(selectedYard);
+    if (result.ok) {
+      const restantes = patiosAtivos.filter(p => p.codigo !== selectedYard);
+      const primeiro = restantes[0]?.codigo || 'VFZ';
+      setSelectedYard(primeiro as YardCode);
+      alert(`Pátio "${nome}" excluído com sucesso.`);
+    } else {
+      alert(result.erro || 'Erro ao excluir.');
+    }
+  };
+
   // ── Styles ──
   const inputStyle: React.CSSProperties = {
     padding: '6px 10px', borderRadius: 6, border: `1px solid ${tema.cardBorda}`,
@@ -352,34 +403,74 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
       {/* ── Categories Section (dynamic, editable) ── */}
       {patioSelecionado && (
         <div style={{ marginBottom: 20 }}>
-          {/* Header + Edit/Save/Cancel buttons */}
+          {/* Header + Rename inline + Edit/Save/Cancel/Delete buttons */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
-            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: tema.texto }}>
-              Categorias — {patioSelecionado.nome}
+            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: tema.texto, display: 'flex', alignItems: 'center', gap: 8 }}>
+              Categorias —{' '}
+              {editandoNome ? (
+                <input
+                  autoFocus
+                  value={novoNomePatio}
+                  onChange={e => setNovoNomePatio(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') salvarNome();
+                    if (e.key === 'Escape') cancelarEdicaoNome();
+                  }}
+                  onBlur={salvarNome}
+                  style={{
+                    background: 'transparent', border: `1px solid ${tema.primaria}`,
+                    borderRadius: 6, padding: '4px 8px', fontSize: 16, fontWeight: 700,
+                    color: tema.texto, width: '100%', maxWidth: 300, outline: 'none',
+                  }}
+                />
+              ) : (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  {patioSelecionado.nome}
+                  {canEditSelectedYard && !isEditing && (
+                    <button onClick={iniciarEdicaoNome} style={{
+                      background: 'transparent', border: 'none', cursor: 'pointer',
+                      fontSize: 14, padding: '2px 6px', borderRadius: 4, color: tema.textoSecundario,
+                    }} title="Renomear pátio">
+                      ✏️
+                    </button>
+                  )}
+                </span>
+              )}
             </h3>
-            {canEditSelectedYard && (
-              <button onClick={() => { isEditing ? salvarEdicao() : iniciarEdicao(selectedYard); }} style={{
+            {canEditSelectedYard && !isEditing && (
+              <button onClick={() => iniciarEdicao(selectedYard)} style={{
                 padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                border: isEditing ? '2px solid #007e7a' : `1px solid ${tema.cardBorda}`,
-                background: isEditing ? 'rgba(0,126,122,0.1)' : 'transparent',
-                color: isEditing ? '#007e7a' : tema.texto, minHeight: 36,
+                border: `1px solid ${tema.cardBorda}`, background: 'transparent',
+                color: tema.texto, minHeight: 36,
               }}>
-                {isEditing ? 'Salvar Alterações' : 'Editar Pátio'}
+                Editar Pátio
+              </button>
+            )}
+            {canEditSelectedYard && !isEditing && !patioSelecionado.padrao && (
+              <button onClick={handleExcluirPatio} style={{
+                background: 'transparent', border: '1px solid #ef4444', borderRadius: 8,
+                padding: '6px 14px', color: '#ef4444', fontWeight: 600, fontSize: 12,
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, minHeight: 36,
+              }}>
+                Excluir Pátio
               </button>
             )}
             {isEditing && (
-              <button onClick={cancelarEdicao} style={{
-                padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                border: `1px solid ${tema.cardBorda}`, background: 'transparent', color: tema.texto, minHeight: 36,
-              }}>Cancelar</button>
+              <>
+                <button onClick={salvarEdicao} style={{
+                  padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                  border: '2px solid #007e7a', background: 'rgba(0,126,122,0.1)',
+                  color: '#007e7a', minHeight: 36,
+                }}>
+                  Salvar Alterações
+                </button>
+                <button onClick={cancelarEdicao} style={{
+                  padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                  border: `1px solid ${tema.cardBorda}`, background: 'transparent', color: tema.texto, minHeight: 36,
+                }}>Cancelar</button>
+              </>
             )}
           </div>
-
-          {(isGestor || isInspetor) && !canEditSelectedYard && (
-            <div style={{ fontSize: 11, color: tema.textoSecundario, fontStyle: 'italic', marginBottom: 8 }}>
-              Você não tem permissão para editar este pátio. Contate o gestor responsável.
-            </div>
-          )}
 
           {editErro && (
             <div style={{ padding: '10px 14px', marginBottom: 12, borderRadius: 8, background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', fontSize: 13, color: '#dc2626' }}>

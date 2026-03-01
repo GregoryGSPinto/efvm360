@@ -171,6 +171,28 @@ export function usePatio() {
     return { ok: true };
   }, []);
 
+  const excluirPatio = useCallback((codigo: string): { ok: boolean; erro?: string } => {
+    const atuais = carregarPatios();
+    const patio = atuais.find(p => p.codigo === codigo);
+    if (!patio) return { ok: false, erro: 'Pátio não encontrado' };
+    if (patio.padrao) return { ok: false, erro: 'Não é possível excluir pátios padrão do sistema' };
+    const filtrados = atuais.filter(p => p.codigo !== codigo);
+    persistirPatios(filtrados);
+    setPatios(filtrados);
+    return { ok: true };
+  }, []);
+
+  const renomearPatio = useCallback((codigo: string, novoNome: string): { ok: boolean; erro?: string } => {
+    if (!novoNome.trim()) return { ok: false, erro: 'Nome não pode ser vazio' };
+    const atuais = carregarPatios();
+    const idx = atuais.findIndex(p => p.codigo === codigo);
+    if (idx === -1) return { ok: false, erro: 'Pátio não encontrado' };
+    atuais[idx] = { ...atuais[idx], nome: novoNome.trim(), atualizadoEm: new Date().toISOString() };
+    persistirPatios(atuais);
+    setPatios(atuais);
+    return { ok: true };
+  }, []);
+
   const getPatioNome = useCallback((codigo: string): string => {
     const p = patios.find(p => p.codigo === codigo);
     return p?.nome || codigo;
@@ -251,6 +273,8 @@ export function usePatio() {
     patiosAtivos,
     criarPatio,
     editarPatio,
+    excluirPatio,
+    renomearPatio,
     desativarPatio,
     ativarPatio,
     getPatioNome,
