@@ -105,6 +105,14 @@ export function adamCalar(): void {
 }
 
 /**
+ * Retorna true se o AdamBot está falando no momento.
+ */
+export function adamFalando(): boolean {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return false;
+  return speechSynthesis.speaking;
+}
+
+/**
  * Pré-carrega as vozes (chamar no mount do app).
  * Alguns browsers só carregam vozes após onvoiceschanged.
  */
@@ -188,4 +196,83 @@ export function initSTT(
     },
     isSupported: true,
   };
+}
+
+// ── Standalone STT API (for simpler usage) ──────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _reconhecimento: any = null;
+
+/**
+ * Verifica se STT está disponível no browser.
+ */
+export function sttDisponivel(): boolean {
+  if (typeof window === 'undefined') return false;
+  return !!(
+    (window as any).SpeechRecognition ||
+    (window as any).webkitSpeechRecognition
+  );
+}
+
+/**
+ * Inicia reconhecimento de voz (one-shot).
+ * Chama onResultado com o texto reconhecido, onErro se falhar, onFim ao terminar.
+ */
+export function iniciarReconhecimento(
+  onResultado: (texto: string) => void,
+  onErro: (erro: string) => void,
+  onFim: () => void,
+): void {
+  if (!sttDisponivel()) {
+    onErro('STT não suportado neste navegador');
+    return;
+  }
+
+  // Stop any existing recognition
+  if (_reconhecimento) {
+    try { _reconhecimento.stop(); } catch { /* ignore */ }
+    _reconhecimento = null;
+  }
+
+  const SpeechRecognitionCtor =
+    (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+  _reconhecimento = new SpeechRecognitionCtor();
+  _reconhecimento.lang = 'pt-BR';
+  _reconhecimento.continuous = false;
+  _reconhecimento.interimResults = false;
+  _reconhecimento.maxAlternatives = 1;
+
+  _reconhecimento.onresult = (event: any) => {
+    const texto = event.results[0][0].transcript;
+    if (texto.trim()) onResultado(texto.trim());
+  };
+
+  _reconhecimento.onerror = (event: any) => {
+    if (event.error !== 'no-speech') onErro(event.error);
+  };
+
+  _reconhecimento.onend = () => {
+    _reconhecimento = null;
+    onFim();
+  };
+
+  _reconhecimento.start();
+}
+
+/**
+ * Para o reconhecimento de voz em andamento.
+ */
+export function pararReconhecimento(): void {
+  if (_reconhecimento) {
+    try { _reconhecimento.stop(); } catch { /* ignore */ }
+    _reconhecimento = null;
+  }
+}
+
+/**
+ * Retorna true se está ouvindo (reconhecimento ativo).
+ */
+export function estaOuvindo(): boolean {
+  return _reconhecimento !== null;
 }

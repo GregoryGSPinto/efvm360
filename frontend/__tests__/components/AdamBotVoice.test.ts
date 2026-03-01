@@ -113,3 +113,94 @@ describe('voice selection', () => {
     expect(utterance.voice).toBe(maleVoice);
   });
 });
+
+describe('adamFalando', () => {
+  it('retorna false quando não está falando', async () => {
+    const { adamFalando } = await getModule();
+    expect(adamFalando()).toBe(false);
+  });
+
+  it('retorna true quando speechSynthesis.speaking é true', async () => {
+    Object.defineProperty(globalThis, 'speechSynthesis', {
+      value: { speak: mockSpeak, cancel: mockCancel, getVoices: mockGetVoices, speaking: true, onvoiceschanged: undefined },
+      writable: true, configurable: true,
+    });
+    const { adamFalando } = await getModule();
+    expect(adamFalando()).toBe(true);
+  });
+});
+
+describe('STT — sttDisponivel', () => {
+  it('retorna false sem SpeechRecognition', async () => {
+    // Ensure neither SpeechRecognition nor webkitSpeechRecognition exist
+    delete (globalThis as any).SpeechRecognition;
+    delete (globalThis as any).webkitSpeechRecognition;
+    const { sttDisponivel } = await getModule();
+    expect(sttDisponivel()).toBe(false);
+  });
+
+  it('retorna true com webkitSpeechRecognition', async () => {
+    (globalThis as any).webkitSpeechRecognition = class {};
+    const { sttDisponivel } = await getModule();
+    expect(sttDisponivel()).toBe(true);
+    delete (globalThis as any).webkitSpeechRecognition;
+  });
+
+  it('retorna true com SpeechRecognition', async () => {
+    (globalThis as any).SpeechRecognition = class {};
+    const { sttDisponivel } = await getModule();
+    expect(sttDisponivel()).toBe(true);
+    delete (globalThis as any).SpeechRecognition;
+  });
+});
+
+describe('STT — iniciarReconhecimento', () => {
+  it('chama onErro quando STT indisponível', async () => {
+    delete (globalThis as any).SpeechRecognition;
+    delete (globalThis as any).webkitSpeechRecognition;
+    const { iniciarReconhecimento } = await getModule();
+    const onResultado = vi.fn();
+    const onErro = vi.fn();
+    const onFim = vi.fn();
+    iniciarReconhecimento(onResultado, onErro, onFim);
+    expect(onErro).toHaveBeenCalledWith('STT não suportado neste navegador');
+    expect(onResultado).not.toHaveBeenCalled();
+  });
+
+  it('cria reconhecimento e chama start quando disponível', async () => {
+    const mockStart = vi.fn();
+    const mockStop = vi.fn();
+    (globalThis as any).SpeechRecognition = class {
+      lang = '';
+      continuous = false;
+      interimResults = false;
+      maxAlternatives = 1;
+      onresult: any = null;
+      onerror: any = null;
+      onend: any = null;
+      start = mockStart;
+      stop = mockStop;
+    };
+    const { iniciarReconhecimento } = await getModule();
+    const onResultado = vi.fn();
+    const onErro = vi.fn();
+    const onFim = vi.fn();
+    iniciarReconhecimento(onResultado, onErro, onFim);
+    expect(mockStart).toHaveBeenCalled();
+    delete (globalThis as any).SpeechRecognition;
+  });
+});
+
+describe('STT — pararReconhecimento', () => {
+  it('é safe quando não está ouvindo', async () => {
+    const { pararReconhecimento } = await getModule();
+    expect(() => pararReconhecimento()).not.toThrow();
+  });
+});
+
+describe('STT — estaOuvindo', () => {
+  it('retorna false inicialmente', async () => {
+    const { estaOuvindo } = await getModule();
+    expect(estaOuvindo()).toBe(false);
+  });
+});

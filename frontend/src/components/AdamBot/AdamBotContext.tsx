@@ -8,7 +8,7 @@ import type { AdamMessage, ContextoBot } from './AdamBotEngine';
 import { processarMensagem, getSugestoesContextuais, gerarBoasVindas } from './AdamBotEngine';
 import type { AdamAction } from './AdamBotActions';
 import { executarAcao, type ActionExecutors } from './AdamBotActions';
-import { falar, pararFala, initSTT } from './AdamBotVoice';
+import { adamFalar, adamCalar, initSTT } from './AdamBotVoice';
 import { carregarMemoria, salvarMemoria, registrarInteracao, getInsightsMemoria } from './AdamBotMemory';
 import { registrarAudit } from './AdamBotAudit';
 import { verificarNotificacoes, type AdamNotification } from './AdamBotNotifications';
@@ -140,7 +140,7 @@ export function AdamBotProvider({ children, contexto, executors }: AdamBotProvid
     setInput('');
 
     // TTS
-    if (voiceOn) falar(result.text);
+    if (voiceOn) adamFalar(result.text);
 
     // Memory
     if (ctx.matricula) registrarInteracao(ctx.matricula, msg);
@@ -153,7 +153,7 @@ export function AdamBotProvider({ children, contexto, executors }: AdamBotProvid
   const toggleVoice = useCallback(() => {
     setVoiceOn(prev => {
       const next = !prev;
-      if (!next) pararFala();
+      if (!next) adamCalar();
       // Persist preference
       if (ctxRef.current.matricula) {
         const mem = carregarMemoria(ctxRef.current.matricula);

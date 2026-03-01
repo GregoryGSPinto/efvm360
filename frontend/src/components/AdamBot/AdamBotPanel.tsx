@@ -3,9 +3,9 @@
 // Premium chat panel with markdown, actions, suggestions, notifications
 // ============================================================================
 
-import { memo, useRef, useEffect, useCallback } from 'react';
+import { memo, useRef, useEffect, useCallback, useState } from 'react';
 import { useAdamBotContext } from './AdamBotContext';
-import { isTTSSupported } from './AdamBotVoice';
+import { isTTSSupported, adamFalar, adamCalar, adamFalando, sttDisponivel } from './AdamBotVoice';
 import { IMAGENS } from '../../assets/images';
 import type { TemaEstilos } from '../../types';
 
@@ -27,6 +27,41 @@ const AdamBotPanelInner = ({ tema, fabPosition }: AdamBotPanelProps) => {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [, forceUpdate] = useState(0);
+
+  // Inject pulse animation CSS once
+  useEffect(() => {
+    const id = 'adambot-pulse-css';
+    if (document.getElementById(id)) return;
+    const style = document.createElement('style');
+    style.id = id;
+    style.textContent = `@keyframes adambot-pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.1);opacity:.7}}`;
+    document.head.appendChild(style);
+  }, []);
+
+  // Ler Tudo handler
+  const handleLerTudo = useCallback(() => {
+    if (adamFalando()) {
+      adamCalar();
+      forceUpdate(n => n + 1);
+      return;
+    }
+    const textoCompleto = messages
+      .filter(m => m.role === 'adam')
+      .map(m => m.text)
+      .join('. ');
+    if (textoCompleto) {
+      adamFalar(textoCompleto);
+      forceUpdate(n => n + 1);
+    }
+  }, [messages]);
+
+  // Per-message TTS
+  const handleFalarMensagem = useCallback((texto: string) => {
+    if (adamFalando()) adamCalar();
+    adamFalar(texto);
+    forceUpdate(n => n + 1);
+  }, []);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -142,6 +177,21 @@ const AdamBotPanelInner = ({ tema, fabPosition }: AdamBotPanelProps) => {
             {voiceOn ? '🔊' : '🔇'}
           </button>
         )}
+        {isTTSSupported && messages.some(m => m.role === 'adam') && (
+          <button
+            type="button"
+            onClick={handleLerTudo}
+            aria-label={adamFalando() ? 'Parar leitura' : 'Ler todas as mensagens'}
+            title={adamFalando() ? 'Parar leitura' : 'Ler tudo'}
+            style={{
+              background: 'transparent', border: '1px solid rgba(255,255,255,0.3)',
+              borderRadius: '8px', padding: '6px 8px', cursor: 'pointer',
+              color: '#fff', fontSize: '16px',
+            }}
+          >
+            {adamFalando() ? '⏹️' : '📢'}
+          </button>
+        )}
         <button
           type="button"
           onClick={clearHistory}
@@ -232,8 +282,24 @@ const AdamBotPanelInner = ({ tema, fabPosition }: AdamBotPanelProps) => {
                 {msg.action.label || msg.action.tipo} →
               </button>
             )}
-            <div style={{ fontSize: '10px', color: tema.textoSecundario, marginTop: '2px', padding: '0 4px' }}>
+            <div style={{ fontSize: '10px', color: tema.textoSecundario, marginTop: '2px', padding: '0 4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               {new Date(msg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+              {msg.role === 'adam' && isTTSSupported && (
+                <button
+                  type="button"
+                  onClick={() => handleFalarMensagem(msg.text)}
+                  title="Ouvir esta mensagem"
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    fontSize: '13px', padding: '1px 4px', opacity: 0.5,
+                    color: tema.texto, lineHeight: 1,
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.opacity = '1'; }}
+                  onMouseLeave={e => { e.currentTarget.style.opacity = '0.5'; }}
+                >
+                  🔊
+                </button>
+              )}
             </div>
           </div>
         ))}
@@ -281,24 +347,27 @@ const AdamBotPanelInner = ({ tema, fabPosition }: AdamBotPanelProps) => {
           }}
         />
         {/* STT button */}
-        {typeof window !== 'undefined' && ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) && (
+        {sttDisponivel() && (
           <button
             type="button"
             onMouseDown={startListening}
             onMouseUp={stopListening}
             onTouchStart={startListening}
             onTouchEnd={stopListening}
-            aria-label={isListening ? 'Ouvindo...' : 'Falar'}
+            aria-label={isListening ? 'Ouvindo...' : 'Falar com AdamBot'}
+            title={isListening ? 'Ouvindo...' : 'Falar com AdamBot'}
             style={{
-              width: '40px', height: '40px', borderRadius: '50%',
-              border: 'none', cursor: 'pointer', fontSize: '18px',
-              background: isListening ? '#e53935' : tema.backgroundSecundario,
-              color: isListening ? '#fff' : tema.texto,
-              animation: isListening ? 'adam-pulse 1.5s infinite' : 'none',
+              width: '44px', height: '44px', borderRadius: '50%',
+              border: isListening ? '2px solid #ef4444' : `1px solid ${tema.cardBorda}`,
+              cursor: 'pointer', fontSize: '18px',
+              background: isListening ? '#ef444415' : tema.backgroundSecundario,
+              color: isListening ? '#ef4444' : tema.texto,
+              animation: isListening ? 'adambot-pulse 1.5s infinite' : 'none',
               flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >
-            🎤
+            {isListening ? '⏹️' : '🎤'}
           </button>
         )}
         {/* Send button */}

@@ -9,7 +9,7 @@ export type { AdamMessage, ContextoBot } from './AdamBotEngine';
 export { processarMensagem, getSugestoesContextuais, gerarBoasVindas } from './AdamBotEngine';
 export type { AdamAction } from './AdamBotActions';
 export { executarAcao } from './AdamBotActions';
-export { falar, pararFala, initSTT, isTTSSupported } from './AdamBotVoice';
+export { adamFalar, adamCalar, adamFalando, adamPrecarregarVozes, falar, pararFala, initSTT, isTTSSupported, sttDisponivel, iniciarReconhecimento, pararReconhecimento, estaOuvindo } from './AdamBotVoice';
 export { carregarMemoria, salvarMemoria, registrarInteracao, getInsightsMemoria } from './AdamBotMemory';
 export type { AdamMemory } from './AdamBotMemory';
 export { registrarAudit, getAuditLog, exportarAuditCSV } from './AdamBotAudit';
