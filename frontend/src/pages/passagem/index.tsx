@@ -6,7 +6,7 @@
 import { useState, useRef, useCallback, useMemo, useEffect, memo } from 'react';
 import type { PaginaPassagemProps } from '../types';
 import type { DadosFormulario, UsuarioCadastro, TemaEstilos } from '../../types';
-import { ChecklistSeguranca, Card, StatusBadge, AIRiskScore } from '../../components';
+import { ChecklistSeguranca, Card, StatusBadge } from '../../components';
 import { calcularRisco } from '../../components/operacional';
 import { TabelaPatio, TabelaEquipamentos } from '../../components/tables';
 import { SECOES_FORMULARIO, TURNOS, SENSOS_5S, NIVEIS_MATURIDADE_5S, SUGESTOES_PONTOS_ATENCAO, STORAGE_KEYS } from '../../utils/constants';
@@ -3000,11 +3000,6 @@ SEGURANÇA EM MANOBRAS
       </div>
 
       {renderSecaoFormulario()}
-
-      {/* AI Risk Score Widget — v3.2: moved to bottom of form */}
-      <div data-tour="risco-operacional" style={{ marginTop: 16, marginBottom: 16 }}>
-        <AIRiskScore tema={tema} dadosFormulario={dadosFormulario} patio={selectedYard} />
-      </div>
 
       {/* Navegação */}
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
