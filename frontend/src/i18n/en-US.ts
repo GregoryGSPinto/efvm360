@@ -56,6 +56,7 @@ export const enUS: TranslationMap = {
     biPlus: 'BI+',
     historico: 'History',
     layout: 'Layout',
+    grausRisco: 'Risk Grade',
     gestao: 'Management',
     meuPerfil: 'My Profile',
     configuracoes: 'Settings',

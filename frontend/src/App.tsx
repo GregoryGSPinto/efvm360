@@ -681,7 +681,7 @@ export default function App(): JSX.Element {
               </ModuleErrorBoundary>
             } />
 
-            {/* Graus de Risco */}
+            {/* Grau Risco */}
             <Route path={ROUTES.GRAUS_RISCO} element={
               <ModuleErrorBoundary module="graus-risco">
                 <PaginaGrausRisco tema={tema} styles={styles}

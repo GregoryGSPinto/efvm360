@@ -54,6 +54,7 @@ export const ptBR = {
     biPlus: 'BI+',
     historico: 'Historico',
     layout: 'Layout',
+    grausRisco: 'Grau Risco',
     gestao: 'Gestao',
     meuPerfil: 'Meu Perfil',
     configuracoes: 'Configuracoes',
