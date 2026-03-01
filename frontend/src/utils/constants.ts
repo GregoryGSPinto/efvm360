@@ -173,7 +173,7 @@ export const MENU_PRINCIPAL: ItemMenu[] = [
   { id: 'passagem', label: 'Gestão de Troca de Turno', icon: '📋' },
   { id: 'layout', label: 'Layout do Pátio', icon: '🗺️' },
   { id: 'graus-risco', label: 'Grau Risco', icon: '⚠️' },
-  { id: 'equipamentos', label: 'Equipamentos', icon: '🛠️' },
+
   { id: 'historico', label: 'Histórico', icon: '📁' },
   { id: 'configuracoes', label: 'Configurações', icon: '⚙️' },
 ];

@@ -18,7 +18,7 @@ const BASE_NAV_ITEMS = [
   { id: 'historico', label: 'Historico',    icon: '\uD83D\uDCCB' },
   { id: 'layout',    label: 'Layout',       icon: '\uD83D\uDDFA\uFE0F' },
   { id: 'graus-risco', label: 'Grau Risco', icon: '\u26A0\uFE0F' },
-  { id: 'equipamentos', label: 'Equip.',    icon: '\uD83D\uDEE0\uFE0F' },
+
 ];
 
 // ── Props ──────────────────────────────────────────────────────────────

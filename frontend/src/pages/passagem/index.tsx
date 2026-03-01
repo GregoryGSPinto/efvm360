@@ -5,14 +5,15 @@
 
 import { useState, useRef, useCallback, useMemo, useEffect, memo } from 'react';
 import type { PaginaPassagemProps } from '../types';
-import type { DadosFormulario, UsuarioCadastro, TemaEstilos } from '../../types';
+import type { DadosFormulario, UsuarioCadastro, TemaEstilos, EquipamentoConfig, CategoriaEquipamento, CriticidadeEquipamento } from '../../types';
 import { ChecklistSeguranca, Card, StatusBadge } from '../../components';
 import { calcularRisco } from '../../components/operacional';
-import { TabelaPatio, TabelaEquipamentos } from '../../components/tables';
-import { SECOES_FORMULARIO, TURNOS, SENSOS_5S, NIVEIS_MATURIDADE_5S, SUGESTOES_PONTOS_ATENCAO, STORAGE_KEYS } from '../../utils/constants';
+import { TabelaPatio } from '../../components/tables';
+import { SECOES_FORMULARIO, TURNOS, SENSOS_5S, NIVEIS_MATURIDADE_5S, SUGESTOES_PONTOS_ATENCAO, STORAGE_KEYS, CATEGORIAS_EQUIPAMENTO, CRITICIDADES_EQUIPAMENTO, UNIDADES_EQUIPAMENTO } from '../../utils/constants';
 import { getYardName, type YardCode } from '../../domain/aggregates/YardRegistry';
 import { usePermissions } from '../../hooks/usePermissions';
 import { usePatio } from '../../hooks/usePatio';
+import { useEquipamentos } from '../../hooks/useEquipamentos';
 import type { StylesObject } from '../../hooks/useStyles';
 
 // ── ItemSegurancaSimNao — Extracted to avoid inline re-creation ──────
@@ -114,7 +115,7 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
     secaoFormulario,
     setSecaoFormulario, atualizarCabecalho, atualizarLinhaPatio,
     atualizarSegurancaManobras, atualizarIntervencao, atualizarEquipamento,
-    atualizarPontosAtencao, salvarPassagem, usuarioLogado,
+    atualizarPontosAtencao, salvarPassagem, setDadosFormulario, usuarioLogado,
     mostrarModalSenha, setMostrarModalSenha, senhaConfirmacao,
     setSenhaConfirmacao, erroSenhaConfirmacao,
     avaliacoes5S, setAvaliacoes5S, observacoes5S, setObservacoes5S,
@@ -156,6 +157,88 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
   const { isGestor, isInspetor } = usePermissions(usuarioLogado);
   const { patiosAtivos, criarPatio: criarPatioHook } = usePatio();
   const canSelectYard = isGestor || isInspetor;
+  const canEditEquip = isGestor || isInspetor;
+
+  // ── Equipment Catalog (useEquipamentos) ──
+  const {
+    equipamentosAtivos,
+    estatisticas: equipStats,
+    criarEquipamento, editarEquipamento, excluirEquipamento, toggleAtivoEquipamento,
+  } = useEquipamentos();
+
+  // Sync catalog → dadosFormulario.equipamentos (per-turn data)
+  useEffect(() => {
+    const nomes = equipamentosAtivos.map(e => e.nome);
+    const atuais = dadosFormulario.equipamentos;
+    const atuaisMap = new Map(atuais.map(e => [e.nome, e]));
+    // Build synced list: keep existing per-turn data, add new items
+    const synced = nomes.map(nome => atuaisMap.get(nome) || { nome, quantidade: 0, emCondicoes: true, observacao: '' });
+    // Only update if names differ
+    const nomesAtuais = atuais.map(e => e.nome).join(',');
+    if (nomes.join(',') !== nomesAtuais) {
+      setDadosFormulario(prev => ({ ...prev, equipamentos: synced }));
+    }
+  }, [equipamentosAtivos, dadosFormulario.equipamentos, setDadosFormulario]);
+
+  // Equipment CRUD modal state
+  interface FormEquip {
+    nome: string; descricao: string; categoria: CategoriaEquipamento;
+    criticidade: CriticidadeEquipamento; quantidadeMinima: number;
+    unidade: string; patiosAfetados: string[]; todosPatio: boolean;
+  }
+  const FORM_VAZIO: FormEquip = {
+    nome: '', descricao: '', categoria: 'comunicacao', criticidade: 'importante',
+    quantidadeMinima: 1, unidade: 'unidade', patiosAfetados: [], todosPatio: true,
+  };
+  const [showEquipModal, setShowEquipModal] = useState(false);
+  const [equipEditingId, setEquipEditingId] = useState<string | null>(null);
+  const [equipForm, setEquipForm] = useState<FormEquip>(FORM_VAZIO);
+  const [equipFormErro, setEquipFormErro] = useState('');
+
+  const openEquipCreate = useCallback(() => {
+    setEquipForm(FORM_VAZIO);
+    setEquipEditingId(null);
+    setEquipFormErro('');
+    setShowEquipModal(true);
+  }, []);
+
+  const openEquipEdit = useCallback((eq: EquipamentoConfig) => {
+    setEquipForm({
+      nome: eq.nome, descricao: eq.descricao, categoria: eq.categoria,
+      criticidade: eq.criticidade, quantidadeMinima: eq.quantidadeMinima,
+      unidade: eq.unidade, patiosAfetados: eq.patiosAfetados,
+      todosPatio: eq.patiosAfetados.length === 0,
+    });
+    setEquipEditingId(eq.id);
+    setEquipFormErro('');
+    setShowEquipModal(true);
+  }, []);
+
+  const handleEquipSave = useCallback(() => {
+    if (!equipForm.nome.trim()) { setEquipFormErro('Nome é obrigatório'); return; }
+    const dados = {
+      nome: equipForm.nome.trim(), descricao: equipForm.descricao.trim(),
+      categoria: equipForm.categoria, criticidade: equipForm.criticidade,
+      quantidadeMinima: equipForm.quantidadeMinima, unidade: equipForm.unidade,
+      patiosAfetados: equipForm.todosPatio ? [] : equipForm.patiosAfetados, ativo: true,
+    };
+    if (equipEditingId) {
+      const r = editarEquipamento(equipEditingId, dados);
+      if (!r.ok) { setEquipFormErro(r.erro || 'Erro ao salvar'); return; }
+    } else {
+      const r = criarEquipamento({ ...dados, criadoPor: usuarioLogado?.matricula || 'sistema' });
+      if (!r.ok) { setEquipFormErro(r.erro || 'Erro ao criar'); return; }
+    }
+    setShowEquipModal(false);
+  }, [equipForm, equipEditingId, editarEquipamento, criarEquipamento, usuarioLogado]);
+
+  const handleEquipExcluir = useCallback((eq: EquipamentoConfig) => {
+    const msg = eq.criticidade === 'essencial'
+      ? `ATENÇÃO: "${eq.nome}" é ESSENCIAL.\n\nExcluir permanentemente?`
+      : `Excluir "${eq.nome}" permanentemente?`;
+    if (!window.confirm(msg)) return;
+    excluirEquipamento(eq.id);
+  }, [excluirEquipamento]);
 
   // ── Yard selector (P12 — Multi-Yard) ──
   const defaultYard = (usuarioLogado?.primaryYard || 'VFZ') as YardCode;
@@ -212,15 +295,6 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
     } catch { return null; }
   }, []);
 
-  const setDadosFormulario = useCallback((updater: any) => {
-    // Read-modify-write via localStorage since we don't have the setter
-    try {
-      const current = JSON.parse(localStorage.getItem(STORAGE_KEYS.RASCUNHO) || '{}');
-      const updated = typeof updater === 'function' ? updater(current) : updater;
-      localStorage.setItem(STORAGE_KEYS.RASCUNHO, JSON.stringify(updated));
-      window.location.reload(); // Force refresh to pick up changes
-    } catch { /* silent */ }
-  }, []);
 
   const atualizarAssinatura = useCallback((_tipo: string, _campo: string, _valor: unknown) => {
     // Stub — signatures handled via modal flow
@@ -805,20 +879,276 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
           </Card>
         );
 
-      case 'equipamentos':
+      case 'equipamentos': {
+        // Per-turn data map (nome → index in dadosFormulario.equipamentos)
+        const turnoMap = new Map(dadosFormulario.equipamentos.map((e, i) => [e.nome, i]));
+        // Group active catalog items by category
+        const gruposEquip = (Object.keys(CATEGORIAS_EQUIPAMENTO) as CategoriaEquipamento[])
+          .map(cat => ({ cat, items: equipamentosAtivos.filter(e => e.categoria === cat) }))
+          .filter(g => g.items.length > 0);
+
+        const eqInputStyle: React.CSSProperties = {
+          padding: '6px 10px', borderRadius: 8, border: `1px solid ${tema.cardBorda}`,
+          background: tema.card, color: tema.texto, fontSize: 12, width: '100%', boxSizing: 'border-box' as const,
+        };
+
         return (
-          <Card title="🛠️ Equipamentos" styles={styles}>
-            <TabelaEquipamentos
-              equipamentos={dadosFormulario.equipamentos}
-              onUpdate={atualizarEquipamento}
-              styles={styles}
-              tema={tema}
-              userRole={usuarioLogado?.funcao}
-              userName={usuarioLogado?.nome}
-              userMatricula={usuarioLogado?.matricula}
-            />
-          </Card>
+          <>
+            <Card title="🛠️ Equipamentos Operacionais" styles={styles}>
+              {/* KPI bar */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: 10, marginBottom: 16 }}>
+                {[
+                  { label: 'Total', valor: equipStats.total, cor: tema.primaria },
+                  { label: 'Ativos', valor: equipStats.ativos, cor: tema.sucesso },
+                  { label: 'Essenciais', valor: equipStats.essenciais, cor: '#ef4444' },
+                  { label: 'Categorias', valor: equipStats.categoriasCobertas, cor: tema.aviso },
+                ].map(kpi => (
+                  <div key={kpi.label} style={{
+                    padding: '10px 12px', borderRadius: 10,
+                    background: tema.backgroundSecundario, border: `1px solid ${tema.cardBorda}`,
+                  }}>
+                    <div style={{ fontSize: 10, color: tema.textoSecundario, textTransform: 'uppercase', fontWeight: 600, marginBottom: 2 }}>{kpi.label}</div>
+                    <div style={{ fontSize: 20, fontWeight: 700, color: kpi.cor }}>{kpi.valor}</div>
+                  </div>
+                ))}
+              </div>
+
+              {canEditEquip && (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+                  <button onClick={openEquipCreate} style={{
+                    padding: '8px 16px', borderRadius: 8, border: 'none',
+                    background: tema.primaria, color: '#fff', fontSize: 12,
+                    fontWeight: 700, cursor: 'pointer',
+                  }}>+ Novo Equipamento</button>
+                </div>
+              )}
+
+              {/* Grouped list */}
+              {gruposEquip.length === 0 && (
+                <div style={{ padding: 24, textAlign: 'center', color: tema.textoSecundario, fontSize: 13,
+                  border: `1px dashed ${tema.cardBorda}`, borderRadius: 12 }}>
+                  Nenhum equipamento ativo cadastrado.
+                </div>
+              )}
+
+              {gruposEquip.map(({ cat, items }) => {
+                const catInfo = CATEGORIAS_EQUIPAMENTO[cat];
+                return (
+                  <div key={cat} style={{ marginBottom: 16 }}>
+                    <div style={{
+                      display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6,
+                      padding: '8px 12px', borderRadius: 10,
+                      background: `${catInfo.cor}10`, borderLeft: `4px solid ${catInfo.cor}`,
+                    }}>
+                      <span style={{ fontSize: 16 }}>{catInfo.icone}</span>
+                      <h4 style={{ margin: 0, flex: 1, fontSize: 13, fontWeight: 700, color: tema.texto }}>{catInfo.label}</h4>
+                      <span style={{ fontSize: 11, color: tema.textoSecundario }}>{items.length} item(ns)</span>
+                    </div>
+
+                    {items.map(eq => {
+                      const critInfo = CRITICIDADES_EQUIPAMENTO[eq.criticidade];
+                      const turnoIdx = turnoMap.get(eq.nome);
+                      const turnoData = turnoIdx !== undefined ? dadosFormulario.equipamentos[turnoIdx] : null;
+
+                      return (
+                        <div key={eq.id} style={{
+                          padding: '12px 14px', borderRadius: 10, marginBottom: 4,
+                          border: `1px solid ${tema.cardBorda}`, background: tema.card,
+                        }}>
+                          {/* Row 1: Name + badges + actions */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+                            <span style={{
+                              padding: '2px 7px', borderRadius: 8, fontSize: 9, fontWeight: 700,
+                              background: critInfo.corBg, color: critInfo.cor, textTransform: 'uppercase',
+                            }}>{critInfo.label}</span>
+                            <span style={{ fontWeight: 700, fontSize: 13, color: tema.texto, flex: 1 }}>{eq.nome}</span>
+                            <span style={{ fontSize: 10, color: tema.textoSecundario }}>
+                              Min: {eq.quantidadeMinima} {eq.unidade}(s)/turno
+                            </span>
+                            {canEditEquip && (
+                              <div style={{ display: 'flex', gap: 4 }}>
+                                <button onClick={() => openEquipEdit(eq)} style={{
+                                  padding: '3px 8px', borderRadius: 6, fontSize: 10, fontWeight: 600,
+                                  border: `1px solid ${tema.primaria}`, background: `${tema.primaria}10`,
+                                  color: tema.primaria, cursor: 'pointer',
+                                }}>Editar</button>
+                                <button onClick={() => toggleAtivoEquipamento(eq.id)} style={{
+                                  padding: '3px 8px', borderRadius: 6, fontSize: 10, fontWeight: 600,
+                                  border: `1px solid ${tema.cardBorda}`, background: 'transparent',
+                                  color: tema.aviso, cursor: 'pointer',
+                                }}>Desativar</button>
+                                <button onClick={() => handleEquipExcluir(eq)} style={{
+                                  padding: '3px 8px', borderRadius: 6, fontSize: 10, fontWeight: 600,
+                                  border: '1px solid #ef4444', background: '#ef444410',
+                                  color: '#ef4444', cursor: 'pointer',
+                                }}>Excluir</button>
+                              </div>
+                            )}
+                          </div>
+                          {eq.descricao && (
+                            <div style={{ fontSize: 11, color: tema.textoSecundario, marginBottom: 8, lineHeight: 1.4 }}>
+                              {eq.descricao}
+                            </div>
+                          )}
+                          {/* Row 2: Per-turn fields */}
+                          {turnoData && turnoIdx !== undefined && (
+                            <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr', gap: 8, alignItems: 'center' }}>
+                              <div>
+                                <label style={{ fontSize: 10, color: tema.textoSecundario, display: 'block', marginBottom: 2 }}>Qtd. turno</label>
+                                <input type="number" min={0} max={999} style={eqInputStyle}
+                                  value={turnoData.quantidade}
+                                  onChange={e => atualizarEquipamento(turnoIdx, 'quantidade', Math.max(0, Number(e.target.value)))} />
+                              </div>
+                              <div>
+                                <label style={{ fontSize: 10, color: tema.textoSecundario, display: 'block', marginBottom: 2 }}>Condição</label>
+                                <button
+                                  onClick={() => atualizarEquipamento(turnoIdx, 'emCondicoes', !turnoData.emCondicoes)}
+                                  style={{
+                                    padding: '6px 10px', borderRadius: 8, fontSize: 11, fontWeight: 600, width: '100%',
+                                    border: `1px solid ${turnoData.emCondicoes ? tema.sucesso : '#ef4444'}`,
+                                    background: turnoData.emCondicoes ? `${tema.sucesso}15` : '#ef444415',
+                                    color: turnoData.emCondicoes ? tema.sucesso : '#ef4444',
+                                    cursor: 'pointer',
+                                  }}
+                                >{turnoData.emCondicoes ? 'OK' : 'Avariado'}</button>
+                              </div>
+                              <div>
+                                <label style={{ fontSize: 10, color: tema.textoSecundario, display: 'block', marginBottom: 2 }}>Observação</label>
+                                <input type="text" style={eqInputStyle} placeholder="..."
+                                  value={turnoData.observacao}
+                                  onChange={e => atualizarEquipamento(turnoIdx, 'observacao', e.target.value)} />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </Card>
+
+            {/* Equipment CRUD Modal */}
+            {showEquipModal && (
+              <div style={{
+                position: 'fixed', inset: 0, zIndex: 9999,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+              }} onClick={() => setShowEquipModal(false)}>
+                <div style={{
+                  background: tema.card, borderRadius: 16, padding: '24px 28px',
+                  maxWidth: 520, width: '92%', maxHeight: '90vh', overflowY: 'auto',
+                  border: `1px solid ${tema.cardBorda}`, boxShadow: '0 16px 48px rgba(0,0,0,0.2)',
+                }} onClick={e => e.stopPropagation()}>
+                  <h3 style={{ color: tema.texto, margin: '0 0 16px', fontSize: 17, fontWeight: 700 }}>
+                    {equipEditingId ? 'Editar Equipamento' : 'Novo Equipamento'}
+                  </h3>
+
+                  {equipFormErro && (
+                    <div style={{
+                      padding: '10px 14px', marginBottom: 12, borderRadius: 8,
+                      background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)',
+                      fontSize: 13, color: '#dc2626',
+                    }}>{equipFormErro}</div>
+                  )}
+
+                  <div style={{ marginBottom: 12 }}>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: tema.textoSecundario, marginBottom: 4, textTransform: 'uppercase' }}>Nome *</label>
+                    <input style={eqInputStyle} value={equipForm.nome}
+                      onChange={e => setEquipForm(prev => ({ ...prev, nome: e.target.value }))}
+                      placeholder="Ex: Rádio VHF" />
+                  </div>
+
+                  <div style={{ marginBottom: 12 }}>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: tema.textoSecundario, marginBottom: 4, textTransform: 'uppercase' }}>Descrição</label>
+                    <textarea style={{ ...eqInputStyle, minHeight: 50, resize: 'vertical' }} value={equipForm.descricao}
+                      onChange={e => setEquipForm(prev => ({ ...prev, descricao: e.target.value }))}
+                      placeholder="Descrição do equipamento..." />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: tema.textoSecundario, marginBottom: 4, textTransform: 'uppercase' }}>Categoria *</label>
+                      <select style={{ ...eqInputStyle, cursor: 'pointer' }} value={equipForm.categoria}
+                        onChange={e => setEquipForm(prev => ({ ...prev, categoria: e.target.value as CategoriaEquipamento }))}>
+                        {(Object.keys(CATEGORIAS_EQUIPAMENTO) as CategoriaEquipamento[]).map(cat => (
+                          <option key={cat} value={cat}>{CATEGORIAS_EQUIPAMENTO[cat].icone} {CATEGORIAS_EQUIPAMENTO[cat].label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: tema.textoSecundario, marginBottom: 4, textTransform: 'uppercase' }}>Criticidade *</label>
+                      <select style={{ ...eqInputStyle, cursor: 'pointer' }} value={equipForm.criticidade}
+                        onChange={e => setEquipForm(prev => ({ ...prev, criticidade: e.target.value as CriticidadeEquipamento }))}>
+                        {(Object.keys(CRITICIDADES_EQUIPAMENTO) as CriticidadeEquipamento[]).map(crit => (
+                          <option key={crit} value={crit}>{CRITICIDADES_EQUIPAMENTO[crit].label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: tema.textoSecundario, marginBottom: 4, textTransform: 'uppercase' }}>Qtd. mínima por turno *</label>
+                      <input type="number" min={0} max={100} style={eqInputStyle} value={equipForm.quantidadeMinima}
+                        onChange={e => setEquipForm(prev => ({ ...prev, quantidadeMinima: Math.max(0, Number(e.target.value)) }))} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: tema.textoSecundario, marginBottom: 4, textTransform: 'uppercase' }}>Unidade</label>
+                      <select style={{ ...eqInputStyle, cursor: 'pointer' }} value={equipForm.unidade}
+                        onChange={e => setEquipForm(prev => ({ ...prev, unidade: e.target.value }))}>
+                        {UNIDADES_EQUIPAMENTO.map(u => (
+                          <option key={u} value={u}>{u}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: 16 }}>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: tema.textoSecundario, marginBottom: 6, textTransform: 'uppercase' }}>Pátios onde se aplica</label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, cursor: 'pointer', fontSize: 12, color: tema.texto }}>
+                      <input type="checkbox" checked={equipForm.todosPatio}
+                        onChange={e => setEquipForm(prev => ({ ...prev, todosPatio: e.target.checked, patiosAfetados: e.target.checked ? [] : prev.patiosAfetados }))} />
+                      Todos os pátios
+                    </label>
+                    {!equipForm.todosPatio && (
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        {patiosAtivos.map(p => (
+                          <label key={p.codigo} style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontSize: 12, color: tema.texto }}>
+                            <input type="checkbox"
+                              checked={equipForm.patiosAfetados.includes(p.codigo)}
+                              onChange={e => {
+                                setEquipForm(prev => ({
+                                  ...prev,
+                                  patiosAfetados: e.target.checked
+                                    ? [...prev.patiosAfetados, p.codigo]
+                                    : prev.patiosAfetados.filter(c => c !== p.codigo),
+                                }));
+                              }} />
+                            {p.codigo}
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <button onClick={() => setShowEquipModal(false)} style={{
+                      flex: 1, padding: '10px 20px', borderRadius: 8,
+                      border: `1px solid ${tema.cardBorda}`, background: tema.backgroundSecundario,
+                      color: tema.texto, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                    }}>Cancelar</button>
+                    <button onClick={handleEquipSave} style={{
+                      flex: 1, padding: '10px 20px', borderRadius: 8, border: 'none',
+                      background: tema.primaria, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                    }}>{equipEditingId ? 'Salvar Alterações' : 'Criar Equipamento'}</button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         );
+      }
 
       case '5s':
         const naoConformes5S = Object.values(avaliacoes5S).filter(v => v === 'nao-conforme').length;

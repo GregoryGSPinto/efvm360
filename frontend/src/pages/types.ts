@@ -89,6 +89,7 @@ export interface PaginaPassagemProps {
   atualizarEquipamento: (index: number, campo: string, valor: unknown) => void;
   atualizarPontosAtencao: (valor: string) => void;
   salvarPassagem: () => boolean;
+  setDadosFormulario: React.Dispatch<React.SetStateAction<DadosFormulario>>;
   // DSS
   temaDSSAnterior?: string;
   // Assinatura
@@ -113,13 +114,6 @@ export interface PaginaGrausRiscoProps {
   usuarioLogado?: Usuario | null;
 }
 
-// ── Página de Equipamentos ───────────────────────────────────────────
-
-export interface PaginaEquipamentosProps {
-  tema: TemaComputed;
-  styles: StylesObject;
-  usuarioLogado?: Usuario | null;
-}
 
 // ── Página de Layout do Pátio ──────────────────────────────────────────
 

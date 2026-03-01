@@ -54,7 +54,7 @@ const PaginaGestao = lazy(() => import('./pages/gestao'));
 const PaginaPerfil = lazy(() => import('./pages/perfil'));
 const PaginaLayoutPatio = lazy(() => import('./pages/layout-patio'));
 const PaginaGrausRisco = lazy(() => import('./pages/graus-risco'));
-const PaginaEquipamentos = lazy(() => import('./pages/equipamentos'));
+
 const PaginaHistorico = lazy(() => import('./pages/historico'));
 const PaginaConfiguracoes = lazy(() => import('./pages/configuracoes'));
 const PaginaSuporte = lazy(() => import('./pages/suporte'));
@@ -205,7 +205,7 @@ export default function App(): JSX.Element {
 
   // ── Form ─────────────────────────────────────────────────────────────
   const {
-    dadosFormulario, historicoTurnos, turnoAnterior,
+    dadosFormulario, setDadosFormulario, historicoTurnos, turnoAnterior,
     atualizarCabecalho, atualizarLinhaPatio,
     atualizarSegurancaManobras, atualizarIntervencao, atualizarEquipamento,
     atualizarPontosAtencao, salvarPassagem,
@@ -641,6 +641,7 @@ export default function App(): JSX.Element {
                   atualizarEquipamento={atualizarEquipamento as (index: number, campo: string, valor: unknown) => void}
                   atualizarPontosAtencao={atualizarPontosAtencao}
                   salvarPassagem={salvarPassagem}
+                  setDadosFormulario={setDadosFormulario}
                   temaDSSAnterior={temaDSSAnterior ?? undefined}
                   usuarioLogado={usuarioLogado}
                   mostrarModalSenha={handlers.mostrarModalSenha}
@@ -684,13 +685,6 @@ export default function App(): JSX.Element {
               </ModuleErrorBoundary>
             } />
 
-            {/* Equipamentos */}
-            <Route path={ROUTES.EQUIPAMENTOS} element={
-              <ModuleErrorBoundary module="equipamentos">
-                <PaginaEquipamentos tema={tema} styles={styles}
-                  usuarioLogado={usuarioLogado} />
-              </ModuleErrorBoundary>
-            } />
 
             {/* Historico */}
             <Route path={ROUTES.HISTORICO} element={
