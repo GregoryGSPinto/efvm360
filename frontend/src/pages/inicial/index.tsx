@@ -3,11 +3,13 @@
 // CSS Grid layout, personalized greeting, SVG gauge, responsive
 // ============================================================================
 
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { PaginaInicialProps } from '../types';
 import { GaugeCircular, StatCard, AlertaCard, ProgressBar } from '../../components/ui';
 import { ROUTES } from '../../router/routes';
+import { useBriefingData } from '../../components/AdamBot/useBriefingData';
+import { gerarBriefing, type ResultadoBriefing } from '../../components/AdamBot/AdamBotBriefing';
 import {
   Sun, Moon, Calendar, TrainFront, MessageCircle, FileText,
   AlertTriangle, CheckCircle, ClipboardList, FolderOpen, ArrowRight, BarChart3,
@@ -141,6 +143,28 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
     navigate(ROUTES.ANALYTICS);
   }, [navigate]);
 
+  // ── Briefing de Turno ────────────────────────────────────────────────
+
+  const dadosBriefing = useBriefingData();
+  const [briefingEntregue, setBriefingEntregue] = useState(false);
+  const [ultimoBriefing, setUltimoBriefing] = useState<ResultadoBriefing | null>(null);
+
+  useEffect(() => {
+    if (briefingEntregue) return;
+    const timer = setTimeout(() => {
+      const resultado = gerarBriefing(dadosBriefing);
+      setUltimoBriefing(resultado);
+      setBriefingEntregue(true);
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(resultado.texto);
+        utterance.lang = 'pt-BR';
+        utterance.rate = 1.1;
+        speechSynthesis.speak(utterance);
+      }
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [dadosBriefing, briefingEntregue]);
+
   // ── Derived state ─────────────────────────────────────────────────────
 
   const temPassagemEmAndamento = !!dadosFormulario.cabecalho.dss;
@@ -177,6 +201,37 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
           )}
         </div>
       </div>
+
+      {/* ── BRIEFING DO TURNO ─────────────────────────────────────────── */}
+      {ultimoBriefing && (
+        <div style={{
+          padding: '16px 20px', borderRadius: 14, marginBottom: 20,
+          background: ultimoBriefing.severidade === 'critico' ? 'rgba(239,68,68,0.08)'
+            : ultimoBriefing.severidade === 'atencao' ? 'rgba(245,158,11,0.08)' : 'rgba(34,197,94,0.08)',
+          border: `1px solid ${ultimoBriefing.severidade === 'critico' ? '#ef4444'
+            : ultimoBriefing.severidade === 'atencao' ? '#f59e0b' : '#22c55e'}30`,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            <span style={{ fontSize: 18 }}>📋</span>
+            <span style={{ fontWeight: 700, fontSize: 14, color: tema.texto }}>Briefing do Turno</span>
+            <span style={{
+              fontSize: 10, padding: '2px 10px', borderRadius: 999, fontWeight: 700, color: '#fff',
+              background: ultimoBriefing.severidade === 'critico' ? '#ef4444'
+                : ultimoBriefing.severidade === 'atencao' ? '#f59e0b' : '#22c55e',
+            }}>
+              {ultimoBriefing.severidade === 'critico' ? 'CRÍTICO' : ultimoBriefing.severidade === 'atencao' ? 'ATENÇÃO' : 'ESTÁVEL'}
+            </span>
+            <span style={{ marginLeft: 'auto', fontSize: 10, color: tema.textoSecundario }}>
+              {new Date(ultimoBriefing.timestamp).toLocaleTimeString('pt-BR')}
+            </span>
+          </div>
+          <div style={{ display: 'grid', gap: 4 }}>
+            {ultimoBriefing.itensDestaque.map((item, i) => (
+              <div key={i} style={{ fontSize: 12, color: tema.texto, lineHeight: 1.5 }}>{item}</div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── ROW 1: 4x StatCards ───────────────────────────────────────── */}
       <div className="efvm-dash-grid-stats" style={{ marginBottom: 16 }}>
