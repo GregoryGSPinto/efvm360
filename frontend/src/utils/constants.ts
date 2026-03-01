@@ -4,6 +4,7 @@
 // ============================================================================
 
 import type {
+  AMV,
   ConfiguracaoSistema,
   Equipamento,
   FuncaoOpcao,
@@ -392,18 +393,60 @@ export const NIVEIS_MATURIDADE_5S: { value: NivelMaturidade5S; label: string; de
 // ============================================================================
 
 function criarCategoriasDefault(codigo: string): { categorias: import('../types').CategoriaPatio[]; linhas: import('../types').LinhaPatioInfo[] } {
-  const mkLinhas = (n: number): import('../types').LinhaPatioInfo[] =>
-    Array.from({ length: n }, (_, i) => ({
-      nome: `Linha ${i + 1}`, status: 'livre' as const,
-      comprimento: 800 - i * 50, capacidade: 80 - i * 5,
-    }));
-  const cima = { id: `${codigo}-cima`, nome: 'Pátio de Cima', linhas: mkLinhas(5) };
-  const baixo = { id: `${codigo}-baixo`, nome: 'Pátio de Baixo', linhas: mkLinhas(5) };
-  return { categorias: [cima, baixo], linhas: [...cima.linhas, ...baixo.linhas] };
+  const cima = { id: `${codigo}-cima`, nome: 'Pátio de Cima', linhas: [] as import('../types').LinhaPatioInfo[] };
+  const baixo = { id: `${codigo}-baixo`, nome: 'Pátio de Baixo', linhas: [] as import('../types').LinhaPatioInfo[] };
+  return { categorias: [cima, baixo], linhas: [] };
+}
+
+// Fazendão (VFZ) — pátio principal EFVM, pré-populado com dados operacionais realistas
+function criarFazendaoDefault(): { categorias: import('../types').CategoriaPatio[]; linhas: import('../types').LinhaPatioInfo[]; amvs: AMV[] } {
+  const categorias: import('../types').CategoriaPatio[] = [
+    {
+      id: 'VFZ-cima',
+      nome: 'Pátio de Cima',
+      linhas: [
+        { nome: 'Linha 01', status: 'livre', capacidade: 80, comprimento: 1200 },
+        { nome: 'Linha 02', status: 'ocupada', capacidade: 60, comprimento: 950 },
+        { nome: 'Linha 03', status: 'livre', capacidade: 80, comprimento: 1200 },
+        { nome: 'Linha 04', status: 'livre', capacidade: 45, comprimento: 720 },
+        { nome: 'Linha 05', status: 'interditada', capacidade: 80, comprimento: 1200 },
+      ],
+    },
+    {
+      id: 'VFZ-baixo',
+      nome: 'Pátio de Baixo',
+      linhas: [
+        { nome: 'Linha 06', status: 'livre', capacidade: 90, comprimento: 1350 },
+        { nome: 'Linha 07', status: 'ocupada', capacidade: 70, comprimento: 1050 },
+        { nome: 'Linha 08', status: 'livre', capacidade: 90, comprimento: 1350 },
+        { nome: 'Linha 09', status: 'livre', capacidade: 55, comprimento: 850 },
+        { nome: 'Linha 10', status: 'livre', capacidade: 90, comprimento: 1350 },
+      ],
+    },
+    {
+      id: 'VFZ-manobras',
+      nome: 'Pátio de Manobras',
+      linhas: [
+        { nome: 'Linha M1', status: 'livre', capacidade: 30, comprimento: 450 },
+        { nome: 'Linha M2', status: 'ocupada', capacidade: 25, comprimento: 380 },
+        { nome: 'Linha M3', status: 'livre', capacidade: 30, comprimento: 450 },
+      ],
+    },
+  ];
+  const amvs: AMV[] = [
+    { id: 'AMV-01', posicao: 'normal', observacao: 'Entrada principal do pátio' },
+    { id: 'AMV-02', posicao: 'normal', observacao: 'Bifurcação Cima/Baixo' },
+    { id: 'AMV-03', posicao: 'reversa', observacao: 'Acesso manobras — manutenção preventiva 15/03' },
+    { id: 'AMV-04', posicao: 'normal', observacao: 'Saída expedição' },
+    { id: 'AMV-05', posicao: 'normal', observacao: 'Desvio emergencial' },
+    { id: 'AMV-06', posicao: 'reversa', observacao: 'Cruzamento linha tronco' },
+  ];
+  const linhas = categorias.flatMap(c => c.linhas);
+  return { categorias, linhas, amvs };
 }
 
 export const PATIOS_PADRAO: PatioInfo[] = [
-  { codigo: 'VFZ', nome: 'Pátio de Fazendão', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z', ...criarCategoriasDefault('VFZ') },
+  { codigo: 'VFZ', nome: 'Pátio de Fazendão', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z', ...criarFazendaoDefault() },
   { codigo: 'VBR', nome: 'Pátio de Barão de Cocais', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z', ...criarCategoriasDefault('VBR') },
   { codigo: 'VCS', nome: 'Pátio de Costa Lacerda', ativo: false, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z', ...criarCategoriasDefault('VCS') },
   { codigo: 'P6', nome: 'Pátio Pedro Nolasco', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z', ...criarCategoriasDefault('P6') },

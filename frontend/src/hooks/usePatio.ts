@@ -18,6 +18,21 @@ const DEFAULT_AMVS: AMV[] = [
 ];
 
 function normalizarPatio(patio: PatioInfo): PatioInfo {
+  // VFZ (Fazendão) — re-populate from seed if categories are all empty (no lines)
+  // This ensures existing localStorage with empty VFZ gets rich data on first load
+  const allCatsEmpty = !patio.categorias || patio.categorias.length === 0 || patio.categorias.every(c => c.linhas.length === 0);
+  if (patio.codigo === 'VFZ' && allCatsEmpty) {
+    const seed = PATIOS_PADRAO.find(p => p.codigo === 'VFZ');
+    if (seed?.categorias && seed.categorias.some(c => c.linhas.length > 0)) {
+      return {
+        ...patio,
+        categorias: seed.categorias,
+        linhas: seed.categorias.flatMap(c => c.linhas),
+        amvs: patio.amvs && patio.amvs.length > 0 ? patio.amvs : seed.amvs || DEFAULT_AMVS,
+      };
+    }
+  }
+
   // Seed AMVs if missing
   const amvs = patio.amvs && patio.amvs.length > 0 ? patio.amvs : DEFAULT_AMVS;
 
@@ -63,6 +78,7 @@ function carregarPatios(): PatioInfo[] {
           atualizadoEm: p.atualizadoEm,
           linhas: p.linhas,
           categorias: p.categorias,
+          amvs: p.amvs,
         });
       } else {
         map.set(p.codigo, { ...p, padrao: false });
