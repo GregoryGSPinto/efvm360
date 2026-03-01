@@ -6,17 +6,19 @@
 import { memo, useRef, useEffect, useCallback } from 'react';
 import { useAdamBotContext } from './AdamBotContext';
 import { isTTSSupported } from './AdamBotVoice';
+import { IMAGENS } from '../../assets/images';
 import type { TemaEstilos } from '../../types';
 
 interface AdamBotPanelProps {
   tema: TemaEstilos;
+  fabPosition?: { x: number; y: number };
 }
 
 function formatBold(text: string): string {
   return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 }
 
-const AdamBotPanelInner = ({ tema }: AdamBotPanelProps) => {
+const AdamBotPanelInner = ({ tema, fabPosition }: AdamBotPanelProps) => {
   const {
     isOpen, messages, voiceOn, isListening, sugestoes, notifications, input,
     setInput, close, sendMessage, toggleVoice, startListening, stopListening,
@@ -53,18 +55,49 @@ const AdamBotPanelInner = ({ tema }: AdamBotPanelProps) => {
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
+  // Compute panel position relative to FAB
+  const getPanelPosition = (): React.CSSProperties => {
+    if (isMobile) {
+      return { top: 0, left: 0, right: 0, bottom: 0, width: '100vw', height: '100vh', borderRadius: 0 };
+    }
+
+    const chatW = 400;
+    const chatH = 560;
+    const pos = fabPosition;
+
+    // Default position (FAB at bottom-right corner)
+    if (!pos || (pos.x === -1 && pos.y === -1)) {
+      return { bottom: '88px', right: '24px', width: `${chatW}px`, height: `${chatH}px`, borderRadius: '20px' };
+    }
+
+    // Position relative to dragged FAB
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const margin = 10;
+
+    let chatLeft = pos.x;
+    let chatTop = Math.max(margin, pos.y - chatH - margin);
+
+    // Clamp horizontal
+    if (chatLeft + chatW > vw - margin) chatLeft = vw - chatW - margin;
+    if (chatLeft < margin) chatLeft = margin;
+    // Clamp vertical
+    if (chatTop < margin) chatTop = margin;
+    if (chatTop + chatH > vh - margin) chatTop = vh - chatH - margin;
+
+    return { left: `${chatLeft}px`, top: `${chatTop}px`, width: `${chatW}px`, height: `${chatH}px`, borderRadius: '20px' };
+  };
+
   return (
     <div
       role="dialog"
       aria-label="AdamBot Assistente"
       style={{
         position: 'fixed',
-        ...(isMobile
-          ? { top: 0, left: 0, right: 0, bottom: 0, width: '100vw', height: '100vh', borderRadius: 0 }
-          : { bottom: '88px', right: '20px', width: '400px', height: '560px', borderRadius: '20px' }),
+        ...getPanelPosition(),
         background: tema.card,
         border: `1px solid ${tema.cardBorda}`,
-        boxShadow: `0 20px 60px rgba(0,0,0,0.3)`,
+        boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
         display: 'flex',
         flexDirection: 'column',
         zIndex: 9999,
@@ -80,13 +113,16 @@ const AdamBotPanelInner = ({ tema }: AdamBotPanelProps) => {
         gap: '12px',
         flexShrink: 0,
       }}>
-        <div style={{
-          width: '36px', height: '36px', borderRadius: '50%',
-          background: 'rgba(255,255,255,0.2)', display: 'flex',
-          alignItems: 'center', justifyContent: 'center', fontSize: '20px',
-        }}>
-          🤖
-        </div>
+        <img
+          src={IMAGENS.adamboot}
+          alt="AdamBot"
+          style={{
+            width: '36px', height: '36px', borderRadius: '50%',
+            objectFit: 'cover', objectPosition: 'center top',
+            border: '2px solid rgba(255,255,255,0.3)',
+            flexShrink: 0,
+          }}
+        />
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 700, color: '#fff', fontSize: '14px' }}>AdamBot</div>
           <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)' }}>Assistente EFVM360</div>
