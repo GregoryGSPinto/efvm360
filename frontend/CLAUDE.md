@@ -16,7 +16,7 @@ Digitaliza o handover operacional entre turnos em pátios ferroviários, com:
 - **Frontend:** React 18 + TypeScript + Vite
 - **State:** localStorage + IndexedDB (offline-first, sem backend ativo)
 - **Styling:** Inline styles + CSS (glassmorphism, Vale corporate green/yellow)
-- **Tests:** Vitest (387/387 passando)
+- **Tests:** Vitest (396/396 passando)
 
 ## Comandos
 
@@ -111,7 +111,7 @@ O projeto usa `optimizeDeps.force: true` e `resolve.dedupe: ['react', 'react-dom
 ## Testes
 
 ```bash
-pnpm test                              # 387 testes (domain + services + components + hooks + stress)
+pnpm test                              # 396 testes (domain + services + components + hooks + stress)
 pnpm exec vitest run --reporter=verbose  # Output detalhado
 ```
 
@@ -133,7 +133,7 @@ pnpm exec vitest run --reporter=verbose  # Output detalhado
 | `__tests__/hooks/useFormulario.test.ts` | 10 | Hook de formulário |
 | `__tests__/hooks/useEquipe.test.ts` | 12 | Equipe por pátio + agrupamento hierárquico |
 | `__tests__/hooks/useAuth.test.ts` | 10 | Autenticação + seed |
-| `__tests__/components/AdamBotVoice.test.ts` | 6 | TTS masculina + seleção de voz |
+| `__tests__/components/AdamBotVoice.test.ts` | 15 | TTS masculina + seleção de voz + STT |
 | `__tests__/fixtures/dadosFormulario.ts` | — | Fixtures compartilhadas (criarDadosVazios, criarDadosCompletos) |
 
 ### Nota técnica
