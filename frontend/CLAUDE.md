@@ -16,7 +16,7 @@ Digitaliza o handover operacional entre turnos em pátios ferroviários, com:
 - **Frontend:** React 18 + TypeScript + Vite
 - **State:** localStorage + IndexedDB (offline-first, sem backend ativo)
 - **Styling:** Inline styles + CSS (glassmorphism, Vale corporate green/yellow)
-- **Tests:** Vitest (354/354 passando)
+- **Tests:** Vitest (375/375 passando)
 
 ## Comandos
 
@@ -111,7 +111,7 @@ O projeto usa `optimizeDeps.force: true` e `resolve.dedupe: ['react', 'react-dom
 ## Testes
 
 ```bash
-pnpm test                              # 354 testes (domain + services + components + stress)
+pnpm test                              # 375 testes (domain + services + components + stress)
 pnpm exec vitest run --reporter=verbose  # Output detalhado
 ```
 
@@ -129,8 +129,10 @@ pnpm exec vitest run --reporter=verbose  # Output detalhado
 | `__tests__/infrastructure/conflictResolution.test.ts` | 19 | Estratégias de conflito |
 | `__tests__/services/permissions.test.ts` | 16 | RBAC por nível |
 | `__tests__/stress/stress.test.ts` | 13 | 10K seals, 50K events |
+| `__tests__/components/AdamBotTendencias.test.ts` | 15 | Análise de tendências + carregarHistorico |
 | `__tests__/hooks/useFormulario.test.ts` | 10 | Hook de formulário |
 | `__tests__/hooks/useAuth.test.ts` | 10 | Autenticação + seed |
+| `__tests__/components/AdamBotVoice.test.ts` | 6 | TTS masculina + seleção de voz |
 | `__tests__/fixtures/dadosFormulario.ts` | — | Fixtures compartilhadas (criarDadosVazios, criarDadosCompletos) |
 
 ### Nota técnica
