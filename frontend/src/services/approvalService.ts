@@ -19,6 +19,7 @@ export interface RegistrationRequest {
   nome: string;
   funcao: string;
   requestedYard: YardCode;
+  patiosResponsaveis?: string[];
   turno?: string;
   horarioTurno?: string;
   status: 'pending' | 'approved' | 'rejected';
@@ -78,8 +79,8 @@ export function approveRegistration(requestId: string, approverMatricula: string
       turno: req.turno || 'A',
       horarioTurno: req.horarioTurno || '07-19',
       avatar: '👷',
-      primaryYard: req.requestedYard,
-      allowedYards: ['VFZ', 'VBR', 'VCS', 'P6', 'VTO'],
+      primaryYard: req.patiosResponsaveis?.[0] || req.requestedYard,
+      allowedYards: req.patiosResponsaveis || [req.requestedYard as string],
       status: 'active',
       hierarchyLevel: 1,
       aceiteTermos: { aceito: false },

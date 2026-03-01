@@ -1,11 +1,11 @@
 // ============================================================================
 // EFVM360 - CADASTRO — Mesma paleta do Login (Ultra-defensive)
 // ============================================================================
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { usePatio } from '../../hooks/usePatio';
 
 // Funções NÃO disponíveis para auto-cadastro (requerem nomeação por gestor/admin)
-const FUNCOES_BLOQUEADAS_CADASTRO = ['supervisor', 'gestor', 'coordenador', 'outra'];
+const FUNCOES_BLOQUEADAS_CADASTRO = ['supervisor', 'coordenador', 'outra'];
 
 interface CadastroPremiumProps {
   cadastroForm: Record<string, string>;
@@ -29,6 +29,21 @@ const CadastroPremium: React.FC<CadastroPremiumProps> = ({
   const [foc, setFoc] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const { patiosAtivos } = usePatio();
+  const [patiosCadastro, setPatiosCadastro] = useState<string[]>([]);
+
+  const togglePatioCadastro = useCallback((codigo: string) => {
+    setPatiosCadastro(prev =>
+      prev.includes(codigo) ? prev.filter(c => c !== codigo) : [...prev, codigo]
+    );
+  }, []);
+
+  // Clear multi-patio selection when function changes away from gestor/inspetor
+  const funcaoAtual = cadastroForm?.funcao || '';
+  useEffect(() => {
+    if (funcaoAtual !== 'gestor' && funcaoAtual !== 'inspetor') {
+      setPatiosCadastro([]);
+    }
+  }, [funcaoAtual]);
 
   // Filtrar funções que NÃO devem aparecer no auto-cadastro
   const funcoesDisponiveis = useMemo(() =>
@@ -74,10 +89,29 @@ const CadastroPremium: React.FC<CadastroPremiumProps> = ({
   }, [onFormChange]);
 
   const doSubmit = useCallback(() => {
-    setSubmitting(true);
-    try { onCadastro(); } catch {}
-    setTimeout(() => setSubmitting(false), 600);
-  }, [onCadastro]);
+    // For gestor/inspetor: inject multi-patio data before submitting
+    const f = cadastroForm?.funcao || '';
+    if ((f === 'gestor' || f === 'inspetor') && patiosCadastro.length === 0) {
+      return; // validation message already shown in UI
+    }
+    if (f === 'gestor' || f === 'inspetor') {
+      onFormChange((p: Record<string, string>) => ({
+        ...p,
+        primaryYard: patiosCadastro[0],
+        allowedYards: patiosCadastro.join(','),
+      }));
+      // Small delay to let state propagate before submit
+      setTimeout(() => {
+        setSubmitting(true);
+        try { onCadastro(); } catch {}
+        setTimeout(() => setSubmitting(false), 600);
+      }, 50);
+    } else {
+      setSubmitting(true);
+      try { onCadastro(); } catch {}
+      setTimeout(() => setSubmitting(false), 600);
+    }
+  }, [onCadastro, cadastroForm?.funcao, patiosCadastro, onFormChange]);
 
   const ic = (f: string): React.CSSProperties => ({
     display: 'flex', alignItems: 'center', background: inBg, borderRadius: 10,
@@ -223,21 +257,48 @@ const CadastroPremium: React.FC<CadastroPremiumProps> = ({
             </div>
           </div>
 
-          {/* Pátio Principal */}
-          <div>
-            <div style={lbl}>Pátio Principal *</div>
-            <div style={ic('patio')}>
-              <select style={selSt}
-                value={cadastroForm?.primaryYard || ''}
-                onChange={e => update('primaryYard', e.target.value)}
-                onFocus={() => setFoc('patio')} onBlur={() => setFoc(null)}>
-                <option value="">Selecione o pátio...</option>
-                {patiosAtivos.map(patio => (
-                  <option key={patio.codigo} value={patio.codigo}>{patio.codigo} — {patio.nome}</option>
-                ))}
-              </select>
+          {/* Pátio — single select for maquinista/oficial, multi-select for gestor/inspetor */}
+          {(funcaoAtual === 'gestor' || funcaoAtual === 'inspetor') ? (
+            <div>
+              <div style={lbl}>Pátios sob sua responsabilidade *</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+                {patiosAtivos.map(patio => {
+                  const sel = patiosCadastro.includes(patio.codigo);
+                  return (
+                    <button key={patio.codigo} type="button" onClick={() => togglePatioCadastro(patio.codigo)}
+                      style={{
+                        padding: '7px 14px', borderRadius: 8, fontSize: 12, cursor: 'pointer',
+                        border: sel ? '2px solid #007e7a' : `1px solid ${dk ? '#444' : '#ddd'}`,
+                        background: sel ? 'rgba(0,126,122,0.12)' : 'transparent',
+                        color: sel ? '#007e7a' : txt, fontWeight: sel ? 700 : 400,
+                      }}>
+                      {sel ? '✓ ' : ''}{patio.codigo} — {patio.nome}
+                    </button>
+                  );
+                })}
+              </div>
+              {patiosCadastro.length === 0 && (
+                <div style={{ fontSize: 11, color: '#dc2626', marginTop: -6, marginBottom: 12 }}>
+                  Selecione pelo menos um pátio
+                </div>
+              )}
             </div>
-          </div>
+          ) : (
+            <div>
+              <div style={lbl}>Pátio Principal *</div>
+              <div style={ic('patio')}>
+                <select style={selSt}
+                  value={cadastroForm?.primaryYard || ''}
+                  onChange={e => update('primaryYard', e.target.value)}
+                  onFocus={() => setFoc('patio')} onBlur={() => setFoc(null)}>
+                  <option value="">Selecione o pátio...</option>
+                  {patiosAtivos.map(patio => (
+                    <option key={patio.codigo} value={patio.codigo}>{patio.codigo} — {patio.nome}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
 
           {/* Turno + Horário */}
           <div className="efvm360-grid-responsive-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>

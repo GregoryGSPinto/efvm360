@@ -209,6 +209,9 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
         {/* ── Gestão Técnica — inspetor (e gestor também) ── */}
         {isInspetor && !isGestor && (
           <>
+            <button style={tabStyle(secao === 'cadastros')} onClick={() => setSecao('cadastros')}>
+              📥 Cadastros {badge(pendingRegistrations.length)}
+            </button>
             <button style={tabStyle(secao === 'senhas')} onClick={() => setSecao('senhas')}>
               🔑 Senhas {badge(pendingPasswords.length)}
             </button>
@@ -459,36 +462,49 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
       )}
 
       {/* ── SEÇÃO: Cadastros Pendentes ── */}
-      {secao === 'cadastros' && isGestor && (
+      {secao === 'cadastros' && isInspetor && (
         <Card title={`📥 Solicitações de Cadastro (${pendingRegistrations.length} pendentes)`} styles={styles}>
           {pendingRegistrations.length === 0 ? (
             <p style={{ color: tema.textoSecundario, fontSize: 13, textAlign: 'center', padding: 20 }}>
               Nenhuma solicitação pendente
             </p>
-          ) : pendingRegistrations.map(req => (
-            <div key={req.id} style={{
-              padding: 16, borderRadius: 10, marginBottom: 8,
-              border: `1px solid ${tema.cardBorda}`, background: tema.backgroundSecundario,
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8,
-            }}>
-              <div>
-                <div style={{ fontWeight: 600, color: tema.texto, fontSize: 14 }}>{req.nome}</div>
-                <div style={{ fontSize: 12, color: tema.textoSecundario }}>
-                  {req.matricula} · {req.funcao} · {req.requestedYard} · {new Date(req.requestedAt).toLocaleDateString('pt-BR')}
+          ) : pendingRegistrations.map(req => {
+            // Only gestor can approve gestor registrations; gestor or inspetor can approve the rest
+            const podeAprovar = req.funcao === 'gestor' ? isGestor : (isGestor || isInspetor);
+            return (
+              <div key={req.id} style={{
+                padding: 16, borderRadius: 10, marginBottom: 8,
+                border: `1px solid ${tema.cardBorda}`, background: tema.backgroundSecundario,
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8,
+              }}>
+                <div>
+                  <div style={{ fontWeight: 600, color: tema.texto, fontSize: 14 }}>{req.nome}</div>
+                  <div style={{ fontSize: 12, color: tema.textoSecundario }}>
+                    {req.matricula} · {req.funcao} · {req.requestedYard} · {new Date(req.requestedAt).toLocaleDateString('pt-BR')}
+                  </div>
+                  <div style={{ fontSize: 11, color: tema.textoSecundario, marginTop: 4 }}>
+                    Pátios: {req.patiosResponsaveis?.join(', ') || req.requestedYard || 'N/A'}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {podeAprovar ? (
+                    <button onClick={() => handleApproveReg(req.id)} style={{
+                      padding: '6px 14px', borderRadius: 6, border: 'none', cursor: 'pointer',
+                      background: '#16a34a', color: '#fff', fontSize: 12, fontWeight: 600,
+                    }}>✓ Aprovar</button>
+                  ) : (
+                    <span style={{ fontSize: 11, color: tema.textoSecundario, fontStyle: 'italic', padding: '6px 8px' }}>
+                      Apenas gestor pode aprovar
+                    </span>
+                  )}
+                  <button onClick={() => handleRejectReg(req.id)} style={{
+                    padding: '6px 14px', borderRadius: 6, border: `1px solid #dc2626`, cursor: 'pointer',
+                    background: 'transparent', color: '#dc2626', fontSize: 12, fontWeight: 600,
+                  }}>✗ Rejeitar</button>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <button onClick={() => handleApproveReg(req.id)} style={{
-                  padding: '6px 14px', borderRadius: 6, border: 'none', cursor: 'pointer',
-                  background: '#16a34a', color: '#fff', fontSize: 12, fontWeight: 600,
-                }}>✓ Aprovar</button>
-                <button onClick={() => handleRejectReg(req.id)} style={{
-                  padding: '6px 14px', borderRadius: 6, border: `1px solid #dc2626`, cursor: 'pointer',
-                  background: 'transparent', color: '#dc2626', fontSize: 12, fontWeight: 600,
-                }}>✗ Rejeitar</button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </Card>
       )}
 

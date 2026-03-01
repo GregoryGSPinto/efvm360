@@ -6,6 +6,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import type { PatioInfo, LinhaPatioInfo } from '../types';
 import { STORAGE_KEYS, PATIOS_PADRAO } from '../utils/constants';
+import { provisionarUsuariosPatio } from '../services/patioProvisioning';
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 
@@ -52,7 +53,7 @@ export function usePatio() {
 
   const patiosAtivos = useMemo(() => patios.filter(p => p.ativo), [patios]);
 
-  const criarPatio = useCallback((codigo: string, nome: string, criadoPor?: string): { ok: boolean; erro?: string } => {
+  const criarPatio = useCallback((codigo: string, nome: string, criadoPor?: string): { ok: boolean; erro?: string; usuariosCriados?: Array<{ matricula: string; funcao: string }> } => {
     const codigoUp = codigo.trim().toUpperCase();
     const nomeClean = nome.trim();
 
@@ -76,7 +77,11 @@ export function usePatio() {
     const novaLista = [...atuais, novo];
     persistirPatios(novaLista);
     setPatios(novaLista);
-    return { ok: true };
+
+    // Auto-provision demo users for the new yard
+    const usuariosCriados = provisionarUsuariosPatio(codigoUp, nomeClean);
+
+    return { ok: true, usuariosCriados };
   }, []);
 
   const editarPatio = useCallback((codigo: string, nome: string): { ok: boolean; erro?: string } => {

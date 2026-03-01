@@ -27,6 +27,8 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
   const [novoPatErro, setNovoPatErro] = useState('');
   const [novoPatConfirm, setNovoPatConfirm] = useState(false);
 
+  const [novoPatSucesso, setNovoPatSucesso] = useState<string | null>(null);
+
   const handleCriarPatio = useCallback(() => {
     if (!novoPatConfirm) {
       setNovoPatConfirm(true);
@@ -34,8 +36,14 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
     }
     const result = criarPatioHook(novoPatCodigo, novoPatNome);
     if (result.ok) {
+      const usuarios = result.usuariosCriados || [];
+      const msg = usuarios.length > 0
+        ? `Pátio ${novoPatNome} criado!\n\nUsuários demo:\n${usuarios.map(u => `  ${u.matricula} (${u.funcao}) — senha: 123456`).join('\n')}`
+        : `Pátio ${novoPatNome} criado!`;
+      setNovoPatSucesso(msg);
       setShowCriarPatioModal(false);
       setNovoPatCodigo(''); setNovoPatNome(''); setNovoPatLinhas(''); setNovoPatErro(''); setNovoPatConfirm(false);
+      setTimeout(() => setNovoPatSucesso(null), 8000);
     } else {
       setNovoPatErro(result.erro || 'Erro ao criar pátio');
       setNovoPatConfirm(false);
@@ -163,6 +171,22 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
                 }}>{novoPatConfirm ? 'Sim, Criar' : 'Criar Pátio'}</button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Toast: pátio criado com sucesso */}
+        {novoPatSucesso && (
+          <div style={{
+            padding: '16px 20px', borderRadius: 12, marginBottom: 16,
+            background: `${tema.sucesso}10`, border: `2px solid ${tema.sucesso}`,
+            whiteSpace: 'pre-line',
+          }}>
+            <div style={{ fontWeight: 700, color: tema.sucesso, fontSize: 14, marginBottom: 6 }}>Pátio criado com sucesso!</div>
+            <div style={{ fontSize: 12, color: tema.texto, lineHeight: 1.5 }}>{novoPatSucesso}</div>
+            <button onClick={() => setNovoPatSucesso(null)} style={{
+              marginTop: 8, padding: '4px 12px', borderRadius: 6, border: 'none',
+              background: tema.sucesso, color: '#fff', fontSize: 11, fontWeight: 600, cursor: 'pointer',
+            }}>OK</button>
           </div>
         )}
 

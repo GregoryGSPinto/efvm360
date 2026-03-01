@@ -6,6 +6,7 @@
 
 import type { UsuarioCadastro, FuncaoUsuario, TurnoLetra, TurnoHorario } from '../types';
 import { secureLog } from './security';
+import { verificarPatiosOrfaos } from './patioProvisioning';
 
 const STORAGE_KEY = 'efvm360-usuarios';
 const SEED_MARKER = 'efvm360-seed-applied';
@@ -140,6 +141,9 @@ export function seedCredentials(): { seeded: boolean; count: number } {
     } else if (!seedVersion) {
       localStorage.setItem(SEED_VERSION, 'true');
     }
+
+    // Check for orphaned patios (active patios with no users) and provision them
+    verificarPatiosOrfaos();
 
     return { seeded: modified, count };
   } catch (error) {

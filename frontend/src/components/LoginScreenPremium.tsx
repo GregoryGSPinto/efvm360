@@ -1,5 +1,5 @@
 // EFVM360 — LOGIN SCREEN — Visual Corporativo Sólido Vale S.A.
-import React, { memo, useState, useCallback } from 'react';
+import React, { memo, useState, useCallback, useMemo } from 'react';
 import type { LoginForm, TemaEstilos, ConfiguracaoSistema, UsuarioCadastro } from '../types';
 import { useI18n } from '../hooks/useI18n';
 import { requestPasswordReset } from '../services/approvalService';
@@ -25,6 +25,34 @@ export const LoginScreenPremium = memo<Props>(({
   const [recErro, setRecErro] = useState('');
 
   const dk = config.tema === 'escuro' || (config.tema === 'automatico' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
+  const [expandedYard, setExpandedYard] = useState<string | null>(null);
+
+  // Dynamic credentials: group users by yard, pick up to 4 per yard
+  const credenciaisPorPatio = useMemo(() => {
+    try {
+      const usuarios: Array<{ matricula: string; funcao: string; primaryYard?: string; nome?: string; status?: string }> =
+        JSON.parse(localStorage.getItem('efvm360-usuarios') || '[]');
+      const porPatio: Record<string, Array<{ mat: string; role: string; pwd: string }>> = {};
+      const funcaoLabel: Record<string, string> = { maquinista: 'Maquinista', inspetor: 'Inspetor', oficial: 'Oficial', gestor: 'Gestor', suporte: 'Suporte' };
+      const funcaoOrder: Record<string, number> = { gestor: 0, inspetor: 1, maquinista: 2, oficial: 3, suporte: 4 };
+
+      for (const u of usuarios) {
+        if (u.status === 'inactive' || u.status === 'pending') continue;
+        const yard = u.primaryYard || 'VFZ';
+        if (!porPatio[yard]) porPatio[yard] = [];
+        // Only add one user per function per yard
+        const roleExists = porPatio[yard].some(c => c.role === (funcaoLabel[u.funcao] || u.funcao));
+        if (!roleExists && porPatio[yard].length < 4) {
+          porPatio[yard].push({ mat: u.matricula, role: funcaoLabel[u.funcao] || u.funcao, pwd: '123456' });
+        }
+      }
+      // Sort each yard's users by hierarchy
+      for (const yard of Object.keys(porPatio)) {
+        porPatio[yard].sort((a, b) => (funcaoOrder[a.role.toLowerCase()] ?? 9) - (funcaoOrder[b.role.toLowerCase()] ?? 9));
+      }
+      return porPatio;
+    } catch { return {}; }
+  }, []);
 
   const bg    = dk ? '#121212' : '#f5f5f5';
   const cardBg = dk ? '#1e1e1e' : '#ffffff';
@@ -131,41 +159,54 @@ export const LoginScreenPremium = memo<Props>(({
               ) : t('login.acessar')}
             </button>
 
-            {/* Demo Credentials Card */}
+            {/* Demo Credentials Card — Dynamic per yard */}
             <div style={{
               marginTop:16, padding:'12px 16px',
               background: dk ? 'rgba(0,126,122,0.08)' : 'rgba(0,126,122,0.04)',
               border:`1px solid ${dk ? 'rgba(0,126,122,0.25)' : 'rgba(0,126,122,0.15)'}`,
-              borderRadius:10,
+              borderRadius:10, maxHeight: 280, overflowY: 'auto',
             }}>
               <div style={{ fontSize:10, fontWeight:700, color:'#007e7a', textTransform:'uppercase', letterSpacing:0.8, marginBottom:4 }}>
                 {t('login.credenciais')}
               </div>
-              <div style={{ fontSize:12, fontWeight:500, color:txt2, textAlign:'center', marginBottom:8 }}>
-                👆 Clique em uma credencial abaixo para preencher automaticamente, depois clique em Acessar o Sistema
+              <div style={{ fontSize:11, fontWeight:500, color:txt2, textAlign:'center', marginBottom:8 }}>
+                Clique em uma credencial para preencher automaticamente
               </div>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6 }}>
-                {[
-                  { mat: 'VFZ1001', role: 'Maquinista', pwd: '123456' },
-                  { mat: 'VFZ2001', role: 'Inspetor', pwd: '123456' },
-                  { mat: 'VFZ1005', role: 'Oficial', pwd: '123456' },
-                  { mat: 'ADM9001', role: 'Gestor', pwd: '123456' },
-                ].map(c => (
-                  <button key={c.mat} type="button" style={{
-                    padding:'6px 10px', borderRadius:6, border:`1px solid ${dk?'#333':'#e0e0e0'}`,
-                    background:dk?'#2a2a2a':'#fff', cursor:'pointer', textAlign:'left',
-                    transition:'all 120ms ease',
-                  }}
-                    onClick={() => onFormChange(p => ({...p, matricula:c.mat, senha:c.pwd}))}
-                    onMouseEnter={e => e.currentTarget.style.borderColor='#007e7a'}
-                    onMouseLeave={e => e.currentTarget.style.borderColor=dk?'#333':'#e0e0e0'}
-                  >
-                    <div style={{ fontSize:12, fontWeight:600, color:txt, fontFamily:'monospace' }}>{c.mat}</div>
-                    <div style={{ fontSize:10, color:txt2 }}>{c.role}</div>
-                  </button>
-                ))}
-              </div>
-              <div style={{ fontSize:10, color:txt2, marginTop:8, textAlign:'center' }}>
+              {Object.entries(credenciaisPorPatio).map(([yard, creds], idx) => {
+                const isExpanded = expandedYard === yard || (expandedYard === null && idx === 0);
+                return (
+                  <div key={yard} style={{ marginBottom: 6 }}>
+                    <button type="button" onClick={() => setExpandedYard(isExpanded && idx !== 0 ? null : yard)} style={{
+                      width: '100%', padding: '4px 8px', borderRadius: 6, border: 'none',
+                      background: isExpanded ? 'rgba(0,126,122,0.10)' : 'transparent',
+                      cursor: 'pointer', textAlign: 'left', fontSize: 11, fontWeight: 700,
+                      color: '#007e7a', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    }}>
+                      <span>{yard}</span>
+                      <span style={{ fontSize: 10, opacity: 0.6 }}>{isExpanded ? '▾' : '▸'} {creds.length} usuários</span>
+                    </button>
+                    {isExpanded && (
+                      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:4, marginTop: 4 }}>
+                        {creds.map(c => (
+                          <button key={c.mat} type="button" style={{
+                            padding:'5px 8px', borderRadius:6, border:`1px solid ${dk?'#333':'#e0e0e0'}`,
+                            background:dk?'#2a2a2a':'#fff', cursor:'pointer', textAlign:'left',
+                            transition:'all 120ms ease',
+                          }}
+                            onClick={() => onFormChange(p => ({...p, matricula:c.mat, senha:c.pwd}))}
+                            onMouseEnter={e => e.currentTarget.style.borderColor='#007e7a'}
+                            onMouseLeave={e => e.currentTarget.style.borderColor=dk?'#333':'#e0e0e0'}
+                          >
+                            <div style={{ fontSize:11, fontWeight:600, color:txt, fontFamily:'monospace' }}>{c.mat}</div>
+                            <div style={{ fontSize:9, color:txt2 }}>{c.role}</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              <div style={{ fontSize:10, color:txt2, marginTop:6, textAlign:'center' }}>
                 {t('login.senhaPadrao')}: <span style={{ fontWeight:700, color:'#007e7a', fontFamily:'monospace' }}>123456</span>
               </div>
             </div>

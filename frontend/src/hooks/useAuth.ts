@@ -359,18 +359,26 @@ export function useAuth(): AuthReturn {
     // Hash da senha ANTES de persistir
     const senhaHash = await hashSenha(cadastroForm.senha, matricula);
 
+    // For gestor/inspetor: allowedYards comes as comma-separated string from form
+    const funcao = cadastroForm.funcao as FuncaoUsuario;
+    const isMultiPatio = funcao === 'gestor' || funcao === 'inspetor';
+    const allowedYardsRaw = (cadastroForm as unknown as Record<string, string>).allowedYards;
+    const parsedYards = isMultiPatio && allowedYardsRaw
+      ? allowedYardsRaw.split(',').filter(Boolean)
+      : [cadastroForm.primaryYard || 'VFZ'];
+
     const novoUsuario: UsuarioCadastro = {
       nome,
       matricula,
-      funcao: cadastroForm.funcao as FuncaoUsuario,
+      funcao,
       turno: cadastroForm.turno as TurnoLetra,
       horarioTurno: cadastroForm.horarioTurno as TurnoHorario,
       senhaHash, // Hash, nunca plaintext
       dataCadastro: new Date().toISOString(),
       email: cadastroForm.email?.trim() || undefined,
       telefone: cadastroForm.telefone?.trim() || undefined,
-      primaryYard: cadastroForm.primaryYard || 'VFZ',
-      allowedYards: ['VFZ', 'VBR', 'VCS', 'P6', 'VTO'],
+      primaryYard: isMultiPatio ? parsedYards[0] : (cadastroForm.primaryYard || 'VFZ'),
+      allowedYards: parsedYards,
       status: 'pending', // Aguardando aprovação do gestor
     };
 
