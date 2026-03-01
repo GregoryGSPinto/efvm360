@@ -54,6 +54,7 @@ const PaginaGestao = lazy(() => import('./pages/gestao'));
 const PaginaPerfil = lazy(() => import('./pages/perfil'));
 const PaginaLayoutPatio = lazy(() => import('./pages/layout-patio'));
 const PaginaGrausRisco = lazy(() => import('./pages/graus-risco'));
+const PaginaEquipamentos = lazy(() => import('./pages/equipamentos'));
 const PaginaHistorico = lazy(() => import('./pages/historico'));
 const PaginaConfiguracoes = lazy(() => import('./pages/configuracoes'));
 const PaginaSuporte = lazy(() => import('./pages/suporte'));
@@ -679,6 +680,14 @@ export default function App(): JSX.Element {
             <Route path={ROUTES.GRAUS_RISCO} element={
               <ModuleErrorBoundary module="graus-risco">
                 <PaginaGrausRisco tema={tema} styles={styles}
+                  usuarioLogado={usuarioLogado} />
+              </ModuleErrorBoundary>
+            } />
+
+            {/* Equipamentos */}
+            <Route path={ROUTES.EQUIPAMENTOS} element={
+              <ModuleErrorBoundary module="equipamentos">
+                <PaginaEquipamentos tema={tema} styles={styles}
                   usuarioLogado={usuarioLogado} />
               </ModuleErrorBoundary>
             } />

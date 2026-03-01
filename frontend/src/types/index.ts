@@ -666,5 +666,27 @@ export interface ConfigRisco {
   ultimaAtualizacao: string;
 }
 
+// ============================================================================
+// EQUIPAMENTOS OPERACIONAIS
+// ============================================================================
+
+export type CategoriaEquipamento = 'comunicacao' | 'sinalizacao' | 'seguranca' | 'medicao' | 'ferramental' | 'epi' | 'outro';
+export type CriticidadeEquipamento = 'essencial' | 'importante' | 'complementar';
+
+export interface EquipamentoConfig {
+  id: string;
+  nome: string;
+  descricao: string;
+  categoria: CategoriaEquipamento;
+  criticidade: CriticidadeEquipamento;
+  quantidadeMinima: number;
+  unidade: string;
+  ativo: boolean;
+  patiosAfetados: string[];
+  criadoPor: string;
+  criadoEm: string;
+  atualizadoEm?: string;
+}
+
 // Re-exportar tipos do dashboard
 export * from './dashboard';

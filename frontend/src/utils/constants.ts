@@ -5,8 +5,10 @@
 
 import type {
   AMV,
+  CategoriaEquipamento,
   CategoriaRisco,
   ConfiguracaoSistema,
+  CriticidadeEquipamento,
   Equipamento,
   FuncaoOpcao,
   PatioInfo,
@@ -171,6 +173,7 @@ export const MENU_PRINCIPAL: ItemMenu[] = [
   { id: 'passagem', label: 'Gestão de Troca de Turno', icon: '📋' },
   { id: 'layout', label: 'Layout do Pátio', icon: '🗺️' },
   { id: 'graus-risco', label: 'Graus de Risco', icon: '⚠️' },
+  { id: 'equipamentos', label: 'Equipamentos', icon: '🛠️' },
   { id: 'historico', label: 'Histórico', icon: '📁' },
   { id: 'configuracoes', label: 'Configurações', icon: '⚙️' },
 ];
@@ -280,6 +283,7 @@ export const STORAGE_KEYS = {
   PERFORMANCE: 'efvm360-performance',
   PATIOS: 'efvm360-patios',
   GRAUS_RISCO: 'efvm360-graus-risco',
+  EQUIPAMENTOS_CONFIG: 'efvm360-equipamentos-config',
 } as const;
 
 /**
@@ -527,3 +531,25 @@ export const ESCALA_PROBABILIDADE: Record<number, string> = {
 export const ESCALA_IMPACTO: Record<number, string> = {
   1: 'Insignificante', 2: 'Menor', 3: 'Moderado', 4: 'Maior', 5: 'Catastrófico',
 };
+
+// ============================================================================
+// EQUIPAMENTOS OPERACIONAIS — Constantes
+// ============================================================================
+
+export const CATEGORIAS_EQUIPAMENTO: Record<CategoriaEquipamento, { label: string; icone: string; cor: string }> = {
+  comunicacao: { label: 'Comunicação', icone: '📡', cor: '#3b82f6' },
+  sinalizacao: { label: 'Sinalização', icone: '🚦', cor: '#f59e0b' },
+  seguranca: { label: 'Segurança', icone: '🦺', cor: '#ef4444' },
+  medicao: { label: 'Medição', icone: '📏', cor: '#8b5cf6' },
+  ferramental: { label: 'Ferramental', icone: '🔧', cor: '#6366f1' },
+  epi: { label: 'EPI', icone: '🧤', cor: '#22c55e' },
+  outro: { label: 'Outro', icone: '📦', cor: '#64748b' },
+};
+
+export const CRITICIDADES_EQUIPAMENTO: Record<CriticidadeEquipamento, { label: string; cor: string; corBg: string }> = {
+  essencial: { label: 'Essencial', cor: '#ef4444', corBg: '#ef444420' },
+  importante: { label: 'Importante', cor: '#f59e0b', corBg: '#f59e0b20' },
+  complementar: { label: 'Complementar', cor: '#64748b', corBg: '#64748b20' },
+};
+
+export const UNIDADES_EQUIPAMENTO = ['unidade', 'par', 'conjunto', 'kit'] as const;

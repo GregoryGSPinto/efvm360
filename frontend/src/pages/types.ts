@@ -113,6 +113,14 @@ export interface PaginaGrausRiscoProps {
   usuarioLogado?: Usuario | null;
 }
 
+// ── Página de Equipamentos ───────────────────────────────────────────
+
+export interface PaginaEquipamentosProps {
+  tema: TemaComputed;
+  styles: StylesObject;
+  usuarioLogado?: Usuario | null;
+}
+
 // ── Página de Layout do Pátio ──────────────────────────────────────────
 
 export interface PaginaLayoutPatioProps {

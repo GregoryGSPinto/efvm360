@@ -18,5 +18,6 @@ export const MENU_SIDEBAR_ITEMS: SidebarItem[] = [
   { id: 'historico',     label: 'Histórico',            icon: '📁' },
   { id: 'layout',        label: 'Layout do Pátio',      icon: '🗺️' },
   { id: 'graus-risco',   label: 'Graus de Risco',       icon: '⚠️' },
+  { id: 'equipamentos',  label: 'Equipamentos',         icon: '🛠️' },
   { id: 'configuracoes', label: 'Configurações',        icon: '⚙️' },
 ];

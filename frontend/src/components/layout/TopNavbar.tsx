@@ -22,6 +22,7 @@ const NAV_LABEL_KEYS: Record<string, string> = {
   historico: 'nav.historico',
   layout: 'nav.layout',
   'graus-risco': 'nav.grausRisco',
+  equipamentos: 'nav.equipamentos',
   gestao: 'nav.gestao',
 };
 
@@ -32,6 +33,7 @@ const BASE_NAV_ITEMS = [
   { id: 'historico', label: 'Historico' },
   { id: 'layout',    label: 'Layout' },
   { id: 'graus-risco', label: 'Riscos' },
+  { id: 'equipamentos', label: 'Equip.' },
 ];
 
 // ── Props ──────────────────────────────────────────────────────────────
