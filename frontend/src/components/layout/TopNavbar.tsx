@@ -21,6 +21,7 @@ const NAV_LABEL_KEYS: Record<string, string> = {
   analytics: 'nav.biPlus',
   historico: 'nav.historico',
   layout: 'nav.layout',
+  'graus-risco': 'nav.grausRisco',
   gestao: 'nav.gestao',
 };
 
@@ -30,6 +31,7 @@ const BASE_NAV_ITEMS = [
   { id: 'analytics', label: 'BI+' },
   { id: 'historico', label: 'Historico' },
   { id: 'layout',    label: 'Layout' },
+  { id: 'graus-risco', label: 'Riscos' },
 ];
 
 // ── Props ──────────────────────────────────────────────────────────────

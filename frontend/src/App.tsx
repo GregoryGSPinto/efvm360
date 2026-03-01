@@ -53,6 +53,7 @@ const DashboardBI = lazy(() => import('./components/dashboard/DashboardBI'));
 const PaginaGestao = lazy(() => import('./pages/gestao'));
 const PaginaPerfil = lazy(() => import('./pages/perfil'));
 const PaginaLayoutPatio = lazy(() => import('./pages/layout-patio'));
+const PaginaGrausRisco = lazy(() => import('./pages/graus-risco'));
 const PaginaHistorico = lazy(() => import('./pages/historico'));
 const PaginaConfiguracoes = lazy(() => import('./pages/configuracoes'));
 const PaginaSuporte = lazy(() => import('./pages/suporte'));
@@ -670,6 +671,14 @@ export default function App(): JSX.Element {
               <ModuleErrorBoundary module="layout-patio">
                 <PaginaLayoutPatio tema={tema} styles={styles}
                   dadosFormulario={dadosFormulario} atualizarLinhaPatio={atualizarLinhaPatio as (tipo: string, index: number, campo: string, valor: string) => void}
+                  usuarioLogado={usuarioLogado} />
+              </ModuleErrorBoundary>
+            } />
+
+            {/* Graus de Risco */}
+            <Route path={ROUTES.GRAUS_RISCO} element={
+              <ModuleErrorBoundary module="graus-risco">
+                <PaginaGrausRisco tema={tema} styles={styles}
                   usuarioLogado={usuarioLogado} />
               </ModuleErrorBoundary>
             } />

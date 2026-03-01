@@ -5,10 +5,12 @@
 
 import type {
   AMV,
+  CategoriaRisco,
   ConfiguracaoSistema,
   Equipamento,
   FuncaoOpcao,
   PatioInfo,
+  SeveridadeRisco,
   StatusLinha,
   Temas,
   ItemMenu,
@@ -168,6 +170,7 @@ export const MENU_PRINCIPAL: ItemMenu[] = [
   { id: 'analytics', label: 'BI+', icon: '📈' },
   { id: 'passagem', label: 'Gestão de Troca de Turno', icon: '📋' },
   { id: 'layout', label: 'Layout do Pátio', icon: '🗺️' },
+  { id: 'graus-risco', label: 'Graus de Risco', icon: '⚠️' },
   { id: 'historico', label: 'Histórico', icon: '📁' },
   { id: 'configuracoes', label: 'Configurações', icon: '⚙️' },
 ];
@@ -276,6 +279,7 @@ export const STORAGE_KEYS = {
   TEAMS: 'efvm360-teams',
   PERFORMANCE: 'efvm360-performance',
   PATIOS: 'efvm360-patios',
+  GRAUS_RISCO: 'efvm360-graus-risco',
 } as const;
 
 /**
@@ -495,3 +499,31 @@ export const SUGESTOES_PONTOS_ATENCAO: { categoria: string; sugestoes: string[] 
     ],
   },
 ];
+
+// ============================================================================
+// GRAUS DE RISCO OPERACIONAL — Constantes
+// ============================================================================
+
+export const CATEGORIAS_RISCO: Record<CategoriaRisco, { label: string; icone: string; cor: string }> = {
+  operacional: { label: 'Operacional', icone: '🚂', cor: '#3b82f6' },
+  seguranca: { label: 'Segurança', icone: '🦺', cor: '#f59e0b' },
+  ambiental: { label: 'Ambiental', icone: '🌿', cor: '#22c55e' },
+  equipamento: { label: 'Equipamento', icone: '🔧', cor: '#8b5cf6' },
+  via_permanente: { label: 'Via Permanente', icone: '🛤️', cor: '#6366f1' },
+  custom: { label: 'Personalizado', icone: '📋', cor: '#64748b' },
+};
+
+export const SEVERIDADES_RISCO: Record<SeveridadeRisco, { label: string; cor: string; corBg: string }> = {
+  baixo: { label: 'Baixo', cor: '#22c55e', corBg: '#22c55e20' },
+  moderado: { label: 'Moderado', cor: '#f59e0b', corBg: '#f59e0b20' },
+  alto: { label: 'Alto', cor: '#f97316', corBg: '#f9731620' },
+  critico: { label: 'Crítico', cor: '#ef4444', corBg: '#ef444420' },
+};
+
+export const ESCALA_PROBABILIDADE: Record<number, string> = {
+  1: 'Raro', 2: 'Improvável', 3: 'Possível', 4: 'Provável', 5: 'Quase Certo',
+};
+
+export const ESCALA_IMPACTO: Record<number, string> = {
+  1: 'Insignificante', 2: 'Menor', 3: 'Moderado', 4: 'Maior', 5: 'Catastrófico',
+};

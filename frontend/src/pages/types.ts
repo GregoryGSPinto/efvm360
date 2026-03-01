@@ -105,6 +105,14 @@ export interface PaginaPassagemProps {
   setObservacoes5S: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }
 
+// ── Página de Graus de Risco ──────────────────────────────────────────
+
+export interface PaginaGrausRiscoProps {
+  tema: TemaComputed;
+  styles: StylesObject;
+  usuarioLogado?: Usuario | null;
+}
+
 // ── Página de Layout do Pátio ──────────────────────────────────────────
 
 export interface PaginaLayoutPatioProps {

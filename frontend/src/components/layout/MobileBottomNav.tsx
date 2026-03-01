@@ -17,6 +17,7 @@ const BASE_NAV_ITEMS = [
   { id: 'analytics', label: 'BI+',         icon: '\uD83D\uDCCA' },
   { id: 'historico', label: 'Historico',    icon: '\uD83D\uDCCB' },
   { id: 'layout',    label: 'Layout',       icon: '\uD83D\uDDFA\uFE0F' },
+  { id: 'graus-risco', label: 'Riscos',     icon: '\u26A0\uFE0F' },
 ];
 
 // ── Props ──────────────────────────────────────────────────────────────

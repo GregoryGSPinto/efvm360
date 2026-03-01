@@ -630,5 +630,41 @@ export interface PatioInfo {
   amvs?: AMV[];
 }
 
+// ============================================================================
+// GRAUS DE RISCO OPERACIONAL
+// ============================================================================
+
+export type SeveridadeRisco = 'baixo' | 'moderado' | 'alto' | 'critico';
+export type CategoriaRisco = 'operacional' | 'seguranca' | 'ambiental' | 'equipamento' | 'via_permanente' | 'custom';
+
+export interface MedidaMitigacao {
+  id: string;
+  descricao: string;
+  obrigatoria: boolean;
+}
+
+export interface GrauRisco {
+  id: string;
+  codigo: string;
+  nome: string;
+  descricao: string;
+  categoria: CategoriaRisco;
+  severidade: SeveridadeRisco;
+  probabilidade: 1 | 2 | 3 | 4 | 5;
+  impacto: 1 | 2 | 3 | 4 | 5;
+  scoreRisco?: number;
+  medidasMitigacao: MedidaMitigacao[];
+  ativo: boolean;
+  patiosAfetados: string[];
+  criadoPor: string;
+  criadoEm: string;
+  atualizadoEm?: string;
+}
+
+export interface ConfigRisco {
+  graus: GrauRisco[];
+  ultimaAtualizacao: string;
+}
+
 // Re-exportar tipos do dashboard
 export * from './dashboard';
