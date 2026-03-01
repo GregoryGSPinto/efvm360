@@ -17,6 +17,7 @@ import { useEquipamentos } from '../../hooks/useEquipamentos';
 import type { StylesObject } from '../../hooks/useStyles';
 import { validarSecao, gerarResumoCopilot, type AlertaCopilot, type ResumoCopilot } from '../../components/AdamBot/AdamBotCopilot';
 import { useAdamBotContext } from '../../components/AdamBot/AdamBotContext';
+import { adamFalar } from '../../components/AdamBot/AdamBotVoice';
 
 // ── ItemSegurancaSimNao — Extracted to avoid inline re-creation ──────
 interface ItemSegurancaSimNaoProps {
@@ -182,12 +183,7 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
     }
 
     const bloqueante = alertas.find(a => a.nivel === 'bloqueante');
-    if (bloqueante && 'speechSynthesis' in window) {
-      const utt = new SpeechSynthesisUtterance(bloqueante.mensagemVoz);
-      utt.lang = 'pt-BR';
-      utt.rate = 1.1;
-      speechSynthesis.speak(utt);
-    }
+    if (bloqueante) adamFalar(bloqueante.mensagemVoz);
 
     if (secaoFormulario === 'assinaturas') {
       const secoesIds = SECOES_FORMULARIO.map(s => s.id);
@@ -201,12 +197,7 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
       msgResumo += `\n\n${resumo.texto}`;
       addBotMessage(msgResumo);
 
-      if ('speechSynthesis' in window) {
-        const utt = new SpeechSynthesisUtterance(resumo.textoVoz);
-        utt.lang = 'pt-BR';
-        utt.rate = 1.1;
-        speechSynthesis.speak(utt);
-      }
+      adamFalar(resumo.textoVoz);
     } else {
       setCopilotResumo(null);
     }

@@ -11,6 +11,8 @@ import { ROUTES } from '../../router/routes';
 import { useBriefingData } from '../../components/AdamBot/useBriefingData';
 import { gerarBriefing, type ResultadoBriefing } from '../../components/AdamBot/AdamBotBriefing';
 import { useAdamBotContext } from '../../components/AdamBot/AdamBotContext';
+import { adamFalar } from '../../components/AdamBot/AdamBotVoice';
+import { analisarTendencias, type AnaliseHistorico } from '../../components/AdamBot/AdamBotTendencias';
 import {
   Sun, Moon, Calendar, TrainFront, MessageCircle, FileText,
   AlertTriangle, CheckCircle, ClipboardList, FolderOpen, ArrowRight, BarChart3,
@@ -149,6 +151,7 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
   const dadosBriefing = useBriefingData();
   const [briefingEntregue, setBriefingEntregue] = useState(false);
   const [ultimoBriefing, setUltimoBriefing] = useState<ResultadoBriefing | null>(null);
+  const [tendencias, setTendencias] = useState<AnaliseHistorico | null>(null);
   const { addBotMessage } = useAdamBotContext();
 
   useEffect(() => {
@@ -163,11 +166,25 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
       const msgChat = `📋 **Briefing do Turno** [${badge}]\n\n${resultado.itensDestaque.join('\n')}\n\n${resultado.severidade === 'critico' ? '⚠️ Atenção redobrada.' : resultado.severidade === 'atencao' ? '⚡ Pontos de atenção.' : '✅ Situação estável.'}`;
       addBotMessage(msgChat);
 
-      if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(resultado.texto);
-        utterance.lang = 'pt-BR';
-        utterance.rate = 1.1;
-        speechSynthesis.speak(utterance);
+      adamFalar(resultado.texto);
+
+      // Trend analysis
+      const analise = analisarTendencias();
+      if (analise.alertas.length > 0) {
+        setTendencias(analise);
+
+        let msgTendencias = '📊 **Análise de Tendências**\n';
+        analise.alertas.forEach(a => {
+          const icon = a.severidade === 'critico' ? '🔴' : a.severidade === 'aviso' ? '🟡' : 'ℹ️';
+          msgTendencias += `\n${icon} ${a.titulo}`;
+        });
+        msgTendencias += `\n\n📈 ${analise.totalPassagensAnalisadas} passagens analisadas`;
+        addBotMessage(msgTendencias);
+
+        const critico = analise.alertas.find(a => a.severidade === 'critico');
+        if (critico) {
+          setTimeout(() => adamFalar(critico.descricaoVoz), 8000);
+        }
       }
     }, 2000);
     return () => clearTimeout(timer);
@@ -238,6 +255,54 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
               <div key={i} style={{ fontSize: 12, color: tema.texto, lineHeight: 1.5 }}>{item}</div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* ── TENDÊNCIAS ─────────────────────────────────────────────── */}
+      {tendencias && tendencias.alertas.length > 0 && (
+        <div style={{
+          margin: '0 0 20px', padding: '16px 20px', borderRadius: 14,
+          background: tendencias.alertas.some(a => a.severidade === 'critico')
+            ? 'rgba(239,68,68,0.06)'
+            : tendencias.alertas.some(a => a.severidade === 'aviso')
+              ? 'rgba(245,158,11,0.06)'
+              : 'rgba(59,130,246,0.06)',
+          border: `1px solid ${
+            tendencias.alertas.some(a => a.severidade === 'critico') ? '#ef4444'
+            : tendencias.alertas.some(a => a.severidade === 'aviso') ? '#f59e0b'
+            : '#3b82f6'
+          }25`,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            <span style={{ fontSize: 16 }}>📊</span>
+            <span style={{ fontWeight: 700, fontSize: 13, color: tema.texto, flex: 1 }}>
+              Tendências — {tendencias.periodoAnalisado}
+            </span>
+            <span style={{
+              fontSize: 10, padding: '2px 8px', borderRadius: 999, fontWeight: 600,
+              color: tema.textoSecundario, background: `${tema.texto}10`,
+            }}>
+              {tendencias.alertas.length} alerta{tendencias.alertas.length > 1 ? 's' : ''}
+            </span>
+          </div>
+          {tendencias.alertas.map((alerta, i) => (
+            <div key={i} style={{
+              padding: '8px 12px', margin: '4px 0', borderRadius: 10,
+              background: `${tema.texto}06`, fontSize: 12,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                <span>{
+                  alerta.severidade === 'critico' ? '🔴' :
+                  alerta.severidade === 'aviso' ? '🟡' :
+                  alerta.tipo === 'melhoria' ? '🟢' : 'ℹ️'
+                }</span>
+                <span style={{ fontWeight: 600, color: tema.texto }}>{alerta.titulo}</span>
+              </div>
+              <div style={{ color: tema.textoSecundario, paddingLeft: 22 }}>
+                {alerta.descricao}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

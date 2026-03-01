@@ -35,6 +35,7 @@ import { FUNCOES_USUARIO, STORAGE_KEYS } from './utils/constants';
 import { SplashScreenPremium, LoginScreenPremium } from './components';
 import { AdamBotProvider, AdamBot } from './components/AdamBot';
 import type { ContextoBot } from './components/AdamBot';
+import { adamPrecarregarVozes } from './components/AdamBot/AdamBotVoice';
 import { TopNavbar } from './components/layout/TopNavbar';
 import { MobileBottomNav } from './components/layout/MobileBottomNav';
 import { OnlineIndicator } from './components/layout/OnlineIndicator';
@@ -262,6 +263,9 @@ export default function App(): JSX.Element {
   const handlers = usePassagemHandlers(
     usuarioLogado as UsuarioCadastro | null, dadosFormulario.cabecalho as unknown as { matriculaEntra?: string; matriculaSai?: string }, historicoDSS, registrarAuditoria as unknown as (tipo: string, area: string, detalhe: string) => void,
   );
+
+  // ── AdamBot voice preload (once) ────────────────────────────────────
+  useEffect(() => { adamPrecarregarVozes(); }, []);
 
   // ── Dark mode body sync ──────────────────────────────────────────────
   const isDark = config.tema === 'escuro' || (config.tema === 'automatico' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
