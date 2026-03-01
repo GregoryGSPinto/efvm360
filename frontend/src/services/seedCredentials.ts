@@ -123,7 +123,8 @@ export function seedCredentials(): { seeded: boolean; count: number } {
         modified = true;
         count++;
       } else {
-        // Ensure new fields exist on existing seed users
+        // Ensure fields are synced on existing seed users (fixes stale funcao from older seeds)
+        if (exists.funcao !== seedUser.funcao) { exists.funcao = seedUser.funcao; modified = true; }
         if (!exists.primaryYard) { exists.primaryYard = seedUser.primaryYard; modified = true; }
         if (!exists.allowedYards) { exists.allowedYards = ['VFZ', 'VBR', 'VCS', 'P6', 'VTO']; modified = true; }
         if (!exists.status) { exists.status = 'active'; modified = true; }

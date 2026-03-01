@@ -65,7 +65,7 @@ src/
 | VFZ1001 | 123456 | Maquinista | Flexal | Boa Jornada, DSS, BI+, Layout |
 | VFZ2001 | 123456 | Inspetor | Flexal | Tudo + Gestão (equipes, ranking) |
 | VFZ3001 | 123456 | Gestor | Flexal | Tudo + Aprovações |
-| ADM9001 | 123456 | Admin | Global | Acesso total a todos os pátios |
+| ADM9001 | 123456 | Gestor | Global | Acesso total a todos os pátios |
 
 ### 5 Pátios (7 usuários cada)
 

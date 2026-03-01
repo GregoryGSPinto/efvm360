@@ -40,6 +40,13 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
   const [showCriarUsuario, setShowCriarUsuario] = useState(false);
   const [novoUser, setNovoUser] = useState({ nome: '', matricula: '', funcao: '', primaryYard: yardCode as string, turno: '' as string, horarioTurno: '' as string, senha: '123456' });
   const [erroCriarUsuario, setErroCriarUsuario] = useState('');
+  const [patiosSelecionados, setPatiosSelecionados] = useState<string[]>([yardCode as string]);
+
+  const togglePatio = useCallback((codigo: string) => {
+    setPatiosSelecionados(prev =>
+      prev.includes(codigo) ? prev.filter(c => c !== codigo) : [...prev, codigo]
+    );
+  }, []);
 
   // Filter available functions based on logged-in user's role
   const funcoesDisponiveis = useMemo(() => {
@@ -53,7 +60,7 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
     if (!novoUser.nome.trim()) { setErroCriarUsuario('Nome é obrigatório'); return; }
     if (!novoUser.matricula.trim()) { setErroCriarUsuario('Matrícula é obrigatória'); return; }
     if (!novoUser.funcao) { setErroCriarUsuario('Função é obrigatória'); return; }
-    if (!novoUser.primaryYard) { setErroCriarUsuario('Pátio é obrigatório'); return; }
+    if (patiosSelecionados.length === 0) { setErroCriarUsuario('Selecione pelo menos um pátio'); return; }
 
     try {
       const usuarios: Usuario[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.USUARIOS) || '[]');
@@ -64,8 +71,8 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
         nome: novoUser.nome.trim(),
         matricula: novoUser.matricula.trim(),
         funcao: novoUser.funcao,
-        primaryYard: novoUser.primaryYard,
-        allowedYards: ['VFZ', 'VBR', 'VCS', 'P6', 'VTO'],
+        primaryYard: patiosSelecionados[0],
+        allowedYards: [...patiosSelecionados],
         turno: novoUser.turno || undefined,
         horarioTurno: novoUser.horarioTurno || undefined,
         senha: novoUser.senha || '123456',
@@ -77,11 +84,12 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
       localStorage.setItem(STORAGE_KEYS.USUARIOS, JSON.stringify(usuarios));
       setShowCriarUsuario(false);
       setNovoUser({ nome: '', matricula: '', funcao: '', primaryYard: yardCode as string, turno: '', horarioTurno: '', senha: '123456' });
+      setPatiosSelecionados([yardCode as string]);
       refresh();
     } catch {
       setErroCriarUsuario('Erro ao salvar usuário');
     }
-  }, [novoUser, yardCode, refresh]);
+  }, [novoUser, yardCode, patiosSelecionados, refresh]);
 
   // ── Audit trail state ──
   const [auditFiltroTipo, setAuditFiltroTipo] = useState<string>('todos');
@@ -605,11 +613,35 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
                     </div>
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: tema.textoSecundario, marginBottom: 4, textTransform: 'uppercase' }}>Pátio Principal *</label>
-                    <select style={{ padding: '10px 12px', borderRadius: 8, border: `1px solid ${tema.cardBorda}`, background: tema.backgroundSecundario, color: tema.texto, fontSize: 13, width: '100%', boxSizing: 'border-box', cursor: 'pointer' }}
-                      value={novoUser.primaryYard} onChange={e => setNovoUser(p => ({ ...p, primaryYard: e.target.value }))}>
-                      {patiosAtivos.map(p => <option key={p.codigo} value={p.codigo}>{p.codigo} — {p.nome}</option>)}
-                    </select>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: tema.textoSecundario, marginBottom: 4, textTransform: 'uppercase' }}>
+                      Pátios sob responsabilidade * {patiosSelecionados.length > 0 && <span style={{ color: tema.primaria }}>({patiosSelecionados.length})</span>}
+                    </label>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                      {patiosAtivos.map(patio => {
+                        const sel = patiosSelecionados.includes(patio.codigo);
+                        return (
+                          <button key={patio.codigo} type="button" onClick={() => togglePatio(patio.codigo)}
+                            style={{
+                              padding: '8px 14px', borderRadius: 8, fontSize: 12, cursor: 'pointer',
+                              border: sel ? `2px solid ${tema.primaria}` : `1px solid ${tema.cardBorda}`,
+                              background: sel ? `${tema.primaria}12` : 'transparent',
+                              color: sel ? tema.primaria : tema.texto,
+                              fontWeight: sel ? 700 : 400,
+                              transition: 'all 150ms ease',
+                            }}>
+                            {sel && '✓ '}{patio.codigo} — {patio.nome.replace(/^Pátio (de |do |)/, '')}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {patiosSelecionados.length === 0 && (
+                      <div style={{ fontSize: 11, color: '#dc2626', marginTop: 4 }}>Selecione pelo menos um pátio</div>
+                    )}
+                    {patiosSelecionados.length > 0 && (
+                      <div style={{ fontSize: 11, color: tema.textoSecundario, marginTop: 4 }}>
+                        Pátio principal: <strong>{patiosSelecionados[0]}</strong> (primeiro selecionado)
+                      </div>
+                    )}
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                     <div>
