@@ -20,7 +20,7 @@ Digital platform for railway shift handover, yard management, operational safety
 
 ## The Problem
 
-Railway shift handovers at EFVM's Fazendão yard relied on paper forms — creating data loss, delayed communication, and safety blind spots across 24/7 operations. Inspectors, operators, and managers had no unified view of yard status, equipment condition, or risk posture during critical transitions.
+Railway shift handovers at the main railway yard relied on paper forms — creating data loss, delayed communication, and safety blind spots across 24/7 operations. Inspectors, operators, and managers had no unified view of yard status, equipment condition, or risk posture during critical transitions.
 
 ## The Solution
 
@@ -86,7 +86,7 @@ The frontend implements a pure domain layer following DDD, CQRS, and Event Sourc
 Digital form replacing paper-based handover with 12 sections: header, upper/lower yard status, layout/switches, attention points, VP interventions, equipment, 5S inspection, safety protocols, previous shift notes, audit trail, and signatures.
 
 ### Yard Layout Management
-Multi-patio support (Fazendão, Barão de Cocais, Pedro Nolasco, Costa Lacerda) with full CRUD for track lines, categories, and AMV (Automated Switch) positions. Auto-provisioning with realistic seed data for Fazendão.
+Multi-patio support with configurable yard locations, full CRUD for track lines, categories, and AMV (Automated Switch) positions. Auto-provisioning with realistic seed data for the primary yard.
 
 ### Operational Risk Assessment
 5×5 probability × impact risk matrix aligned with NR-01 standards and industry safety-first principles. Full CRUD for risk grades with mitigation measures, severity classification, and KPI dashboard.
@@ -282,7 +282,7 @@ az deployment sub create \
 
 **Gregory G. S. Pinto** — UX/UI & AI Specialist · Solution Architect
 
-Architecture, design, and implementation of enterprise railway operations management platform for Brazil's EFVM railway corridor.
+Architecture, design, and implementation of enterprise railway operations management platform for Brazilian railway operations.
 
 ---
 
