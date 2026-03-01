@@ -5,16 +5,16 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import type { PaginaLayoutPatioProps } from '../types';
-import type { LinhaPatioInfo, CategoriaPatio } from '../../types';
-import { SectionHeader, Card, StatusBadge } from '../../components';
+import type { LinhaPatioInfo, CategoriaPatio, AMV } from '../../types';
+import { SectionHeader, StatusBadge } from '../../components';
 import { getYardName, type YardCode } from '../../domain/aggregates/YardRegistry';
 import { usePermissions } from '../../hooks/usePermissions';
 import { usePatio } from '../../hooks/usePatio';
 
 export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.Element {
-  const { tema, styles, dadosFormulario, usuarioLogado } = props;
+  const { tema, styles, usuarioLogado } = props;
   const { isGestor, isInspetor } = usePermissions(usuarioLogado);
-  const { patiosAtivos, criarPatio: criarPatioHook, editarCategoriasPatio } = usePatio();
+  const { patiosAtivos, criarPatio: criarPatioHook, editarCategoriasPatio, editarAmvsPatio } = usePatio();
   const canSelectYard = isGestor || isInspetor;
   const allowedYards: string[] = usuarioLogado?.allowedYards || [usuarioLogado?.primaryYard || ''];
   const defaultYard = (usuarioLogado?.primaryYard || 'VFZ') as YardCode;
@@ -30,9 +30,10 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
   const [novoPatConfirm, setNovoPatConfirm] = useState(false);
   const [novoPatSucesso, setNovoPatSucesso] = useState<string | null>(null);
 
-  // ── Category Editing State ──
+  // ── Category + AMV Editing State ──
   const [editingYard, setEditingYard] = useState<string | null>(null);
   const [categoriasEditadas, setCategoriasEditadas] = useState<Record<string, CategoriaPatio[]>>({});
+  const [amvsEditados, setAmvsEditados] = useState<Record<string, AMV[]>>({});
   const [editErro, setEditErro] = useState<string | null>(null);
 
   const patioSelecionado = patiosAtivos.find(p => p.codigo === selectedYard);
@@ -40,6 +41,9 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
   const categoriasExibidas = isEditing
     ? (categoriasEditadas[selectedYard] || [])
     : (patioSelecionado?.categorias || []);
+  const amvsExibidos = isEditing
+    ? (amvsEditados[selectedYard] || patioSelecionado?.amvs || [])
+    : (patioSelecionado?.amvs || []);
 
   // ── Editing lifecycle ──
   const iniciarEdicao = useCallback((codigoPatio: string) => {
@@ -47,6 +51,7 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
     if (!patio) return;
     const cats = patio.categorias || [{ id: `${codigoPatio}-geral`, nome: 'Geral', linhas: patio.linhas || [] }];
     setCategoriasEditadas(prev => ({ ...prev, [codigoPatio]: JSON.parse(JSON.stringify(cats)) }));
+    setAmvsEditados(prev => ({ ...prev, [codigoPatio]: JSON.parse(JSON.stringify(patio.amvs || [])) }));
     setEditingYard(codigoPatio);
     setEditErro(null);
   }, [patiosAtivos]);
@@ -54,6 +59,7 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
   const cancelarEdicao = useCallback(() => {
     if (editingYard) {
       setCategoriasEditadas(prev => { const n = { ...prev }; delete n[editingYard]; return n; });
+      setAmvsEditados(prev => { const n = { ...prev }; delete n[editingYard]; return n; });
     }
     setEditingYard(null);
     setEditErro(null);
@@ -80,21 +86,24 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
       setEditErro('O pátio deve ter pelo menos 1 linha.');
       return;
     }
+    const amvs = amvsEditados[editingYard] || [];
     const confirmado = window.confirm(
       `Confirma as alterações no pátio ${editingYard}?\n\n` +
-      `${cats.length} categoria(s), ${totalLinhas} linha(s) total.`
+      `${cats.length} categoria(s), ${totalLinhas} linha(s), ${amvs.length} AMV(s).`
     );
     if (!confirmado) return;
     const linhasFlat = cats.flatMap(c => c.linhas);
     const result = editarCategoriasPatio(editingYard, cats, linhasFlat);
     if (result.ok) {
+      editarAmvsPatio(editingYard, amvs);
       setEditingYard(null);
       setCategoriasEditadas(prev => { const n = { ...prev }; delete n[editingYard]; return n; });
+      setAmvsEditados(prev => { const n = { ...prev }; delete n[editingYard]; return n; });
       setEditErro(null);
     } else {
       setEditErro(result.erro || 'Erro ao salvar.');
     }
-  }, [editingYard, categoriasEditadas, editarCategoriasPatio, usuarioLogado]);
+  }, [editingYard, categoriasEditadas, amvsEditados, editarCategoriasPatio, editarAmvsPatio, usuarioLogado]);
 
   // ── Category CRUD ──
   const updateNomeCategoria = useCallback((catIdx: number, nome: string) => {
@@ -168,6 +177,35 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
       return { ...prev, [editingYard]: cats };
     });
   }, [editingYard, categoriasEditadas]);
+
+  // ── AMV CRUD ──
+  const updateAmv = useCallback((amvIdx: number, campo: keyof AMV, valor: string) => {
+    if (!editingYard) return;
+    setAmvsEditados(prev => {
+      const amvs = [...(prev[editingYard] || [])];
+      amvs[amvIdx] = { ...amvs[amvIdx], [campo]: valor };
+      return { ...prev, [editingYard]: amvs };
+    });
+  }, [editingYard]);
+
+  const removerAmv = useCallback((amvIdx: number) => {
+    if (!editingYard) return;
+    setAmvsEditados(prev => {
+      const amvs = [...(prev[editingYard] || [])];
+      amvs.splice(amvIdx, 1);
+      return { ...prev, [editingYard]: amvs };
+    });
+  }, [editingYard]);
+
+  const adicionarAmv = useCallback(() => {
+    if (!editingYard) return;
+    setAmvsEditados(prev => {
+      const amvs = [...(prev[editingYard] || [])];
+      const nextNum = amvs.length + 1;
+      amvs.push({ id: `AMV-${String(nextNum).padStart(2, '0')}`, posicao: 'normal', observacao: '' });
+      return { ...prev, [editingYard]: amvs };
+    });
+  }, [editingYard]);
 
   // ── Create Patio ──
   const handleCriarPatio = useCallback(() => {
@@ -313,7 +351,7 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
                 background: isEditing ? 'rgba(0,126,122,0.1)' : 'transparent',
                 color: isEditing ? '#007e7a' : tema.texto, minHeight: 36,
               }}>
-                {isEditing ? 'Salvar Alterações' : 'Editar Linhas'}
+                {isEditing ? 'Salvar Alterações' : 'Editar Pátio'}
               </button>
             )}
             {isEditing && (
@@ -450,27 +488,87 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
           {categoriasExibidas.length === 0 && !isEditing && (
             <div style={{ padding: '20px', textAlign: 'center', color: tema.textoSecundario, fontSize: 13, border: `1px dashed ${tema.cardBorda}`, borderRadius: 8 }}>
               Nenhuma categoria cadastrada neste pátio.
-              {canEditSelectedYard && ' Clique em "Editar Linhas" para adicionar.'}
+              {canEditSelectedYard && ' Clique em "Editar Pátio" para adicionar.'}
             </div>
           )}
         </div>
       )}
 
       {/* AMVs */}
-      <Card title="⚙️ AMVs" styles={styles}>
-        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
-          {dadosFormulario.layoutPatio.amvs.map((amv) => (
-            <div key={amv.id} style={{
-              padding: '12px 20px', borderRadius: '20px',
-              background: amv.posicao === 'normal' ? `${tema.sucesso}18` : `${tema.aviso}18`,
-              border: `2px solid ${amv.posicao === 'normal' ? tema.sucesso : tema.aviso}`,
-              fontSize: '12px', fontWeight: 600, color: tema.texto,
-            }}>
-              {amv.id}: {amv.posicao.toUpperCase()}
-            </div>
-          ))}
+      <div style={{ marginBottom: 20 }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8,
+          padding: '8px 14px', borderRadius: 8,
+          background: `${tema.primaria}08`, borderLeft: `4px solid ${tema.primaria}`,
+        }}>
+          <h4 style={{ margin: 0, flex: 1, fontSize: 14, fontWeight: 700, color: tema.texto }}>
+            ⚙️ AMVs (Aparelhos de Mudança de Via)
+          </h4>
+          <span style={{ fontSize: 12, color: tema.textoSecundario }}>
+            {amvsExibidos.length} AMV(s)
+          </span>
         </div>
-      </Card>
+
+        {/* View mode: badges */}
+        {!isEditing && (
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'center', padding: '12px 0' }}>
+            {amvsExibidos.length > 0 ? amvsExibidos.map((amv) => (
+              <div key={amv.id} style={{
+                padding: '12px 20px', borderRadius: 20,
+                background: amv.posicao === 'normal' ? `${tema.sucesso}18` : `${tema.aviso}18`,
+                border: `2px solid ${amv.posicao === 'normal' ? tema.sucesso : tema.aviso}`,
+                fontSize: 12, fontWeight: 600, color: tema.texto,
+              }} title={amv.observacao || undefined}>
+                {amv.id}: {amv.posicao.toUpperCase()}
+                {amv.observacao && <span style={{ marginLeft: 6, fontSize: 11, color: tema.textoSecundario }}>({amv.observacao})</span>}
+              </div>
+            )) : (
+              <div style={{ fontSize: 13, color: tema.textoSecundario }}>Nenhum AMV cadastrado.</div>
+            )}
+          </div>
+        )}
+
+        {/* Edit mode: grid */}
+        {isEditing && (
+          <>
+            {amvsExibidos.length > 0 && (
+              <div style={{
+                display: 'grid', gridTemplateColumns: '140px 130px 1fr 44px',
+                gap: 8, padding: '0 14px 6px', fontSize: 11, fontWeight: 600,
+                color: tema.textoSecundario, textTransform: 'uppercase',
+              }}>
+                <span>Código</span><span>Posição</span><span>Observação</span><span></span>
+              </div>
+            )}
+            {amvsExibidos.map((amv, amvIdx) => (
+              <div key={amvIdx} style={{
+                display: 'grid', gridTemplateColumns: '140px 130px 1fr 44px',
+                gap: 8, alignItems: 'center', padding: '10px 14px',
+                borderRadius: 8, marginBottom: 4,
+                border: `1px solid ${tema.cardBorda}`, background: tema.backgroundSecundario,
+              }}>
+                <input value={amv.id} onChange={e => updateAmv(amvIdx, 'id', e.target.value)} style={inputStyle} placeholder="AMV-01" />
+                <select value={amv.posicao} onChange={e => updateAmv(amvIdx, 'posicao', e.target.value)} style={selectStyle}>
+                  <option value="normal">Normal</option>
+                  <option value="reversa">Reversa</option>
+                </select>
+                <input value={amv.observacao} onChange={e => updateAmv(amvIdx, 'observacao', e.target.value)} style={inputStyle} placeholder="Observação (opcional)" />
+                <button onClick={() => removerAmv(amvIdx)} style={{
+                  padding: '4px 8px', borderRadius: 6, border: '1px solid #dc2626',
+                  background: 'transparent', color: '#dc2626', fontSize: 14, cursor: 'pointer', fontWeight: 700, lineHeight: 1, minHeight: 32,
+                }} title="Remover AMV">×</button>
+              </div>
+            ))}
+            <button onClick={adicionarAmv} style={{
+              width: '100%', padding: '8px', borderRadius: 8, marginTop: 4,
+              border: `2px dashed ${tema.cardBorda}`, background: 'transparent',
+              color: tema.textoSecundario, fontSize: 12, cursor: 'pointer', fontWeight: 600,
+            }}>
+              + Adicionar AMV
+            </button>
+          </>
+        )}
+      </div>
 
       <style>{`
         @media (max-width: 768px) {

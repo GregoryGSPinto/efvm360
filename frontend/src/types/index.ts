@@ -627,6 +627,7 @@ export interface PatioInfo {
   criadoPor?: string;
   linhas?: LinhaPatioInfo[];
   categorias?: CategoriaPatio[];
+  amvs?: AMV[];
 }
 
 // Re-exportar tipos do dashboard

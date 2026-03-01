@@ -4,23 +4,34 @@
 // ============================================================================
 
 import { useState, useCallback, useMemo } from 'react';
-import type { PatioInfo, LinhaPatioInfo, CategoriaPatio } from '../types';
+import type { PatioInfo, LinhaPatioInfo, CategoriaPatio, AMV } from '../types';
 import { STORAGE_KEYS, PATIOS_PADRAO } from '../utils/constants';
 import { provisionarUsuariosPatio } from '../services/patioProvisioning';
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 
+const DEFAULT_AMVS: AMV[] = [
+  { id: 'AMV-01', posicao: 'normal', observacao: '' },
+  { id: 'AMV-02', posicao: 'normal', observacao: '' },
+  { id: 'AMV-03', posicao: 'normal', observacao: '' },
+  { id: 'AMV-04', posicao: 'normal', observacao: '' },
+];
+
 function normalizarPatio(patio: PatioInfo): PatioInfo {
+  // Seed AMVs if missing
+  const amvs = patio.amvs && patio.amvs.length > 0 ? patio.amvs : DEFAULT_AMVS;
+
   // Already has categories → keep, sync flat linhas
   if (patio.categorias && patio.categorias.length > 0) {
     const linhasFlat = patio.categorias.flatMap(c => c.linhas);
-    return { ...patio, linhas: linhasFlat };
+    return { ...patio, linhas: linhasFlat, amvs };
   }
   // Only flat linhas (legacy) → migrate to single "Geral" category
   if (patio.linhas && patio.linhas.length > 0) {
     return {
       ...patio,
       categorias: [{ id: `${patio.codigo}-geral`, nome: 'Geral', linhas: patio.linhas }],
+      amvs,
     };
   }
   // Nothing → create default structure
@@ -31,6 +42,7 @@ function normalizarPatio(patio: PatioInfo): PatioInfo {
       { id: `${patio.codigo}-baixo`, nome: 'Pátio de Baixo', linhas: [] },
     ],
     linhas: [],
+    amvs,
   };
 }
 
@@ -195,6 +207,16 @@ export function usePatio() {
     return { ok: true };
   }, []);
 
+  const editarAmvsPatio = useCallback((codigo: string, amvs: AMV[]): { ok: boolean; erro?: string } => {
+    const atuais = carregarPatios();
+    const idx = atuais.findIndex(p => p.codigo === codigo);
+    if (idx === -1) return { ok: false, erro: 'Pátio não encontrado' };
+    atuais[idx] = { ...atuais[idx], amvs, atualizadoEm: new Date().toISOString() };
+    persistirPatios(atuais);
+    setPatios(atuais);
+    return { ok: true };
+  }, []);
+
   const removerLinha = useCallback((codigoPatio: string, indexLinha: number): { ok: boolean } => {
     const atuais = carregarPatios();
     const idx = atuais.findIndex(p => p.codigo === codigoPatio);
@@ -220,6 +242,7 @@ export function usePatio() {
     editarLinha,
     editarLinhasPatio,
     editarCategoriasPatio,
+    editarAmvsPatio,
     removerLinha,
   };
 }
