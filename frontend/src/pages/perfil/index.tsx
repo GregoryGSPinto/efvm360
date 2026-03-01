@@ -12,6 +12,8 @@ import { getYardName, type YardCode } from '../../domain/aggregates/YardRegistry
 import { getTeamForUser } from '../../services/teamPerformanceService';
 import { FUNCOES_USUARIO, TURNOS_LETRAS, STORAGE_KEYS } from '../../utils/constants';
 import { useI18n } from '../../hooks/useI18n';
+import { useMinhaEquipe, useTodasEquipes, isAdminGlobal, type MembroEquipe, type EquipePatio } from '../../hooks/useEquipe';
+import { ALL_YARD_CODES } from '../../domain/aggregates/YardRegistry';
 
 interface PaginaPerfilProps {
   tema: TemaEstilos;
@@ -58,6 +60,12 @@ export default function PaginaPerfil({
   }, [userRanking, usuarioLogado?.matricula]);
 
   const { t, locale } = useI18n();
+
+  // ── Equipe do pátio ──
+  const isAdmin = isAdminGlobal(usuarioLogado?.matricula);
+  const minhaEquipe = useMinhaEquipe(usuarioLogado);
+  const todasEquipes = useTodasEquipes();
+  const [adminPatioSelecionado, setAdminPatioSelecionado] = useState(0);
 
   const score = myPerformance?.overallScore || 0;
   const funcaoLabel = FUNCOES_USUARIO.find(f => f.value === usuarioLogado?.funcao)?.label || usuarioLogado?.funcao || '';
@@ -311,6 +319,177 @@ export default function PaginaPerfil({
           </div>
         </div>
       </Card>
+
+      {/* ── Minha Equipe — Árvore Hierárquica ── */}
+      {(() => {
+        const corFuncao = (funcao: string): string => {
+          switch (funcao) {
+            case 'gestor': return '#22c55e';
+            case 'inspetor': return '#3b82f6';
+            case 'maquinista': return '#eab308';
+            case 'oficial': return '#f97316';
+            default: return '#6b7280';
+          }
+        };
+
+        const CardMembro = ({ membro, isCurrentUser }: { membro: MembroEquipe; isCurrentUser: boolean }) => (
+          <div style={{
+            padding: '10px 14px', borderRadius: 10,
+            background: isCurrentUser ? `${tema.primaria}15` : `${tema.texto}06`,
+            border: isCurrentUser ? `2px solid ${tema.primaria}` : `1px solid ${tema.texto}10`,
+            display: 'flex', alignItems: 'center', gap: 10, position: 'relative',
+          }}>
+            {isCurrentUser && (
+              <span style={{
+                position: 'absolute', top: -8, right: 10,
+                fontSize: 9, padding: '1px 8px', borderRadius: 999,
+                background: tema.primaria, color: '#fff', fontWeight: 700,
+              }}>{'VOC\u00CA'}</span>
+            )}
+            <div style={{
+              width: 36, height: 36, borderRadius: '50%',
+              background: corFuncao(membro.funcao),
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#fff', fontWeight: 700, fontSize: 14, flexShrink: 0,
+            }}>
+              {membro.nome.charAt(0)}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 600, fontSize: 13, color: tema.texto, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {membro.nome}
+              </div>
+              <div style={{ fontSize: 11, color: tema.textoSecundario }}>
+                {membro.matricula} {membro.turno ? `· Turno ${membro.turno}` : ''}
+              </div>
+            </div>
+          </div>
+        );
+
+        const ArvoreEquipe = ({ equipe }: { equipe: EquipePatio }) => {
+          if (equipe.totalMembros === 0) return null;
+          const mat = usuarioLogado?.matricula || '';
+
+          return (
+            <div style={{
+              margin: '0 0 16px', padding: 20, borderRadius: 16,
+              background: `${tema.texto}04`, border: `1px solid ${tema.texto}10`,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                <span style={{ fontSize: 20 }}>🏭</span>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 15, color: tema.texto }}>
+                    {equipe.nomePatio}
+                  </div>
+                  <div style={{ fontSize: 11, color: tema.textoSecundario }}>
+                    {equipe.codigoPatio} · {equipe.totalMembros} membro{equipe.totalMembros !== 1 ? 's' : ''}
+                  </div>
+                </div>
+              </div>
+
+              {/* Gestor */}
+              {equipe.gestor && (
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: '#22c55e', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>
+                    🟢 Gestor
+                  </div>
+                  <CardMembro membro={equipe.gestor} isCurrentUser={equipe.gestor.matricula === mat} />
+                </div>
+              )}
+
+              {/* Nível inspetor */}
+              <div style={{ borderLeft: `2px solid ${tema.texto}15`, marginLeft: 18, paddingLeft: 20 }}>
+                {equipe.inspetores.length > 0 && (
+                  <div style={{ marginBottom: 12 }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: '#3b82f6', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>
+                      🔵 Inspetor{equipe.inspetores.length > 1 ? 'es' : ''}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {equipe.inspetores.map(i => (
+                        <CardMembro key={i.matricula} membro={i} isCurrentUser={i.matricula === mat} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Nível maquinistas + oficiais */}
+                <div style={{ borderLeft: `2px solid ${tema.texto}10`, marginLeft: 18, paddingLeft: 20 }}>
+                  {equipe.maquinistas.length > 0 && (
+                    <div style={{ marginBottom: 12 }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: '#eab308', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>
+                        🟡 Maquinistas ({equipe.maquinistas.length})
+                      </div>
+                      {['A', 'B', 'C', 'D'].map(turno => {
+                        const doTurno = equipe.maquinistas.filter(m => m.turno === turno);
+                        if (doTurno.length === 0) return null;
+                        return (
+                          <div key={turno} style={{ marginBottom: 8 }}>
+                            <div style={{ fontSize: 9, color: tema.textoSecundario, marginBottom: 4, fontWeight: 600, textTransform: 'uppercase' }}>
+                              Turno {turno}
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                              {doTurno.map(m => (
+                                <CardMembro key={m.matricula} membro={m} isCurrentUser={m.matricula === mat} />
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {equipe.oficiais.length > 0 && (
+                    <div style={{ marginBottom: 12 }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: '#f97316', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>
+                        🟠 Oficial{equipe.oficiais.length > 1 ? 'is' : ''} ({equipe.oficiais.length})
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        {equipe.oficiais.map(o => (
+                          <CardMembro key={o.matricula} membro={o} isCurrentUser={o.matricula === mat} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        // Admin: show all yards with selector
+        if (isAdmin) {
+          return (
+            <Card title="👥 Equipes — Todos os Pátios" styles={styles}>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+                {ALL_YARD_CODES.map((code, idx) => (
+                  <button key={code} onClick={() => setAdminPatioSelecionado(idx)} style={{
+                    padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600,
+                    border: adminPatioSelecionado === idx ? `2px solid ${tema.primaria}` : `1px solid ${tema.cardBorda}`,
+                    background: adminPatioSelecionado === idx ? `${tema.primaria}15` : tema.backgroundSecundario,
+                    color: adminPatioSelecionado === idx ? tema.primaria : tema.texto,
+                    cursor: 'pointer',
+                  }}>
+                    {code}
+                  </button>
+                ))}
+              </div>
+              {todasEquipes[adminPatioSelecionado] && (
+                <ArvoreEquipe equipe={todasEquipes[adminPatioSelecionado]} />
+              )}
+            </Card>
+          );
+        }
+
+        // Regular user: show own yard
+        if (minhaEquipe && minhaEquipe.totalMembros > 0) {
+          return (
+            <Card title="👥 Minha Equipe" styles={styles}>
+              <ArvoreEquipe equipe={minhaEquipe} />
+            </Card>
+          );
+        }
+
+        return null;
+      })()}
 
       {/* ── Identificação Pessoal ── */}
       <Card title="📋 Identificação Pessoal" styles={styles}>

@@ -27,7 +27,7 @@ import {
 // ============================================================================
 
 const SESSION_KEY = 'efvm360-session-auth';
-const SEED_FLAG = 'efvm360-seed-v6'; // v6: 36 usuários multi-pátio via seedCredentials
+const SEED_FLAG = 'efvm360-seed-v7'; // v7: nomes completos P6/VTO/VCS + admin renomeado
 
 // ── Seed delegado ao seedCredentials ──────────────────────────────────
 import { seedCredentials } from '../services/seedCredentials';
@@ -36,7 +36,7 @@ const executarSeed = async (): Promise<void> => {
   try {
     // Limpar TODAS as flags de versões anteriores para forçar re-seed limpo
     const oldFlags = [
-      'efvm360-seed-v5', 'efvm360-seed-v4', 'efvm360-seed-v6',
+      'efvm360-seed-v5', 'efvm360-seed-v4', 'efvm360-seed-v6', 'efvm360-seed-v7',
       'vfz-seed-v4', 'vfz-seed-v3', 'vfz-seed-v2', 'vfz-seed-v1', 'vfz-seed-applied',
     ];
 

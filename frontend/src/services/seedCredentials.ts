@@ -1,6 +1,6 @@
 // ============================================================================
-// EFVM PÁTIO 360 — Seed de Credenciais v6
-// 36 operadores: 7 por pátio × 5 pátios + 1 admin global
+// EFVM PÁTIO 360 — Seed de Credenciais v7
+// 37 operadores: 7 por pátio × 5 pátios + 1 admin global + 1 suporte
 // Senha padrão: 123456
 // ============================================================================
 
@@ -10,7 +10,7 @@ import { verificarPatiosOrfaos } from './patioProvisioning';
 
 const STORAGE_KEY = 'efvm360-usuarios';
 const SEED_MARKER = 'efvm360-seed-applied';
-const SEED_VERSION = 'efvm360-seed-v6';
+const SEED_VERSION = 'efvm360-seed-v7';
 // REVIEW [SECURITY]: Hardcoded dev/test password. Must be replaced with Azure AD
 // SSO or hashed credentials before production deployment.
 const DEFAULT_PASSWORD = '123456';
@@ -47,34 +47,34 @@ const EFVM360_USERS: SeedUser[] = [
   { nome: 'Marcelo Augusto Reis',       matricula: 'VBR3001', funcao: 'gestor',                                         primaryYard: 'VBR' },
 
   // ═══ VCS — Pátio de Costa Lacerda ═══
-  { nome: 'Wellington Silva Moreira',   matricula: 'VCS1001', funcao: 'maquinista', turno: 'A', horarioTurno: '07-19', primaryYard: 'VCS' },
-  { nome: 'Rodrigo Alves Pereira',      matricula: 'VCS1002', funcao: 'maquinista', turno: 'A', horarioTurno: '07-19', primaryYard: 'VCS' },
-  { nome: 'Fábio Nogueira Santos',      matricula: 'VCS1003', funcao: 'maquinista', turno: 'B', horarioTurno: '19-07', primaryYard: 'VCS' },
-  { nome: 'Leandro Costa Vieira',       matricula: 'VCS1004', funcao: 'maquinista', turno: 'B', horarioTurno: '19-07', primaryYard: 'VCS' },
-  { nome: 'Eduardo Teixeira Lima',      matricula: 'VCS1005', funcao: 'oficial',    turno: 'A', horarioTurno: '07-19', primaryYard: 'VCS' },
+  { nome: 'Wellington Santos Lima',      matricula: 'VCS1001', funcao: 'maquinista', turno: 'A', horarioTurno: '07-19', primaryYard: 'VCS' },
+  { nome: 'Rodrigo Alves Moreira',      matricula: 'VCS1002', funcao: 'maquinista', turno: 'A', horarioTurno: '07-19', primaryYard: 'VCS' },
+  { nome: 'Fábio Henrique Cruz',        matricula: 'VCS1003', funcao: 'maquinista', turno: 'B', horarioTurno: '19-07', primaryYard: 'VCS' },
+  { nome: 'Leandro Souza Ramos',        matricula: 'VCS1004', funcao: 'maquinista', turno: 'B', horarioTurno: '19-07', primaryYard: 'VCS' },
+  { nome: 'Eduardo Martins Prado',      matricula: 'VCS1005', funcao: 'oficial',    turno: 'A', horarioTurno: '07-19', primaryYard: 'VCS' },
   { nome: 'Fernando Costa Oliveira',    matricula: 'VCS2001', funcao: 'inspetor',                                       primaryYard: 'VCS' },
   { nome: 'Sérgio Magalhães Junior',    matricula: 'VCS3001', funcao: 'gestor',                                         primaryYard: 'VCS' },
 
   // ═══ P6 — Pátio Pedro Nolasco ═══
-  { nome: 'Adriano Batista Correia',    matricula: 'P61001',  funcao: 'maquinista', turno: 'A', horarioTurno: '07-19', primaryYard: 'P6' },
-  { nome: 'Vinícius Araújo Moura',      matricula: 'P61002',  funcao: 'maquinista', turno: 'A', horarioTurno: '07-19', primaryYard: 'P6' },
-  { nome: 'Renato Ferreira Lopes',      matricula: 'P61003',  funcao: 'maquinista', turno: 'B', horarioTurno: '19-07', primaryYard: 'P6' },
-  { nome: 'Cláudio Pereira Duarte',     matricula: 'P61004',  funcao: 'maquinista', turno: 'B', horarioTurno: '19-07', primaryYard: 'P6' },
-  { nome: 'Márcio Ramos Fonseca',       matricula: 'P61005',  funcao: 'oficial',    turno: 'A', horarioTurno: '07-19', primaryYard: 'P6' },
+  { nome: 'Adriano Pereira Nunes',      matricula: 'P61001',  funcao: 'maquinista', turno: 'A', horarioTurno: '07-19', primaryYard: 'P6' },
+  { nome: 'Vinícius Campos Batista',    matricula: 'P61002',  funcao: 'maquinista', turno: 'A', horarioTurno: '07-19', primaryYard: 'P6' },
+  { nome: 'Renato Gonçalves Duarte',    matricula: 'P61003',  funcao: 'maquinista', turno: 'B', horarioTurno: '19-07', primaryYard: 'P6' },
+  { nome: 'Cláudio Azevedo Freitas',    matricula: 'P61004',  funcao: 'maquinista', turno: 'B', horarioTurno: '19-07', primaryYard: 'P6' },
+  { nome: 'Márcio Tavares Borges',      matricula: 'P61005',  funcao: 'oficial',    turno: 'A', horarioTurno: '07-19', primaryYard: 'P6' },
   { nome: 'José Ricardo Andrade',       matricula: 'P62001',  funcao: 'inspetor',                                       primaryYard: 'P6' },
   { nome: 'Antonio Marcos Cardoso',     matricula: 'P63001',  funcao: 'gestor',                                         primaryYard: 'P6' },
 
   // ═══ VTO — Pátio de Tubarão ═══
-  { nome: 'Daniel Gomes Freitas',       matricula: 'VTO1001', funcao: 'maquinista', turno: 'A', horarioTurno: '07-19', primaryYard: 'VTO' },
-  { nome: 'Michel Santos Prado',        matricula: 'VTO1002', funcao: 'maquinista', turno: 'A', horarioTurno: '07-19', primaryYard: 'VTO' },
-  { nome: 'Felipe Nunes Barros',        matricula: 'VTO1003', funcao: 'maquinista', turno: 'B', horarioTurno: '19-07', primaryYard: 'VTO' },
-  { nome: 'Henrique Campos Melo',       matricula: 'VTO1004', funcao: 'maquinista', turno: 'B', horarioTurno: '19-07', primaryYard: 'VTO' },
-  { nome: 'Rogério Almeida Cunha',      matricula: 'VTO1005', funcao: 'oficial',    turno: 'A', horarioTurno: '07-19', primaryYard: 'VTO' },
+  { nome: 'Daniel Fonseca Araújo',      matricula: 'VTO1001', funcao: 'maquinista', turno: 'A', horarioTurno: '07-19', primaryYard: 'VTO' },
+  { nome: 'Michel Barbosa Lopes',       matricula: 'VTO1002', funcao: 'maquinista', turno: 'A', horarioTurno: '07-19', primaryYard: 'VTO' },
+  { nome: 'Felipe Correia Monteiro',    matricula: 'VTO1003', funcao: 'maquinista', turno: 'B', horarioTurno: '19-07', primaryYard: 'VTO' },
+  { nome: 'Henrique Pires Machado',     matricula: 'VTO1004', funcao: 'maquinista', turno: 'B', horarioTurno: '19-07', primaryYard: 'VTO' },
+  { nome: 'Rogério Damasceno Viana',    matricula: 'VTO1005', funcao: 'oficial',    turno: 'A', horarioTurno: '07-19', primaryYard: 'VTO' },
   { nome: 'Gilberto Souza Braga',       matricula: 'VTO2001', funcao: 'inspetor',                                       primaryYard: 'VTO' },
   { nome: 'Osvaldo Ramos Teixeira',     matricula: 'VTO3001', funcao: 'gestor',                                         primaryYard: 'VTO' },
 
   // ═══ GESTOR GLOBAL (antigo admin) ═══
-  { nome: 'Gregory Gestor',             matricula: 'ADM9001', funcao: 'gestor',                                         primaryYard: 'VFZ' },
+  { nome: 'Gregory Administrador',      matricula: 'ADM9001', funcao: 'gestor',                                         primaryYard: 'VFZ' },
 
   // ═══ SUPORTE TÉCNICO ═══
   { nome: 'Suporte Tecnico',            matricula: 'SUP0001', funcao: 'suporte',                                        primaryYard: 'VFZ', senha: 'suporte360' },
