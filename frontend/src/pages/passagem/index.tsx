@@ -16,6 +16,7 @@ import { usePatio } from '../../hooks/usePatio';
 import { useEquipamentos } from '../../hooks/useEquipamentos';
 import type { StylesObject } from '../../hooks/useStyles';
 import { validarSecao, gerarResumoCopilot, type AlertaCopilot, type ResumoCopilot } from '../../components/AdamBot/AdamBotCopilot';
+import { useAdamBotContext } from '../../components/AdamBot/AdamBotContext';
 
 // ── ItemSegurancaSimNao — Extracted to avoid inline re-creation ──────
 interface ItemSegurancaSimNaoProps {
@@ -149,6 +150,7 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
   const [copilotResumo, setCopilotResumo] = useState<ResumoCopilot | null>(null);
   const [copilotMinimizado, setCopilotMinimizado] = useState(false);
   const secaoAnteriorRef = useRef<string>(secaoFormulario);
+  const { addBotMessage } = useAdamBotContext();
 
   // Auto-scroll active section tab into view
   useEffect(() => {
@@ -169,6 +171,16 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
     const alertas = validarSecao(secaoSaindo, dadosFormulario);
     setCopilotAlertas(alertas);
 
+    // Inject alerts into AdamBot chat
+    if (alertas.length > 0) {
+      const bloqueantes = alertas.filter(a => a.nivel === 'bloqueante');
+      const avisos = alertas.filter(a => a.nivel === 'aviso');
+      let msg = '🤖 **Copiloto** — Validação da seção anterior:\n';
+      bloqueantes.forEach(a => { msg += `\n🔴 ${a.mensagem}`; });
+      avisos.forEach(a => { msg += `\n🟡 ${a.mensagem}`; });
+      addBotMessage(msg);
+    }
+
     const bloqueante = alertas.find(a => a.nivel === 'bloqueante');
     if (bloqueante && 'speechSynthesis' in window) {
       const utt = new SpeechSynthesisUtterance(bloqueante.mensagemVoz);
@@ -181,6 +193,14 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
       const secoesIds = SECOES_FORMULARIO.map(s => s.id);
       const resumo = gerarResumoCopilot(dadosFormulario, secoesIds);
       setCopilotResumo(resumo);
+
+      // Inject resumo into AdamBot chat
+      let msgResumo = `🤖 **Resumo do Copiloto** — ${resumo.pronto ? 'PRONTO P/ ASSINAR ✅' : `${resumo.alertasBloqueantes} BLOQUEANTE(S) 🔴`}\n`;
+      msgResumo += `${resumo.secoesCompletas}/${resumo.secoesTotal} seções OK`;
+      if (resumo.alertasAviso > 0) msgResumo += ` · ${resumo.alertasAviso} aviso(s)`;
+      msgResumo += `\n\n${resumo.texto}`;
+      addBotMessage(msgResumo);
+
       if ('speechSynthesis' in window) {
         const utt = new SpeechSynthesisUtterance(resumo.textoVoz);
         utt.lang = 'pt-BR';
@@ -193,7 +213,7 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
 
     const timer = setTimeout(() => setCopilotAlertas([]), 8000);
     return () => clearTimeout(timer);
-  }, [secaoFormulario, dadosFormulario]);
+  }, [secaoFormulario, dadosFormulario, addBotMessage]);
 
   // Reset copilot minimizado ao mudar de seção
   useEffect(() => {

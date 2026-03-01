@@ -10,6 +10,7 @@ import { GaugeCircular, StatCard, AlertaCard, ProgressBar } from '../../componen
 import { ROUTES } from '../../router/routes';
 import { useBriefingData } from '../../components/AdamBot/useBriefingData';
 import { gerarBriefing, type ResultadoBriefing } from '../../components/AdamBot/AdamBotBriefing';
+import { useAdamBotContext } from '../../components/AdamBot/AdamBotContext';
 import {
   Sun, Moon, Calendar, TrainFront, MessageCircle, FileText,
   AlertTriangle, CheckCircle, ClipboardList, FolderOpen, ArrowRight, BarChart3,
@@ -148,6 +149,7 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
   const dadosBriefing = useBriefingData();
   const [briefingEntregue, setBriefingEntregue] = useState(false);
   const [ultimoBriefing, setUltimoBriefing] = useState<ResultadoBriefing | null>(null);
+  const { addBotMessage } = useAdamBotContext();
 
   useEffect(() => {
     if (briefingEntregue) return;
@@ -155,6 +157,12 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
       const resultado = gerarBriefing(dadosBriefing);
       setUltimoBriefing(resultado);
       setBriefingEntregue(true);
+
+      // Inject into AdamBot chat panel
+      const badge = resultado.severidade === 'critico' ? 'CRITICO' : resultado.severidade === 'atencao' ? 'ATENCAO' : 'ESTAVEL';
+      const msgChat = `📋 **Briefing do Turno** [${badge}]\n\n${resultado.itensDestaque.join('\n')}\n\n${resultado.severidade === 'critico' ? '⚠️ Atenção redobrada.' : resultado.severidade === 'atencao' ? '⚡ Pontos de atenção.' : '✅ Situação estável.'}`;
+      addBotMessage(msgChat);
+
       if ('speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(resultado.texto);
         utterance.lang = 'pt-BR';
@@ -163,7 +171,7 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
       }
     }, 2000);
     return () => clearTimeout(timer);
-  }, [dadosBriefing, briefingEntregue]);
+  }, [dadosBriefing, briefingEntregue, addBotMessage]);
 
   // ── Derived state ─────────────────────────────────────────────────────
 

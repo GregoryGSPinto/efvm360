@@ -35,6 +35,7 @@ interface AdamBotContextValue {
   clearHistory: () => void;
   executeAction: (action: AdamAction) => void;
   dismissNotification: (id: string) => void;
+  addBotMessage: (texto: string) => void;
 }
 
 const AdamBotCtx = createContext<AdamBotContextValue | null>(null);
@@ -197,13 +198,23 @@ export function AdamBotProvider({ children, contexto, executors }: AdamBotProvid
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, lida: true } : n));
   }, []);
 
+  const addBotMessage = useCallback((texto: string) => {
+    const msg: AdamMessage = {
+      id: `msg-bot-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      role: 'adam',
+      text: texto,
+      timestamp: Date.now(),
+    };
+    setMessages(prev => [...prev, msg]);
+  }, []);
+
   const value = useMemo<AdamBotContextValue>(() => ({
     isOpen, messages, voiceOn, isListening, sugestoes, notifications, unreadCount,
     input, setInput, toggle, open, close, sendMessage, toggleVoice,
-    startListening, stopListening, clearHistory, executeAction, dismissNotification,
+    startListening, stopListening, clearHistory, executeAction, dismissNotification, addBotMessage,
   }), [isOpen, messages, voiceOn, isListening, sugestoes, notifications, unreadCount,
     input, toggle, open, close, sendMessage, toggleVoice, startListening, stopListening,
-    clearHistory, executeAction, dismissNotification]);
+    clearHistory, executeAction, dismissNotification, addBotMessage]);
 
   return <AdamBotCtx.Provider value={value}>{children}</AdamBotCtx.Provider>;
 }
