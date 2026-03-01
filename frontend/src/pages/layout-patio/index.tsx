@@ -208,23 +208,36 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
   }, [editingYard]);
 
   // ── Create Patio ──
+  const [autoEditYard, setAutoEditYard] = useState<string | null>(null);
+
   const handleCriarPatio = useCallback(() => {
     if (!novoPatConfirm) { setNovoPatConfirm(true); return; }
-    const result = criarPatioHook(novoPatCodigo, novoPatNome);
+    const codigoFinal = novoPatCodigo.trim().toUpperCase();
+    const result = criarPatioHook(codigoFinal, novoPatNome);
     if (result.ok) {
       const usuarios = result.usuariosCriados || [];
       const msg = usuarios.length > 0
-        ? `Pátio ${novoPatNome} criado!\n\nUsuários demo:\n${usuarios.map(u => `  ${u.matricula} (${u.funcao}) — senha: 123456`).join('\n')}`
-        : `Pátio ${novoPatNome} criado!`;
+        ? `Pátio ${novoPatNome} criado! Editando...\n\nUsuários demo:\n${usuarios.map(u => `  ${u.matricula} (${u.funcao}) — senha: 123456`).join('\n')}`
+        : `Pátio ${novoPatNome} criado! Editando...`;
       setNovoPatSucesso(msg);
       setShowCriarPatioModal(false);
       setNovoPatCodigo(''); setNovoPatNome(''); setNovoPatLinhas(''); setNovoPatErro(''); setNovoPatConfirm(false);
+      setSelectedYard(codigoFinal as YardCode);
+      setAutoEditYard(codigoFinal);
       setTimeout(() => setNovoPatSucesso(null), 8000);
     } else {
       setNovoPatErro(result.erro || 'Erro ao criar pátio');
       setNovoPatConfirm(false);
     }
   }, [novoPatCodigo, novoPatNome, novoPatConfirm, criarPatioHook]);
+
+  // Auto-enter edit mode after creating a new patio (waits for patiosAtivos to update)
+  useEffect(() => {
+    if (autoEditYard && patiosAtivos.some(p => p.codigo === autoEditYard)) {
+      iniciarEdicao(autoEditYard);
+      setAutoEditYard(null);
+    }
+  }, [autoEditYard, patiosAtivos, iniciarEdicao]);
 
   // ── Styles ──
   const inputStyle: React.CSSProperties = {
@@ -460,6 +473,13 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
                   )}
                 </div>
               ))}
+
+              {/* Empty category message (view mode) */}
+              {!isEditing && categoria.linhas.length === 0 && (
+                <div style={{ padding: '12px 14px', fontSize: 12, color: tema.textoSecundario, fontStyle: 'italic' }}>
+                  Nenhuma linha cadastrada nesta categoria.
+                </div>
+              )}
 
               {/* Add line to this category */}
               {isEditing && (
