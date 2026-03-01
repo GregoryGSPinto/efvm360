@@ -32,7 +32,7 @@ const BASE_NAV_ITEMS = [
   { id: 'analytics', label: 'BI+' },
   { id: 'historico', label: 'Historico' },
   { id: 'layout',    label: 'Layout' },
-  { id: 'graus-risco', label: 'Riscos' },
+  { id: 'graus-risco', label: 'Grau Risco' },
   { id: 'equipamentos', label: 'Equip.' },
 ];
 
