@@ -5,7 +5,7 @@
 
 import { useState, useCallback } from 'react';
 import type { PaginaLayoutPatioProps } from '../types';
-import type { StatusLinha } from '../../types';
+import type { StatusLinha, LinhaPatioInfo } from '../../types';
 import { SectionHeader, Card, StatusBadge } from '../../components';
 import { getYardName, type YardCode } from '../../domain/aggregates/YardRegistry';
 import { usePermissions } from '../../hooks/usePermissions';
@@ -14,8 +14,9 @@ import { usePatio } from '../../hooks/usePatio';
 export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.Element {
   const { tema, styles, dadosFormulario, usuarioLogado } = props;
   const { isGestor, isInspetor } = usePermissions(usuarioLogado);
-  const { patiosAtivos, criarPatio: criarPatioHook } = usePatio();
+  const { patiosAtivos, criarPatio: criarPatioHook, editarLinhasPatio } = usePatio();
   const canSelectYard = isGestor || isInspetor;
+  const canEdit = isGestor || isInspetor;
   const defaultYard = (usuarioLogado?.primaryYard || 'VFZ') as YardCode;
   const [selectedYard, setSelectedYard] = useState<YardCode>(defaultYard);
 
@@ -28,6 +29,88 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
   const [novoPatConfirm, setNovoPatConfirm] = useState(false);
 
   const [novoPatSucesso, setNovoPatSucesso] = useState<string | null>(null);
+
+  // ── Line Editing State ──
+  const [editingYard, setEditingYard] = useState<string | null>(null);
+  const [linhasEditadas, setLinhasEditadas] = useState<Record<string, LinhaPatioInfo[]>>({});
+  const [editErro, setEditErro] = useState<string | null>(null);
+
+  const patioSelecionado = patiosAtivos.find(p => p.codigo === selectedYard);
+  const isEditing = editingYard === selectedYard;
+  const linhasExibidas = isEditing
+    ? (linhasEditadas[selectedYard] || [])
+    : (patioSelecionado?.linhas || []);
+
+  const iniciarEdicao = useCallback((codigoPatio: string, linhas: LinhaPatioInfo[]) => {
+    setLinhasEditadas(prev => ({ ...prev, [codigoPatio]: JSON.parse(JSON.stringify(linhas)) }));
+    setEditingYard(codigoPatio);
+    setEditErro(null);
+  }, []);
+
+  const cancelarEdicao = useCallback(() => {
+    if (editingYard) {
+      setLinhasEditadas(prev => { const n = { ...prev }; delete n[editingYard]; return n; });
+    }
+    setEditingYard(null);
+    setEditErro(null);
+  }, [editingYard]);
+
+  const salvarEdicaoLinhas = useCallback(() => {
+    if (!editingYard) return;
+    const linhas = linhasEditadas[editingYard];
+    if (!linhas || linhas.length === 0) {
+      setEditErro('O pátio deve ter pelo menos 1 linha.');
+      return;
+    }
+
+    const confirmado = window.confirm(
+      `Confirma as alterações nas linhas do pátio ${editingYard}?\n\n` +
+      `${linhas.length} linha(s) serão salvas.`
+    );
+    if (!confirmado) return;
+
+    const result = editarLinhasPatio(editingYard, linhas);
+    if (result.ok) {
+      setEditingYard(null);
+      setLinhasEditadas(prev => { const n = { ...prev }; delete n[editingYard]; return n; });
+      setEditErro(null);
+    } else {
+      setEditErro(result.erro || 'Erro ao salvar linhas.');
+    }
+  }, [editingYard, linhasEditadas, editarLinhasPatio]);
+
+  const updateLinha = useCallback((index: number, campo: keyof LinhaPatioInfo, valor: string | number) => {
+    if (!editingYard) return;
+    setLinhasEditadas(prev => {
+      const linhas = [...(prev[editingYard] || [])];
+      linhas[index] = { ...linhas[index], [campo]: valor };
+      return { ...prev, [editingYard]: linhas };
+    });
+  }, [editingYard]);
+
+  const removerLinhaLocal = useCallback((index: number) => {
+    if (!editingYard) return;
+    setLinhasEditadas(prev => {
+      const linhas = [...(prev[editingYard] || [])];
+      linhas.splice(index, 1);
+      return { ...prev, [editingYard]: linhas };
+    });
+  }, [editingYard]);
+
+  const adicionarLinhaLocal = useCallback(() => {
+    if (!editingYard) return;
+    const linhas = linhasEditadas[editingYard] || [];
+    const novaLinha: LinhaPatioInfo = {
+      nome: `Linha ${linhas.length + 1}`,
+      status: 'livre',
+      comprimento: 500,
+      capacidade: 80,
+    };
+    setLinhasEditadas(prev => ({
+      ...prev,
+      [editingYard]: [...(prev[editingYard] || []), novaLinha],
+    }));
+  }, [editingYard, linhasEditadas]);
 
   const handleCriarPatio = useCallback(() => {
     if (!novoPatConfirm) {
@@ -65,6 +148,16 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
           : `${tema.perigo}12`,
       border: `2px solid ${status === 'livre' ? tema.sucesso : status === 'ocupada' ? tema.aviso : tema.perigo}35`,
     });
+
+    const inputStyle: React.CSSProperties = {
+      padding: '6px 10px', borderRadius: 6, border: `1px solid ${tema.cardBorda}`,
+      background: tema.card, color: tema.texto, fontSize: 13, width: '100%', boxSizing: 'border-box',
+    };
+
+    const selectStyle: React.CSSProperties = {
+      padding: '6px 8px', borderRadius: 6, border: `1px solid ${tema.cardBorda}`,
+      background: tema.card, color: tema.texto, fontSize: 12, cursor: 'pointer', width: '100%', boxSizing: 'border-box',
+    };
 
     return (
       <>
@@ -206,6 +299,185 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
           ))}
         </div>
 
+        {/* ── Linhas do Pátio (PatioInfo.linhas — editable by gestor/inspetor) ── */}
+        {patioSelecionado && (
+          <div style={{ marginBottom: 20 }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, flexWrap: 'wrap',
+            }}>
+              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: tema.texto }}>
+                Linhas — {patioSelecionado.nome}
+              </h3>
+              {canEdit && (
+                <button
+                  onClick={() => {
+                    if (isEditing) {
+                      salvarEdicaoLinhas();
+                    } else {
+                      iniciarEdicao(selectedYard, patioSelecionado.linhas || []);
+                    }
+                  }}
+                  style={{
+                    padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                    border: isEditing ? '2px solid #007e7a' : `1px solid ${tema.cardBorda}`,
+                    background: isEditing ? 'rgba(0,126,122,0.1)' : 'transparent',
+                    color: isEditing ? '#007e7a' : tema.texto,
+                    minHeight: 36,
+                  }}
+                >
+                  {isEditing ? 'Salvar Alterações' : 'Editar Linhas'}
+                </button>
+              )}
+              {isEditing && (
+                <button
+                  onClick={cancelarEdicao}
+                  style={{
+                    padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                    border: `1px solid ${tema.cardBorda}`, background: 'transparent', color: tema.texto,
+                    minHeight: 36,
+                  }}
+                >
+                  Cancelar
+                </button>
+              )}
+            </div>
+
+            {editErro && (
+              <div style={{
+                padding: '10px 14px', marginBottom: 12, borderRadius: 8,
+                background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)',
+                fontSize: 13, color: '#dc2626',
+              }}>
+                {editErro}
+              </div>
+            )}
+
+            {/* Column headers (desktop) */}
+            {linhasExibidas.length > 0 && (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: isEditing ? '1fr 120px 100px 100px 44px' : '1fr 120px 100px 100px',
+                gap: 8, padding: '0 14px 6px', fontSize: 11, fontWeight: 600,
+                color: tema.textoSecundario, textTransform: 'uppercase',
+              }}>
+                <span>Nome</span>
+                <span>Status</span>
+                <span>Capacidade</span>
+                <span>Comprimento</span>
+                {isEditing && <span></span>}
+              </div>
+            )}
+
+            {linhasExibidas.map((linha, index) => (
+              <div key={index} style={{
+                display: 'grid',
+                gridTemplateColumns: isEditing ? '1fr 120px 100px 100px 44px' : '1fr 120px 100px 100px',
+                gap: 8, alignItems: 'center', padding: '10px 14px',
+                borderRadius: 8, marginBottom: 6,
+                border: `1px solid ${tema.cardBorda}`,
+                background: tema.backgroundSecundario,
+              }}>
+                {/* Nome */}
+                {isEditing ? (
+                  <input
+                    value={linha.nome}
+                    onChange={e => updateLinha(index, 'nome', e.target.value)}
+                    style={inputStyle}
+                  />
+                ) : (
+                  <div style={{ fontWeight: 600, color: tema.texto, fontSize: 13 }}>
+                    {linha.nome || `Linha ${index + 1}`}
+                  </div>
+                )}
+
+                {/* Status */}
+                {isEditing ? (
+                  <select
+                    value={linha.status}
+                    onChange={e => updateLinha(index, 'status', e.target.value)}
+                    style={selectStyle}
+                  >
+                    <option value="livre">Livre</option>
+                    <option value="ocupada">Ocupada</option>
+                    <option value="interditada">Interditada</option>
+                  </select>
+                ) : (
+                  <StatusBadge status={linha.status} tema={tema} />
+                )}
+
+                {/* Capacidade */}
+                {isEditing ? (
+                  <input
+                    type="number"
+                    value={linha.capacidade}
+                    onChange={e => updateLinha(index, 'capacidade', Number(e.target.value))}
+                    min={1} max={500}
+                    style={inputStyle}
+                  />
+                ) : (
+                  <div style={{ fontSize: 12, color: tema.textoSecundario }}>
+                    {linha.capacidade} vagões
+                  </div>
+                )}
+
+                {/* Comprimento */}
+                {isEditing ? (
+                  <input
+                    type="number"
+                    value={linha.comprimento}
+                    onChange={e => updateLinha(index, 'comprimento', Number(e.target.value))}
+                    min={1} max={5000}
+                    style={inputStyle}
+                  />
+                ) : (
+                  <div style={{ fontSize: 12, color: tema.textoSecundario }}>
+                    {linha.comprimento}m
+                  </div>
+                )}
+
+                {/* Remover */}
+                {isEditing && (
+                  <button
+                    onClick={() => removerLinhaLocal(index)}
+                    style={{
+                      padding: '4px 8px', borderRadius: 6, border: '1px solid #dc2626',
+                      background: 'transparent', color: '#dc2626', fontSize: 14, cursor: 'pointer',
+                      fontWeight: 700, lineHeight: 1, minHeight: 32,
+                    }}
+                    title="Remover linha"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            ))}
+
+            {/* Add line button */}
+            {isEditing && (
+              <button
+                onClick={adicionarLinhaLocal}
+                style={{
+                  width: '100%', padding: '10px', borderRadius: 8, marginTop: 8,
+                  border: `2px dashed ${tema.cardBorda}`, background: 'transparent',
+                  color: tema.textoSecundario, fontSize: 13, cursor: 'pointer', fontWeight: 600,
+                }}
+              >
+                + Adicionar Linha
+              </button>
+            )}
+
+            {linhasExibidas.length === 0 && !isEditing && (
+              <div style={{
+                padding: '20px', textAlign: 'center', color: tema.textoSecundario, fontSize: 13,
+                border: `1px dashed ${tema.cardBorda}`, borderRadius: 8,
+              }}>
+                Nenhuma linha cadastrada neste pátio.
+                {canEdit && ' Clique em "Editar Linhas" para adicionar.'}
+              </div>
+            )}
+          </div>
+        )}
+
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
           {/* Pátio de Cima */}
           <Card title="▲ Pátio de Cima" styles={styles}>
@@ -257,6 +529,22 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
             ))}
           </div>
         </Card>
+
+        {/* ── Responsive: mobile overrides via inline media query workaround ── */}
+        <style>{`
+          @media (max-width: 768px) {
+            .efvm-linhas-grid {
+              grid-template-columns: 1fr !important;
+            }
+            .efvm-linhas-header {
+              display: none !important;
+            }
+            .efvm-edit-btn {
+              width: 100% !important;
+              min-height: 44px !important;
+            }
+          }
+        `}</style>
       </>
     );
 }

@@ -22,7 +22,7 @@ function carregarPatios(): PatioInfo[] {
       if (map.has(p.codigo)) {
         // Atualizar status (ativo/nome) mas manter padrao=true para defaults
         const base = map.get(p.codigo)!;
-        map.set(p.codigo, { ...base, ativo: p.ativo, nome: p.nome, atualizadoEm: p.atualizadoEm });
+        map.set(p.codigo, { ...base, ativo: p.ativo, nome: p.nome, atualizadoEm: p.atualizadoEm, linhas: p.linhas });
       } else {
         map.set(p.codigo, { ...p, padrao: false });
       }
@@ -150,6 +150,17 @@ export function usePatio() {
     return { ok: true };
   }, []);
 
+  const editarLinhasPatio = useCallback((codigo: string, linhas: LinhaPatioInfo[]): { ok: boolean; erro?: string } => {
+    if (linhas.length === 0) return { ok: false, erro: 'O pátio deve ter pelo menos 1 linha' };
+    const atuais = carregarPatios();
+    const idx = atuais.findIndex(p => p.codigo === codigo);
+    if (idx === -1) return { ok: false, erro: 'Pátio não encontrado' };
+    atuais[idx] = { ...atuais[idx], linhas, atualizadoEm: new Date().toISOString() };
+    persistirPatios(atuais);
+    setPatios(atuais);
+    return { ok: true };
+  }, []);
+
   const removerLinha = useCallback((codigoPatio: string, indexLinha: number): { ok: boolean } => {
     const atuais = carregarPatios();
     const idx = atuais.findIndex(p => p.codigo === codigoPatio);
@@ -173,6 +184,7 @@ export function usePatio() {
     getPatioNome,
     adicionarLinha,
     editarLinha,
+    editarLinhasPatio,
     removerLinha,
   };
 }
