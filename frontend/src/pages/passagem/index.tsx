@@ -161,6 +161,16 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
   const defaultYard = (usuarioLogado?.primaryYard || 'VFZ') as YardCode;
   const [selectedYard, setSelectedYard] = useState<YardCode>(defaultYard);
 
+  // ── Current patio & dynamic categories ──
+  const patioAtual = useMemo(() =>
+    patiosAtivos.find(p => p.codigo === selectedYard) || null,
+    [patiosAtivos, selectedYard]
+  );
+  const categoriasAtuais = useMemo(() =>
+    patioAtual?.categorias || [],
+    [patioAtual]
+  );
+
   // ── Create Patio Modal ──
   const [showCriarPatioModal, setShowCriarPatioModal] = useState(false);
   const [novoPatCodigo, setNovoPatCodigo] = useState('');
@@ -274,16 +284,6 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
   const confirmarAposReforco = useCallback(() => {
     setMostrarConfirmacaoEntendimento(false);
   }, []);
-
-  // ── Curried patio update helpers ──
-  const onUpdatePatioCima = useCallback(
-    (index: number, campo: string, valor: string) => atualizarLinhaPatio('cima', index, campo, valor),
-    [atualizarLinhaPatio]
-  );
-  const onUpdatePatioBaixo = useCallback(
-    (index: number, campo: string, valor: string) => atualizarLinhaPatio('baixo', index, campo, valor),
-    [atualizarLinhaPatio]
-  );
 
   const renderSecaoFormulario = (): JSX.Element => {
     switch (secaoFormulario) {
@@ -424,341 +424,241 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
           </>
         );
 
-      case 'patio-cima':
+      case 'situacao-patio': {
+        // ── Dynamic category helpers ──
+        const catIcons = ['🚂', '🚃', '🚋', '🚆', '🚈'];
+
+        const getLinhasCat = (idx: number, catId: string) => {
+          if (idx === 0) return dadosFormulario.patioCima;
+          if (idx === 1) return dadosFormulario.patioBaixo;
+          return dadosFormulario.patiosCategorias?.[catId] || [];
+        };
+
+        const getConferenciaCat = (idx: number, catId: string) => {
+          if (idx === 0) return dadosFormulario.conferenciaCima;
+          if (idx === 1) return dadosFormulario.conferenciaBaixo;
+          return dadosFormulario.conferenciasCategorias?.[catId] || { tipo: null, observacao: '' };
+        };
+
+        const onUpdateCat = (catIdx: number, catId: string) =>
+          (index: number, campo: string, valor: string) => {
+            if (catIdx === 0) atualizarLinhaPatio('cima', index, campo, valor);
+            else if (catIdx === 1) atualizarLinhaPatio('baixo', index, campo, valor);
+            else atualizarLinhaPatio(catId, index, campo, valor);
+          };
+
+        const setConferenciaTipo = (catIdx: number, catId: string, tipo: 'confirmada' | 'comprometida') => {
+          if (catIdx === 0) {
+            setDadosFormulario((prev: DadosFormulario) => ({
+              ...prev,
+              conferenciaCima: { ...(prev.conferenciaCima || { tipo: null, observacao: '' }), tipo },
+            }));
+          } else if (catIdx === 1) {
+            setDadosFormulario((prev: DadosFormulario) => ({
+              ...prev,
+              conferenciaBaixo: { ...(prev.conferenciaBaixo || { tipo: null, observacao: '' }), tipo },
+            }));
+          } else {
+            setDadosFormulario((prev: DadosFormulario) => {
+              const cats = { ...(prev.conferenciasCategorias || {}) };
+              cats[catId] = { ...(cats[catId] || { tipo: null, observacao: '' }), tipo };
+              return { ...prev, conferenciasCategorias: cats };
+            });
+          }
+        };
+
+        const setConferenciaObs = (catIdx: number, catId: string, observacao: string) => {
+          if (catIdx === 0) {
+            setDadosFormulario((prev: DadosFormulario) => ({
+              ...prev,
+              conferenciaCima: { ...prev.conferenciaCima!, observacao },
+            }));
+          } else if (catIdx === 1) {
+            setDadosFormulario((prev: DadosFormulario) => ({
+              ...prev,
+              conferenciaBaixo: { ...prev.conferenciaBaixo!, observacao },
+            }));
+          } else {
+            setDadosFormulario((prev: DadosFormulario) => {
+              const cats = { ...(prev.conferenciasCategorias || {}) };
+              cats[catId] = { ...(cats[catId] || { tipo: null, observacao: '' }), observacao };
+              return { ...prev, conferenciasCategorias: cats };
+            });
+          }
+        };
+
+        if (categoriasAtuais.length === 0) {
+          return (
+            <Card title="🚂 Situacao do Patio" styles={styles}>
+              <div style={{ textAlign: 'center', padding: '40px', color: tema.textoSecundario }}>
+                <span style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}>📋</span>
+                <p style={{ margin: 0 }}>Nenhuma categoria configurada para este patio.</p>
+                <p style={{ fontSize: '12px', marginTop: '8px' }}>Configure as categorias na pagina <strong>Layout do Patio</strong>.</p>
+              </div>
+            </Card>
+          );
+        }
+
         return (
-          <Card title="🚂 Pátio de Cima" styles={styles}>
-            <TabelaPatio
-              linhas={dadosFormulario.patioCima}
-              onUpdate={onUpdatePatioCima}
-              styles={styles}
-              tema={tema}
-            />
-            
-            {/* Conferência obrigatória - Mutuamente exclusiva */}
-            <div style={{
-              marginTop: '20px',
-              padding: '20px',
-              background: tema.card,
-              borderRadius: '16px',
-              border: `2px solid ${dadosFormulario.conferenciaCima?.tipo ? tema.primaria : tema.aviso}`,
-            }}>
-              <div style={{ 
-                marginBottom: '16px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-              }}>
-                <span style={{ fontSize: '20px' }}>🔍</span>
-                <div>
-                  <div style={{ fontWeight: 700, color: tema.texto, fontSize: '14px' }}>
-                    Conferência de Pátio *
-                  </div>
-                  <div style={{ fontSize: '11px', color: tema.textoSecundario }}>
-                    Selecione UMA das opções abaixo (obrigatório)
-                  </div>
-                </div>
-              </div>
+          <>
+            {categoriasAtuais.map((cat, catIdx) => {
+              const linhas = getLinhasCat(catIdx, cat.id);
+              const conferencia = getConferenciaCat(catIdx, cat.id);
+              const icon = catIcons[catIdx % catIcons.length];
 
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                {/* Conferência Confirmada */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    const atual = dadosFormulario.conferenciaCima || { tipo: null, observacao: '' };
-                    setDadosFormulario((prev: DadosFormulario) => ({
-                      ...prev,
-                      conferenciaCima: { ...atual, tipo: 'confirmada' }
-                    }));
-                  }}
-                  style={{
-                    flex: 1,
-                    minWidth: 'min(200px, 100%)',
-                    padding: '16px',
-                    borderRadius: '12px',
-                    border: `2px solid ${dadosFormulario.conferenciaCima?.tipo === 'confirmada' ? tema.sucesso : tema.cardBorda}`,
-                    background: dadosFormulario.conferenciaCima?.tipo === 'confirmada' ? `${tema.sucesso}15` : tema.backgroundSecundario,
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                    <span style={{
-                      width: '24px',
-                      height: '24px',
-                      borderRadius: '50%',
-                      border: `2px solid ${dadosFormulario.conferenciaCima?.tipo === 'confirmada' ? tema.sucesso : tema.cardBorda}`,
-                      background: dadosFormulario.conferenciaCima?.tipo === 'confirmada' ? tema.sucesso : 'transparent',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#fff',
-                      fontSize: '14px',
-                    }}>
-                      {dadosFormulario.conferenciaCima?.tipo === 'confirmada' && '✓'}
-                    </span>
-                    <span style={{ fontWeight: 700, color: dadosFormulario.conferenciaCima?.tipo === 'confirmada' ? tema.sucesso : tema.texto }}>
-                      ✅ Conferência Confirmada
-                    </span>
-                  </div>
-                  <div style={{ fontSize: '12px', color: tema.textoSecundario, paddingLeft: '34px' }}>
-                    Verifiquei fisicamente todas as linhas e a situação está correta
-                  </div>
-                </button>
-
-                {/* Visibilidade Comprometida */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    const atual = dadosFormulario.conferenciaCima || { tipo: null, observacao: '' };
-                    setDadosFormulario((prev: DadosFormulario) => ({
-                      ...prev,
-                      conferenciaCima: { ...atual, tipo: 'comprometida' }
-                    }));
-                  }}
-                  style={{
-                    flex: 1,
-                    minWidth: 'min(200px, 100%)',
-                    padding: '16px',
-                    borderRadius: '12px',
-                    border: `2px solid ${dadosFormulario.conferenciaCima?.tipo === 'comprometida' ? tema.aviso : tema.cardBorda}`,
-                    background: dadosFormulario.conferenciaCima?.tipo === 'comprometida' ? `${tema.aviso}15` : tema.backgroundSecundario,
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                    <span style={{
-                      width: '24px',
-                      height: '24px',
-                      borderRadius: '50%',
-                      border: `2px solid ${dadosFormulario.conferenciaCima?.tipo === 'comprometida' ? tema.aviso : tema.cardBorda}`,
-                      background: dadosFormulario.conferenciaCima?.tipo === 'comprometida' ? tema.aviso : 'transparent',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#fff',
-                      fontSize: '14px',
-                    }}>
-                      {dadosFormulario.conferenciaCima?.tipo === 'comprometida' && '!'}
-                    </span>
-                    <span style={{ fontWeight: 700, color: dadosFormulario.conferenciaCima?.tipo === 'comprometida' ? tema.aviso : tema.texto }}>
-                      ⚠️ Visibilidade Comprometida
-                    </span>
-                  </div>
-                  <div style={{ fontSize: '12px', color: tema.textoSecundario, paddingLeft: '34px' }}>
-                    Condições climáticas ou outros fatores impediram conferência visual completa
-                  </div>
-                </button>
-              </div>
-
-              {/* Campo de observação quando visibilidade comprometida */}
-              {dadosFormulario.conferenciaCima?.tipo === 'comprometida' && (
-                <div style={{ marginTop: '16px' }}>
-                  <label style={styles.label}>Descreva o motivo da visibilidade comprometida *</label>
-                  <input
-                    type="text"
-                    style={styles.input}
-                    placeholder="Ex: Neblina intensa, chuva forte..."
-                    value={dadosFormulario.conferenciaCima?.observacao || ''}
-                    onChange={(e) => {
-                      setDadosFormulario((prev: DadosFormulario) => ({
-                        ...prev,
-                        conferenciaCima: { ...prev.conferenciaCima!, observacao: e.target.value }
-                      }));
-                    }}
+              return (
+                <Card key={cat.id} title={`${icon} ${cat.nome}`} styles={styles}>
+                  <TabelaPatio
+                    linhas={linhas}
+                    onUpdate={onUpdateCat(catIdx, cat.id)}
+                    styles={styles}
+                    tema={tema}
                   />
-                </div>
-              )}
 
-              {/* Aviso se nenhuma opção selecionada */}
-              {!dadosFormulario.conferenciaCima?.tipo && (
-                <div style={{
-                  marginTop: '12px',
-                  padding: '10px 14px',
-                  background: `${tema.aviso}15`,
-                  border: `1px solid ${tema.aviso}40`,
-                  borderRadius: '8px',
-                  fontSize: '12px',
-                  color: tema.aviso,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}>
-                  <span>⚠️</span>
-                  Selecione uma opção para continuar
-                </div>
-              )}
-            </div>
-          </Card>
-        );
-
-      case 'patio-baixo':
-        return (
-          <Card title="🚃 Pátio de Baixo" styles={styles}>
-            <TabelaPatio
-              linhas={dadosFormulario.patioBaixo}
-              onUpdate={onUpdatePatioBaixo}
-              styles={styles}
-              tema={tema}
-            />
-            
-            {/* Conferência obrigatória - Mutuamente exclusiva */}
-            <div style={{
-              marginTop: '20px',
-              padding: '20px',
-              background: tema.card,
-              borderRadius: '16px',
-              border: `2px solid ${dadosFormulario.conferenciaBaixo?.tipo ? tema.primaria : tema.aviso}`,
-            }}>
-              <div style={{ 
-                marginBottom: '16px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-              }}>
-                <span style={{ fontSize: '20px' }}>🔍</span>
-                <div>
-                  <div style={{ fontWeight: 700, color: tema.texto, fontSize: '14px' }}>
-                    Conferência de Pátio *
-                  </div>
-                  <div style={{ fontSize: '11px', color: tema.textoSecundario }}>
-                    Selecione UMA das opções abaixo (obrigatório)
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                {/* Conferência Confirmada */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    const atual = dadosFormulario.conferenciaBaixo || { tipo: null, observacao: '' };
-                    setDadosFormulario((prev: DadosFormulario) => ({
-                      ...prev,
-                      conferenciaBaixo: { ...atual, tipo: 'confirmada' }
-                    }));
-                  }}
-                  style={{
-                    flex: 1,
-                    minWidth: 'min(200px, 100%)',
-                    padding: '16px',
-                    borderRadius: '12px',
-                    border: `2px solid ${dadosFormulario.conferenciaBaixo?.tipo === 'confirmada' ? tema.sucesso : tema.cardBorda}`,
-                    background: dadosFormulario.conferenciaBaixo?.tipo === 'confirmada' ? `${tema.sucesso}15` : tema.backgroundSecundario,
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                    <span style={{
-                      width: '24px',
-                      height: '24px',
-                      borderRadius: '50%',
-                      border: `2px solid ${dadosFormulario.conferenciaBaixo?.tipo === 'confirmada' ? tema.sucesso : tema.cardBorda}`,
-                      background: dadosFormulario.conferenciaBaixo?.tipo === 'confirmada' ? tema.sucesso : 'transparent',
+                  {/* Conferencia obrigatoria - Mutuamente exclusiva */}
+                  <div style={{
+                    marginTop: '20px',
+                    padding: '20px',
+                    background: tema.card,
+                    borderRadius: '16px',
+                    border: `2px solid ${conferencia?.tipo ? tema.primaria : tema.aviso}`,
+                  }}>
+                    <div style={{
+                      marginBottom: '16px',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#fff',
-                      fontSize: '14px',
+                      gap: '10px',
                     }}>
-                      {dadosFormulario.conferenciaBaixo?.tipo === 'confirmada' && '✓'}
-                    </span>
-                    <span style={{ fontWeight: 700, color: dadosFormulario.conferenciaBaixo?.tipo === 'confirmada' ? tema.sucesso : tema.texto }}>
-                      ✅ Conferência Confirmada
-                    </span>
-                  </div>
-                  <div style={{ fontSize: '12px', color: tema.textoSecundario, paddingLeft: '34px' }}>
-                    Verifiquei fisicamente todas as linhas e a situação está correta
-                  </div>
-                </button>
+                      <span style={{ fontSize: '20px' }}>🔍</span>
+                      <div>
+                        <div style={{ fontWeight: 700, color: tema.texto, fontSize: '14px' }}>
+                          Conferencia de Patio *
+                        </div>
+                        <div style={{ fontSize: '11px', color: tema.textoSecundario }}>
+                          Selecione UMA das opcoes abaixo (obrigatorio)
+                        </div>
+                      </div>
+                    </div>
 
-                {/* Visibilidade Comprometida */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    const atual = dadosFormulario.conferenciaBaixo || { tipo: null, observacao: '' };
-                    setDadosFormulario((prev: DadosFormulario) => ({
-                      ...prev,
-                      conferenciaBaixo: { ...atual, tipo: 'comprometida' }
-                    }));
-                  }}
-                  style={{
-                    flex: 1,
-                    minWidth: 'min(200px, 100%)',
-                    padding: '16px',
-                    borderRadius: '12px',
-                    border: `2px solid ${dadosFormulario.conferenciaBaixo?.tipo === 'comprometida' ? tema.aviso : tema.cardBorda}`,
-                    background: dadosFormulario.conferenciaBaixo?.tipo === 'comprometida' ? `${tema.aviso}15` : tema.backgroundSecundario,
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                    <span style={{
-                      width: '24px',
-                      height: '24px',
-                      borderRadius: '50%',
-                      border: `2px solid ${dadosFormulario.conferenciaBaixo?.tipo === 'comprometida' ? tema.aviso : tema.cardBorda}`,
-                      background: dadosFormulario.conferenciaBaixo?.tipo === 'comprometida' ? tema.aviso : 'transparent',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#fff',
-                      fontSize: '14px',
-                    }}>
-                      {dadosFormulario.conferenciaBaixo?.tipo === 'comprometida' && '!'}
-                    </span>
-                    <span style={{ fontWeight: 700, color: dadosFormulario.conferenciaBaixo?.tipo === 'comprometida' ? tema.aviso : tema.texto }}>
-                      ⚠️ Visibilidade Comprometida
-                    </span>
-                  </div>
-                  <div style={{ fontSize: '12px', color: tema.textoSecundario, paddingLeft: '34px' }}>
-                    Condições climáticas ou outros fatores impediram conferência visual completa
-                  </div>
-                </button>
-              </div>
+                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                      {/* Conferencia Confirmada */}
+                      <button
+                        type="button"
+                        onClick={() => setConferenciaTipo(catIdx, cat.id, 'confirmada')}
+                        style={{
+                          flex: 1,
+                          minWidth: 'min(200px, 100%)',
+                          padding: '16px',
+                          borderRadius: '12px',
+                          border: `2px solid ${conferencia?.tipo === 'confirmada' ? tema.sucesso : tema.cardBorda}`,
+                          background: conferencia?.tipo === 'confirmada' ? `${tema.sucesso}15` : tema.backgroundSecundario,
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                          <span style={{
+                            width: '24px',
+                            height: '24px',
+                            borderRadius: '50%',
+                            border: `2px solid ${conferencia?.tipo === 'confirmada' ? tema.sucesso : tema.cardBorda}`,
+                            background: conferencia?.tipo === 'confirmada' ? tema.sucesso : 'transparent',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#fff',
+                            fontSize: '14px',
+                          }}>
+                            {conferencia?.tipo === 'confirmada' && '✓'}
+                          </span>
+                          <span style={{ fontWeight: 700, color: conferencia?.tipo === 'confirmada' ? tema.sucesso : tema.texto }}>
+                            Conferencia Confirmada
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '12px', color: tema.textoSecundario, paddingLeft: '34px' }}>
+                          Verifiquei fisicamente todas as linhas e a situacao esta correta
+                        </div>
+                      </button>
 
-              {/* Campo de observação quando visibilidade comprometida */}
-              {dadosFormulario.conferenciaBaixo?.tipo === 'comprometida' && (
-                <div style={{ marginTop: '16px' }}>
-                  <label style={styles.label}>Descreva o motivo da visibilidade comprometida *</label>
-                  <input
-                    type="text"
-                    style={styles.input}
-                    placeholder="Ex: Neblina intensa, chuva forte..."
-                    value={dadosFormulario.conferenciaBaixo?.observacao || ''}
-                    onChange={(e) => {
-                      setDadosFormulario((prev: DadosFormulario) => ({
-                        ...prev,
-                        conferenciaBaixo: { ...prev.conferenciaBaixo!, observacao: e.target.value }
-                      }));
-                    }}
-                  />
-                </div>
-              )}
+                      {/* Visibilidade Comprometida */}
+                      <button
+                        type="button"
+                        onClick={() => setConferenciaTipo(catIdx, cat.id, 'comprometida')}
+                        style={{
+                          flex: 1,
+                          minWidth: 'min(200px, 100%)',
+                          padding: '16px',
+                          borderRadius: '12px',
+                          border: `2px solid ${conferencia?.tipo === 'comprometida' ? tema.aviso : tema.cardBorda}`,
+                          background: conferencia?.tipo === 'comprometida' ? `${tema.aviso}15` : tema.backgroundSecundario,
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                          <span style={{
+                            width: '24px',
+                            height: '24px',
+                            borderRadius: '50%',
+                            border: `2px solid ${conferencia?.tipo === 'comprometida' ? tema.aviso : tema.cardBorda}`,
+                            background: conferencia?.tipo === 'comprometida' ? tema.aviso : 'transparent',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#fff',
+                            fontSize: '14px',
+                          }}>
+                            {conferencia?.tipo === 'comprometida' && '!'}
+                          </span>
+                          <span style={{ fontWeight: 700, color: conferencia?.tipo === 'comprometida' ? tema.aviso : tema.texto }}>
+                            Visibilidade Comprometida
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '12px', color: tema.textoSecundario, paddingLeft: '34px' }}>
+                          Condicoes climaticas ou outros fatores impediram conferencia visual completa
+                        </div>
+                      </button>
+                    </div>
 
-              {/* Aviso se nenhuma opção selecionada */}
-              {!dadosFormulario.conferenciaBaixo?.tipo && (
-                <div style={{
-                  marginTop: '12px',
-                  padding: '10px 14px',
-                  background: `${tema.aviso}15`,
-                  border: `1px solid ${tema.aviso}40`,
-                  borderRadius: '8px',
-                  fontSize: '12px',
-                  color: tema.aviso,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}>
-                  <span>⚠️</span>
-                  Selecione uma opção para continuar
-                </div>
-              )}
-            </div>
-          </Card>
+                    {/* Campo de observacao quando visibilidade comprometida */}
+                    {conferencia?.tipo === 'comprometida' && (
+                      <div style={{ marginTop: '16px' }}>
+                        <label style={styles.label}>Descreva o motivo da visibilidade comprometida *</label>
+                        <input
+                          type="text"
+                          style={styles.input}
+                          placeholder="Ex: Neblina intensa, chuva forte..."
+                          value={conferencia?.observacao || ''}
+                          onChange={(e) => setConferenciaObs(catIdx, cat.id, e.target.value)}
+                        />
+                      </div>
+                    )}
+
+                    {/* Aviso se nenhuma opcao selecionada */}
+                    {!conferencia?.tipo && (
+                      <div style={{
+                        marginTop: '12px',
+                        padding: '10px 14px',
+                        background: `${tema.aviso}15`,
+                        border: `1px solid ${tema.aviso}40`,
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        color: tema.aviso,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                      }}>
+                        <span>⚠️</span>
+                        Selecione uma opcao para continuar
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              );
+            })}
+          </>
         );
+      }
 
       case 'postos':
         return renderSecaoPostos();
@@ -1466,31 +1366,28 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
               </div>
             </div>
 
-            {/* Pátios Anteriores */}
+            {/* Patios Anteriores — dynamic categories */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: '16px', marginBottom: '20px' }}>
-              {/* Pátio de Cima */}
-              <div style={{ padding: '16px', background: tema.backgroundSecundario, borderRadius: '12px' }}>
-                <h4 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '14px' }}>🚂 Pátio de Cima</h4>
-                {turnoAnterior.patioCima?.map((l) => (
-                  <div key={l.linha} style={{ fontSize: '12px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <strong style={{ color: tema.texto, width: '70px' }}>{l.linha}</strong>
-                    <StatusBadge status={l.status} tema={tema} />
-                    {l.prefixo && <span style={{ color: tema.textoSecundario }}>{l.prefixo}</span>}
+              {categoriasAtuais.map((cat, catIdx) => {
+                const catIcons = ['🚂', '🚃', '🚋', '🚆', '🚈'];
+                const linhasAnt = catIdx === 0
+                  ? turnoAnterior.patioCima
+                  : catIdx === 1
+                    ? turnoAnterior.patioBaixo
+                    : (turnoAnterior as DadosFormulario).patiosCategorias?.[cat.id] || [];
+                return (
+                  <div key={cat.id} style={{ padding: '16px', background: tema.backgroundSecundario, borderRadius: '12px' }}>
+                    <h4 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '14px' }}>{catIcons[catIdx % catIcons.length]} {cat.nome}</h4>
+                    {linhasAnt?.map((l) => (
+                      <div key={l.linha} style={{ fontSize: '12px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <strong style={{ color: tema.texto, width: '70px' }}>{l.linha}</strong>
+                        <StatusBadge status={l.status} tema={tema} />
+                        {l.prefixo && <span style={{ color: tema.textoSecundario }}>{l.prefixo}</span>}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              
-              {/* Pátio de Baixo */}
-              <div style={{ padding: '16px', background: tema.backgroundSecundario, borderRadius: '12px' }}>
-                <h4 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '14px' }}>🚃 Pátio de Baixo</h4>
-                {turnoAnterior.patioBaixo?.map((l) => (
-                  <div key={l.linha} style={{ fontSize: '12px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <strong style={{ color: tema.texto, width: '70px' }}>{l.linha}</strong>
-                    <StatusBadge status={l.status} tema={tema} />
-                    {l.prefixo && <span style={{ color: tema.textoSecundario }}>{l.prefixo}</span>}
-                  </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
 
             {/* Pontos de Atenção Anteriores */}
@@ -1785,13 +1682,12 @@ DSS: ${cabecalho.dss}
 Turno: ${cabecalho.turno}
 Horário: ${cabecalho.horario}
 
-PÁTIO DE CIMA
+${categoriasAtuais.map((cat, idx) => {
+  const linhas = idx === 0 ? patioCima : idx === 1 ? patioBaixo : (dadosFormulario.patiosCategorias?.[cat.id] || []);
+  return `${cat.nome.toUpperCase()}
 -------------------------------------
-${patioCima.map((l) => `${l.linha}: ${l.status.toUpperCase()}${l.prefixo ? ` - ${l.prefixo}` : ''}`).join('\n')}
-
-PÁTIO DE BAIXO
--------------------------------------
-${patioBaixo.map((l) => `${l.linha}: ${l.status.toUpperCase()}${l.prefixo ? ` - ${l.prefixo}` : ''}`).join('\n')}
+${linhas.map((l) => `${l.linha}: ${l.status.toUpperCase()}${l.prefixo ? ` - ${l.prefixo}` : ''}`).join('\n')}`;
+}).join('\n\n')}
 
 SEGURANÇA EM MANOBRAS
 -------------------------------------
@@ -1894,28 +1790,24 @@ SEGURANÇA EM MANOBRAS
             </div>
           </div>
 
-          {/* Pátios */}
+          {/* Patios — dynamic categories */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: '16px', marginBottom: '16px' }}>
-            <div style={{ padding: '16px', background: tema.backgroundSecundario, borderRadius: '12px', border: `1px solid ${tema.cardBorda}` }}>
-              <h4 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '14px' }}>🚂 PÁTIO DE CIMA</h4>
-              {patioCima.map((l) => (
-                <div key={l.linha} style={{ fontSize: '13px', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <strong style={{ color: tema.texto, width: '80px' }}>{l.linha}</strong>
-                  <StatusBadge status={l.status} tema={tema} />
-                  {l.prefixo && <span style={{ color: tema.textoSecundario }}>{l.prefixo}</span>}
+            {categoriasAtuais.map((cat, catIdx) => {
+              const auditIcons = ['🚂', '🚃', '🚋', '🚆', '🚈'];
+              const linhasAudit = catIdx === 0 ? patioCima : catIdx === 1 ? patioBaixo : (dadosFormulario.patiosCategorias?.[cat.id] || []);
+              return (
+                <div key={cat.id} style={{ padding: '16px', background: tema.backgroundSecundario, borderRadius: '12px', border: `1px solid ${tema.cardBorda}` }}>
+                  <h4 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '14px' }}>{auditIcons[catIdx % auditIcons.length]} {cat.nome.toUpperCase()}</h4>
+                  {linhasAudit.map((l) => (
+                    <div key={l.linha} style={{ fontSize: '13px', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <strong style={{ color: tema.texto, width: '80px' }}>{l.linha}</strong>
+                      <StatusBadge status={l.status} tema={tema} />
+                      {l.prefixo && <span style={{ color: tema.textoSecundario }}>{l.prefixo}</span>}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <div style={{ padding: '16px', background: tema.backgroundSecundario, borderRadius: '12px', border: `1px solid ${tema.cardBorda}` }}>
-              <h4 style={{ color: tema.primaria, marginBottom: '12px', fontSize: '14px' }}>🚃 PÁTIO DE BAIXO</h4>
-              {patioBaixo.map((l) => (
-                <div key={l.linha} style={{ fontSize: '13px', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <strong style={{ color: tema.texto, width: '80px' }}>{l.linha}</strong>
-                  <StatusBadge status={l.status} tema={tema} />
-                  {l.prefixo && <span style={{ color: tema.textoSecundario }}>{l.prefixo}</span>}
-                </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
 
           {/* Pontos de Atenção */}

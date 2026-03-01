@@ -192,6 +192,8 @@ export interface DadosFormulario {
   patioBaixo: LinhaPatio[];
   conferenciaCima: ConferenciaPatio;
   conferenciaBaixo: ConferenciaPatio;
+  patiosCategorias?: Record<string, LinhaPatio[]>;
+  conferenciasCategorias?: Record<string, ConferenciaPatio>;
   layoutPatio: LayoutPatio;
   pontosAtencao: string[];
   intervencoes: Intervencao;
@@ -609,6 +611,12 @@ export interface LinhaPatioInfo {
   capacidade: number;
 }
 
+export interface CategoriaPatio {
+  id: string;
+  nome: string;
+  linhas: LinhaPatioInfo[];
+}
+
 export interface PatioInfo {
   codigo: string;
   nome: string;
@@ -618,6 +626,7 @@ export interface PatioInfo {
   atualizadoEm?: string;
   criadoPor?: string;
   linhas?: LinhaPatioInfo[];
+  categorias?: CategoriaPatio[];
 }
 
 // Re-exportar tipos do dashboard

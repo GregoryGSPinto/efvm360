@@ -587,7 +587,7 @@ export default function App(): JSX.Element {
                   estatisticasPatio={estatisticasPatio} resumoSeguranca={resumoSeguranca}
                   secaoFormulario={secaoFormulario} setSecaoFormulario={setSecaoFormulario}
                   atualizarCabecalho={atualizarCabecalho as (campo: string, valor: string) => void}
-                  atualizarLinhaPatio={atualizarLinhaPatio as (tipo: 'cima' | 'baixo', index: number, campo: string, valor: string) => void}
+                  atualizarLinhaPatio={atualizarLinhaPatio as (tipo: string, index: number, campo: string, valor: string) => void}
                   atualizarSegurancaManobras={atualizarSegurancaManobras as (campo: string, valor: unknown) => void}
                   atualizarIntervencao={atualizarIntervencao as (campo: string, valor: unknown) => void}
                   atualizarEquipamento={atualizarEquipamento as (index: number, campo: string, valor: unknown) => void}
@@ -623,7 +623,7 @@ export default function App(): JSX.Element {
             <Route path={ROUTES.LAYOUT} element={
               <ModuleErrorBoundary module="layout-patio">
                 <PaginaLayoutPatio tema={tema} styles={styles}
-                  dadosFormulario={dadosFormulario} atualizarLinhaPatio={atualizarLinhaPatio as (tipo: 'cima' | 'baixo', index: number, campo: string, valor: string) => void}
+                  dadosFormulario={dadosFormulario} atualizarLinhaPatio={atualizarLinhaPatio as (tipo: string, index: number, campo: string, valor: string) => void}
                   usuarioLogado={usuarioLogado} />
               </ModuleErrorBoundary>
             } />

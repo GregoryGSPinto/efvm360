@@ -83,7 +83,7 @@ export interface PaginaPassagemProps {
   secaoFormulario: string;
   setSecaoFormulario: (secao: string) => void;
   atualizarCabecalho: (campo: string, valor: string) => void;
-  atualizarLinhaPatio: (tipo: 'cima' | 'baixo', index: number, campo: string, valor: string | StatusLinha) => void;
+  atualizarLinhaPatio: (tipo: string, index: number, campo: string, valor: string | StatusLinha) => void;
   atualizarSegurancaManobras: (campo: string, valor: unknown) => void;
   atualizarIntervencao: (campo: string, valor: unknown) => void;
   atualizarEquipamento: (index: number, campo: string, valor: unknown) => void;
@@ -111,7 +111,7 @@ export interface PaginaLayoutPatioProps {
   tema: TemaComputed;
   styles: StylesObject;
   dadosFormulario: DadosFormulario;
-  atualizarLinhaPatio: (tipo: 'cima' | 'baixo', index: number, campo: string, valor: string | StatusLinha) => void;
+  atualizarLinhaPatio: (tipo: string, index: number, campo: string, valor: string | StatusLinha) => void;
   usuarioLogado?: Usuario | null;
 }
 

@@ -149,7 +149,7 @@ interface UseFormularioReturn {
   setModoEdicao: (modo: boolean) => void;
   atualizarCabecalho: (campo: keyof DadosFormulario['cabecalho'], valor: string) => void;
   atualizarLinhaPatio: (
-    patio: 'cima' | 'baixo',
+    patio: string,
     index: number,
     campo: keyof LinhaPatio,
     valor: string | StatusLinha
@@ -219,20 +219,29 @@ export function useFormulario(): UseFormularioReturn {
     []
   );
 
-  // Atualiza linha do pátio (cima ou baixo)
+  // Atualiza linha do pátio (cima, baixo, ou categoria dinâmica por ID)
   const atualizarLinhaPatio = useCallback(
     (
-      patio: 'cima' | 'baixo',
+      patio: string,
       index: number,
       campo: keyof LinhaPatio,
       valor: string | StatusLinha
     ) => {
-      const patioKey = patio === 'cima' ? 'patioCima' : 'patioBaixo';
-      setDadosFormulario((prev) => {
-        const novoArray = [...prev[patioKey]];
-        novoArray[index] = { ...novoArray[index], [campo]: valor };
-        return { ...prev, [patioKey]: novoArray };
-      });
+      if (patio === 'cima' || patio === 'baixo') {
+        const patioKey = patio === 'cima' ? 'patioCima' : 'patioBaixo';
+        setDadosFormulario((prev) => {
+          const novoArray = [...prev[patioKey]];
+          novoArray[index] = { ...novoArray[index], [campo]: valor };
+          return { ...prev, [patioKey]: novoArray };
+        });
+      } else {
+        setDadosFormulario((prev) => {
+          const cats = { ...(prev.patiosCategorias || {}) };
+          const linhas = [...(cats[patio] || [])];
+          if (linhas[index]) linhas[index] = { ...linhas[index], [campo]: valor };
+          return { ...prev, patiosCategorias: { ...cats, [patio]: linhas } };
+        });
+      }
     },
     []
   );

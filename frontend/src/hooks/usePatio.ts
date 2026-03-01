@@ -4,32 +4,61 @@
 // ============================================================================
 
 import { useState, useCallback, useMemo } from 'react';
-import type { PatioInfo, LinhaPatioInfo } from '../types';
+import type { PatioInfo, LinhaPatioInfo, CategoriaPatio } from '../types';
 import { STORAGE_KEYS, PATIOS_PADRAO } from '../utils/constants';
 import { provisionarUsuariosPatio } from '../services/patioProvisioning';
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 
+function normalizarPatio(patio: PatioInfo): PatioInfo {
+  // Already has categories → keep, sync flat linhas
+  if (patio.categorias && patio.categorias.length > 0) {
+    const linhasFlat = patio.categorias.flatMap(c => c.linhas);
+    return { ...patio, linhas: linhasFlat };
+  }
+  // Only flat linhas (legacy) → migrate to single "Geral" category
+  if (patio.linhas && patio.linhas.length > 0) {
+    return {
+      ...patio,
+      categorias: [{ id: `${patio.codigo}-geral`, nome: 'Geral', linhas: patio.linhas }],
+    };
+  }
+  // Nothing → create default structure
+  return {
+    ...patio,
+    categorias: [
+      { id: `${patio.codigo}-cima`, nome: 'Pátio de Cima', linhas: [] },
+      { id: `${patio.codigo}-baixo`, nome: 'Pátio de Baixo', linhas: [] },
+    ],
+    linhas: [],
+  };
+}
+
 function carregarPatios(): PatioInfo[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.PATIOS);
-    if (!raw) return [...PATIOS_PADRAO];
+    if (!raw) return PATIOS_PADRAO.map(normalizarPatio);
     const saved: PatioInfo[] = JSON.parse(raw);
-    // Merge: defaults sempre presentes (atualizados pelo saved), custom adicionados
     const map = new Map<string, PatioInfo>();
     for (const p of PATIOS_PADRAO) map.set(p.codigo, { ...p });
     for (const p of saved) {
       if (map.has(p.codigo)) {
-        // Atualizar status (ativo/nome) mas manter padrao=true para defaults
         const base = map.get(p.codigo)!;
-        map.set(p.codigo, { ...base, ativo: p.ativo, nome: p.nome, atualizadoEm: p.atualizadoEm, linhas: p.linhas });
+        map.set(p.codigo, {
+          ...base,
+          ativo: p.ativo,
+          nome: p.nome,
+          atualizadoEm: p.atualizadoEm,
+          linhas: p.linhas,
+          categorias: p.categorias,
+        });
       } else {
         map.set(p.codigo, { ...p, padrao: false });
       }
     }
-    return Array.from(map.values());
+    return Array.from(map.values()).map(normalizarPatio);
   } catch {
-    return [...PATIOS_PADRAO];
+    return PATIOS_PADRAO.map(normalizarPatio);
   }
 }
 
@@ -66,32 +95,28 @@ export function usePatio() {
       return { ok: false, erro: `Código "${codigoUp}" já existe` };
     }
 
-    const novo: PatioInfo = {
+    const novo: PatioInfo = normalizarPatio({
       codigo: codigoUp,
       nome: nomeClean,
       ativo: true,
       padrao: false,
       criadoEm: new Date().toISOString(),
       criadoPor,
-    };
+    });
     const novaLista = [...atuais, novo];
     persistirPatios(novaLista);
     setPatios(novaLista);
 
-    // Auto-provision demo users for the new yard
     const usuariosCriados = provisionarUsuariosPatio(codigoUp, nomeClean);
-
     return { ok: true, usuariosCriados };
   }, []);
 
   const editarPatio = useCallback((codigo: string, nome: string): { ok: boolean; erro?: string } => {
     const nomeClean = nome.trim();
     if (!nomeClean) return { ok: false, erro: 'Nome é obrigatório' };
-
     const atuais = carregarPatios();
     const idx = atuais.findIndex(p => p.codigo === codigo);
     if (idx === -1) return { ok: false, erro: 'Pátio não encontrado' };
-
     atuais[idx] = { ...atuais[idx], nome: nomeClean, atualizadoEm: new Date().toISOString() };
     persistirPatios(atuais);
     setPatios(atuais);
@@ -102,7 +127,6 @@ export function usePatio() {
     const atuais = carregarPatios();
     const idx = atuais.findIndex(p => p.codigo === codigo);
     if (idx === -1) return { ok: false, erro: 'Pátio não encontrado' };
-
     atuais[idx] = { ...atuais[idx], ativo: false, atualizadoEm: new Date().toISOString() };
     persistirPatios(atuais);
     setPatios(atuais);
@@ -113,7 +137,6 @@ export function usePatio() {
     const atuais = carregarPatios();
     const idx = atuais.findIndex(p => p.codigo === codigo);
     if (idx === -1) return { ok: false, erro: 'Pátio não encontrado' };
-
     atuais[idx] = { ...atuais[idx], ativo: true, atualizadoEm: new Date().toISOString() };
     persistirPatios(atuais);
     setPatios(atuais);
@@ -161,6 +184,17 @@ export function usePatio() {
     return { ok: true };
   }, []);
 
+  const editarCategoriasPatio = useCallback((codigo: string, categorias: CategoriaPatio[], linhasFlat: LinhaPatioInfo[]): { ok: boolean; erro?: string } => {
+    if (categorias.length === 0) return { ok: false, erro: 'Pelo menos 1 categoria é necessária' };
+    const atuais = carregarPatios();
+    const idx = atuais.findIndex(p => p.codigo === codigo);
+    if (idx === -1) return { ok: false, erro: 'Pátio não encontrado' };
+    atuais[idx] = { ...atuais[idx], categorias, linhas: linhasFlat, atualizadoEm: new Date().toISOString() };
+    persistirPatios(atuais);
+    setPatios(atuais);
+    return { ok: true };
+  }, []);
+
   const removerLinha = useCallback((codigoPatio: string, indexLinha: number): { ok: boolean } => {
     const atuais = carregarPatios();
     const idx = atuais.findIndex(p => p.codigo === codigoPatio);
@@ -185,6 +219,7 @@ export function usePatio() {
     adicionarLinha,
     editarLinha,
     editarLinhasPatio,
+    editarCategoriasPatio,
     removerLinha,
   };
 }

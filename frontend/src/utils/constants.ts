@@ -178,16 +178,15 @@ export const MENU_PRINCIPAL: ItemMenu[] = [
 export const SECOES_FORMULARIO: SecaoFormulario[] = [
   { id: 'cabecalho', label: '1. Cabeçalho', icon: '📋' },
   { id: 'postos', label: '2. Postos de Manobra', icon: '👷' },
-  { id: 'patio-cima', label: '3. Pátio de Cima', icon: '🚂' },
-  { id: 'patio-baixo', label: '4. Pátio de Baixo', icon: '🚃' },
-  { id: 'atencao', label: '5. Pontos de Atenção', icon: '⚠️' },
-  { id: 'intervencoes', label: '6. Intervenções VP', icon: '🔧' },
-  { id: 'equipamentos', label: '7. Equipamentos', icon: '🛠️' },
-  { id: '5s', label: '8. 5S da Sala', icon: '🧹' },
-  { id: 'seguranca', label: '9. Segurança Manobras', icon: '🛡️' },
-  { id: 'turno-anterior', label: '10. Turno Anterior', icon: '📜' },
-  { id: 'visualizacao', label: '11. Auditoria', icon: '👁️' },
-  { id: 'assinaturas', label: '12. Assinaturas', icon: '✍️' },
+  { id: 'situacao-patio', label: '3. Situação do Pátio', icon: '🚂' },
+  { id: 'atencao', label: '4. Pontos de Atenção', icon: '⚠️' },
+  { id: 'intervencoes', label: '5. Intervenções VP', icon: '🔧' },
+  { id: 'equipamentos', label: '6. Equipamentos', icon: '🛠️' },
+  { id: '5s', label: '7. 5S da Sala', icon: '🧹' },
+  { id: 'seguranca', label: '8. Segurança Manobras', icon: '🛡️' },
+  { id: 'turno-anterior', label: '9. Turno Anterior', icon: '📜' },
+  { id: 'visualizacao', label: '10. Auditoria', icon: '👁️' },
+  { id: 'assinaturas', label: '11. Assinaturas', icon: '✍️' },
 ];
 
 // ============================================================================
@@ -392,12 +391,23 @@ export const NIVEIS_MATURIDADE_5S: { value: NivelMaturidade5S; label: string; de
 // PÁTIOS PADRÃO — Cadastro base do sistema (fonte de verdade offline)
 // ============================================================================
 
+function criarCategoriasDefault(codigo: string): { categorias: import('../types').CategoriaPatio[]; linhas: import('../types').LinhaPatioInfo[] } {
+  const mkLinhas = (n: number): import('../types').LinhaPatioInfo[] =>
+    Array.from({ length: n }, (_, i) => ({
+      nome: `Linha ${i + 1}`, status: 'livre' as const,
+      comprimento: 800 - i * 50, capacidade: 80 - i * 5,
+    }));
+  const cima = { id: `${codigo}-cima`, nome: 'Pátio de Cima', linhas: mkLinhas(5) };
+  const baixo = { id: `${codigo}-baixo`, nome: 'Pátio de Baixo', linhas: mkLinhas(5) };
+  return { categorias: [cima, baixo], linhas: [...cima.linhas, ...baixo.linhas] };
+}
+
 export const PATIOS_PADRAO: PatioInfo[] = [
-  { codigo: 'VFZ', nome: 'Pátio de Fazendão', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z' },
-  { codigo: 'VBR', nome: 'Pátio de Barão de Cocais', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z' },
-  { codigo: 'VCS', nome: 'Pátio de Costa Lacerda', ativo: false, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z' },
-  { codigo: 'P6', nome: 'Pátio Pedro Nolasco', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z' },
-  { codigo: 'VTO', nome: 'Pátio de Tubarão', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z' },
+  { codigo: 'VFZ', nome: 'Pátio de Fazendão', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z', ...criarCategoriasDefault('VFZ') },
+  { codigo: 'VBR', nome: 'Pátio de Barão de Cocais', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z', ...criarCategoriasDefault('VBR') },
+  { codigo: 'VCS', nome: 'Pátio de Costa Lacerda', ativo: false, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z', ...criarCategoriasDefault('VCS') },
+  { codigo: 'P6', nome: 'Pátio Pedro Nolasco', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z', ...criarCategoriasDefault('P6') },
+  { codigo: 'VTO', nome: 'Pátio de Tubarão', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z', ...criarCategoriasDefault('VTO') },
 ];
 
 // ============================================================================
