@@ -16,7 +16,7 @@ Digitaliza o handover operacional entre turnos em pátios ferroviários, com:
 - **Frontend:** React 18 + TypeScript + Vite
 - **State:** localStorage + IndexedDB (offline-first, sem backend ativo)
 - **Styling:** Inline styles + CSS (glassmorphism, Vale corporate green/yellow)
-- **Tests:** Vitest (90/90 passando)
+- **Tests:** Vitest (354/354 passando)
 
 ## Comandos
 
@@ -49,6 +49,8 @@ src/
 ├── hooks/               # 🎣 React adapters (useAuth, usePermissions, useDSS, etc.)
 ├── pages/               # 📄 Páginas (passagem, dss, gestao, historico, config, etc.)
 ├── components/          # 🧩 UI (TopNavbar, BottomNav, DashboardBI, AdamBot, etc.)
+│   └── AdamBot/         #   AdamBotBriefing (briefing automático), AdamBotCopilot (validação por seção),
+│                        #   useBriefingData (hook coletor), AdamBotContext (addBotMessage)
 ├── services/            # 🔧 Auth, security, validation, sync, seedCredentials
 ├── types/               # 📝 TypeScript types
 └── _deprecated/         # 🗄️ Código morto em quarentena
@@ -109,9 +111,31 @@ O projeto usa `optimizeDeps.force: true` e `resolve.dedupe: ['react', 'react-dom
 ## Testes
 
 ```bash
-pnpm test                              # 90 testes (domain + organizational)
+pnpm test                              # 354 testes (domain + services + components + stress)
 pnpm exec vitest run --reporter=verbose  # Output detalhado
 ```
+
+### Arquivos de teste
+
+| Arquivo | Testes | Descrição |
+|---------|--------|-----------|
+| `__tests__/domain/domain.test.ts` | 63 | Aggregates, value objects, events |
+| `__tests__/domain/policies.test.ts` | 52 | OperationalPolicies + RBACPolicy |
+| `__tests__/components/AdamBotCopilot.test.ts` | 47 | Validação por seção + resumo executivo |
+| `__tests__/services/validacao.test.ts` | 42 | Validação de formulário |
+| `__tests__/components/AdamBotBriefing.test.ts` | 30 | Briefing automático + detectarTurnoAtual |
+| `__tests__/services/logging.test.ts` | 28 | ObservabilityEngine |
+| `__tests__/services/security.test.ts` | 24 | Sessão assinada, HMAC |
+| `__tests__/infrastructure/conflictResolution.test.ts` | 19 | Estratégias de conflito |
+| `__tests__/services/permissions.test.ts` | 16 | RBAC por nível |
+| `__tests__/stress/stress.test.ts` | 13 | 10K seals, 50K events |
+| `__tests__/hooks/useFormulario.test.ts` | 10 | Hook de formulário |
+| `__tests__/hooks/useAuth.test.ts` | 10 | Autenticação + seed |
+| `__tests__/fixtures/dadosFormulario.ts` | — | Fixtures compartilhadas (criarDadosVazios, criarDadosCompletos) |
+
+### Nota técnica
+
+`vi.useFakeTimers()` é incompatível com jsdom no Vitest 2.1.9 (causa `TypeError: Object prototype may only be an Object or null`). Usar mock manual de `Date` via `Object.defineProperty` — ver `AdamBotBriefing.test.ts` para o pattern.
 
 ## Idioma
 
