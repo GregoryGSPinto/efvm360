@@ -3,7 +3,7 @@
 // Extraída de App.tsx renderLayoutPatio() — role-aware yard selector
 // ============================================================================
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { PaginaLayoutPatioProps } from '../types';
 import type { StatusLinha, LinhaPatioInfo } from '../../types';
 import { SectionHeader, Card, StatusBadge } from '../../components';
@@ -16,9 +16,10 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
   const { isGestor, isInspetor } = usePermissions(usuarioLogado);
   const { patiosAtivos, criarPatio: criarPatioHook, editarLinhasPatio } = usePatio();
   const canSelectYard = isGestor || isInspetor;
-  const canEdit = isGestor || isInspetor;
+  const allowedYards: string[] = usuarioLogado?.allowedYards || [usuarioLogado?.primaryYard || ''];
   const defaultYard = (usuarioLogado?.primaryYard || 'VFZ') as YardCode;
   const [selectedYard, setSelectedYard] = useState<YardCode>(defaultYard);
+  const canEditSelectedYard = (isGestor || isInspetor) && allowedYards.includes(selectedYard);
 
   // ── Create Patio Modal ──
   const [showCriarPatioModal, setShowCriarPatioModal] = useState(false);
@@ -55,8 +56,23 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
     setEditErro(null);
   }, [editingYard]);
 
+  // Cancel editing when switching to a different yard
+  useEffect(() => {
+    if (editingYard && editingYard !== selectedYard) {
+      cancelarEdicao();
+    }
+  }, [selectedYard, editingYard, cancelarEdicao]);
+
   const salvarEdicaoLinhas = useCallback(() => {
     if (!editingYard) return;
+
+    // Security check: verify user has permission for this yard
+    const allowed = usuarioLogado?.allowedYards || [usuarioLogado?.primaryYard || ''];
+    if (!allowed.includes(editingYard)) {
+      setEditErro('Sem permissão para editar este pátio.');
+      return;
+    }
+
     const linhas = linhasEditadas[editingYard];
     if (!linhas || linhas.length === 0) {
       setEditErro('O pátio deve ter pelo menos 1 linha.');
@@ -77,7 +93,7 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
     } else {
       setEditErro(result.erro || 'Erro ao salvar linhas.');
     }
-  }, [editingYard, linhasEditadas, editarLinhasPatio]);
+  }, [editingYard, linhasEditadas, editarLinhasPatio, usuarioLogado]);
 
   const updateLinha = useCallback((index: number, campo: keyof LinhaPatioInfo, valor: string | number) => {
     if (!editingYard) return;
@@ -308,7 +324,7 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
               <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: tema.texto }}>
                 Linhas — {patioSelecionado.nome}
               </h3>
-              {canEdit && (
+              {canEditSelectedYard && (
                 <button
                   onClick={() => {
                     if (isEditing) {
@@ -341,6 +357,12 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
                 </button>
               )}
             </div>
+
+            {(isGestor || isInspetor) && !canEditSelectedYard && (
+              <div style={{ fontSize: 11, color: tema.textoSecundario, fontStyle: 'italic', marginBottom: 8 }}>
+                Você não tem permissão para editar este pátio. Contate o gestor responsável.
+              </div>
+            )}
 
             {editErro && (
               <div style={{
@@ -472,7 +494,7 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
                 border: `1px dashed ${tema.cardBorda}`, borderRadius: 8,
               }}>
                 Nenhuma linha cadastrada neste pátio.
-                {canEdit && ' Clique em "Editar Linhas" para adicionar.'}
+                {canEditSelectedYard && ' Clique em "Editar Linhas" para adicionar.'}
               </div>
             )}
           </div>
