@@ -9,7 +9,6 @@ export { Card, StatusBadge, SectionHeader } from './layout';
 export { TabelaPatio, TabelaEquipamentos } from './tables';
 
 // Dashboard
-export { AdamBootChat } from './dashboard/AdamBootChat';
 export { DashboardBI } from './dashboard/DashboardBI';
 
 // Componentes Operacionais

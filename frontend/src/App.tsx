@@ -16,6 +16,7 @@ import { NAV_ID_TO_PATH, PATH_TO_NAV_ID, ROUTES, PUBLIC_PATHS } from './router/r
 import { useAuth } from './hooks/useAuth';
 import { useConfig } from './hooks/useConfig';
 import { useFormulario } from './hooks/useFormulario';
+// useAdamBoot kept for backward compat (proficiency, completude)
 import { useAdamBoot } from './hooks/useAdamBoot';
 import { useAlertas } from './hooks/useAlertas';
 import { useStyles } from './hooks/useStyles';
@@ -31,7 +32,9 @@ import { useTour } from './hooks/useTour';
 import { FUNCOES_USUARIO, STORAGE_KEYS } from './utils/constants';
 
 // ── Components ──────────────────────────────────────────────────────────
-import { SplashScreenPremium, LoginScreenPremium, AdamBootChat } from './components';
+import { SplashScreenPremium, LoginScreenPremium } from './components';
+import { AdamBotProvider, AdamBot } from './components/AdamBot';
+import type { ContextoBot } from './components/AdamBot';
 import { TopNavbar } from './components/layout/TopNavbar';
 import { MobileBottomNav } from './components/layout/MobileBottomNav';
 import { OnlineIndicator } from './components/layout/OnlineIndicator';
@@ -223,7 +226,6 @@ export default function App(): JSX.Element {
 
   // ── AdamBoot (receives alertas array) ────────────────────────────────
   const adamBoot = useAdamBoot(dadosFormulario, alertas);
-  const chatRef = useRef<HTMLDivElement>(null);
 
   // ── Online status ────────────────────────────────────────────────────
   const onlineStatus = useOnlineStatus();
@@ -291,7 +293,6 @@ export default function App(): JSX.Element {
 
   // ── Navigation (React Router) ─────────────────────────────────────────
   const [secaoFormulario, setSecaoFormulario] = useState<string>('cabecalho');
-  const [adambootAberto, setAdambootAberto] = useState(false);
   const [splashVisible, setSplashVisible] = useState(true);
 
   // Derive current "page ID" from URL path (for AdamBoot sync, badges, etc.)
@@ -366,6 +367,50 @@ export default function App(): JSX.Element {
       return regs + pwds;
     } catch { return 0; }
   }, [usuarioLogado, currentPageId]); // currentPageId dep to refresh on nav
+
+  // ── AdamBot Context ─────────────────────────────────────────────────
+  const adamBotContexto = useMemo<ContextoBot>(() => {
+    const secoes = ['cabecalho', 'situacao-patio', 'seguranca', 'equipamentos', 'pontos-atencao', 'conferencia', 'assinatura'];
+    const etapaIdx = secoes.indexOf(secaoFormulario);
+    return {
+      paginaAtual: currentPageId,
+      funcaoUsuario: usuarioLogado?.funcao || 'maquinista',
+      patioSelecionado: usuarioLogado?.primaryYard || '',
+      etapaBoaJornada: etapaIdx >= 0 ? etapaIdx + 1 : 1,
+      totalEtapas: secoes.length,
+      dadosFormulario: dadosFormulario as unknown as Record<string, unknown>,
+      nomeUsuario: usuarioLogado?.nome || 'Operador',
+      matricula: usuarioLogado?.matricula || '',
+      allowedYards: usuarioLogado?.allowedYards || [],
+      linhasPatio: [],
+      scoreRisco: null,
+      nivelRisco: null,
+      ocorrenciasAbertas: alertasCriticos.length,
+      trensAtivos: 0,
+      passagemEmAndamento: secaoFormulario !== 'cabecalho',
+      horaAtual: new Date().getHours(),
+      turnoAtual: dadosFormulario.cabecalho.turno || '',
+    };
+  }, [currentPageId, usuarioLogado, secaoFormulario, dadosFormulario, alertasCriticos.length]);
+
+  const adamBotExecutors = useMemo(() => ({
+    navegar: (destino: string) => {
+      const path = NAV_ID_TO_PATH[destino] || '/';
+      navigate(path);
+    },
+    avancarEtapa: () => {
+      const secoes = ['cabecalho', 'situacao-patio', 'seguranca', 'equipamentos', 'pontos-atencao', 'conferencia', 'assinatura'];
+      const idx = secoes.indexOf(secaoFormulario);
+      if (idx < secoes.length - 1) setSecaoFormulario(secoes[idx + 1]);
+    },
+    voltarEtapa: () => {
+      const secoes = ['cabecalho', 'situacao-patio', 'seguranca', 'equipamentos', 'pontos-atencao', 'conferencia', 'assinatura'];
+      const idx = secoes.indexOf(secaoFormulario);
+      if (idx > 0) setSecaoFormulario(secoes[idx - 1]);
+    },
+    abrirTour: () => iniciarTour(),
+    clearHistory: () => {},
+  }), [navigate, secaoFormulario, setSecaoFormulario, iniciarTour]);
 
   // ── Terms ────────────────────────────────────────────────────────────
   const verificarAceiteTermos = () => {
@@ -476,6 +521,7 @@ export default function App(): JSX.Element {
   // ==================================================================
 
   return (
+    <AdamBotProvider contexto={adamBotContexto} executors={adamBotExecutors}>
     <div style={{
       minHeight: '100vh', width: '100%',
       backgroundColor: tema.background,
@@ -735,26 +781,8 @@ export default function App(): JSX.Element {
         isDark={isDark}
       />
 
-      {/* AdamBoot Chat */}
-      <AdamBootChat
-        isOpen={adambootAberto}
-        onToggle={() => setAdambootAberto((p) => !p)}
-        mensagens={adamBoot.mensagensChat}
-        inputValue={adamBoot.inputChat}
-        onInputChange={adamBoot.setInputChat}
-        onEnviar={adamBoot.enviarMensagem}
-        chatRef={adamBoot.chatRef || chatRef}
-        styles={styles}
-        tema={tema}
-        modoAtivo={!!usuarioLogado}
-        alertasCriticos={alertasCriticos.map((a) => a.mensagem || '')}
-        aiStatus={adamBoot.aiStatus}
-        isListening={adamBoot.isListening}
-        onStartVoice={adamBoot.startVoice}
-        onStopVoice={adamBoot.stopVoice}
-        paginaAtual={adamBoot.paginaAtual}
-        completudePassagem={adamBoot.completudePassagem}
-      />
+      {/* AdamBot — Assistente IA Local */}
+      {usuarioLogado && <AdamBot tema={tema} />}
 
       {/* Guided Tour */}
       {usuarioLogado && (
@@ -768,5 +796,6 @@ export default function App(): JSX.Element {
         />
       )}
     </div>
+    </AdamBotProvider>
   );
 }
