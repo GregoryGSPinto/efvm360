@@ -59,7 +59,7 @@ export const YARD_REGISTRY: Record<YardCode, Yard> = {
   VFZ: {
     id: 'VFZ',
     name: 'Pátio de Fazendão',
-    shortName: 'Fazendão',
+    shortName: 'VFZ - Fazendão',
     region: 'litoral',
     km: 0,
     tracks: [
@@ -100,8 +100,8 @@ export const YARD_REGISTRY: Record<YardCode, Yard> = {
 
   VBR: {
     id: 'VBR',
-    name: 'Pátio de Brucutu',
-    shortName: 'Brucutu',
+    name: 'Pátio de Barão de Cocais',
+    shortName: 'VBR - Barão de Cocais',
     region: 'serra',
     km: 356,
     tracks: [
@@ -132,7 +132,7 @@ export const YARD_REGISTRY: Record<YardCode, Yard> = {
   VCS: {
     id: 'VCS',
     name: 'Pátio de Costa Lacerda',
-    shortName: 'Costa Lacerda',
+    shortName: 'VCS - Costa Lacerda',
     region: 'vale',
     km: 280,
     tracks: [
@@ -164,8 +164,8 @@ export const YARD_REGISTRY: Record<YardCode, Yard> = {
 
   P6: {
     id: 'P6',
-    name: 'Pátio Meia',
-    shortName: 'Meia',
+    name: 'Pátio Pedro Nolasco',
+    shortName: 'P6 - Pedro Nolasco',
     region: 'litoral',
     km: 15,
     tracks: [
@@ -193,8 +193,8 @@ export const YARD_REGISTRY: Record<YardCode, Yard> = {
 
   VTO: {
     id: 'VTO',
-    name: 'Pátio de Timbopeba',
-    shortName: 'Timbopeba',
+    name: 'Pátio de Tubarão',
+    shortName: 'VTO - Tubarão',
     region: 'litoral',
     km: 2,
     tracks: [

@@ -65,7 +65,7 @@ export const CONFIG_INICIAL: ConfiguracaoSistema = {
   // Perfil Extendido
   perfilExtendido: {
     nomeSocial: '',
-    unidade: 'Pátio do Fazendão',
+    unidade: 'Pátio de Fazendão',
     area: 'Operação Ferroviária',
     emailCorporativo: '',
     telefone: '',
@@ -393,11 +393,11 @@ export const NIVEIS_MATURIDADE_5S: { value: NivelMaturidade5S; label: string; de
 // ============================================================================
 
 export const PATIOS_PADRAO: PatioInfo[] = [
-  { codigo: 'VFZ', nome: 'Pátio do Fazendão (Flexal)', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z' },
-  { codigo: 'VBR', nome: 'Barão de Cocais', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z' },
-  { codigo: 'VCS', nome: 'Costa Lacerda', ativo: false, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z' },
-  { codigo: 'P6', nome: 'Pedro Nolasco', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z' },
-  { codigo: 'VTO', nome: 'Tubarão Outbound', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z' },
+  { codigo: 'VFZ', nome: 'Pátio de Fazendão', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z' },
+  { codigo: 'VBR', nome: 'Pátio de Barão de Cocais', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z' },
+  { codigo: 'VCS', nome: 'Pátio de Costa Lacerda', ativo: false, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z' },
+  { codigo: 'P6', nome: 'Pátio Pedro Nolasco', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z' },
+  { codigo: 'VTO', nome: 'Pátio de Tubarão', ativo: true, padrao: true, criadoEm: '2024-01-01T00:00:00.000Z' },
 ];
 
 // ============================================================================

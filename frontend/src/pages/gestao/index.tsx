@@ -14,6 +14,8 @@ import {
   getPendingRegistrations, approveRegistration, rejectRegistration,
   getPendingPasswordResets, approvePasswordReset, rejectPasswordReset,
 } from '../../services/approvalService';
+import { usePatio } from '../../hooks/usePatio';
+import { FUNCOES_USUARIO, STORAGE_KEYS } from '../../utils/constants';
 
 interface PaginaGestaoProps {
   tema: TemaEstilos;
@@ -27,10 +29,59 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
   const yardCode = (usuarioLogado?.primaryYard || 'VFZ') as YardCode;
   const { teamPerformance, yardPerformance, userRanking } = useProjections(yardCode, usuarioLogado?.matricula);
 
-  const [secao, setSecao] = useState<'dashboard' | 'equipe' | 'cadastros' | 'senhas' | 'usuarios' | 'auditoria'>('dashboard');
+  const defaultSecao = isGestor ? 'dashboard' : 'senhas';
+  const [secao, setSecao] = useState<'dashboard' | 'equipe' | 'cadastros' | 'senhas' | 'usuarios' | 'auditoria'>(defaultSecao);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const refresh = useCallback(() => setRefreshKey(k => k + 1), []);
+
+  // ── Create user state ──
+  const { patiosAtivos } = usePatio();
+  const [showCriarUsuario, setShowCriarUsuario] = useState(false);
+  const [novoUser, setNovoUser] = useState({ nome: '', matricula: '', funcao: '', primaryYard: yardCode as string, turno: '' as string, horarioTurno: '' as string, senha: '123456' });
+  const [erroCriarUsuario, setErroCriarUsuario] = useState('');
+
+  // Filter available functions based on logged-in user's role
+  const funcoesDisponiveis = useMemo(() => {
+    if (isGestor) return FUNCOES_USUARIO; // gestor can create all roles
+    if (isInspetor) return FUNCOES_USUARIO.filter(f => f.value !== 'gestor'); // inspetor cannot create gestor
+    return []; // maquinista/oficial cannot create anyone
+  }, [isGestor, isInspetor]);
+
+  const handleCriarUsuario = useCallback(() => {
+    setErroCriarUsuario('');
+    if (!novoUser.nome.trim()) { setErroCriarUsuario('Nome é obrigatório'); return; }
+    if (!novoUser.matricula.trim()) { setErroCriarUsuario('Matrícula é obrigatória'); return; }
+    if (!novoUser.funcao) { setErroCriarUsuario('Função é obrigatória'); return; }
+    if (!novoUser.primaryYard) { setErroCriarUsuario('Pátio é obrigatório'); return; }
+
+    try {
+      const usuarios: Usuario[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.USUARIOS) || '[]');
+      if (usuarios.find(u => u.matricula === novoUser.matricula.trim())) {
+        setErroCriarUsuario('Matrícula já existe'); return;
+      }
+      const novo = {
+        nome: novoUser.nome.trim(),
+        matricula: novoUser.matricula.trim(),
+        funcao: novoUser.funcao,
+        primaryYard: novoUser.primaryYard,
+        allowedYards: ['VFZ', 'VBR', 'VCS', 'P6', 'VTO'],
+        turno: novoUser.turno || undefined,
+        horarioTurno: novoUser.horarioTurno || undefined,
+        senha: novoUser.senha || '123456',
+        status: 'active',
+        dataCadastro: new Date().toISOString(),
+        aceiteTermos: { aceito: true, dataAceite: new Date().toISOString(), versaoTermo: '1.0.0' },
+      };
+      usuarios.push(novo as unknown as Usuario);
+      localStorage.setItem(STORAGE_KEYS.USUARIOS, JSON.stringify(usuarios));
+      setShowCriarUsuario(false);
+      setNovoUser({ nome: '', matricula: '', funcao: '', primaryYard: yardCode as string, turno: '', horarioTurno: '', senha: '123456' });
+      refresh();
+    } catch {
+      setErroCriarUsuario('Erro ao salvar usuário');
+    }
+  }, [novoUser, yardCode, refresh]);
 
   // ── Audit trail state ──
   const [auditFiltroTipo, setAuditFiltroTipo] = useState<string>('todos');
@@ -115,39 +166,46 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
     <div>
       <div style={{ marginBottom: 20 }}>
         <h1 style={{ color: tema.texto, fontSize: 22, fontWeight: 700, margin: '0 0 4px' }}>
-          👥 Gestão de Equipe
+          {isGestor ? '👥 Gestão' : '🔧 Gestão Técnica'}
         </h1>
         <p style={{ color: tema.textoSecundario, fontSize: 13, margin: 0 }}>
-          {getYardName(yardCode)} {isGestor && '(Visão Global)'}
+          {getYardName(yardCode)} {isGestor && '(Visão Global — Pessoas + Técnica)'}
         </p>
       </div>
 
       {/* Navigation tabs */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 20, overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
-        <button style={tabStyle(secao === 'dashboard')} onClick={() => setSecao('dashboard')}>
-          📈 Dashboard
-        </button>
-        <button style={tabStyle(secao === 'equipe')} onClick={() => setSecao('equipe')}>
-          📊 Equipe
-        </button>
-        {/* Gestão de Pessoas — apenas gestor */}
+      <div style={{ display: 'flex', gap: 4, marginBottom: 20, overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', alignItems: 'center' }}>
+        {/* ── Gestão de Pessoas — apenas gestor ── */}
         {isGestor && (
           <>
+            <span style={{ fontSize: 10, fontWeight: 700, color: tema.textoSecundario, textTransform: 'uppercase', letterSpacing: 0.5, padding: '0 8px 0 0', whiteSpace: 'nowrap' }}>Pessoas</span>
+            <button style={tabStyle(secao === 'dashboard')} onClick={() => setSecao('dashboard')}>
+              📈 Dashboard
+            </button>
+            <button style={tabStyle(secao === 'equipe')} onClick={() => setSecao('equipe')}>
+              📊 Equipe
+            </button>
             <button style={tabStyle(secao === 'cadastros')} onClick={() => setSecao('cadastros')}>
               📥 Cadastros {badge(pendingRegistrations.length)}
             </button>
             <button style={tabStyle(secao === 'usuarios')} onClick={() => setSecao('usuarios')}>
               ⚙️ Usuários
             </button>
+            <button style={tabStyle(secao === 'senhas')} onClick={() => setSecao('senhas')}>
+              🔑 Senhas {badge(pendingPasswords.length)}
+            </button>
+            <span style={{ width: 1, height: 24, background: tema.cardBorda, margin: '0 4px' }} />
+            <span style={{ fontSize: 10, fontWeight: 700, color: tema.textoSecundario, textTransform: 'uppercase', letterSpacing: 0.5, padding: '0 8px 0 0', whiteSpace: 'nowrap' }}>Técnica</span>
           </>
         )}
-        {/* Senhas — gestor e inspetor */}
-        {isInspetor && (
-          <button style={tabStyle(secao === 'senhas')} onClick={() => setSecao('senhas')}>
-            🔑 Senhas {badge(pendingPasswords.length)}
-          </button>
+        {/* ── Gestão Técnica — inspetor (e gestor também) ── */}
+        {isInspetor && !isGestor && (
+          <>
+            <button style={tabStyle(secao === 'senhas')} onClick={() => setSecao('senhas')}>
+              🔑 Senhas {badge(pendingPasswords.length)}
+            </button>
+          </>
         )}
-        {/* Gestão Técnica — inspetor */}
         {isInspetor && (
           <button style={tabStyle(secao === 'auditoria')} onClick={() => setSecao('auditoria')}>
             🛡️ Auditoria {auditTrail.length > 0 && <span style={{ fontSize: 10, color: tema.textoSecundario, marginLeft: 4 }}>({auditTrail.length})</span>}
@@ -155,8 +213,8 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
         )}
       </div>
 
-      {/* ── SEÇÃO: Dashboard Executivo ── */}
-      {secao === 'dashboard' && (
+      {/* ── SEÇÃO: Dashboard Executivo — gestor only ── */}
+      {secao === 'dashboard' && isGestor && (
         <>
           {/* KPI Cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: 14, marginBottom: 20 }}>
@@ -319,8 +377,8 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
         </>
       )}
 
-      {/* ── SEÇÃO: Equipe ── */}
-      {secao === 'equipe' && (
+      {/* ── SEÇÃO: Equipe — gestor only ── */}
+      {secao === 'equipe' && isGestor && (
         <>
           {/* Yard summary */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(140px, 100%), 1fr))', gap: 12, marginBottom: 20 }}>
@@ -462,36 +520,137 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
 
       {/* ── SEÇÃO: Gestão de Usuários ── */}
       {secao === 'usuarios' && isGestor && (
-        <Card title={`⚙️ Usuários do Pátio (${usuarios.length})`} styles={styles}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-            <thead>
-              <tr style={{ borderBottom: `1px solid ${tema.cardBorda}` }}>
-                <th style={{ textAlign: 'left', padding: 8, color: tema.textoSecundario }}>Nome</th>
-                <th style={{ textAlign: 'left', padding: 8, color: tema.textoSecundario }}>Matrícula</th>
-                <th style={{ textAlign: 'left', padding: 8, color: tema.textoSecundario }}>Função</th>
-                <th style={{ textAlign: 'left', padding: 8, color: tema.textoSecundario }}>Pátio</th>
-                <th style={{ textAlign: 'left', padding: 8, color: tema.textoSecundario }}>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {usuarios.map((u, i) => (
-                <tr key={u.matricula || i} style={{ borderBottom: `1px solid ${tema.cardBorda}20` }}>
-                  <td style={{ padding: 8, color: tema.texto }}>{u.nome}</td>
-                  <td style={{ padding: 8, color: tema.textoSecundario, fontFamily: 'monospace' }}>{u.matricula}</td>
-                  <td style={{ padding: 8, color: tema.textoSecundario }}>{u.funcao}</td>
-                  <td style={{ padding: 8, color: tema.textoSecundario }}>{u.primaryYard || 'VFZ'}</td>
-                  <td style={{ padding: 8 }}>
-                    <span style={{
-                      padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 600,
-                      background: (u.status || 'active') === 'active' ? '#dcfce7' : '#fef2f2',
-                      color: (u.status || 'active') === 'active' ? '#16a34a' : '#dc2626',
-                    }}>{(u.status || 'active') === 'active' ? 'Ativo' : u.status}</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Card>
+        <>
+          <Card title={`⚙️ Usuários do Pátio (${usuarios.length})`} styles={styles}>
+            {/* Botão Criar Usuário — visível apenas para gestor e inspetor */}
+            {funcoesDisponiveis.length > 0 && (
+              <div style={{ marginBottom: 16 }}>
+                <button onClick={() => { setShowCriarUsuario(true); setErroCriarUsuario(''); }} style={{
+                  padding: '10px 20px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                  background: tema.primaria, color: '#fff', fontSize: 13, fontWeight: 600,
+                }}>+ Criar Usuário</button>
+              </div>
+            )}
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                <thead>
+                  <tr style={{ borderBottom: `1px solid ${tema.cardBorda}` }}>
+                    <th style={{ textAlign: 'left', padding: 8, color: tema.textoSecundario }}>Nome</th>
+                    <th style={{ textAlign: 'left', padding: 8, color: tema.textoSecundario }}>Matrícula</th>
+                    <th style={{ textAlign: 'left', padding: 8, color: tema.textoSecundario }}>Função</th>
+                    <th style={{ textAlign: 'left', padding: 8, color: tema.textoSecundario }}>Pátio</th>
+                    <th style={{ textAlign: 'left', padding: 8, color: tema.textoSecundario }}>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {usuarios.map((u, i) => (
+                    <tr key={u.matricula || i} style={{ borderBottom: `1px solid ${tema.cardBorda}20` }}>
+                      <td style={{ padding: 8, color: tema.texto }}>{u.nome}</td>
+                      <td style={{ padding: 8, color: tema.textoSecundario, fontFamily: 'monospace' }}>{u.matricula}</td>
+                      <td style={{ padding: 8, color: tema.textoSecundario }}>{u.funcao}</td>
+                      <td style={{ padding: 8, color: tema.textoSecundario }}>{u.primaryYard || 'VFZ'}</td>
+                      <td style={{ padding: 8 }}>
+                        <span style={{
+                          padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 600,
+                          background: (u.status || 'active') === 'active' ? '#dcfce7' : '#fef2f2',
+                          color: (u.status || 'active') === 'active' ? '#16a34a' : '#dc2626',
+                        }}>{(u.status || 'active') === 'active' ? 'Ativo' : u.status}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+
+          {/* Modal: Criar Usuário */}
+          {showCriarUsuario && (
+            <div style={{
+              position: 'fixed', inset: 0, zIndex: 9999,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+            }} onClick={() => setShowCriarUsuario(false)}>
+              <div style={{
+                background: tema.card, borderRadius: 16, padding: '28px 32px', maxWidth: 480, width: '92%',
+                border: `1px solid ${tema.cardBorda}`, boxShadow: '0 16px 48px rgba(0,0,0,0.2)',
+                maxHeight: '85vh', overflowY: 'auto',
+              }} onClick={e => e.stopPropagation()}>
+                <h3 style={{ color: tema.texto, margin: '0 0 16px', fontSize: 17, fontWeight: 700 }}>
+                  Criar Usuário
+                </h3>
+                {erroCriarUsuario && (
+                  <div style={{ padding: '10px 14px', marginBottom: 12, borderRadius: 8, background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', fontSize: 13, color: '#dc2626' }}>
+                    {erroCriarUsuario}
+                  </div>
+                )}
+                <div style={{ display: 'grid', gap: 12 }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: tema.textoSecundario, marginBottom: 4, textTransform: 'uppercase' }}>Nome Completo *</label>
+                    <input style={{ padding: '10px 12px', borderRadius: 8, border: `1px solid ${tema.cardBorda}`, background: tema.backgroundSecundario, color: tema.texto, fontSize: 13, width: '100%', boxSizing: 'border-box' }}
+                      value={novoUser.nome} onChange={e => setNovoUser(p => ({ ...p, nome: e.target.value }))} placeholder="Nome do colaborador" />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: tema.textoSecundario, marginBottom: 4, textTransform: 'uppercase' }}>Matrícula *</label>
+                      <input style={{ padding: '10px 12px', borderRadius: 8, border: `1px solid ${tema.cardBorda}`, background: tema.backgroundSecundario, color: tema.texto, fontSize: 13, width: '100%', boxSizing: 'border-box' }}
+                        value={novoUser.matricula} onChange={e => setNovoUser(p => ({ ...p, matricula: e.target.value }))} placeholder="Ex: VFZ1006" />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: tema.textoSecundario, marginBottom: 4, textTransform: 'uppercase' }}>Função *</label>
+                      <select style={{ padding: '10px 12px', borderRadius: 8, border: `1px solid ${tema.cardBorda}`, background: tema.backgroundSecundario, color: tema.texto, fontSize: 13, width: '100%', boxSizing: 'border-box', cursor: 'pointer' }}
+                        value={novoUser.funcao} onChange={e => setNovoUser(p => ({ ...p, funcao: e.target.value }))}>
+                        <option value="">Selecione...</option>
+                        {funcoesDisponiveis.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: tema.textoSecundario, marginBottom: 4, textTransform: 'uppercase' }}>Pátio Principal *</label>
+                    <select style={{ padding: '10px 12px', borderRadius: 8, border: `1px solid ${tema.cardBorda}`, background: tema.backgroundSecundario, color: tema.texto, fontSize: 13, width: '100%', boxSizing: 'border-box', cursor: 'pointer' }}
+                      value={novoUser.primaryYard} onChange={e => setNovoUser(p => ({ ...p, primaryYard: e.target.value }))}>
+                      {patiosAtivos.map(p => <option key={p.codigo} value={p.codigo}>{p.codigo} — {p.nome}</option>)}
+                    </select>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: tema.textoSecundario, marginBottom: 4, textTransform: 'uppercase' }}>Turno</label>
+                      <select style={{ padding: '10px 12px', borderRadius: 8, border: `1px solid ${tema.cardBorda}`, background: tema.backgroundSecundario, color: tema.texto, fontSize: 13, width: '100%', boxSizing: 'border-box', cursor: 'pointer' }}
+                        value={novoUser.turno} onChange={e => setNovoUser(p => ({ ...p, turno: e.target.value }))}>
+                        <option value="">Opcional...</option>
+                        <option value="A">Turno A</option>
+                        <option value="B">Turno B</option>
+                        <option value="C">Turno C</option>
+                        <option value="D">Turno D</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: tema.textoSecundario, marginBottom: 4, textTransform: 'uppercase' }}>Horário</label>
+                      <select style={{ padding: '10px 12px', borderRadius: 8, border: `1px solid ${tema.cardBorda}`, background: tema.backgroundSecundario, color: tema.texto, fontSize: 13, width: '100%', boxSizing: 'border-box', cursor: 'pointer' }}
+                        value={novoUser.horarioTurno} onChange={e => setNovoUser(p => ({ ...p, horarioTurno: e.target.value }))}>
+                        <option value="">Opcional...</option>
+                        <option value="07-19">07:00 às 19:00 (Diurno)</option>
+                        <option value="19-07">19:00 às 07:00 (Noturno)</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 11, color: tema.textoSecundario, padding: '4px 0' }}>
+                    Senha inicial: <strong>123456</strong> (troca obrigatória no primeiro login)
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+                  <button onClick={() => setShowCriarUsuario(false)} style={{
+                    flex: 1, padding: '10px 20px', borderRadius: 8, border: `1px solid ${tema.cardBorda}`,
+                    background: tema.backgroundSecundario, color: tema.texto, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                  }}>Cancelar</button>
+                  <button onClick={handleCriarUsuario} style={{
+                    flex: 1, padding: '10px 20px', borderRadius: 8, border: 'none',
+                    background: tema.primaria, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                  }}>Criar Usuário</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* ── SEÇÃO: Auditoria — gestor e inspetor ── */}

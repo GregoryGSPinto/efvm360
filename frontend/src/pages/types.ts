@@ -112,6 +112,7 @@ export interface PaginaLayoutPatioProps {
   styles: StylesObject;
   dadosFormulario: DadosFormulario;
   atualizarLinhaPatio: (tipo: 'cima' | 'baixo', index: number, campo: string, valor: string | StatusLinha) => void;
+  usuarioLogado?: Usuario | null;
 }
 
 // ── Página de Histórico ────────────────────────────────────────────────

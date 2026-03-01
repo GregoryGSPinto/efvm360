@@ -623,7 +623,8 @@ export default function App(): JSX.Element {
             <Route path={ROUTES.LAYOUT} element={
               <ModuleErrorBoundary module="layout-patio">
                 <PaginaLayoutPatio tema={tema} styles={styles}
-                  dadosFormulario={dadosFormulario} atualizarLinhaPatio={atualizarLinhaPatio as (tipo: 'cima' | 'baixo', index: number, campo: string, valor: string) => void} />
+                  dadosFormulario={dadosFormulario} atualizarLinhaPatio={atualizarLinhaPatio as (tipo: 'cima' | 'baixo', index: number, campo: string, valor: string) => void}
+                  usuarioLogado={usuarioLogado} />
               </ModuleErrorBoundary>
             } />
 
