@@ -1,8 +1,10 @@
 # EFVM360 — Enterprise Railway Operations Management
 
+> **Portfolio Project** — This is an independent case study demonstrating enterprise architecture for railway operations. Built as a technical portfolio piece targeting the EFVM railway corridor. Not commissioned by or affiliated with Vale S.A.
+
 <div align="center">
 
-**Estrada de Ferro Vitória a Minas** · Vale S.A.
+**Enterprise Railway Operations Platform** · Portfolio Case Study
 
 Digital platform for railway shift handover, yard management, operational safety, and real-time decision support.
 
@@ -10,7 +12,7 @@ Digital platform for railway shift handover, yard management, operational safety
 [![Tests](https://img.shields.io/badge/tests-277%20passing-brightgreen)]()
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)]()
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)]()
-[![License](https://img.shields.io/badge/license-proprietary-red)]()
+[![License](https://img.shields.io/badge/license-portfolio-blue)]()
 
 </div>
 
@@ -87,7 +89,7 @@ Digital form replacing paper-based handover with 12 sections: header, upper/lowe
 Multi-patio support (Fazendão, Barão de Cocais, Pedro Nolasco, Costa Lacerda) with full CRUD for track lines, categories, and AMV (Automated Switch) positions. Auto-provisioning with realistic seed data for Fazendão.
 
 ### Operational Risk Assessment
-5×5 probability × impact risk matrix aligned with NR-01 and Vale VPS "Life First" standards. Full CRUD for risk grades with mitigation measures, severity classification, and KPI dashboard.
+5×5 probability × impact risk matrix aligned with NR-01 standards and industry safety-first principles. Full CRUD for risk grades with mitigation measures, severity classification, and KPI dashboard.
 
 ### Equipment Management
 Categorized equipment inventory (Communication, Signaling, Safety, Measurement, Tools, PPE) with criticality levels, minimum quantities per shift, and inline management within handover forms.
@@ -99,7 +101,7 @@ Operational intelligence with KPIs answering questions like "Which track gives m
 10-module AI system with voice input/output, speech-to-text, conversation memory, audit trail, and proactive notifications. Draggable floating interface with offline capability.
 
 ### 5S Workplace Organization
-Digital 5S inspection aligned with Vale's corporate guidelines (PGS-007091 Rev. 01) for the Southeast Corridor.
+Digital 5S inspection aligned with industry standards for railway yard operations.
 
 ---
 
@@ -117,7 +119,7 @@ Digital 5S inspection aligned with Vale's corporate guidelines (PGS-007091 Rev. 
 | CI/CD | GitHub Actions (4 workflows) · Blue/green deploy · Dependabot |
 | Monitoring | Azure Application Insights · KQL dashboards |
 | Testing | Vitest (unit) · Playwright (E2E) · k6 (load) |
-| Design | Glassmorphism · Vale corporate green/yellow · Dark/light theme · Mobile-first |
+| Design | Glassmorphism · Corporate green/yellow · Dark/light theme · Mobile-first |
 
 ---
 
@@ -208,10 +210,10 @@ cd backend && npm run migrate && npm run migrate:seed
 
 | Role | Matrícula | Credentials |
 |------|-----------|-------------|
-| Gestor (Manager) | ADM9001 | System admin |
-| Inspetor (Inspector) | VFZ2001 | Yard inspector |
-| Maquinista (Operator) | VFZ3001 | Train operator |
-| Oficial (Officer) | VFZ4001 | Operations officer |
+| Gestor (Manager) | demo-admin | System admin |
+| Inspetor (Inspector) | demo-inspector | Yard inspector |
+| Maquinista (Operator) | demo-operator | Train operator |
+| Oficial (Officer) | demo-officer | Operations officer |
 
 ---
 
@@ -280,14 +282,14 @@ az deployment sub create \
 
 **Gregory G. S. Pinto** — UX/UI & AI Specialist · Solution Architect
 
-Architecture, design, and implementation of enterprise railway operations management platform for Vale S.A.'s EFVM corridor.
+Architecture, design, and implementation of enterprise railway operations management platform for Brazil's EFVM railway corridor.
 
 ---
 
 <div align="center">
 
-*Built for safety-critical railway operations — VPS "Life First" (A Vida em Primeiro Lugar)*
+*Built for safety-critical railway operations — "Life First" (A Vida em Primeiro Lugar)*
 
-**Vale S.A.** · Estrada de Ferro Vitória a Minas · Proprietary
+Portfolio project demonstrating enterprise railway operations architecture
 
 </div>
