@@ -15,6 +15,7 @@ interface UsuarioAttributes {
   funcao: string;
   turno: string | null;
   horario_turno: string | null;
+  primary_yard: string;
   senha_hash: string;
   ativo: boolean;
   ultimo_login: Date | null;
@@ -68,7 +69,7 @@ interface AuditTrailAttributes {
 
 // ── MODELOS ──────────────────────────────────────────────────────────────
 
-export class Usuario extends Model<UsuarioAttributes, Optional<UsuarioAttributes, 'id' | 'uuid' | 'ativo' | 'ultimo_login' | 'tentativas_login' | 'bloqueado_ate' | 'azure_ad_oid'>> implements UsuarioAttributes {
+export class Usuario extends Model<UsuarioAttributes, Optional<UsuarioAttributes, 'id' | 'uuid' | 'ativo' | 'ultimo_login' | 'tentativas_login' | 'bloqueado_ate' | 'azure_ad_oid' | 'primary_yard'>> implements UsuarioAttributes {
   declare id: number;
   declare uuid: string;
   declare nome: string;
@@ -76,6 +77,7 @@ export class Usuario extends Model<UsuarioAttributes, Optional<UsuarioAttributes
   declare funcao: string;
   declare turno: string | null;
   declare horario_turno: string | null;
+  declare primary_yard: string;
   declare senha_hash: string;
   declare ativo: boolean;
   declare ultimo_login: Date | null;
@@ -94,6 +96,7 @@ export class Usuario extends Model<UsuarioAttributes, Optional<UsuarioAttributes
       funcao: this.funcao,
       turno: this.turno,
       horarioTurno: this.horario_turno,
+      primaryYard: this.primary_yard,
       ativo: this.ativo,
       ultimoLogin: this.ultimo_login,
     };
@@ -108,6 +111,7 @@ Usuario.init({
   funcao: { type: DataTypes.STRING(30), allowNull: false, defaultValue: 'operador' },
   turno: { type: DataTypes.STRING(1), allowNull: true },
   horario_turno: { type: DataTypes.STRING(10), allowNull: true },
+  primary_yard: { type: DataTypes.STRING(10), allowNull: false, defaultValue: 'VFZ' },
   senha_hash: { type: DataTypes.STRING(255), allowNull: false },
   ativo: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
   ultimo_login: { type: DataTypes.DATE, allowNull: true },

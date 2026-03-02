@@ -103,6 +103,7 @@ export const login = async (
     uuid: usuario.uuid,
     matricula: usuario.matricula,
     funcao: usuario.funcao,
+    primaryYard: usuario.primary_yard,
   };
 
   const accessToken = jwt.sign(
@@ -147,7 +148,7 @@ export const refreshAccessToken = async (
 
   // Busca refresh token válido
   const [rows] = await sequelize.query(
-    `SELECT rt.*, u.uuid, u.matricula, u.funcao, u.ativo, u.id as user_id
+    `SELECT rt.*, u.uuid, u.matricula, u.funcao, u.primary_yard, u.ativo, u.id as user_id
      FROM refresh_tokens rt
      JOIN usuarios u ON rt.usuario_id = u.id
      WHERE rt.token_hash = ? AND rt.revoked = 0 AND rt.expires_at > CURRENT_TIMESTAMP
@@ -176,6 +177,7 @@ export const refreshAccessToken = async (
     uuid: row.uuid as string,
     matricula: row.matricula as string,
     funcao: row.funcao as string,
+    primaryYard: (row.primary_yard as string) || 'VFZ',
     type: 'access',
   };
 

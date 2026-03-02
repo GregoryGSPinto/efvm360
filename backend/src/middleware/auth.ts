@@ -10,6 +10,7 @@ export interface JWTPayload {
   uuid: string;
   matricula: string;
   funcao: string;
+  primaryYard: string;
   type: 'access' | 'refresh';
 }
 

@@ -1,0 +1,79 @@
+# ============================================================================
+# EFVM360 — Docker Compose para Desenvolvimento Local
+# Uso: docker-compose up -d
+# ============================================================================
+
+version: '3.8'
+
+services:
+  # ── MySQL 8.0 ──────────────────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: efvm360-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: vfz_root_2024
+      MYSQL_DATABASE: vfz_railway
+      MYSQL_USER: vfz_app
+      MYSQL_PASSWORD: vfz_dev_2024
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --innodb-buffer-pool-size=256M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pvfz_root_2024"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Backend API ────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: efvm360-backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: vfz_railway
+      DB_USER: vfz_app
+      DB_PASSWORD: vfz_dev_2024
+      JWT_SECRET: efvm360-jwt-secret-dev-change-in-production-minimum-64-random-chars
+      JWT_REFRESH_SECRET: efvm360-refresh-secret-dev-change-in-production-minimum-64-chars
+      CORS_ORIGIN: http://localhost:5173,http://localhost:3000
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./backend/src:/app/src
+
+  # ── Frontend (Vite dev) ────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: efvm360-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:3001/api/v1
+      VITE_ENV: development
+    volumes:
+      - ./frontend/src:/app/src
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
+    driver: local

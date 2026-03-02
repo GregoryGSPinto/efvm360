@@ -1,12 +1,7 @@
 // ============================================================================
-// EFVM360 — Hook de Autenticação — HARDENED
-// Credenciais individuais por usuário | Sessão: HMAC-SHA256
-// Senhas: SHA-256 hash | Inputs: sanitizados
-//
-// REVIEW [SECURITY]: User credentials and session data stored in localStorage
-// as plaintext JSON. This is an architectural limitation of the offline-first
-// design. For production, migrate to server-side sessions with Azure AD SSO
-// and use encrypted IndexedDB for any local credential caching.
+// EFVM360 — Hook de Autenticação — DUAL-MODE (JWT Backend + Offline)
+// Modo Online:  VITE_API_URL definido → JWT via backend Express/MySQL
+// Modo Offline: sem VITE_API_URL → localStorage seed (dev/demo)
 // ============================================================================
 
 import { useState, useCallback, useEffect } from 'react';
@@ -21,13 +16,20 @@ import {
   validarEstruturaSessao,
   secureLog,
 } from '../services/security';
+import { api, setTokens, clearTokens, ApiError } from '../api';
+import type { LoginResponseDTO } from '../api';
 
 // ============================================================================
 // CONSTANTES DE SEGURANÇA
 // ============================================================================
 
 const SESSION_KEY = 'efvm360-session-auth';
+const JWT_TOKEN_KEY = 'efvm360-jwt';
+const JWT_REFRESH_KEY = 'efvm360-jwt-refresh';
 const SEED_FLAG = 'efvm360-seed-v7'; // v7: nomes completos P6/VTO/VCS + admin renomeado
+
+/** Se VITE_API_URL está configurado, usar backend JWT */
+const BACKEND_AVAILABLE = !!import.meta.env.VITE_API_URL;
 
 // ── Seed delegado ao seedCredentials ──────────────────────────────────
 import { seedCredentials } from '../services/seedCredentials';
@@ -138,6 +140,10 @@ const setSessaoSegura = async (u: Usuario): Promise<void> => {
 const limparSessao = () => {
   sessionStorage.removeItem(SESSION_KEY);
   localStorage.removeItem(STORAGE_KEYS.USUARIO);
+  // Limpar tokens JWT
+  localStorage.removeItem(JWT_TOKEN_KEY);
+  localStorage.removeItem(JWT_REFRESH_KEY);
+  clearTokens();
 };
 
 // ============================================================================
@@ -178,18 +184,46 @@ export function useAuth(): AuthReturn {
   const [cadastroErro, setCadastroErro] = useState('');
   const [cadastroSucesso, setCadastroSucesso] = useState(false);
 
-  // Verificação assíncrona de HMAC após hidratação
+  // Hidratar tokens JWT do localStorage (se existem)
+  useEffect(() => {
+    if (BACKEND_AVAILABLE) {
+      const savedAccess = localStorage.getItem(JWT_TOKEN_KEY);
+      const savedRefresh = localStorage.getItem(JWT_REFRESH_KEY);
+      if (savedAccess && savedRefresh) {
+        setTokens(savedAccess, savedRefresh);
+      }
+    }
+  }, []);
+
+  // Verificação assíncrona: HMAC (offline) ou GET /auth/me (online)
   useEffect(() => {
     if (!sessaoInicial) return;
-    verificarSessaoCompleta().then((sessaoVerificada) => {
-      if (!sessaoVerificada) {
-        // HMAC inválido — sessão adulterada, forçar logout
-        secureLog.warn('Sessão HMAC falhou — forçando logout');
+
+    if (BACKEND_AVAILABLE) {
+      // Online mode: verificar token via GET /auth/me
+      const savedAccess = localStorage.getItem(JWT_TOKEN_KEY);
+      if (!savedAccess) {
+        // Sem token JWT mas tem sessão — limpar e forçar re-login
         limparSessao();
         setUsuarioLogado(null);
         setTelaAtual('login');
+        return;
       }
-    });
+      api.health().catch(() => {
+        // Backend indisponível — manter sessão offline
+        secureLog.info('Backend indisponível — mantendo sessão offline');
+      });
+    } else {
+      // Offline mode: verificar HMAC
+      verificarSessaoCompleta().then((sessaoVerificada) => {
+        if (!sessaoVerificada) {
+          secureLog.warn('Sessão HMAC falhou — forçando logout');
+          limparSessao();
+          setUsuarioLogado(null);
+          setTelaAtual('login');
+        }
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -209,19 +243,18 @@ export function useAuth(): AuthReturn {
     try { sessionStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(data)); } catch { /* ignore */ }
   };
 
-  // ========== LOGIN — Verificação assíncrona com hash ==========
+  // ========== LOGIN — Dual Mode: Backend JWT (online) / localStorage (offline) ==========
   const realizarLogin = useCallback(async () => {
     setLoginErro('');
 
     try {
-      // Ensure seed has completed (wait up to 3s)
-      if (!localStorage.getItem(SEED_FLAG)) {
-        await executarSeed();
-        // Small delay for localStorage to settle
-        await new Promise(r => setTimeout(r, 100));
-      }
+      const matricula = sanitizarMatricula(loginForm.matricula);
+      const senha = loginForm.senha;
 
-      // Rate limiting check
+      if (!matricula) { setLoginErro('Informe sua matrícula'); return; }
+      if (!senha.trim()) { setLoginErro('Informe sua senha'); return; }
+
+      // Rate limiting check (client-side — backend also has its own)
       const now = Date.now();
       const attempts = getLoginAttempts();
       if (attempts.lockUntil > now) {
@@ -230,11 +263,74 @@ export function useAuth(): AuthReturn {
         return;
       }
 
-      const matricula = sanitizarMatricula(loginForm.matricula);
-      const senha = loginForm.senha;
+      // ── Online Mode: JWT via backend ──────────────────────────────────
+      if (BACKEND_AVAILABLE) {
+        try {
+          const resp: LoginResponseDTO = await api.login({ matricula, senha });
 
-      if (!matricula) { setLoginErro('Informe sua matrícula'); return; }
-      if (!senha.trim()) { setLoginErro('Informe sua senha'); return; }
+          // Persistir tokens
+          setTokens(resp.accessToken, resp.refreshToken);
+          localStorage.setItem(JWT_TOKEN_KEY, resp.accessToken);
+          localStorage.setItem(JWT_REFRESH_KEY, resp.refreshToken);
+
+          // Mapear UserDTO → Usuario
+          const dadosUsuario: Usuario = {
+            nome: resp.user.nome,
+            matricula: resp.user.matricula,
+            funcao: resp.user.funcao as FuncaoUsuario,
+            turno: (resp.user.turno as TurnoLetra) || undefined,
+            horarioTurno: (resp.user.horarioTurno as TurnoHorario) || undefined,
+            primaryYard: resp.user.primaryYard || 'VFZ',
+            allowedYards: ['VFZ', 'VBR', 'VCS', 'P6', 'VTO'],
+            status: resp.user.ativo ? 'active' : 'inactive',
+          };
+
+          // Sessão HMAC
+          try { await setSessaoSegura(dadosUsuario); } catch {
+            sessionStorage.setItem(SESSION_KEY, JSON.stringify(dadosUsuario));
+          }
+
+          localStorage.setItem(STORAGE_KEYS.USUARIO, JSON.stringify(dadosUsuario));
+          setUsuarioLogado(dadosUsuario);
+          setTelaAtual('sistema');
+          setLoginForm({ matricula: '', senha: '' });
+          try { LogService.login(dadosUsuario.matricula, dadosUsuario.nome); } catch {}
+          return;
+        } catch (err) {
+          // Erro de rede → fallback para offline
+          const isNetworkError = err instanceof ApiError && err.status === 0;
+          if (!isNetworkError) {
+            // Erro real do backend (401, 423, etc.) — propagar
+            const att = getLoginAttempts();
+            att.count++;
+            if (att.count >= MAX_LOGIN_ATTEMPTS) {
+              att.lockUntil = Date.now() + LOCKOUT_MS;
+              att.count = 0;
+            }
+            setLoginAttempts(att);
+
+            if (err instanceof ApiError) {
+              if (err.code === 'AUTH_ACCOUNT_LOCKED') {
+                setLoginErro('Conta bloqueada. Tente novamente em alguns minutos.');
+              } else {
+                setLoginErro('Matrícula ou senha incorretos');
+              }
+            } else {
+              setLoginErro('Erro interno. Tente novamente.');
+            }
+            return;
+          }
+          // Network error — fall through to offline mode below
+          secureLog.info('Backend indisponível — fallback para modo offline');
+        }
+      }
+
+      // ── Offline Mode: localStorage seed ─────────────────────────────
+      // Ensure seed has completed
+      if (!localStorage.getItem(SEED_FLAG)) {
+        await executarSeed();
+        await new Promise(r => setTimeout(r, 100));
+      }
 
       let usuarios: UsuarioCadastro[] = [];
       try {
@@ -414,9 +510,13 @@ export function useAuth(): AuthReturn {
     }
   }, [usuarioLogado]);
 
-  // ========== LOGOUT ==========
+  // ========== LOGOUT — Backend (revoke tokens) + local cleanup ==========
   const realizarLogout = useCallback(() => {
     if (usuarioLogado) LogService.logout(usuarioLogado.matricula, usuarioLogado.nome);
+    // Best-effort: revogar refresh tokens no backend
+    if (BACKEND_AVAILABLE) {
+      api.logout().catch(() => { /* best effort — não bloquear logout local */ });
+    }
     limparSessao();
     setUsuarioLogado(null);
     setTelaAtual('login');

@@ -15,7 +15,7 @@ export interface LoginRequestDTO {
 export interface LoginResponseDTO {
   accessToken: string;
   refreshToken: string;
-  expiresIn: number;       // seconds
+  expiresIn: string;       // e.g. '12h'
   user: UserDTO;
 }
 
@@ -28,9 +28,11 @@ export interface UserDTO {
   matricula: string;
   nome: string;
   funcao: string;
-  nivel: number;
-  authMethod: 'local' | 'azure-ad';
-  ultimoAcesso?: string;   // ISO datetime
+  turno: string | null;
+  horarioTurno: string | null;
+  primaryYard: string;
+  ativo: boolean;
+  ultimoLogin?: string | null;
 }
 
 // ── Passagem ────────────────────────────────────────────────────────────
