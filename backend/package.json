@@ -15,7 +15,8 @@
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
     "test:unit": "jest --testPathPattern=unit",
-    "test:integration": "jest --testPathPattern=integration"
+    "test:integration": "jest --testPathPattern=integration",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@azure/identity": "^4.13.0",
