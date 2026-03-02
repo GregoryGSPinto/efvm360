@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Passagem, Usuario } from '../models';
 import { hashFormulario } from '../utils/crypto';
 import * as auditService from '../services/auditService';
+import { metrics } from '../services/metricsService';
 
 /**
  * POST /api/v1/passagens — Salvar passagem (nova ou atualização)
@@ -105,6 +106,8 @@ export const salvar = async (req: Request, res: Response): Promise<void> => {
     // Nova passagem
     passagem = await Passagem.create({ ...dados, uuid: uuidv4() });
   }
+
+  metrics.incrementar('passagens_criadas', 1, { turno: cabecalho.turno, status });
 
   await auditService.registrar({
     matricula: req.user.matricula,
@@ -236,6 +239,8 @@ export const assinar = async (req: Request, res: Response): Promise<void> => {
       status: passagem.assinatura_sai_confirmado ? 'assinado_completo' : 'assinado_parcial',
     });
   }
+
+  metrics.incrementar('passagens_assinadas', 1, { tipo });
 
   await auditService.registrar({
     matricula: req.user.matricula,

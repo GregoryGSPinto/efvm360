@@ -5,6 +5,7 @@
 import { Request, Response } from 'express';
 import * as authService from '../services/authService';
 import * as auditService from '../services/auditService';
+import { metrics } from '../services/metricsService';
 
 /**
  * @openapi
@@ -63,6 +64,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   );
 
   if (!result.success) {
+    metrics.incrementar('logins_falha', 1, { matricula: matricula.trim() });
     await auditService.registrar({
       matricula: matricula.trim(),
       acao: 'LOGIN_FALHA',
@@ -74,6 +76,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     res.status(401).json({ error: result.error, code: result.code });
     return;
   }
+
+  metrics.incrementar('logins_sucesso', 1, { matricula: matricula.trim() });
 
   await auditService.registrar({
     matricula: matricula.trim(),

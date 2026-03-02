@@ -167,6 +167,11 @@ import * as configCtrl from '../controllers/configController';
 router.get('/config', authenticate, configCtrl.obter);
 router.patch('/config', authenticate, configCtrl.atualizar);
 
+// ── METRICS (Observability) ──────────────────────────────────────────────
+import * as metricsCtrl from '../controllers/metricsController';
+router.get('/metrics/resumo', authenticate, authorize('inspetor'), metricsCtrl.resumo);
+router.get('/metrics/requests', authenticate, authorize('administrador'), metricsCtrl.requests);
+
 // ── SYNC (Offline-First) ─────────────────────────────────────────────────
 import syncRoutes from './syncRoutes';
 router.use('/sync', syncRoutes);

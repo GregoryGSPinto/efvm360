@@ -28,6 +28,7 @@ import routes from './routes';
 import { testConnection } from './config/database';
 import { initScheduler } from './jobs/scheduler';
 import { setupSwagger } from './config/swagger';
+import { telemetryMiddleware } from './middleware/telemetry';
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '3001', 10);
@@ -61,6 +62,9 @@ app.use(sanitizeBody);
 if (process.env.NODE_ENV !== 'test') {
   app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 }
+
+// 9. Telemetry (request metrics)
+app.use(telemetryMiddleware);
 
 // ── ROTAS ────────────────────────────────────────────────────────────────
 
