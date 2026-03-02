@@ -167,11 +167,47 @@ Docker Compose port mapping was `5173:5173` but Vite listens on port 3000. Fixed
 
 ---
 
+## 12. Playwright E2E Tests (Visual / Browser)
+
+**Runner:** Playwright 1.42+ with Chromium
+**Execution:** `cd e2e && npx playwright test`
+**Stability:** 3 consecutive runs — 32/32 passed each time (zero flaky)
+
+### Architecture
+
+- **Global Setup** (`e2e/global-setup.ts`): Logs in 3 users (ADM9001, VFZ1001, VFZ2001) via API once, caches sessions to `.auth/*.json` with 10-min TTL
+- **Session Injection**: Tests inject tokens into localStorage/sessionStorage — zero UI logins, zero rate-limiter hits
+- **Projects**: `chromium` (28 desktop tests) + `mobile` (4 responsive tests at 375×667)
+
+### Test Results
+
+| Spec | Tests | Status | Details |
+|------|-------|--------|---------|
+| auth.spec.ts | 6 | PASS | Login form, session injection, invalid login error, logout, protected route redirect, password masking |
+| navigation.spec.ts | 10 | PASS | All nav routes (/passagem, /dss, /analytics, /historico, /layout), user menu (/configuracoes, /perfil), deep link, browser back |
+| passagem.spec.ts | 4 | PASS | Form sections, section navigation, turno selector, 5S checklist |
+| patio.spec.ts | 3 | PASS | Layout page, yard list, yard selector |
+| rbac.spec.ts | 5 | PASS | Operador no Gestão menu, admin sees Gestão, operador restricted on /gestao, admin /gestao OK, operador basic nav |
+| responsive.spec.ts | 4 | PASS | Mobile login, no horizontal overflow (login + dashboard), passagem loads |
+| **Total** | **32** | **PASS** | ~44s per run |
+
+### Key Design Decisions
+
+1. **Session injection over UI login**: Backend has express-rate-limit (5 req/15min per IP+matrícula) + DB-level lockout — UI login per test would hit rate limits after 5 tests
+2. **Global setup with disk cache**: Sessions saved to `.auth/*.json` files, reused for 10 minutes across consecutive runs
+3. **VFZ9999 for invalid login test**: Uses non-existent matrícula to avoid locking real accounts
+4. **Chromium-only for mobile**: Mobile project uses Chromium with iPhone SE viewport/userAgent (no WebKit install needed)
+5. **Backend restart in run-e2e.sh**: Clears in-memory rate-limit store before test execution
+
+---
+
 ## Summary
 
-- **Total tests executed:** 20 API tests + 451 unit tests
+- **Total tests executed:** 20 API tests + 32 Playwright E2E tests + 451 unit tests
+- **Playwright stability:** 3x consecutive runs, 32/32 pass, zero flaky
 - **Bugs found:** 3 (all fixed)
 - **Critical path validated:** Auth → Create Passagem → Sign Passagem → Audit Trail
+- **Visual flows validated:** Login → Navigation → Passagem form → Patio layout → RBAC → Mobile responsiveness
 - **LGPD compliance:** Data export and access verified
 - **Security:** RBAC enforcement, rate limiting, security headers all working
 - **API documentation:** Swagger UI operational with 6 documented endpoints
