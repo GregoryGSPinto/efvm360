@@ -79,8 +79,8 @@ describe('adamFalar', () => {
     adamFalar('Teste de voz');
     const utterance = mockSpeak.mock.calls[0][0] as MockUtterance;
     expect(utterance.lang).toBe('pt-BR');
-    expect(utterance.rate).toBe(1.05);
-    expect(utterance.pitch).toBe(0.85);
+    expect(utterance.rate).toBe(0.95);
+    expect(utterance.pitch).toBe(1.0);
     expect(utterance.volume).toBe(1.0);
   });
 

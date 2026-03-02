@@ -14,8 +14,8 @@ interface AdamBotVoiceConfig {
 
 const CONFIG: AdamBotVoiceConfig = {
   lang: 'pt-BR',
-  rate: 1.05,
-  pitch: 0.85,
+  rate: 0.95,   // Levemente mais lento = mais natural e compreensível
+  pitch: 1.0,   // Tom normal — 0.85 distorce e soa estrangeiro
   volume: 1.0,
 };
 
@@ -31,14 +31,23 @@ function limparTextoParaFala(text: string): string {
     .trim();
 }
 
+// Vozes pt-BR de alta qualidade por plataforma (ordem de preferência)
+const VOZES_PREFERIDAS = [
+  'Google português do Brasil',  // Chrome — a mais natural
+  'Luciana',                      // macOS/iOS pt-BR
+  'Daniel',                       // macOS/iOS (pt-PT mas aceitável)
+  'Microsoft Daniel',             // Windows pt-BR
+];
+
 /**
- * Seleciona a melhor voz masculina pt-BR disponível.
+ * Seleciona a melhor voz pt-BR disponível.
  * Prioridade:
- * 1. Voz pt-BR com "male"/"masculin"/nomes masculinos no nome
- * 2. Voz pt-BR que NÃO tenha "female"/"femin"/nomes femininos
- * 3. Qualquer voz pt-BR
- * 4. Qualquer voz pt-*
- * 5. null (usa default do browser)
+ * 1. Vozes conhecidas de alta qualidade (Google pt-BR, Luciana, Daniel)
+ * 2. Voz pt-BR com "male"/"masculin"/nomes masculinos no nome
+ * 3. Voz pt-BR que NÃO tenha "female"/"femin"/nomes femininos
+ * 4. Qualquer voz pt-BR
+ * 5. Qualquer voz pt-*
+ * 6. null (usa default do browser com lang pt-BR)
  */
 function selecionarVozMasculina(): SpeechSynthesisVoice | null {
   if (cachedVoice) return cachedVoice;
@@ -47,20 +56,30 @@ function selecionarVozMasculina(): SpeechSynthesisVoice | null {
   const voices = speechSynthesis.getVoices();
   if (voices.length === 0) return null;
 
+  // 1. Vozes preferidas por nome (alta qualidade conhecida)
+  for (const nome of VOZES_PREFERIDAS) {
+    const voz = voices.find(v => v.name.includes(nome));
+    if (voz) { cachedVoice = voz; return voz; }
+  }
+
   const ptBR = voices.filter(v => v.lang === 'pt-BR' || v.lang === 'pt_BR');
   const ptAny = voices.filter(v => v.lang.startsWith('pt'));
 
+  // 2. Voz pt-BR masculina explícita
   const maleBR = ptBR.find(v =>
     /male|masculin|daniel|ricardo|marcos/i.test(v.name) &&
     !/female|femin/i.test(v.name)
   );
   if (maleBR) { cachedVoice = maleBR; return maleBR; }
 
+  // 3. Voz pt-BR que não seja feminina
   const nonFemaleBR = ptBR.find(v => !/female|femin|maria|lucia|andrea|vitoria/i.test(v.name));
   if (nonFemaleBR) { cachedVoice = nonFemaleBR; return nonFemaleBR; }
 
+  // 4. Qualquer pt-BR
   if (ptBR.length > 0) { cachedVoice = ptBR[0]; return ptBR[0]; }
 
+  // 5. Qualquer pt (Portugal, etc.)
   const malePT = ptAny.find(v => !/female|femin/i.test(v.name));
   if (malePT) { cachedVoice = malePT; return malePT; }
   if (ptAny.length > 0) { cachedVoice = ptAny[0]; return ptAny[0]; }

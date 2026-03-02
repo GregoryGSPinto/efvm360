@@ -154,6 +154,7 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
   const [tendencias, setTendencias] = useState<AnaliseHistorico | null>(null);
   const { addBotMessage } = useAdamBotContext();
 
+  // Gerar briefing no mount (sem autoplay de voz — mobile bloqueia)
   useEffect(() => {
     if (briefingEntregue) return;
     const timer = setTimeout(() => {
@@ -165,8 +166,6 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
       const badge = resultado.severidade === 'critico' ? 'CRITICO' : resultado.severidade === 'atencao' ? 'ATENCAO' : 'ESTAVEL';
       const msgChat = `📋 **Briefing do Turno** [${badge}]\n\n${resultado.itensDestaque.join('\n')}\n\n${resultado.severidade === 'critico' ? '⚠️ Atenção redobrada.' : resultado.severidade === 'atencao' ? '⚡ Pontos de atenção.' : '✅ Situação estável.'}`;
       addBotMessage(msgChat);
-
-      adamFalar(resultado.texto);
 
       // Trend analysis
       const analise = analisarTendencias();
@@ -180,15 +179,23 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
         });
         msgTendencias += `\n\n📈 ${analise.totalPassagensAnalisadas} passagens analisadas`;
         addBotMessage(msgTendencias);
-
-        const critico = analise.alertas.find(a => a.severidade === 'critico');
-        if (critico) {
-          setTimeout(() => adamFalar(critico.descricaoVoz), 8000);
-        }
       }
     }, 2000);
     return () => clearTimeout(timer);
   }, [dadosBriefing, briefingEntregue, addBotMessage]);
+
+  // Callback para ouvir briefing (requer interação do usuário — mobile-safe)
+  const ouvirBriefing = useCallback(() => {
+    if (!ultimoBriefing) return;
+    adamFalar(ultimoBriefing.texto);
+    // Falar alertas críticos 8s depois
+    if (tendencias) {
+      const critico = tendencias.alertas.find(a => a.severidade === 'critico');
+      if (critico) {
+        setTimeout(() => adamFalar(critico.descricaoVoz), 8000);
+      }
+    }
+  }, [ultimoBriefing, tendencias]);
 
   // ── Derived state ─────────────────────────────────────────────────────
 
@@ -246,7 +253,19 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
             }}>
               {ultimoBriefing.severidade === 'critico' ? 'CRÍTICO' : ultimoBriefing.severidade === 'atencao' ? 'ATENÇÃO' : 'ESTÁVEL'}
             </span>
-            <span style={{ marginLeft: 'auto', fontSize: 10, color: tema.textoSecundario }}>
+            <button
+              type="button"
+              onClick={ouvirBriefing}
+              style={{
+                marginLeft: 'auto', fontSize: 11, fontWeight: 600,
+                padding: '4px 12px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                background: `${tema.primaria}15`, color: tema.primaria,
+                display: 'flex', alignItems: 'center', gap: 4, minHeight: 32,
+              }}
+            >
+              Ouvir briefing
+            </button>
+            <span style={{ fontSize: 10, color: tema.textoSecundario }}>
               {new Date(ultimoBriefing.timestamp).toLocaleTimeString('pt-BR')}
             </span>
           </div>
