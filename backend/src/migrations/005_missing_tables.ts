@@ -51,7 +51,7 @@ export async function runMigration005(): Promise<void> {
     matricula: { type: DataTypes.STRING(20), allowNull: false },
     funcao: { type: DataTypes.STRING(30), allowNull: false, defaultValue: 'operador' },
     turno: { type: DataTypes.STRING(1), allowNull: true },
-    horario_turno: { type: DataTypes.STRING(10), allowNull: true },
+    horario_turno: { type: DataTypes.STRING(20), allowNull: true },
     patio_codigo: { type: DataTypes.STRING(5), allowNull: true },
     senha_hash: { type: DataTypes.STRING(255), allowNull: false },
     status: { type: DataTypes.ENUM('pendente', 'aprovado', 'rejeitado'), allowNull: false, defaultValue: 'pendente' },

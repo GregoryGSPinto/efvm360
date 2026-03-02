@@ -47,9 +47,9 @@ export async function runMigrations(): Promise<void> {
       allowNull: true,
     },
     horario_turno: {
-      type: DataTypes.STRING(10),
+      type: DataTypes.STRING(20),
       allowNull: true,
-      comment: 'Formato: 07-19, 19-07',
+      comment: 'Formato: 07:00-19:00 ou 07-19',
     },
     senha_hash: {
       type: DataTypes.STRING(255),
@@ -172,7 +172,7 @@ export async function runMigrations(): Promise<void> {
       allowNull: false,
     },
     horario_turno: {
-      type: DataTypes.STRING(10),
+      type: DataTypes.STRING(20),
       allowNull: false,
     },
     // Referência aos operadores
