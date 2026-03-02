@@ -4,14 +4,14 @@
 
 import { body } from 'express-validator';
 
-// Matrícula: VALE seguido de 3-6 dígitos (ex: VALE001, VALE123456)
-// Também aceita ADMIN, ANON_ prefixed (para anonimizados)
-const MATRICULA_REGEX = /^(VALE\d{3,6}|ADMIN\d{3,6}|ANON_[a-f0-9]{12})$/;
+// Matrícula EFVM: prefixo pátio + 4 dígitos (ex: VFZ1001, P63001, ADM9001)
+// Também aceita ANON_ prefixed (para anonimizados LGPD)
+const MATRICULA_REGEX = /^(VFZ|VBR|VCS|VTO|P6|ADM|SUP)\d{4}$|^ANON_[a-f0-9]{12}$/;
 
 const FUNCOES_VALIDAS = [
   'operador', 'maquinista', 'oficial', 'oficial_operacao',
   'inspetor', 'gestor', 'supervisor', 'coordenador',
-  'administrador', 'admin',
+  'administrador', 'admin', 'suporte',
 ];
 
 const TURNOS_VALIDOS = ['A', 'B', 'C', 'D'];
@@ -20,7 +20,7 @@ export const loginValidator = [
   body('matricula')
     .trim()
     .notEmpty().withMessage('Matrícula é obrigatória')
-    .matches(MATRICULA_REGEX).withMessage('Matrícula deve seguir o formato VALE seguido de 3-6 dígitos (ex: VALE001)')
+    .matches(MATRICULA_REGEX).withMessage('Matrícula deve seguir o formato PÁTIO + 4 dígitos (ex: VFZ1001, P63001)')
     .escape(),
   body('senha')
     .notEmpty().withMessage('Senha é obrigatória')
@@ -82,7 +82,7 @@ export const criarUsuarioValidator = [
   body('matricula')
     .trim()
     .notEmpty().withMessage('Matrícula é obrigatória')
-    .matches(MATRICULA_REGEX).withMessage('Matrícula deve seguir o formato VALE seguido de 3-6 dígitos (ex: VALE001)')
+    .matches(MATRICULA_REGEX).withMessage('Matrícula deve seguir o formato PÁTIO + 4 dígitos (ex: VFZ1001, P63001)')
     .escape(),
   body('senha')
     .notEmpty().withMessage('Senha é obrigatória')
