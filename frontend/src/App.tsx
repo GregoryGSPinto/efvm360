@@ -40,6 +40,7 @@ import { TopNavbar } from './components/layout/TopNavbar';
 import { MobileBottomNav } from './components/layout/MobileBottomNav';
 import { OnlineIndicator } from './components/layout/OnlineIndicator';
 import { GuidedTour, TOUR_STEPS } from './components/ui/GuidedTour';
+import { UpdateNotification } from './components/ui/UpdateNotification';
 import {
   ModuleErrorBoundary, PassagemBoundary,
   DashboardBoundary, HistoricoBoundary, ConfiguracoesBoundary, DSSBoundary,
@@ -243,6 +244,22 @@ export default function App(): JSX.Element {
 
   // ── Tour ─────────────────────────────────────────────────────────────
   const { tourAtivo, iniciarTour, completarTour, pularTour, resetarTour } = useTour();
+
+  // ── SW Update notification ──────────────────────────────────────────
+  const [swUpdateAvailable, setSwUpdateAvailable] = useState(false);
+  const swRegistrationRef = useRef<ServiceWorkerRegistration | null>(null);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.registration) {
+        swRegistrationRef.current = detail.registration;
+        setSwUpdateAvailable(true);
+      }
+    };
+    window.addEventListener('efvm360-sw-update', handler);
+    return () => window.removeEventListener('efvm360-sw-update', handler);
+  }, []);
 
   // ── Logout wrapper (clears tour sessionStorage) ────────────────────
   const handleLogout = useCallback(() => {
@@ -536,6 +553,17 @@ export default function App(): JSX.Element {
 
       {/* Skip to content (a11y) */}
       <a href="#efvm360-main" className="efvm360-skip-link">Pular para conteúdo</a>
+
+      {/* SW Update Notification */}
+      {swUpdateAvailable && (
+        <UpdateNotification onUpdate={() => {
+          const waiting = swRegistrationRef.current?.waiting;
+          if (waiting) {
+            waiting.postMessage({ type: 'SKIP_WAITING' });
+            window.location.reload();
+          }
+        }} />
+      )}
 
       {/* Demo Banner */}
       <div data-tour="demo-banner" style={{

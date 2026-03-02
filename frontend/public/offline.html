@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EFVM360 — Offline</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #121212;
+      color: #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .card {
+      max-width: 400px;
+      text-align: center;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 40px 32px;
+      backdrop-filter: blur(12px);
+    }
+    .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      display: block;
+    }
+    h1 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #FFD100;
+      margin-bottom: 12px;
+    }
+    p {
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.8;
+      margin-bottom: 24px;
+    }
+    .retry-btn {
+      padding: 10px 24px;
+      border-radius: 8px;
+      border: none;
+      background: #00A651;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .retry-btn:active { opacity: 0.8; }
+    .footer {
+      margin-top: 20px;
+      font-size: 12px;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <span class="icon">&#x1F4F6;</span>
+    <h1>Voce esta offline</h1>
+    <p>
+      Sem conexao com a internet. Seus dados salvos localmente estao seguros e serao
+      sincronizados automaticamente quando a conexao voltar.
+    </p>
+    <button class="retry-btn" onclick="window.location.reload()">
+      Tentar novamente
+    </button>
+    <div class="footer">EFVM360 — Gestao de Troca de Turno</div>
+  </div>
+</body>
+</html>

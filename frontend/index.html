@@ -527,65 +527,18 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Registro do Service Worker para PWA -->
+    <!-- SW registration moved to main.tsx via vite-plugin-pwa -->
     <script>
-      // Registrar Service Worker
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', async () => {
-          try {
-            const registration = await navigator.serviceWorker.register('/sw.js', {
-              scope: '/'
-            });
-            console.log('[EFVM360] Service Worker registrado:', registration.scope);
-            
-            // Verificar atualizações
-            registration.addEventListener('updatefound', () => {
-              const newWorker = registration.installing;
-              if (newWorker) {
-                newWorker.addEventListener('statechange', () => {
-                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    // Nova versão disponível
-                    console.log('[EFVM360] Nova versão disponível');
-                    if (window.confirm('Nova versão do EFVM360 disponível. Atualizar agora?')) {
-                      window.location.reload();
-                    }
-                  }
-                });
-              }
-            });
-          } catch (error) {
-            console.error('[EFVM360] Erro ao registrar Service Worker:', error);
-          }
-        });
-        
-        // Listener para mensagens do SW
-        navigator.serviceWorker.addEventListener('message', (event) => {
-          const { type, data } = event.data || {};
-          
-          if (type === 'SYNC_COMPLETE') {
-            console.log('[EFVM360] Sincronização completa:', data);
-            // Disparar evento customizado para o React
-            window.dispatchEvent(new CustomEvent('vfz-sync-complete', { detail: data }));
-          }
-        });
-      }
-      
-      // Indicador de conexão
+      // Connection status events (kept here for pre-React availability)
       window.addEventListener('online', () => {
-        console.log('[EFVM360] Conexão restaurada');
         window.dispatchEvent(new CustomEvent('vfz-connection-change', { detail: { online: true } }));
       });
-      
       window.addEventListener('offline', () => {
-        console.log('[EFVM360] Conexão perdida');
         window.dispatchEvent(new CustomEvent('vfz-connection-change', { detail: { online: false } }));
       });
-      
-      // Prevenir zoom em inputs no iOS
+      // Prevent pinch zoom on iOS
       document.addEventListener('touchstart', (e) => {
-        if (e.touches.length > 1) {
-          e.preventDefault();
-        }
+        if (e.touches.length > 1) e.preventDefault();
       }, { passive: false });
     </script>
     

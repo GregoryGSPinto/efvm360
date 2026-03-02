@@ -43,6 +43,6 @@
     }
   },
   "include": ["src", "__tests__"],
-  "exclude": ["src/_deprecated"],
+  "exclude": ["src/_deprecated", "src/sw-custom.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
