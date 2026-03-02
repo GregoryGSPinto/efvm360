@@ -32,6 +32,54 @@ import sequelize from '../config/database';
 const router = Router();
 
 // ── HEALTH CHECK ─────────────────────────────────────────────────────────
+/**
+ * @openapi
+ * /health:
+ *   get:
+ *     tags: [Health]
+ *     summary: Verificar saude do servico
+ *     description: Retorna status do servidor e conexao com o banco de dados.
+ *     responses:
+ *       200:
+ *         description: Servico saudavel
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: healthy
+ *                 service:
+ *                   type: string
+ *                   example: vfz-backend
+ *                 version:
+ *                   type: string
+ *                   example: '1.0.0'
+ *                 database:
+ *                   type: string
+ *                   example: connected
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ *                 uptime:
+ *                   type: number
+ *                 environment:
+ *                   type: string
+ *       503:
+ *         description: Servico indisponivel (banco desconectado)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: unhealthy
+ *                 database:
+ *                   type: string
+ *                   example: disconnected
+ */
 router.get('/health', async (_req: Request, res: Response) => {
   try {
     await sequelize.authenticate();

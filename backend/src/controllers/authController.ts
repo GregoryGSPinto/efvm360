@@ -1,16 +1,57 @@
 // ============================================================================
-// VFZ Backend — Controller de Autenticação
+// VFZ Backend — Controller de Autenticacao
 // ============================================================================
 
 import { Request, Response } from 'express';
 import * as authService from '../services/authService';
 import * as auditService from '../services/auditService';
 
+/**
+ * @openapi
+ * /auth/login:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Autenticar usuario
+ *     description: |
+ *       Realiza login com matricula e senha. Retorna JWT access token,
+ *       refresh token e dados do usuario. Rate-limited a 5 tentativas/minuto.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/LoginRequest'
+ *     responses:
+ *       200:
+ *         description: Login bem-sucedido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/LoginResponse'
+ *       400:
+ *         description: Dados de entrada invalidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Credenciais invalidas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       429:
+ *         description: Muitas tentativas de login (rate limit)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 export const login = async (req: Request, res: Response): Promise<void> => {
   const { matricula, senha } = req.body;
 
   if (!matricula || !senha) {
-    res.status(400).json({ error: 'Matrícula e senha são obrigatórios', code: 'VALIDATION_ERROR' });
+    res.status(400).json({ error: 'Matricula e senha sao obrigatorios', code: 'VALIDATION_ERROR' });
     return;
   }
 
@@ -51,11 +92,58 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   });
 };
 
+/**
+ * @openapi
+ * /auth/refresh:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Renovar access token
+ *     description: Gera um novo par de access/refresh tokens a partir de um refresh token valido.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [refreshToken]
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: Refresh token obtido no login
+ *                 minLength: 32
+ *                 maxLength: 256
+ *     responses:
+ *       200:
+ *         description: Tokens renovados com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *                 refreshToken:
+ *                   type: string
+ *                 expiresIn:
+ *                   type: number
+ *       400:
+ *         description: Refresh token ausente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Refresh token invalido ou expirado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 export const refresh = async (req: Request, res: Response): Promise<void> => {
   const { refreshToken } = req.body;
 
   if (!refreshToken) {
-    res.status(400).json({ error: 'Refresh token é obrigatório', code: 'VALIDATION_ERROR' });
+    res.status(400).json({ error: 'Refresh token e obrigatorio', code: 'VALIDATION_ERROR' });
     return;
   }
 
@@ -73,9 +161,36 @@ export const refresh = async (req: Request, res: Response): Promise<void> => {
   });
 };
 
+/**
+ * @openapi
+ * /auth/logout:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Encerrar sessao
+ *     description: Invalida o refresh token do usuario autenticado e registra a acao na auditoria.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logout realizado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Logout realizado com sucesso
+ *       401:
+ *         description: Nao autenticado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 export const logout = async (req: Request, res: Response): Promise<void> => {
   if (!req.user) {
-    res.status(401).json({ error: 'Não autenticado' });
+    res.status(401).json({ error: 'Nao autenticado' });
     return;
   }
 
@@ -92,16 +207,66 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
   res.json({ message: 'Logout realizado com sucesso' });
 };
 
+/**
+ * @openapi
+ * /auth/alterar-senha:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Alterar senha do usuario autenticado
+ *     description: |
+ *       Altera a senha do usuario logado. Exige senha atual para confirmacao.
+ *       A nova senha deve ter no minimo 8 caracteres e ser diferente da atual.
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [senhaAtual, novaSenha]
+ *             properties:
+ *               senhaAtual:
+ *                 type: string
+ *                 description: Senha atual do usuario
+ *               novaSenha:
+ *                 type: string
+ *                 description: Nova senha (min 8 caracteres)
+ *                 minLength: 8
+ *     responses:
+ *       200:
+ *         description: Senha alterada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Senha alterada com sucesso. Realize login novamente.
+ *       400:
+ *         description: Dados invalidos ou senha atual incorreta
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Nao autenticado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 export const alterarSenha = async (req: Request, res: Response): Promise<void> => {
   if (!req.user) {
-    res.status(401).json({ error: 'Não autenticado' });
+    res.status(401).json({ error: 'Nao autenticado' });
     return;
   }
 
   const { senhaAtual, novaSenha } = req.body;
 
   if (!senhaAtual || !novaSenha) {
-    res.status(400).json({ error: 'Senha atual e nova senha são obrigatórias' });
+    res.status(400).json({ error: 'Senha atual e nova senha sao obrigatorias' });
     return;
   }
 
@@ -123,16 +288,48 @@ export const alterarSenha = async (req: Request, res: Response): Promise<void> =
   res.json({ message: 'Senha alterada com sucesso. Realize login novamente.' });
 };
 
+/**
+ * @openapi
+ * /auth/me:
+ *   get:
+ *     tags: [Auth]
+ *     summary: Obter dados do usuario autenticado
+ *     description: Retorna os dados do perfil do usuario logado (sem informacoes sensiveis como senha).
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dados do usuario
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   $ref: '#/components/schemas/UserResponse'
+ *       401:
+ *         description: Nao autenticado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Usuario nao encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 export const me = async (req: Request, res: Response): Promise<void> => {
   if (!req.user) {
-    res.status(401).json({ error: 'Não autenticado' });
+    res.status(401).json({ error: 'Nao autenticado' });
     return;
   }
 
   const { Usuario } = require('../models');
   const usuario = await Usuario.findByPk(req.user.userId);
   if (!usuario) {
-    res.status(404).json({ error: 'Usuário não encontrado' });
+    res.status(404).json({ error: 'Usuario nao encontrado' });
     return;
   }
 

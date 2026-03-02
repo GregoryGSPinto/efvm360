@@ -27,6 +27,7 @@ import {
 import routes from './routes';
 import { testConnection } from './config/database';
 import { initScheduler } from './jobs/scheduler';
+import { setupSwagger } from './config/swagger';
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '3001', 10);
@@ -65,7 +66,10 @@ if (process.env.NODE_ENV !== 'test') {
 
 app.use(API_PREFIX, routes);
 
-// ── ROTA ROOT (informações da API) ──────────────────────────────────────
+// ── SWAGGER / OPENAPI DOCS ──────────────────────────────────────────────
+setupSwagger(app);
+
+// ── ROTA ROOT (informacoes da API) ──────────────────────────────────────
 
 app.get('/', (_req, res) => {
   res.json({
