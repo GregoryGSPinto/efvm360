@@ -39,12 +39,19 @@ export const LoginScreenPremium = memo<Props>(({
       for (const u of usuarios) {
         if (u.status === 'inactive' || u.status === 'pending') continue;
         const yard = u.primaryYard || 'VFZ';
+        // Skip ADM-prefixed users from yard grouping (they are global admins)
+        if (u.matricula.startsWith('ADM')) continue;
         if (!porPatio[yard]) porPatio[yard] = [];
         // Only add one user per function per yard
         const roleExists = porPatio[yard].some(c => c.role === (funcaoLabel[u.funcao] || u.funcao));
         if (!roleExists && porPatio[yard].length < 4) {
           porPatio[yard].push({ mat: u.matricula, role: funcaoLabel[u.funcao] || u.funcao, pwd: '123456' });
         }
+      }
+      // Add global admin separately
+      const admins = usuarios.filter(u => u.matricula.startsWith('ADM') && u.status !== 'inactive' && u.status !== 'pending');
+      if (admins.length > 0) {
+        porPatio['Admin'] = admins.slice(0, 2).map(u => ({ mat: u.matricula, role: funcaoLabel[u.funcao] || u.funcao, pwd: '123456' }));
       }
       // Sort each yard's users by hierarchy
       for (const yard of Object.keys(porPatio)) {

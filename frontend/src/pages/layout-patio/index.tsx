@@ -449,7 +449,7 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
                 Editar Pátio
               </button>
             )}
-            {canDeleteYard && !isEditing && !patioSelecionado.padrao && (
+            {canDeleteYard && !isEditing && (
               <button onClick={handleExcluirPatio} style={{
                 background: 'transparent', border: '1px solid #ef4444', borderRadius: 8,
                 padding: '6px 14px', color: '#ef4444', fontWeight: 600, fontSize: 12,

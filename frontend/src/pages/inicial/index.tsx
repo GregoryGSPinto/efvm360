@@ -228,7 +228,7 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
           </div>
           {(funcaoLabel || patioLabel) && (
             <div style={{ fontSize: 13, color: tema.textoSecundario, marginTop: 4 }}>
-              {funcaoLabel}{funcaoLabel && patioLabel ? ' — ' : ''}{patioLabel ? `Patio ${patioLabel}` : ''}
+              {funcaoLabel}{funcaoLabel && patioLabel ? ' — ' : ''}{patioLabel}
             </div>
           )}
         </div>

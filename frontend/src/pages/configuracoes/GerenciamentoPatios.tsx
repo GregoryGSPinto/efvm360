@@ -21,14 +21,13 @@ const STATUS_LINHA_OPTIONS: { value: LinhaPatioInfo['status']; label: string }[]
 ];
 
 export default function GerenciamentoPatios({ styles, tema }: GerenciamentoPatiosProps): JSX.Element {
-  const { patios, criarPatio, editarPatio, desativarPatio, ativarPatio, adicionarLinha, editarLinha, removerLinha } = usePatio();
+  const { patios, criarPatio, desativarPatio, ativarPatio, adicionarLinha, editarLinha, removerLinha } = usePatio();
 
   const [mostrarForm, setMostrarForm] = useState(false);
   const [novoCodigo, setNovoCodigo] = useState('');
   const [novoNome, setNovoNome] = useState('');
   const [erroForm, setErroForm] = useState('');
-  const [editandoCodigo, setEditandoCodigo] = useState<string | null>(null);
-  const [editandoNome, setEditandoNome] = useState('');
+  // Name editing removed — use /layout page instead
 
   // ── Confirmation modal state (v3.2) ──
   const [confirmar, setConfirmar] = useState<{ tipo: 'desativar' | 'removerLinha'; codigo: string; idx?: number; nome?: string } | null>(null);
@@ -49,10 +48,7 @@ export default function GerenciamentoPatios({ styles, tema }: GerenciamentoPatio
     }
   }, [novoCodigo, novoNome, criarPatio]);
 
-  const handleSalvarEdicao = useCallback((codigo: string) => {
-    const result = editarPatio(codigo, editandoNome);
-    if (result.ok) { setEditandoCodigo(null); setEditandoNome(''); }
-  }, [editandoNome, editarPatio]);
+  // Name editing removed — use /layout page instead
 
   const handleToggleAtivo = useCallback((codigo: string, ativoAtual: boolean) => {
     if (ativoAtual) {
@@ -166,19 +162,7 @@ export default function GerenciamentoPatios({ styles, tema }: GerenciamentoPatio
                       <span style={{ fontWeight: 600, fontFamily: 'monospace', fontSize: 14, color: tema.texto }}>
                         {isExpanded ? '▾' : '▸'} {patio.codigo}
                       </span>
-                      <span>
-                        {editandoCodigo === patio.codigo ? (
-                          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }} onClick={e => e.stopPropagation()}>
-                            <input style={{ ...styles.input, margin: 0, padding: '6px 10px', fontSize: 13 }} value={editandoNome}
-                              onChange={e => setEditandoNome(e.target.value)}
-                              onKeyDown={e => { if (e.key === 'Enter') handleSalvarEdicao(patio.codigo); if (e.key === 'Escape') { setEditandoCodigo(null); setEditandoNome(''); } }}
-                              autoFocus />
-                            <button onClick={() => handleSalvarEdicao(patio.codigo)} style={{ background: tema.sucesso, color: '#fff', border: 'none', borderRadius: 6, padding: '6px 12px', fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>Salvar</button>
-                          </div>
-                        ) : (
-                          <span style={{ color: tema.texto }}>{patio.nome}</span>
-                        )}
-                      </span>
+                      <span style={{ color: tema.texto }}>{patio.nome}</span>
                       <span style={{ textAlign: 'center', fontSize: 12, color: tema.textoSecundario }}>
                         {summary.totalLinhas} linha{summary.totalLinhas !== 1 ? 's' : ''}
                       </span>
@@ -192,10 +176,6 @@ export default function GerenciamentoPatios({ styles, tema }: GerenciamentoPatio
                       <span style={{ textAlign: 'center', fontSize: 11, color: tema.textoSecundario }}>{patio.padrao ? 'Padrão' : 'Custom'}</span>
                       <span style={{ textAlign: 'center' }} onClick={e => e.stopPropagation()}>
                         <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
-                          {editandoCodigo !== patio.codigo && (
-                            <button onClick={() => { setEditandoCodigo(patio.codigo); setEditandoNome(patio.nome); }}
-                              style={{ background: 'transparent', color: tema.primaria, border: `1px solid ${tema.primaria}`, borderRadius: 6, padding: '4px 10px', fontSize: 11, cursor: 'pointer' }}>Editar</button>
-                          )}
                           <button onClick={() => handleToggleAtivo(patio.codigo, patio.ativo)}
                             style={{
                               background: patio.ativo ? 'rgba(220,38,38,0.08)' : 'rgba(34,197,94,0.08)',
