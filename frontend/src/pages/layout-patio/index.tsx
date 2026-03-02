@@ -18,6 +18,8 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
   const canSelectYard = isGestor || isInspetor;
   const defaultYard = (usuarioLogado?.primaryYard || 'VFZ') as YardCode;
   const [selectedYard, setSelectedYard] = useState<YardCode>(defaultYard);
+  const canRenameYard = isGestor || isInspetor;
+  const canDeleteYard = isGestor;
   const canEditSelectedYard = isGestor || isInspetor;
 
   // ── Create Patio Modal ──
@@ -426,10 +428,11 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
               ) : (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                   {patioSelecionado.nome}
-                  {canEditSelectedYard && !isEditing && (
+                  {canRenameYard && !isEditing && (
                     <button onClick={iniciarEdicaoNome} style={{
                       background: 'transparent', border: 'none', cursor: 'pointer',
-                      fontSize: 14, padding: '2px 6px', borderRadius: 4, color: tema.textoSecundario,
+                      fontSize: 14, padding: '10px 12px', borderRadius: 6, color: tema.textoSecundario,
+                      minWidth: 44, minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                     }} title="Renomear pátio">
                       ✏️
                     </button>
@@ -446,11 +449,11 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
                 Editar Pátio
               </button>
             )}
-            {canEditSelectedYard && !isEditing && !patioSelecionado.padrao && (
+            {canDeleteYard && !isEditing && !patioSelecionado.padrao && (
               <button onClick={handleExcluirPatio} style={{
                 background: 'transparent', border: '1px solid #ef4444', borderRadius: 8,
                 padding: '6px 14px', color: '#ef4444', fontWeight: 600, fontSize: 12,
-                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, minHeight: 36,
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, minHeight: 44,
               }}>
                 Excluir Pátio
               </button>
