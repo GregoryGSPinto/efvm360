@@ -26,6 +26,7 @@ import {
 } from './middleware/security';
 import routes from './routes';
 import { testConnection } from './config/database';
+import { initScheduler } from './jobs/scheduler';
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '3001', 10);
@@ -124,6 +125,9 @@ const startServer = async (): Promise<void> => {
   try {
     // Testa conexão com MySQL
     await testConnection();
+
+    // Inicializa jobs agendados (após conexão com DB)
+    initScheduler();
 
     // Inicia servidor
     app.listen(PORT, '0.0.0.0', () => {
