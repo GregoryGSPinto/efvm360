@@ -25,7 +25,7 @@ jobs:
       matrix:
         project: [vfz, backend]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-node@v4
         with:
@@ -51,7 +51,7 @@ jobs:
     name: "🔍 Trivy FS Scan"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Run Trivy
         uses: aquasecurity/trivy-action@master
@@ -86,7 +86,7 @@ jobs:
       matrix:
         project: [vfz, backend]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-node@v4
         with:
@@ -108,7 +108,7 @@ jobs:
     name: "🐳 Docker Image Scan"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Build Image
         run: docker build -t vfz-backend:scan ./backend
