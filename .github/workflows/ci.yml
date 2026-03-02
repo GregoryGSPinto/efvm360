@@ -1,12 +1,12 @@
 # ============================================================================
 # VFZ v3.2 — CI Pipeline (Continuous Integration)
-# Sistema de Gestão de Troca de Turno Ferroviária — Vale S.A.
+# Sistema de Gestao de Troca de Turno Ferroviaria — Vale S.A.
 # ============================================================================
 # Trigger: push (main/staging/develop), PRs para essas branches
-# Pipeline: lint → test → build → docker validate → summary
+# Pipeline: lint -> test (with coverage enforcement) -> build -> docker validate -> summary
 # ============================================================================
 
-name: "🚂 VFZ — CI Pipeline"
+name: "VFZ — CI Pipeline"
 
 on:
   push:
@@ -26,31 +26,35 @@ env:
 jobs:
   # ── 1. Frontend Lint + Type Check ─────────────────────────────────────
   lint-frontend:
-    name: "🔍 Frontend Lint"
+    name: "Frontend Lint"
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: vfz
+        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: vfz/package-lock.json
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
 
-      - run: npm ci --prefer-offline
+      - run: pnpm install --frozen-lockfile
 
       - name: ESLint
-        run: npm run lint
+        run: pnpm lint
 
       - name: TypeScript Strict Check
-        run: npm run type-check
+        run: pnpm type-check
 
   # ── 2. Backend Lint + Type Check ──────────────────────────────────────
   lint-backend:
-    name: "🔍 Backend Lint"
+    name: "Backend Lint"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -72,39 +76,55 @@ jobs:
       - name: TypeScript Type Check
         run: npx tsc --noEmit
 
-  # ── 3. Frontend Tests (Vitest, 130 tests) ────────────────────────────
+  # ── 3. Frontend Tests (Vitest) + Coverage Enforcement ──────────────
   test-frontend:
-    name: "🧪 Frontend Tests"
+    name: "Frontend Tests + Coverage"
     runs-on: ubuntu-latest
     needs: lint-frontend
     defaults:
       run:
-        working-directory: vfz
+        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: vfz/package-lock.json
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
 
-      - run: npm ci --prefer-offline
+      - run: pnpm install --frozen-lockfile
 
-      - name: "Run Vitest (130 tests)"
-        run: npm run test:coverage
+      - name: "Run Vitest with coverage"
+        run: pnpm test -- --coverage
+        # Coverage thresholds are configured in vitest.config.ts:
+        #   branches: 40, functions: 50, lines: 50, statements: 50
+        # Vitest will fail automatically if coverage drops below these thresholds.
+
+      - name: Verify coverage thresholds met
+        run: |
+          echo "### Frontend Coverage" >> $GITHUB_STEP_SUMMARY
+          echo "Vitest coverage thresholds enforced:" >> $GITHUB_STEP_SUMMARY
+          echo "- Branches: >= 40%" >> $GITHUB_STEP_SUMMARY
+          echo "- Functions: >= 50%" >> $GITHUB_STEP_SUMMARY
+          echo "- Lines: >= 50%" >> $GITHUB_STEP_SUMMARY
+          echo "- Statements: >= 50%" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload Coverage
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: frontend-coverage
-          path: vfz/coverage/
+          path: frontend/coverage/
           retention-days: 14
 
-  # ── 4. Backend Tests (Jest, 74 tests) ─────────────────────────────────
+  # ── 4. Backend Tests (Jest) + Coverage Enforcement ─────────────────
   test-backend:
-    name: "🧪 Backend Tests"
+    name: "Backend Tests + Coverage"
     runs-on: ubuntu-latest
     needs: lint-backend
     defaults:
@@ -121,10 +141,22 @@ jobs:
 
       - run: npm ci --prefer-offline
 
-      - name: "Run Jest (74 tests, SQLite in-memory)"
+      - name: "Run Jest with coverage (SQLite in-memory)"
         run: npm run test:coverage
         env:
           NODE_ENV: test
+        # Coverage thresholds are configured in jest.config.ts:
+        #   branches: 50, functions: 60, lines: 60, statements: 60
+        # Jest will fail automatically if coverage drops below these thresholds.
+
+      - name: Verify coverage thresholds met
+        run: |
+          echo "### Backend Coverage" >> $GITHUB_STEP_SUMMARY
+          echo "Jest coverage thresholds enforced:" >> $GITHUB_STEP_SUMMARY
+          echo "- Branches: >= 50%" >> $GITHUB_STEP_SUMMARY
+          echo "- Functions: >= 60%" >> $GITHUB_STEP_SUMMARY
+          echo "- Lines: >= 60%" >> $GITHUB_STEP_SUMMARY
+          echo "- Statements: >= 60%" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload Coverage
         if: always()
@@ -136,48 +168,52 @@ jobs:
 
   # ── 5. Build Frontend (Vite) ──────────────────────────────────────────
   build-frontend:
-    name: "🏗️ Frontend Build"
+    name: "Frontend Build"
     runs-on: ubuntu-latest
     needs: test-frontend
     defaults:
       run:
-        working-directory: vfz
+        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: vfz/package-lock.json
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
 
-      - run: npm ci --prefer-offline
+      - run: pnpm install --frozen-lockfile
 
       - name: Build Vite
-        run: npm run build
+        run: pnpm build
 
       - name: Check Bundle Size
         run: |
           SIZE=$(du -sb dist/ | awk '{print $1}')
           SIZE_MB=$(echo "scale=2; $SIZE / 1048576" | bc)
-          echo "📦 Frontend bundle: ${SIZE_MB}MB"
-          echo "### 📦 Frontend Bundle" >> $GITHUB_STEP_SUMMARY
+          echo "Frontend bundle: ${SIZE_MB}MB"
+          echo "### Frontend Bundle" >> $GITHUB_STEP_SUMMARY
           echo "Size: **${SIZE_MB} MB**" >> $GITHUB_STEP_SUMMARY
           # Fail if > 15MB (enterprise threshold)
           if [ "$SIZE" -gt 15728640 ]; then
-            echo "❌ Bundle exceeds 15MB limit" >> $GITHUB_STEP_SUMMARY
+            echo "Bundle exceeds 15MB limit" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
 
       - uses: actions/upload-artifact@v4
         with:
           name: frontend-dist
-          path: vfz/dist/
+          path: frontend/dist/
           retention-days: 7
 
   # ── 6. Build Backend (TypeScript) ─────────────────────────────────────
   build-backend:
-    name: "🏗️ Backend Build"
+    name: "Backend Build"
     runs-on: ubuntu-latest
     needs: test-backend
     defaults:
@@ -205,7 +241,7 @@ jobs:
 
   # ── 7. Docker Validate (main only) ───────────────────────────────────
   docker-validate:
-    name: "🐳 Docker Validate"
+    name: "Docker Validate"
     runs-on: ubuntu-latest
     needs: [build-frontend, build-backend]
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging'
@@ -220,23 +256,26 @@ jobs:
 
   # ── 8. CI Summary ────────────────────────────────────────────────────
   ci-complete:
-    name: "✅ CI Complete"
+    name: "CI Complete"
     runs-on: ubuntu-latest
     needs: [build-frontend, build-backend]
     if: always()
     steps:
       - name: Pipeline Summary
         run: |
-          echo "## 🚂 VFZ CI Pipeline — Results" >> $GITHUB_STEP_SUMMARY
+          echo "## VFZ CI Pipeline — Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Stage | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Frontend Build | ${{ needs.build-frontend.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Backend Build | ${{ needs.build-backend.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend Build | ${{ needs.build-frontend.result == 'success' && 'Passed' || 'Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend Build | ${{ needs.build-backend.result == 'success' && 'Passed' || 'Failed' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Tests:** 204 total (130 frontend + 74 backend)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Coverage Enforcement:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Backend: branches>=50%, functions>=60%, lines>=60%, statements>=60%" >> $GITHUB_STEP_SUMMARY
+          echo "- Frontend: branches>=40%, functions>=50%, lines>=50%, statements>=50%" >> $GITHUB_STEP_SUMMARY
 
       - name: Fail if any job failed
         if: contains(needs.*.result, 'failure')
