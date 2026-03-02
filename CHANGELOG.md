@@ -1,91 +1,85 @@
-# Changelog — VFZ Gestão de Troca de Turno
+# Changelog
 
-Todas as mudanças notáveis no projeto estão documentadas neste arquivo.
-Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
+All notable changes to this project will be documented in this file.
 
----
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.2.0] — 2026-02-21
+## [Unreleased]
 
-### Enterprise Evolution Release
+## [3.3.0] - 2026-03-01
 
-#### Adicionado
-- **App.tsx decomposto:** 6.662 → 394 linhas (−94%) — orchestrator puro
-- **7 páginas isoladas:** Inicial, Passagem (6 seções), Layout Pátio, Histórico, Configurações, DSS, Cadastro
-- **12 custom hooks:** Incluindo novos `useTurnoTimer` e `usePassagemHandlers`
-- **API abstraction layer:** `api/client.ts` com token management, refresh automático, retry
-- **DTOs/contracts:** Interfaces de contrato para todas as entidades (auth, passagem, audit, LGPD)
-- **Error boundaries segmentados:** Crash em módulo não derruba o sistema
-- **Security guards:** Validação pré-ação para assinatura, login, exportação
-- **Data consistency validators:** Validação de formulário, sessão e storage
-- **Environment config:** Separação clara dev/staging/production com settings por ambiente
-- **13 feature flags:** Com localStorage overrides e debug console
+### Added
+- **JWT Authentication Backend** — Full auth flow with bcrypt, access/refresh token rotation, rate limiting, and audit trail
+- **OpenAPI 3.0 Documentation** — Swagger UI at `/api/docs` with JSDoc annotations on all endpoints
+- **Multi-tab Coordination** — BroadcastChannel-based leader election to prevent sync race conditions; localStorage fallback
+- **Observability Metrics** — Business metrics service, telemetry middleware with rolling window, KPI dashboard component
+- **Docker Production-Ready** — Multi-stage Dockerfile, `docker-compose.prod.yml` with resource limits, token cleanup scheduler
+- **LGPD Compliance Endpoints** — `GET /lgpd/meus-dados`, `POST /lgpd/exportar`, `POST /lgpd/anonimizar`
+- **pnpm Monorepo** — Unified workspace with `pnpm-workspace.yaml`, root scripts, backend migrated from npm
+- **MIT License** — Open-source license added
+- **CONTRIBUTING.md** — Development setup, commit conventions, PR process
+- **451 Tests** — Up from 396; new integration tests (LGPD, sync), TabCoordinator (29), MetricasDashboard (26)
 
-#### Backend
-- **74 testes unitários** (Jest + SQLite in-memory)
-- **5 controllers:** Auth, Passagens, Audit, Users, LGPD
-- **4 middlewares:** Auth JWT, Azure AD JWKS, Security (Helmet, CORS, rate limit), RBAC
-- **Migrations + Seed:** Schema completo + 5 usuários iniciais
-- **Monitoring service:** Application Insights com custom events operacionais
-- **Key Vault service:** Integração Azure com fallback .env
+### Changed
+- **AdamBot Voice** — Pitch 0.85 to 1.0, rate 1.05 to 0.95 for natural Brazilian Portuguese; improved voice selection
+- **Mobile Autoplay** — Replaced `useEffect` autoplay with explicit "Ouvir briefing" button
+- **Matrícula Validation** — Backend regex updated to real EFVM formats (`VFZ|VBR|VCS|VTO|P6|ADM|SUP` + 4 digits)
 
-#### Testes
-- **130 testes frontend** (Vitest + jsdom)
-- **25 testes E2E** (Playwright — login, navegação, passagem, responsividade, segurança)
-- **5 cenários de carga** (k6 — login burst, shift change, stress 300 VUs, endurance 30min)
+### Fixed
+- **RBAC Patio Buttons** — Inspector can only rename yards; manager can delete with double confirmation
+- **MySQL Triggers** — `log-bin-trust-function-creators=1` for binary logging compatibility
 
-#### CI/CD
-- **4 workflows GitHub Actions:** CI, deploy staging, deploy production (blue/green), security scan
-- **Dependabot** configurado para npm e GitHub Actions
-- **CODEOWNERS** + PR template + branch protection
+## [3.2.0] - 2026-02-28
 
-#### Infraestrutura
-- **6 módulos Azure Bicep:** App Service + staging slot, MySQL HA, Key Vault, App Insights, Static Web App
-- **Docker Compose:** MySQL + Backend + Frontend para desenvolvimento local
-- **Dockerfiles:** Backend (Node 20 Alpine) + Frontend (Vite dev server)
+### Added
+- **AdamBot Bidirectional Voice** — STT via Web Speech API, TTS per message, "Read All"
+- **Team Hierarchy** — Visual tree in user profile with `useEquipe` hook
+- **AdamBot Copilot** — Section-by-section validation, alerts with TTS, executive summary
+- **AdamBot Briefing** — Automatic situational summary with TTS on dashboard
 
-#### Documentação
-- ARCHITECTURE.md (6 diagramas C4 + ADRs + NFRs)
-- MANUAL_USUARIO.md (7 capítulos)
-- RUNBOOK.md (procedimentos operacionais TI)
-- MONITORING.md (KQL dashboards + alertas)
-- LGPD_COMPLIANCE.md + PRIVACY_NOTICE.md
-- AZURE_AD_SETUP.md + KEYVAULT_SETUP.md
-- WCAG_CHECKLIST.md (WCAG 2.1 AA)
-- ENTERPRISE_EVOLUTION_REPORT.md (relatório técnico completo)
+### Changed
+- **Equipment Management** — Moved from standalone page into shift handover form
 
-#### Segurança
-- HMAC local para integridade de sessão
-- Sanitização profunda de inputs (XSS, SQL injection patterns)
-- Strip automático de campos sensíveis
-- Audit trail append-only com hash chain SHA-256
-- RBAC hierárquico com 5 níveis
-- Console protection em produção
-- LGPD: API de direitos do titular + aviso de privacidade
+## [3.1.0] - 2026-02-27
 
----
+### Added
+- **Backend API** — Express + Sequelize + MySQL with 6 migrations, 27+ REST endpoints
+- **Input Validation** — express-validator middleware with EFVM-specific validators
+- **Audit Trail** — Append-only log with integrity verification, trigger-based protection
+- **Yard Management** — CRUD for railway yards with activation/deactivation
+- **DSS Module** — Safety dialogue management
+- **BI Dashboard** — Backend KPIs and yard summary endpoints
+- **User Management** — Admin CRUD with registration approval workflow
 
-## [3.1.0] — 2026-01-xx
+### Infrastructure
+- **Docker Compose** — MySQL + Backend + Frontend for local development
+- **CI/CD** — GitHub Actions workflows for lint, test, build
+- **Dependabot** — Automated dependency updates
 
-### Hardened Frontend Release
+## [3.0.0] - 2026-02-25
 
-#### Adicionado
-- Sistema completo de troca de turno com 9 seções operacionais
-- Dashboard BI+ com KPIs operacionais (ECharts)
-- Avaliação 5S alinhada ao PGS-007091 Vale
-- DSS (Diálogo de Segurança e Saúde) com histórico
-- Sistema de alertas inteligentes (IA operacional)
-- AdamBoot chat assistente
-- Tema claro/escuro/automático com glassmorphism
-- PWA com Service Worker (offline-first)
-- Login com SHA-256 hash + salt
-- Blindagem anti-tampering
+### Added
+- **Domain-Driven Design** — 5 aggregates, 16 domain events, event sourcing with CQRS
+- **Offline-First** — IndexedDB event store, SyncEngine with conflict resolution
+- **IntegrityService** — SHA-256 blockchain-like chain for write-once sealed handovers
+- **BI+ Dashboard** — Operational analytics with trend detection
+- **Risk Assessment** — 5x5 risk matrix with mitigation tracking
 
----
+## [2.0.0] - 2026-02-22
 
-## [3.0.0] — 2025-xx-xx
+### Added
+- **App Decomposition** — App.tsx from 6,662 to 394 lines; 7 isolated pages, 12 custom hooks
+- **API Abstraction Layer** — `api/client.ts` with token management, refresh, retry
+- **Error Boundaries** — Segmented crash isolation per module
+- **Security Guards** — Pre-action validation for signatures, login, export
+- **Feature Flags** — 13 flags with localStorage overrides
 
-### Initial Release
-- Formulário digital de troca de turno
-- Login local com matrícula/senha
-- Persistência via localStorage
+## [1.0.0] - 2026-02-20
+
+### Added
+- **Shift Handover Form** — Digital replacement for paper-based railway shift transitions
+- **Authentication** — Local auth with HMAC-signed sessions
+- **RBAC** — 4-level hierarchy (operador, inspetor, gestor, administrador)
+- **Responsive UI** — Mobile-first glassmorphism design for field tablet use
+- **PWA** — Service Worker for offline-first operation

@@ -9,10 +9,10 @@
 Digital platform for railway shift handover, yard management, operational safety, and real-time decision support.
 
 [![Build](https://github.com/GregoryGSPinto/efvm360/actions/workflows/ci.yml/badge.svg)](https://github.com/GregoryGSPinto/efvm360/actions)
-[![Tests](https://img.shields.io/badge/tests-277%20passing-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-451%20passing-brightgreen)]()
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)]()
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)]()
-[![License](https://img.shields.io/badge/license-portfolio-blue)]()
+[![License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 
 </div>
 
