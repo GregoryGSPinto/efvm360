@@ -179,6 +179,11 @@ router.get('/users/:matricula/yards', authenticate, orgCtrl.getUserYards);
 router.post('/users/:matricula/yards', authenticate, authorize('coordenador'), orgCtrl.assignYard);
 router.delete('/users/:matricula/yards/:yard', authenticate, authorize('coordenador'), orgCtrl.removeYard);
 
+// ── RAILWAYS (Multi-Tenancy) ────────────────────────────────────────────
+import * as railwayCtrl from '../controllers/railwayController';
+router.get('/railways', railwayCtrl.list);
+router.get('/railways/:id', railwayCtrl.getById);
+
 // ── APPROVAL WORKFLOWS ──────────────────────────────────────────────────
 import * as workflowCtrl from '../controllers/workflowController';
 router.get('/workflows/inbox', authenticate, authorize('supervisor'), workflowCtrl.inbox);
