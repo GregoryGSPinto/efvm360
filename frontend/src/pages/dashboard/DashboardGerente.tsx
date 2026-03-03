@@ -2,7 +2,7 @@
 // EFVM360 — Dashboard Gerente (all yards consolidated)
 // ============================================================================
 
-import { useMemo, type CSSProperties } from 'react';
+import { useState, useMemo, useEffect, type CSSProperties } from 'react';
 import type { TemaComputed } from '../types';
 import type { Usuario } from '../../types';
 import {
@@ -13,6 +13,13 @@ import {
   calculateTotalAnomalies,
   getComplianceStatus,
 } from '../../services/analyticsService';
+import type { DailyStats, YardSummary } from '../../services/analyticsService';
+import { apiClient } from '../../services/apiClient';
+
+interface GerenteData {
+  summaries: YardSummary[];
+  allStats: DailyStats[];
+}
 
 interface Props {
   tema: TemaComputed;
@@ -22,20 +29,34 @@ interface Props {
 const STATUS_COLOR = { green: '#10b981', yellow: '#f59e0b', red: '#ef4444' };
 const TARGET = 90;
 
-export default function DashboardGerente({ tema }: Props) {
-  const summaries = useMemo(() => generateMockYardSummaries(), []);
+function generateMockGerenteData(): GerenteData {
+  const summaries = generateMockYardSummaries();
+  const yards = ['VFZ', 'VBR', 'VCS', 'P6', 'VTO'];
+  const allStats = yards.flatMap(y => generateMockDailyStats(y, 90));
+  return { summaries, allStats };
+}
 
-  const allStats = useMemo(() => {
-    const yards = ['VFZ', 'VBR', 'VCS', 'P6', 'VTO'];
-    return yards.flatMap(y => generateMockDailyStats(y, 90));
+export default function DashboardGerente({ tema }: Props) {
+  const [isLive, setIsLive] = useState(false);
+  const [data, setData] = useState<GerenteData>(() => generateMockGerenteData());
+
+  useEffect(() => {
+    apiClient.get<GerenteData>('/analytics/dashboard/gerente').then(resp => {
+      if (resp && resp.summaries) {
+        setData(resp);
+        setIsLive(true);
+      }
+    });
   }, []);
 
-  const last30 = allStats.filter(s => {
+  const { summaries, allStats } = data;
+
+  const last30 = useMemo(() => allStats.filter(s => {
     const d = new Date(s.date);
     const ago = new Date();
     ago.setDate(ago.getDate() - 30);
     return d >= ago;
-  });
+  }), [allStats]);
 
   const avgCompliance = calculateAvgCompliance(last30);
   const totalHandovers = calculateTotalHandovers(last30);
@@ -58,7 +79,10 @@ export default function DashboardGerente({ tema }: Props) {
 
   return (
     <div style={{ padding: 20, maxWidth: 1000, margin: '0 auto' }}>
-      <h2 style={{ color: tema.texto, marginBottom: 4 }}>Dashboard Gerencial</h2>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <h2 style={{ color: tema.texto, marginBottom: 4 }}>Dashboard Gerencial</h2>
+        {!isLive && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 8, background: 'rgba(249,115,22,0.1)', color: '#f97316', fontWeight: 600 }}>Modo Demo</span>}
+      </div>
       <div style={{ color: tema.textoSecundario, fontSize: 14, marginBottom: 20 }}>Visao consolidada da regional</div>
 
       {/* KPI Cards */}

@@ -2,7 +2,7 @@
 // EFVM360 — Composicoes (Train Compositions)
 // ============================================================================
 
-import { useState, useMemo, useCallback, type CSSProperties } from 'react';
+import { useState, useMemo, useCallback, useEffect, type CSSProperties } from 'react';
 import type { TemaComputed, StylesObject } from '../types';
 import type { ConfiguracaoSistema, Usuario } from '../../types';
 import type { TrainComposition, CompositionStatus } from '../../domain/aggregates/TrainComposition';
@@ -13,6 +13,7 @@ import {
   completeComposition,
   getJourneyProgress,
 } from '../../domain/aggregates/TrainComposition';
+import { apiClient } from '../../services/apiClient';
 
 // ── Storage ─────────────────────────────────────────────────────────────
 
@@ -66,6 +67,7 @@ function PaginaComposicoes({ tema }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('');
   const [filterYard, setFilterYard] = useState<string>('');
+  const [isLive, setIsLive] = useState(false);
 
   // Create form state
   const [code, setCode] = useState('');
@@ -73,6 +75,18 @@ function PaginaComposicoes({ tema }: Props) {
   const [destination, setDestination] = useState<string>('VBR');
   const [cargo, setCargo] = useState('');
   const [wagons, setWagons] = useState('');
+
+  // Load from API on mount
+  useEffect(() => {
+    const activeYard = sessionStorage.getItem('active_yard') || 'VFZ';
+    apiClient.get<TrainComposition[]>(`/compositions?yard=${activeYard}`).then(data => {
+      if (data && Array.isArray(data)) {
+        setCompositions(data);
+        saveCompositions(data);
+        setIsLive(true);
+      }
+    });
+  }, []);
 
   const selected = useMemo(
     () => compositions.find(c => c.id === selectedId) || null,
@@ -114,23 +128,36 @@ function PaginaComposicoes({ tema }: Props) {
     setView('list');
   }, [code, origin, destination, cargo, wagons, compositions, persist]);
 
-  const handleDepart = useCallback(() => {
+  const handleDepart = useCallback(async () => {
     if (!selected) return;
-    const toYard = selected.destinationYard;
-    const updated = departComposition(selected, toYard);
-    updateComp(updated);
-    setSelectedId(updated.id);
+    const apiResult = await apiClient.patch<TrainComposition>(`/compositions/${selected.compositionCode}/depart`);
+    if (apiResult) {
+      updateComp(apiResult);
+      setSelectedId(apiResult.id);
+    } else {
+      const toYard = selected.destinationYard;
+      const updated = departComposition(selected, toYard);
+      updateComp(updated);
+      setSelectedId(updated.id);
+    }
   }, [selected, updateComp]);
 
-  const handleArrive = useCallback(() => {
+  const handleArrive = useCallback(async () => {
     if (!selected) return;
-    const updated = arriveComposition(selected, selected.destinationYard);
-    updateComp(updated);
-    setSelectedId(updated.id);
+    const apiResult = await apiClient.patch<TrainComposition>(`/compositions/${selected.compositionCode}/arrive`);
+    if (apiResult) {
+      updateComp(apiResult);
+      setSelectedId(apiResult.id);
+    } else {
+      const updated = arriveComposition(selected, selected.destinationYard);
+      updateComp(updated);
+      setSelectedId(updated.id);
+    }
   }, [selected, updateComp]);
 
-  const handleComplete = useCallback(() => {
+  const handleComplete = useCallback(async () => {
     if (!selected) return;
+    // Complete is a local domain action — no dedicated endpoint
     const updated = completeComposition(selected);
     updateComp(updated);
     setSelectedId(updated.id);
@@ -306,7 +333,10 @@ function PaginaComposicoes({ tema }: Props) {
   return (
     <div style={{ padding: 20, maxWidth: 700, margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h2 style={{ color: tema.texto, margin: 0 }}>Composicoes</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <h2 style={{ color: tema.texto, margin: 0 }}>Composicoes</h2>
+          {!isLive && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 8, background: 'rgba(249,115,22,0.1)', color: '#f97316', fontWeight: 600 }}>Modo Demo</span>}
+        </div>
         <button style={btn('#007e7a')} onClick={() => setView('create')}>+ Nova</button>
       </div>
 

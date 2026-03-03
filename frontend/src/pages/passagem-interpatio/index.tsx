@@ -2,7 +2,7 @@
 // EFVM360 — Passagem Inter-Pátio (Inter-Yard Handover)
 // ============================================================================
 
-import { useState, useMemo, useCallback, type CSSProperties } from 'react';
+import { useState, useMemo, useCallback, useEffect, type CSSProperties } from 'react';
 import type { TemaComputed, StylesObject } from '../types';
 import type { ConfiguracaoSistema, Usuario } from '../../types';
 import type { InterYardHandover, InterYardStatus, ChecklistItem } from '../../domain/aggregates/InterYardHandover';
@@ -14,10 +14,12 @@ import {
   sealHandover,
 } from '../../domain/aggregates/InterYardHandover';
 import { evaluateDivergenceEscalation, isHandoverBlocked } from '../../domain/policies/InterYardDivergencePolicy';
+import { apiClient } from '../../services/apiClient';
 
 // ── Storage Key ─────────────────────────────────────────────────────────
 
 const STORAGE_KEY = 'efvm360-inter-yard-handovers';
+const PENDING_SYNC_KEY = 'efvm360-inter-yard-pending-sync';
 
 function loadHandovers(): InterYardHandover[] {
   try {
@@ -28,6 +30,14 @@ function loadHandovers(): InterYardHandover[] {
 
 function saveHandovers(handovers: InterYardHandover[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(handovers));
+}
+
+function savePendingSync(action: { type: string; payload: unknown }): void {
+  try {
+    const pending = JSON.parse(localStorage.getItem(PENDING_SYNC_KEY) || '[]');
+    pending.push({ ...action, timestamp: new Date().toISOString() });
+    localStorage.setItem(PENDING_SYNC_KEY, JSON.stringify(pending));
+  } catch { /* ignore */ }
 }
 
 // ── Default Checklist Items ─────────────────────────────────────────────
@@ -78,6 +88,7 @@ function PaginaInterYard({ tema, usuarioLogado }: Props) {
   const [handovers, setHandovers] = useState<InterYardHandover[]>(loadHandovers);
   const [view, setView] = useState<'list' | 'create' | 'detail'>('list');
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [isLive, setIsLive] = useState(false);
 
   // Create form state
   const [compositionCode, setCompositionCode] = useState('');
@@ -85,6 +96,18 @@ function PaginaInterYard({ tema, usuarioLogado }: Props) {
   const [destinationYard, setDestinationYard] = useState<string>('VBR');
 
   const matricula = usuarioLogado?.matricula || 'UNKNOWN';
+
+  // Load from API on mount
+  useEffect(() => {
+    const activeYard = sessionStorage.getItem('active_yard') || 'VFZ';
+    apiClient.get<InterYardHandover[]>(`/inter-yard?yard=${activeYard}`).then(data => {
+      if (data && Array.isArray(data) && data.length >= 0) {
+        setHandovers(data);
+        saveHandovers(data);
+        setIsLive(true);
+      }
+    });
+  }, []);
 
   const selected = useMemo(
     () => handovers.find(h => h.id === selectedId) || null,
@@ -102,54 +125,102 @@ function PaginaInterYard({ tema, usuarioLogado }: Props) {
 
   // ── Actions ─────────────────────────────────────────────────────────
 
-  const handleCreate = useCallback(() => {
+  const handleCreate = useCallback(async () => {
     if (!compositionCode.trim()) return;
-    const h = createInterYardHandover({
+    const payload = {
       compositionCode: compositionCode.trim(),
-      originYard: originYard as 'VFZ',
-      destinationYard: destinationYard as 'VFZ',
+      originYard,
+      destinationYard,
       dispatcherMatricula: matricula,
-    });
-    persist([h, ...handovers]);
+    };
+
+    // Try API first
+    const apiResult = await apiClient.post<InterYardHandover>('/inter-yard', payload);
+    if (apiResult) {
+      persist([apiResult, ...handovers]);
+    } else {
+      // Offline: create locally and queue for sync
+      const h = createInterYardHandover({
+        ...payload,
+        originYard: originYard as 'VFZ',
+        destinationYard: destinationYard as 'VFZ',
+      });
+      persist([h, ...handovers]);
+      savePendingSync({ type: 'CREATE', payload: h });
+    }
     setCompositionCode('');
     setView('list');
   }, [compositionCode, originYard, destinationYard, matricula, handovers, persist]);
 
-  const handleDispatch = useCallback(() => {
+  const handleDispatch = useCallback(async () => {
     if (!selected || selected.status !== 'draft') return;
     const checklist = DEFAULT_CHECKLIST.map(item => ({
       ...item,
       value: (document.getElementById(`dispatch-${item.id}`) as HTMLInputElement)?.value || 'OK',
     }));
-    const updated = dispatchHandover(selected, checklist);
-    updateHandover(updated);
-    setSelectedId(updated.id);
+
+    const apiResult = await apiClient.patch<InterYardHandover>(`/inter-yard/${selected.id}/dispatch`, { checklist });
+    if (apiResult) {
+      updateHandover(apiResult);
+      setSelectedId(apiResult.id);
+    } else {
+      const updated = dispatchHandover(selected, checklist);
+      updateHandover(updated);
+      setSelectedId(updated.id);
+      savePendingSync({ type: 'DISPATCH', payload: { id: selected.id, checklist } });
+    }
   }, [selected, updateHandover]);
 
-  const handleReceive = useCallback(() => {
+  const handleReceive = useCallback(async () => {
     if (!selected || selected.status !== 'dispatched') return;
     const checklist = DEFAULT_CHECKLIST.map(item => ({
       ...item,
       value: (document.getElementById(`receive-${item.id}`) as HTMLInputElement)?.value || 'OK',
     }));
-    const updated = receiveHandover(selected, matricula, checklist);
-    updateHandover(updated);
-    setSelectedId(updated.id);
+
+    const apiResult = await apiClient.patch<InterYardHandover>(`/inter-yard/${selected.id}/receive`, { checklist });
+    if (apiResult) {
+      updateHandover(apiResult);
+      setSelectedId(apiResult.id);
+    } else {
+      const updated = receiveHandover(selected, matricula, checklist);
+      updateHandover(updated);
+      setSelectedId(updated.id);
+      savePendingSync({ type: 'RECEIVE', payload: { id: selected.id, checklist } });
+    }
   }, [selected, matricula, updateHandover]);
 
-  const handleResolve = useCallback((itemId: string, resolution: 'dispatcher_correct' | 'receiver_correct') => {
+  const handleResolve = useCallback(async (itemId: string, resolution: 'dispatcher_correct' | 'receiver_correct') => {
     if (!selected) return;
-    const updated = resolveDivergence(selected, itemId, resolution, matricula);
-    updateHandover(updated);
-    setSelectedId(updated.id);
+
+    const apiResult = await apiClient.patch<InterYardHandover>(`/inter-yard/${selected.id}/resolve`, {
+      divergenceId: itemId, resolution, resolvedBy: matricula,
+    });
+    if (apiResult) {
+      updateHandover(apiResult);
+      setSelectedId(apiResult.id);
+    } else {
+      const updated = resolveDivergence(selected, itemId, resolution, matricula);
+      updateHandover(updated);
+      setSelectedId(updated.id);
+      savePendingSync({ type: 'RESOLVE', payload: { id: selected.id, itemId, resolution, resolvedBy: matricula } });
+    }
   }, [selected, matricula, updateHandover]);
 
-  const handleSeal = useCallback(() => {
+  const handleSeal = useCallback(async () => {
     if (!selected) return;
-    const hash = crypto.randomUUID().replace(/-/g, '');
-    const updated = sealHandover(selected, hash, null);
-    updateHandover(updated);
-    setSelectedId(updated.id);
+
+    const apiResult = await apiClient.post<InterYardHandover>(`/inter-yard/${selected.id}/seal`);
+    if (apiResult) {
+      updateHandover(apiResult);
+      setSelectedId(apiResult.id);
+    } else {
+      const hash = crypto.randomUUID().replace(/-/g, '');
+      const updated = sealHandover(selected, hash, null);
+      updateHandover(updated);
+      setSelectedId(updated.id);
+      savePendingSync({ type: 'SEAL', payload: { id: selected.id } });
+    }
   }, [selected, updateHandover]);
 
   // ── Styles ──────────────────────────────────────────────────────────
@@ -369,7 +440,10 @@ function PaginaInterYard({ tema, usuarioLogado }: Props) {
   return (
     <div style={{ padding: 20, maxWidth: 700, margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h2 style={{ color: tema.texto, margin: 0 }}>Passagens Inter-Patio</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <h2 style={{ color: tema.texto, margin: 0 }}>Passagens Inter-Patio</h2>
+          {!isLive && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 8, background: 'rgba(249,115,22,0.1)', color: '#f97316', fontWeight: 600 }}>Offline</span>}
+        </div>
         <button style={btn('#007e7a')} onClick={() => setView('create')}>
           + Nova Passagem
         </button>

@@ -2,7 +2,7 @@
 // EFVM360 — Dashboard Supervisor (single yard)
 // ============================================================================
 
-import { useState, useMemo, type CSSProperties } from 'react';
+import { useState, useEffect, type CSSProperties } from 'react';
 import type { TemaComputed } from '../types';
 import type { Usuario } from '../../types';
 import {
@@ -13,6 +13,8 @@ import {
   calculateAvgFiveS,
   getComplianceStatus,
 } from '../../services/analyticsService';
+import type { DailyStats } from '../../services/analyticsService';
+import { apiClient } from '../../services/apiClient';
 
 interface Props {
   tema: TemaComputed;
@@ -24,8 +26,22 @@ const STATUS_COLOR = { green: '#10b981', yellow: '#f59e0b', red: '#ef4444' };
 export default function DashboardSupervisor({ tema, usuarioLogado }: Props) {
   const yard = usuarioLogado?.primaryYard || 'VFZ';
   const [days] = useState(30);
+  const [isLive, setIsLive] = useState(false);
+  const [stats, setStats] = useState<DailyStats[]>(() => generateMockDailyStats(yard, days));
 
-  const stats = useMemo(() => generateMockDailyStats(yard, days), [yard, days]);
+  useEffect(() => {
+    const activeYard = sessionStorage.getItem('active_yard') || yard;
+    apiClient.get<DailyStats[]>(`/analytics/dashboard/supervisor?yard=${activeYard}`).then(data => {
+      if (data && Array.isArray(data) && data.length > 0) {
+        setStats(data);
+        setIsLive(true);
+      } else {
+        setStats(generateMockDailyStats(activeYard, days));
+        setIsLive(false);
+      }
+    });
+  }, [yard, days]);
+
   const todayStats = stats[stats.length - 1];
   const avgCompliance = calculateAvgCompliance(stats);
   const totalHandovers = calculateTotalHandovers(stats);
@@ -49,7 +65,10 @@ export default function DashboardSupervisor({ tema, usuarioLogado }: Props) {
 
   return (
     <div style={{ padding: 20, maxWidth: 900, margin: '0 auto' }}>
-      <h2 style={{ color: tema.texto, marginBottom: 4 }}>Dashboard Supervisor</h2>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <h2 style={{ color: tema.texto, marginBottom: 4 }}>Dashboard Supervisor</h2>
+        {!isLive && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 8, background: 'rgba(249,115,22,0.1)', color: '#f97316', fontWeight: 600 }}>Modo Demo</span>}
+      </div>
       <div style={{ color: tema.textoSecundario, fontSize: 14, marginBottom: 20 }}>Patio {yard}</div>
 
       {/* KPI Cards */}

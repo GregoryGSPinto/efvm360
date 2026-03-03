@@ -14,6 +14,7 @@ import {
   getSlaRemainingMinutes,
   getSlaPercentage,
 } from '../../domain/aggregates/ApprovalWorkflow';
+import { apiClient } from '../../services/apiClient';
 
 // ── Storage ─────────────────────────────────────────────────────────────
 
@@ -122,6 +123,31 @@ function PaginaAprovacoes({ tema, usuarioLogado }: Props) {
   const [workflows, setWorkflows] = useState<ApprovalWorkflow[]>(() => seedDemoWorkflows(matricula));
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [actionComment, setActionComment] = useState('');
+  const [isLive, setIsLive] = useState(false);
+
+  // Load from API on mount
+  useEffect(() => {
+    apiClient.get<ApprovalWorkflow[]>('/workflows/inbox').then(data => {
+      if (data && Array.isArray(data)) {
+        setWorkflows(data);
+        saveWorkflows(data);
+        setIsLive(true);
+      }
+    });
+  }, []);
+
+  // Poll for new workflows every 60s
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const data = await apiClient.get<ApprovalWorkflow[]>('/workflows/inbox');
+      if (data && Array.isArray(data)) {
+        setWorkflows(data);
+        saveWorkflows(data);
+        setIsLive(true);
+      }
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const pending = useMemo(
     () => workflows.filter(w => w.status === 'pending' || w.status === 'escalated'),
@@ -144,20 +170,35 @@ function PaginaAprovacoes({ tema, usuarioLogado }: Props) {
     setActionComment('');
   }, [workflows, persist]);
 
-  const handleApprove = useCallback(() => {
+  const handleApprove = useCallback(async () => {
     if (!selected) return;
-    updateWf(approveWorkflow(selected, matricula, actionComment || undefined));
+    const apiResult = await apiClient.post<ApprovalWorkflow>(`/workflows/${selected.id}/approve`, { comment: actionComment || undefined });
+    if (apiResult) {
+      updateWf(apiResult);
+    } else {
+      updateWf(approveWorkflow(selected, matricula, actionComment || undefined));
+    }
   }, [selected, matricula, actionComment, updateWf]);
 
-  const handleReject = useCallback(() => {
+  const handleReject = useCallback(async () => {
     if (!selected) return;
-    updateWf(rejectWorkflow(selected, matricula, actionComment || undefined));
+    const apiResult = await apiClient.post<ApprovalWorkflow>(`/workflows/${selected.id}/reject`, { comment: actionComment || undefined, reason: actionComment });
+    if (apiResult) {
+      updateWf(apiResult);
+    } else {
+      updateWf(rejectWorkflow(selected, matricula, actionComment || undefined));
+    }
   }, [selected, matricula, actionComment, updateWf]);
 
-  const handleEscalate = useCallback(() => {
+  const handleEscalate = useCallback(async () => {
     if (!selected) return;
-    updateWf(escalateWorkflow(selected, matricula, 'CRD1001'));
-  }, [selected, matricula, updateWf]);
+    const apiResult = await apiClient.post<ApprovalWorkflow>(`/workflows/${selected.id}/escalate`, { comment: actionComment || undefined });
+    if (apiResult) {
+      updateWf(apiResult);
+    } else {
+      updateWf(escalateWorkflow(selected, matricula, 'CRD1001'));
+    }
+  }, [selected, matricula, actionComment, updateWf]);
 
   // ── Styles ──────────────────────────────────────────────────────────
 
@@ -278,6 +319,7 @@ function PaginaAprovacoes({ tema, usuarioLogado }: Props) {
   return (
     <div style={{ padding: 20, maxWidth: 700, margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <h2 style={{ color: tema.texto, margin: 0 }}>
           Aprovacoes
           {pending.length > 0 && (
@@ -289,6 +331,8 @@ function PaginaAprovacoes({ tema, usuarioLogado }: Props) {
             </span>
           )}
         </h2>
+        {!isLive && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 8, background: 'rgba(249,115,22,0.1)', color: '#f97316', fontWeight: 600 }}>Modo Demo</span>}
+        </div>
       </div>
 
       {pending.length === 0 ? (

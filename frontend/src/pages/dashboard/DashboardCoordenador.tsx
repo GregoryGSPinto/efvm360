@@ -2,13 +2,15 @@
 // EFVM360 — Dashboard Coordenador (multiple yards comparison)
 // ============================================================================
 
-import { useMemo, type CSSProperties } from 'react';
+import { useState, useEffect, type CSSProperties } from 'react';
 import type { TemaComputed } from '../types';
 import type { Usuario } from '../../types';
 import {
   generateMockYardSummaries,
   getComplianceStatus,
 } from '../../services/analyticsService';
+import type { YardSummary } from '../../services/analyticsService';
+import { apiClient } from '../../services/apiClient';
 
 interface Props {
   tema: TemaComputed;
@@ -20,7 +22,18 @@ const TREND_ICON: Record<string, string> = { improving: '↑', stable: '→', de
 const TREND_COLOR: Record<string, string> = { improving: '#10b981', stable: '#6b7280', declining: '#ef4444' };
 
 export default function DashboardCoordenador({ tema }: Props) {
-  const summaries = useMemo(() => generateMockYardSummaries(), []);
+  const [isLive, setIsLive] = useState(false);
+  const [summaries, setSummaries] = useState<YardSummary[]>(() => generateMockYardSummaries());
+
+  useEffect(() => {
+    const yards = JSON.parse(sessionStorage.getItem('user_yards') || '["VFZ","VBR"]');
+    apiClient.get<YardSummary[]>(`/analytics/dashboard/coordenador?yards=${yards.join(',')}`).then(data => {
+      if (data && Array.isArray(data) && data.length > 0) {
+        setSummaries(data);
+        setIsLive(true);
+      }
+    });
+  }, []);
 
   const card: CSSProperties = {
     background: tema.card,
@@ -31,7 +44,10 @@ export default function DashboardCoordenador({ tema }: Props) {
 
   return (
     <div style={{ padding: 20, maxWidth: 1000, margin: '0 auto' }}>
-      <h2 style={{ color: tema.texto, marginBottom: 4 }}>Dashboard Coordenador</h2>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <h2 style={{ color: tema.texto, marginBottom: 4 }}>Dashboard Coordenador</h2>
+        {!isLive && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 8, background: 'rgba(249,115,22,0.1)', color: '#f97316', fontWeight: 600 }}>Modo Demo</span>}
+      </div>
       <div style={{ color: tema.textoSecundario, fontSize: 14, marginBottom: 20 }}>Comparativo entre patios</div>
 
       {/* Yard Comparison Grid */}
