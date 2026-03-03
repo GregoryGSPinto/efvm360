@@ -37,9 +37,17 @@ export const loginRateLimit = rateLimit({
 });
 
 // ── CORS ─────────────────────────────────────────────────────────────────
+const DEFAULT_ORIGINS = [
+  'http://localhost:3000',   // Vite dev (configured port)
+  'http://localhost:5173',   // Vite dev (default port)
+  'http://localhost:4173',   // Vite preview
+  'https://efvm360.vercel.app', // Produção Vercel
+];
+
 export const corsConfig = cors({
   origin: (origin, callback) => {
-    const allowed = (process.env.CORS_ORIGIN || 'http://localhost:5173').split(',');
+    const envOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map(o => o.trim()) : [];
+    const allowed = [...DEFAULT_ORIGINS, ...envOrigins];
     // Permitir requests sem origin (mobile apps, Postman, curl)
     if (!origin || allowed.includes(origin)) {
       callback(null, true);
@@ -48,8 +56,8 @@ export const corsConfig = cors({
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID', 'X-Railway-Id', 'X-Active-Yard'],
   exposedHeaders: ['X-Request-ID', 'X-RateLimit-Remaining'],
   maxAge: 86400, // 24h preflight cache
 });

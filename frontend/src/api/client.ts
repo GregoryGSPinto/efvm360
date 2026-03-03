@@ -72,6 +72,15 @@ async function request<T>(
     headers['Authorization'] = `Bearer ${accessToken}`;
   }
 
+  // Tenant headers — multi-tenancy & organizational scope
+  try {
+    const railwayId = sessionStorage.getItem('active_railway');
+    if (railwayId) headers['X-Railway-Id'] = railwayId;
+
+    const activeYard = sessionStorage.getItem('active_yard');
+    if (activeYard) headers['X-Active-Yard'] = activeYard;
+  } catch { /* sessionStorage unavailable (SSR/tests) */ }
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
 
