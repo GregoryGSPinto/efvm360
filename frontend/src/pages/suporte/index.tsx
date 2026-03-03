@@ -47,6 +47,9 @@ const CREDENCIAIS = [
   { patio: 'Admin', nome: 'Global', usuarios: [
     { mat: 'ADM9001', funcao: 'Gestor Global', turno: '-' },
   ]},
+  { patio: 'Suporte', nome: 'Tecnico', usuarios: [
+    { mat: 'SUP0001', funcao: 'Suporte', turno: '-' },
+  ]},
 ];
 
 const ARQUITETURA = [

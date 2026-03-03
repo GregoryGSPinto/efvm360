@@ -93,7 +93,7 @@ export function seedCredentials(): { seeded: boolean; count: number } {
     if (!seedVersion) {
       // Remove old seed users (VFZ pattern from v5)
       const manualUsers = existing.filter(u =>
-        !u.matricula.match(/^(VFZ|VBR|VCS|P6|VTO|ADM)\d+$/)
+        !u.matricula.match(/^(VFZ|VBR|VCS|P6|VTO|ADM|SUP)\d+$/)
       );
       existing.length = 0;
       existing.push(...manualUsers);

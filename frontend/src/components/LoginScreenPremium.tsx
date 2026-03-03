@@ -30,7 +30,7 @@ export const LoginScreenPremium = memo<Props>(({
   // Dynamic credentials: group users by yard, pick up to 4 per yard
   const credenciaisPorPatio = useMemo(() => {
     try {
-      const usuarios: Array<{ matricula: string; funcao: string; primaryYard?: string; nome?: string; status?: string }> =
+      const usuarios: Array<{ matricula: string; funcao: string; primaryYard?: string; nome?: string; status?: string; senha?: string }> =
         JSON.parse(localStorage.getItem('efvm360-usuarios') || '[]');
       const porPatio: Record<string, Array<{ mat: string; role: string; pwd: string }>> = {};
       const funcaoLabel: Record<string, string> = { maquinista: 'Maquinista', inspetor: 'Inspetor', oficial: 'Oficial', gestor: 'Gestor', suporte: 'Suporte' };
@@ -39,8 +39,8 @@ export const LoginScreenPremium = memo<Props>(({
       for (const u of usuarios) {
         if (u.status === 'inactive' || u.status === 'pending') continue;
         const yard = u.primaryYard || 'VFZ';
-        // Skip ADM-prefixed users from yard grouping (they are global admins)
-        if (u.matricula.startsWith('ADM')) continue;
+        // Skip ADM/SUP-prefixed users from yard grouping (they are global/support)
+        if (u.matricula.startsWith('ADM') || u.matricula.startsWith('SUP')) continue;
         if (!porPatio[yard]) porPatio[yard] = [];
         // Only add one user per function per yard
         const roleExists = porPatio[yard].some(c => c.role === (funcaoLabel[u.funcao] || u.funcao));
@@ -52,6 +52,11 @@ export const LoginScreenPremium = memo<Props>(({
       const admins = usuarios.filter(u => u.matricula.startsWith('ADM') && u.status !== 'inactive' && u.status !== 'pending');
       if (admins.length > 0) {
         porPatio['Admin'] = admins.slice(0, 2).map(u => ({ mat: u.matricula, role: funcaoLabel[u.funcao] || u.funcao, pwd: '123456' }));
+      }
+      // Add support users separately
+      const suportes = usuarios.filter(u => u.matricula.startsWith('SUP') && u.status !== 'inactive' && u.status !== 'pending');
+      if (suportes.length > 0) {
+        porPatio['Suporte'] = suportes.slice(0, 2).map(u => ({ mat: u.matricula, role: funcaoLabel[u.funcao] || u.funcao, pwd: u.senha || 'suporte360' }));
       }
       // Sort each yard's users by hierarchy
       for (const yard of Object.keys(porPatio)) {
