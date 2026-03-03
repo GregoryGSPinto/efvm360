@@ -41,7 +41,7 @@ registerRoute(
   ({ url }) => url.pathname.startsWith('/api/v1/'),
   new NetworkFirst({
     cacheName: 'efvm360-api',
-    networkTimeoutSeconds: 5,
+    networkTimeoutSeconds: 10,
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
       new ExpirationPlugin({

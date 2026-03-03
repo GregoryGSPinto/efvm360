@@ -14,7 +14,7 @@ export const msalConfig = {
 
 export const loginWithAzure = async (): Promise<{ accessToken: string } | null> => {
   try {
-    // @ts-expect-error optional dependency - @azure/msal-browser may not be installed
+    // @ts-ignore optional dependency - @azure/msal-browser may not be installed
     const { PublicClientApplication } = await import('@azure/msal-browser');
     const msalInstance = new PublicClientApplication(msalConfig);
     await msalInstance.initialize();

@@ -26,6 +26,7 @@ export const LoginScreenPremium = memo<Props>(({
 
   const dk = config.tema === 'escuro' || (config.tema === 'automatico' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
   const [expandedYard, setExpandedYard] = useState<string | null>(null);
+  const showDemoPanel = import.meta.env.VITE_SHOW_DEMO_CREDENTIALS === 'true';
 
   // Dynamic credentials: group users by yard, pick up to 4 per yard
   const credenciaisPorPatio = useMemo(() => {
@@ -125,6 +126,7 @@ export const LoginScreenPremium = memo<Props>(({
       `}</style>
 
       {/* Demo Banner */}
+      {showDemoPanel && (
       <div style={{
         position:'absolute', top:0, left:0, right:0, zIndex:10,
         background:'#d9a010', color:'#fff', textAlign:'center',
@@ -133,6 +135,7 @@ export const LoginScreenPremium = memo<Props>(({
       }}>
         VERSAO DEMONSTRACAO — Dados fictícios para validacao
       </div>
+      )}
 
       <div style={{
         width:400, maxWidth:'90%', background:cardBg, borderRadius:16,
@@ -188,7 +191,8 @@ export const LoginScreenPremium = memo<Props>(({
               ) : t('login.acessar')}
             </button>
 
-            {/* Demo Credentials Card — Dynamic per yard */}
+            {/* Demo Credentials Card — Dynamic per yard (hidden in production) */}
+            {showDemoPanel && (
             <div style={{
               marginTop:16, padding:'12px 16px',
               background: dk ? 'rgba(0,126,122,0.08)' : 'rgba(0,126,122,0.04)',
@@ -239,6 +243,7 @@ export const LoginScreenPremium = memo<Props>(({
                 {t('login.senhaPadrao')}: <span style={{ fontWeight:700, color:'#007e7a', fontFamily:'monospace' }}>123456</span>
               </div>
             </div>
+            )}
 
             <div style={{ display:'flex', justifyContent:'center', gap:8, marginTop:16, fontSize:12, color:txt2 }}>
               <span style={{cursor:'pointer'}} onClick={() => setTela('rec')}

@@ -10,6 +10,7 @@
     "migrate": "ts-node src/migrations/run.ts",
     "migrate:seed": "ts-node src/migrations/seed.ts",
     "seed": "ts-node src/database/seed.ts",
+    "seed:production": "ts-node src/scripts/seed-production.ts",
     "lint": "eslint src/ --ext .ts",
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage",
