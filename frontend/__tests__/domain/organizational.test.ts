@@ -9,21 +9,21 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   ALL_YARD_CODES, getYard, getYardTracks,
   getAllYardCodes, getYardName, getYardShortName,
-} from '../aggregates/YardRegistry';
+} from '../../src/domain/aggregates/YardRegistry';
 
 // P02: UserAggregate
 import {
   createUserProfile, getHierarchyLevelForRole,
   canManageUser, canOperateInYard, canApproveRegistration, canApprovePasswordReset,
   type UserProfile,
-} from '../aggregates/UserAggregate';
+} from '../../src/domain/aggregates/UserAggregate';
 
 // P03: RBAC
-import { hasPermission, canViewTeamPage, canManageTeam } from '../policies/RBACPolicy';
-import { SystemAction, HierarchyLevel, UserStatus } from '../contracts';
+import { hasPermission, canViewTeamPage, canManageTeam } from '../../src/domain/policies/RBACPolicy';
+import { SystemAction, HierarchyLevel, UserStatus } from '../../src/domain/contracts';
 
 // P08: Performance
-import { calculateScore, type UserPerformance } from '../../services/teamPerformanceService';
+import { calculateScore, type UserPerformance } from '../../src/services/teamPerformanceService';
 
 // ═══════════════════════════════════════════════════════════════════════
 // P01: YARD REGISTRY

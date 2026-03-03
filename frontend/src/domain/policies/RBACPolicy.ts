@@ -9,7 +9,7 @@ import type { UserProfile } from '../aggregates/UserAggregate';
 import { canManageUser } from '../aggregates/UserAggregate';
 import type { YardCode } from '../aggregates/YardRegistry';
 
-// ── Permission Matrix ──────────────────────────────────────────────────
+// ── Permission Matrix (v3.3 — 8 levels with inheritance) ─────────────
 
 const OPERATIVE_ACTIONS: SystemAction[] = [
   SystemAction.CREATE_HANDOVER,
@@ -32,25 +32,45 @@ const INSPECTION_ACTIONS: SystemAction[] = [
   SystemAction.APPROVE_PASSWORD_RESET,
 ];
 
-const MANAGEMENT_ACTIONS: SystemAction[] = [
+const SUPERVISION_ACTIONS: SystemAction[] = [
   ...INSPECTION_ACTIONS,
   SystemAction.MANAGE_TEAM,
   SystemAction.APPROVE_REGISTRATION,
   SystemAction.TRANSFER_USER,
   SystemAction.SUSPEND_USER,
   SystemAction.VIEW_AUDIT_TRAIL,
+];
+
+const COORDINATION_ACTIONS: SystemAction[] = [
+  ...SUPERVISION_ACTIONS,
   SystemAction.EXPORT_AUDIT_TRAIL,
+];
+
+const MANAGEMENT_ACTIONS: SystemAction[] = [
+  ...COORDINATION_ACTIONS,
+];
+
+const DIRECTION_ACTIONS: SystemAction[] = [
+  ...MANAGEMENT_ACTIONS,
   SystemAction.EDIT_SYSTEM_CONFIG,
 ];
 
+const ADMINISTRATION_ACTIONS: SystemAction[] = [
+  ...DIRECTION_ACTIONS,
+];
+
 const TECHNICAL_ACTIONS: SystemAction[] = [
-  ...MANAGEMENT_ACTIONS,
+  ...ADMINISTRATION_ACTIONS,
 ];
 
 const PERMISSION_MAP: Record<number, SystemAction[]> = {
   [HierarchyLevel.OPERATIVE]: OPERATIVE_ACTIONS,
   [HierarchyLevel.INSPECTION]: INSPECTION_ACTIONS,
+  [HierarchyLevel.SUPERVISION]: SUPERVISION_ACTIONS,
+  [HierarchyLevel.COORDINATION]: COORDINATION_ACTIONS,
   [HierarchyLevel.MANAGEMENT]: MANAGEMENT_ACTIONS,
+  [HierarchyLevel.DIRECTION]: DIRECTION_ACTIONS,
+  [HierarchyLevel.ADMINISTRATION]: ADMINISTRATION_ACTIONS,
   [HierarchyLevel.TECHNICAL]: TECHNICAL_ACTIONS,
 };
 

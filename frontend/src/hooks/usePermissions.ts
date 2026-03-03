@@ -20,6 +20,10 @@ interface UsePermissionsReturn {
   isAdmin: boolean;
   isGestor: boolean;
   isInspetor: boolean;
+  isSupervisor: boolean;
+  isCoordenador: boolean;
+  isGerente: boolean;
+  isDiretor: boolean;
   isSuporte: boolean;
 }
 
@@ -101,9 +105,13 @@ export function usePermissions(usuarioLogado?: { funcao?: string; matricula?: st
     podeVisualizar,
     podeGerenciar,
     podeVerEquipe: userProfile ? canViewTeamPage(userProfile) : false,
-    isAdmin: (userProfile?.hierarchyLevel || 0) >= HierarchyLevel.MANAGEMENT, // v3.2: gestor is top
-    isGestor: (userProfile?.hierarchyLevel || 0) >= HierarchyLevel.MANAGEMENT,
+    isAdmin: (userProfile?.hierarchyLevel || 0) >= HierarchyLevel.ADMINISTRATION,
+    isGestor: (userProfile?.hierarchyLevel || 0) >= HierarchyLevel.SUPERVISION,
     isInspetor: (userProfile?.hierarchyLevel || 0) >= HierarchyLevel.INSPECTION,
+    isSupervisor: (userProfile?.hierarchyLevel || 0) >= HierarchyLevel.SUPERVISION,
+    isCoordenador: (userProfile?.hierarchyLevel || 0) >= HierarchyLevel.COORDINATION,
+    isGerente: (userProfile?.hierarchyLevel || 0) >= HierarchyLevel.MANAGEMENT,
+    isDiretor: (userProfile?.hierarchyLevel || 0) >= HierarchyLevel.DIRECTION,
     isSuporte: usuarioLogado?.funcao === 'suporte',
   };
 }

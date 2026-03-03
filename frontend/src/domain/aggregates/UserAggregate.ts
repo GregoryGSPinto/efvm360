@@ -37,9 +37,12 @@ const ROLE_HIERARCHY_MAP: Record<string, HierarchyLevel> = {
   oficial: HierarchyLevel.OPERATIVE,
   oficial_operacao: HierarchyLevel.OPERATIVE,
   inspetor: HierarchyLevel.INSPECTION,
-  gestor: HierarchyLevel.MANAGEMENT,
-  coordenador: HierarchyLevel.MANAGEMENT,
-  supervisor: HierarchyLevel.MANAGEMENT,
+  supervisor: HierarchyLevel.SUPERVISION,
+  gestor: HierarchyLevel.SUPERVISION,         // legacy patio-level manager
+  coordenador: HierarchyLevel.COORDINATION,
+  gerente: HierarchyLevel.MANAGEMENT,
+  diretor: HierarchyLevel.DIRECTION,
+  admin: HierarchyLevel.ADMINISTRATION,
   suporte: HierarchyLevel.TECHNICAL,
 };
 
@@ -81,9 +84,10 @@ export function createUserProfile(data: {
 // ── Hierarchy Service ──────────────────────────────────────────────────
 
 export function canManageUser(manager: UserProfile, target: UserProfile): boolean {
-  // Gestor+ can manage anyone in same yard
-  if (manager.hierarchyLevel >= HierarchyLevel.MANAGEMENT) {
-    if (manager.primaryYard !== target.primaryYard) return false;
+  // Supervisor+ can manage anyone in same yard
+  if (manager.hierarchyLevel >= HierarchyLevel.SUPERVISION) {
+    // Coordination+ can manage across yards
+    if (manager.hierarchyLevel < HierarchyLevel.COORDINATION && manager.primaryYard !== target.primaryYard) return false;
     return manager.hierarchyLevel >= target.hierarchyLevel;
   }
   return false;
@@ -94,8 +98,9 @@ export function canOperateInYard(user: UserProfile, yard: YardCode): boolean {
 }
 
 export function canApproveRegistration(approver: UserProfile, requestedYard: YardCode): boolean {
-  // Gestor+ can approve their own yard
-  if (approver.hierarchyLevel >= HierarchyLevel.MANAGEMENT) {
+  // Coordination+ can approve any yard; Supervisor can approve own yard
+  if (approver.hierarchyLevel >= HierarchyLevel.COORDINATION) return true;
+  if (approver.hierarchyLevel >= HierarchyLevel.SUPERVISION) {
     return approver.primaryYard === requestedYard;
   }
   return false;
@@ -104,7 +109,9 @@ export function canApproveRegistration(approver: UserProfile, requestedYard: Yar
 export function canApprovePasswordReset(approver: UserProfile, targetYard: YardCode): boolean {
   // Technical support can approve any yard
   if (approver.hierarchyLevel >= HierarchyLevel.TECHNICAL) return true;
-  // Gestor and Inspetor can approve own yard
+  // Coordination+ can approve any yard
+  if (approver.hierarchyLevel >= HierarchyLevel.COORDINATION) return true;
+  // Supervisor and Inspetor can approve own yard
   if (approver.hierarchyLevel >= HierarchyLevel.INSPECTION) {
     return approver.primaryYard === targetYard;
   }

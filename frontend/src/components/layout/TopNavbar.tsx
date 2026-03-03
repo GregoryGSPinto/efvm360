@@ -26,15 +26,7 @@ const NAV_LABEL_KEYS: Record<string, string> = {
   gestao: 'nav.gestao',
 };
 
-const BASE_NAV_ITEMS = [
-  { id: 'passagem', label: 'Boa Jornada' },
-  { id: 'dss',       label: 'DSS' },
-  { id: 'analytics', label: 'BI+' },
-  { id: 'historico', label: 'Historico' },
-  { id: 'layout',    label: 'Layout' },
-  { id: 'graus-risco', label: 'Grau Risco' },
-
-];
+// Nav items are now built dynamically per role in buildNavItems()
 
 // ── Props ──────────────────────────────────────────────────────────────
 interface TopNavbarProps {
@@ -59,16 +51,28 @@ export const TopNavbar = memo<TopNavbarProps>(({
   const [avatarOpen, setAvatarOpen] = useState(false);
   const avatarRef = useRef<HTMLDivElement>(null);
 
-  // Build nav items — suporte sees ONLY Suporte; others get base + role items
+  // Build nav items per role hierarchy
   const hierarchyLevel = getHierarchyLevelForRole(usuarioLogado?.funcao || '');
-  const NAV_ITEMS = usuarioLogado?.funcao === 'suporte'
-    ? [{ id: 'suporte', label: 'Suporte' }]
-    : [
-        ...BASE_NAV_ITEMS,
-        ...(hierarchyLevel >= HierarchyLevel.INSPECTION
-          ? [{ id: 'gestao', label: 'Gestao' }]
-          : []),
-      ];
+  const buildNavItems = () => {
+    if (usuarioLogado?.funcao === 'suporte') return [{ id: 'suporte', label: 'Suporte' }];
+    const items: Array<{ id: string; label: string }> = [];
+    // maquinista: Passagem, Historico
+    items.push({ id: 'passagem', label: 'Boa Jornada' });
+    // inspetor+: DSS, Analytics
+    if (hierarchyLevel >= HierarchyLevel.INSPECTION) {
+      items.push({ id: 'dss', label: 'DSS' });
+      items.push({ id: 'analytics', label: 'BI+' });
+    }
+    items.push({ id: 'historico', label: 'Historico' });
+    // supervisor+: Gestao, Layout, Grau Risco
+    if (hierarchyLevel >= HierarchyLevel.SUPERVISION) {
+      items.push({ id: 'layout', label: 'Layout' });
+      items.push({ id: 'graus-risco', label: 'Grau Risco' });
+      items.push({ id: 'gestao', label: 'Gestao' });
+    }
+    return items;
+  };
+  const NAV_ITEMS = buildNavItems();
 
   const dk = config.tema === 'escuro' ||
     (config.tema === 'automatico' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);

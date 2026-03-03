@@ -10,16 +10,7 @@ import { getHierarchyLevelForRole } from '../../domain/aggregates/UserAggregate'
 import { HierarchyLevel } from '../../domain/contracts';
 import { NAV_ID_TO_PATH, ROUTES } from '../../router/routes';
 
-// ── Navigation Items ───────────────────────────────────────────────────
-const BASE_NAV_ITEMS = [
-  { id: 'passagem', label: 'Boa Jornada', icon: '\uD83D\uDE82' },
-  { id: 'dss',       label: 'DSS',         icon: '\uD83D\uDEE1\uFE0F' },
-  { id: 'analytics', label: 'BI+',         icon: '\uD83D\uDCCA' },
-  { id: 'historico', label: 'Historico',    icon: '\uD83D\uDCCB' },
-  { id: 'layout',    label: 'Layout',       icon: '\uD83D\uDDFA\uFE0F' },
-  { id: 'graus-risco', label: 'Grau Risco', icon: '\u26A0\uFE0F' },
-
-];
+// Nav items are now built dynamically per role in useMemo below
 
 // ── Props ──────────────────────────────────────────────────────────────
 interface MobileBottomNavProps {
@@ -40,14 +31,22 @@ export const MobileBottomNav = memo<MobileBottomNavProps>(({
     (config.tema === 'automatico' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
 
   const hierarchyLevel = getHierarchyLevelForRole(userRole);
-  const NAV_ITEMS = useMemo(() => userRole === 'suporte'
-    ? [{ id: 'suporte', label: 'Suporte', icon: '\uD83D\uDEE0\uFE0F' }]
-    : [
-        ...BASE_NAV_ITEMS,
-        ...(hierarchyLevel >= HierarchyLevel.INSPECTION
-          ? [{ id: 'gestao', label: 'Gestao', icon: '\uD83D\uDC65' }]
-          : []),
-      ], [hierarchyLevel, userRole]);
+  const NAV_ITEMS = useMemo(() => {
+    if (userRole === 'suporte') return [{ id: 'suporte', label: 'Suporte', icon: '\uD83D\uDEE0\uFE0F' }];
+    const items: Array<{ id: string; label: string; icon: string }> = [];
+    items.push({ id: 'passagem', label: 'Boa Jornada', icon: '\uD83D\uDE82' });
+    if (hierarchyLevel >= HierarchyLevel.INSPECTION) {
+      items.push({ id: 'dss', label: 'DSS', icon: '\uD83D\uDEE1\uFE0F' });
+      items.push({ id: 'analytics', label: 'BI+', icon: '\uD83D\uDCCA' });
+    }
+    items.push({ id: 'historico', label: 'Historico', icon: '\uD83D\uDCCB' });
+    if (hierarchyLevel >= HierarchyLevel.SUPERVISION) {
+      items.push({ id: 'layout', label: 'Layout', icon: '\uD83D\uDDFA\uFE0F' });
+      items.push({ id: 'graus-risco', label: 'Grau Risco', icon: '\u26A0\uFE0F' });
+      items.push({ id: 'gestao', label: 'Gestao', icon: '\uD83D\uDC65' });
+    }
+    return items;
+  }, [hierarchyLevel, userRole]);
 
   const bg = dk ? '#1a1a1a' : '#ffffff';
   const bd = dk ? '#2a2a2a' : '#e8e8e8';

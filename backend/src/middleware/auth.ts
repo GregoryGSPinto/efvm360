@@ -81,18 +81,23 @@ export const authorize = (...funcoes: string[]) => {
       return;
     }
 
-    // Mapeamento funcao → perfil (mesma lógica do frontend)
+    // Mapeamento funcao → perfil (mesma lógica do frontend v3.3 — 8 níveis)
     const mapeamento: Record<string, string> = {
       maquinista: 'operador', operador: 'operador',
       oficial: 'oficial', oficial_operacao: 'oficial',
       inspetor: 'inspetor',
-      gestor: 'gestor', supervisor: 'gestor', coordenador: 'gestor',
-      administrador: 'administrador', admin: 'administrador',
+      supervisor: 'supervisor', gestor: 'supervisor',
+      coordenador: 'coordenador',
+      gerente: 'gerente',
+      diretor: 'diretor',
+      admin: 'administrador', administrador: 'administrador',
+      suporte: 'suporte',
     };
 
     const perfil = mapeamento[req.user.funcao] || 'operador';
     const perfilHierarquia: Record<string, number> = {
-      operador: 1, oficial: 2, inspetor: 3, gestor: 4, administrador: 5,
+      operador: 1, oficial: 1, inspetor: 2, supervisor: 3, coordenador: 4,
+      gerente: 5, diretor: 6, administrador: 7, suporte: 8,
     };
 
     // Verifica se o perfil do usuário tem nível suficiente

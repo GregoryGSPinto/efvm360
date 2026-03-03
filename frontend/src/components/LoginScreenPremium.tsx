@@ -33,31 +33,48 @@ export const LoginScreenPremium = memo<Props>(({
       const usuarios: Array<{ matricula: string; funcao: string; primaryYard?: string; nome?: string; status?: string; senha?: string }> =
         JSON.parse(localStorage.getItem('efvm360-usuarios') || '[]');
       const porPatio: Record<string, Array<{ mat: string; role: string; pwd: string }>> = {};
-      const funcaoLabel: Record<string, string> = { maquinista: 'Maquinista', inspetor: 'Inspetor', oficial: 'Oficial', gestor: 'Gestor', suporte: 'Suporte' };
-      const funcaoOrder: Record<string, number> = { gestor: 0, inspetor: 1, maquinista: 2, oficial: 3, suporte: 4 };
+      const funcaoLabel: Record<string, string> = {
+        maquinista: 'Maquinista', inspetor: 'Inspetor', oficial: 'Oficial', gestor: 'Gestor',
+        supervisor: 'Supervisor', coordenador: 'Coordenador', gerente: 'Gerente',
+        diretor: 'Diretor', admin: 'Admin', suporte: 'Suporte',
+      };
+      const funcaoOrder: Record<string, number> = { gestor: 0, inspetor: 1, maquinista: 2, oficial: 3 };
+      // Prefixes that get their own groups (not mixed into yard groups)
+      const globalPrefixes = ['ADM', 'SUP', 'CRD', 'GER', 'DIR'];
+      const isGlobalUser = (mat: string) => globalPrefixes.some(p => mat.startsWith(p));
 
       for (const u of usuarios) {
         if (u.status === 'inactive' || u.status === 'pending') continue;
         const yard = u.primaryYard || 'VFZ';
-        // Skip ADM/SUP-prefixed users from yard grouping (they are global/support)
-        if (u.matricula.startsWith('ADM') || u.matricula.startsWith('SUP')) continue;
+        // Skip global/special users from yard grouping
+        if (isGlobalUser(u.matricula)) continue;
+        // SUP1001 (supervisor) goes into yard group since it's patio-level
+        if (u.funcao === 'supervisor' && !u.matricula.startsWith('SUP0')) {
+          if (!porPatio[yard]) porPatio[yard] = [];
+          const roleExists = porPatio[yard].some(c => c.role === (funcaoLabel[u.funcao] || u.funcao));
+          if (!roleExists && porPatio[yard].length < 5) {
+            porPatio[yard].push({ mat: u.matricula, role: funcaoLabel[u.funcao] || u.funcao, pwd: '123456' });
+          }
+          continue;
+        }
         if (!porPatio[yard]) porPatio[yard] = [];
-        // Only add one user per function per yard
         const roleExists = porPatio[yard].some(c => c.role === (funcaoLabel[u.funcao] || u.funcao));
-        if (!roleExists && porPatio[yard].length < 4) {
+        if (!roleExists && porPatio[yard].length < 5) {
           porPatio[yard].push({ mat: u.matricula, role: funcaoLabel[u.funcao] || u.funcao, pwd: '123456' });
         }
       }
-      // Add global admin separately
-      const admins = usuarios.filter(u => u.matricula.startsWith('ADM') && u.status !== 'inactive' && u.status !== 'pending');
-      if (admins.length > 0) {
-        porPatio['Admin'] = admins.slice(0, 2).map(u => ({ mat: u.matricula, role: funcaoLabel[u.funcao] || u.funcao, pwd: '123456' }));
-      }
-      // Add support users separately
-      const suportes = usuarios.filter(u => u.matricula.startsWith('SUP') && u.status !== 'inactive' && u.status !== 'pending');
-      if (suportes.length > 0) {
-        porPatio['Suporte'] = suportes.slice(0, 2).map(u => ({ mat: u.matricula, role: funcaoLabel[u.funcao] || u.funcao, pwd: u.senha || 'suporte360' }));
-      }
+      // Separate groups for global roles
+      const addGroup = (label: string, prefix: string, pwd = '123456') => {
+        const users = usuarios.filter(u => u.matricula.startsWith(prefix) && u.status !== 'inactive' && u.status !== 'pending');
+        if (users.length > 0) {
+          porPatio[label] = users.slice(0, 2).map(u => ({ mat: u.matricula, role: funcaoLabel[u.funcao] || u.funcao, pwd: u.senha || pwd }));
+        }
+      };
+      addGroup('Coordenador', 'CRD');
+      addGroup('Gerente', 'GER');
+      addGroup('Diretor', 'DIR');
+      addGroup('Admin', 'ADM');
+      addGroup('Suporte', 'SUP0', 'suporte360');
       // Sort each yard's users by hierarchy
       for (const yard of Object.keys(porPatio)) {
         porPatio[yard].sort((a, b) => (funcaoOrder[a.role.toLowerCase()] ?? 9) - (funcaoOrder[b.role.toLowerCase()] ?? 9));

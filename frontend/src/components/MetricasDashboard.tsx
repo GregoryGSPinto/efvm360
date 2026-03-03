@@ -159,11 +159,14 @@ const ROLE_HIERARCHY: Record<string, number> = {
   oficial: 2,
   oficial_operacao: 2,
   inspetor: 3,
-  gestor: 4,
   supervisor: 4,
-  coordenador: 4,
-  administrador: 5,
-  admin: 5,
+  gestor: 4,
+  coordenador: 5,
+  gerente: 6,
+  diretor: 7,
+  administrador: 8,
+  admin: 8,
+  suporte: 9,
 };
 
 export function hasMinimumRole(role: string | undefined, minRole: string): boolean {

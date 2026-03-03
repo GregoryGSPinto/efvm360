@@ -1,6 +1,7 @@
 // ============================================================================
-// EFVM PÁTIO 360 — Seed de Credenciais v7
-// 37 operadores: 7 por pátio × 5 pátios + 1 admin global + 1 suporte
+// EFVM PÁTIO 360 — Seed de Credenciais v8
+// 41 operadores: 7 por pátio × 5 pátios + 1 supervisor + 1 coordenador
+//   + 1 gerente + 1 diretor + 1 admin global + 1 suporte
 // Senha padrão: 123456
 // ============================================================================
 
@@ -10,7 +11,7 @@ import { verificarPatiosOrfaos } from './patioProvisioning';
 
 const STORAGE_KEY = 'efvm360-usuarios';
 const SEED_MARKER = 'efvm360-seed-applied';
-const SEED_VERSION = 'efvm360-seed-v7';
+const SEED_VERSION = 'efvm360-seed-v8';
 // REVIEW [SECURITY]: Hardcoded dev/test password. Must be replaced with Azure AD
 // SSO or hashed credentials before production deployment.
 const DEFAULT_PASSWORD = '123456';
@@ -73,11 +74,23 @@ const EFVM360_USERS: SeedUser[] = [
   { nome: 'Gilberto Souza Braga',       matricula: 'VTO2001', funcao: 'inspetor',                                       primaryYard: 'VTO' },
   { nome: 'Osvaldo Ramos Teixeira',     matricula: 'VTO3001', funcao: 'gestor',                                         primaryYard: 'VTO' },
 
-  // ═══ GESTOR GLOBAL (antigo admin) ═══
-  { nome: 'Gregory Administrador',      matricula: 'ADM9001', funcao: 'gestor',                                         primaryYard: 'VFZ' },
+  // ═══ SUPERVISOR (pátio VFZ) ═══
+  { nome: 'Lucas Supervisor Ferreira',   matricula: 'SUP1001', funcao: 'supervisor',                                    primaryYard: 'VFZ' },
+
+  // ═══ COORDENADOR (multi-pátio VFZ+VBR) ═══
+  { nome: 'Ricardo Coordenador Silva',   matricula: 'CRD1001', funcao: 'coordenador',                                   primaryYard: 'VFZ' },
+
+  // ═══ GERENTE (regional EFVM) ═══
+  { nome: 'Fernando Gerente Almeida',    matricula: 'GER1001', funcao: 'gerente',                                       primaryYard: 'VFZ' },
+
+  // ═══ DIRETOR (estratégico EFVM) ═══
+  { nome: 'Alberto Diretor Campos',      matricula: 'DIR1001', funcao: 'diretor',                                       primaryYard: 'VFZ' },
+
+  // ═══ ADMIN GLOBAL (sistema) ═══
+  { nome: 'Gregory Administrador',       matricula: 'ADM9001', funcao: 'admin',                                         primaryYard: 'VFZ' },
 
   // ═══ SUPORTE TÉCNICO ═══
-  { nome: 'Suporte Tecnico',            matricula: 'SUP0001', funcao: 'suporte',                                        primaryYard: 'VFZ', senha: 'suporte360' },
+  { nome: 'Suporte Tecnico',             matricula: 'SUP0001', funcao: 'suporte',                                       primaryYard: 'VFZ', senha: 'suporte360' },
 ];
 
 // ── Seed Function ───────────────────────────────────────────────────────
@@ -93,7 +106,7 @@ export function seedCredentials(): { seeded: boolean; count: number } {
     if (!seedVersion) {
       // Remove old seed users (VFZ pattern from v5)
       const manualUsers = existing.filter(u =>
-        !u.matricula.match(/^(VFZ|VBR|VCS|P6|VTO|ADM|SUP)\d+$/)
+        !u.matricula.match(/^(VFZ|VBR|VCS|P6|VTO|ADM|SUP|CRD|GER|DIR)\d+$/)
       );
       existing.length = 0;
       existing.push(...manualUsers);

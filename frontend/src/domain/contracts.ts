@@ -78,16 +78,21 @@ export enum ShiftWindow {
   NIGHT = '19-07',
 }
 
-/** Função/cargo do operador (v3.2 — admin removido) */
+/** Função/cargo do operador (v3.3 — 8 níveis hierárquicos) */
 export enum OperatorRole {
   MACHINIST = 'maquinista',
   OPERATOR = 'operador',
   OFFICER = 'oficial',
   OPERATIONS_OFFICER = 'oficial_operacao',
   INSPECTOR = 'inspetor',
-  MANAGER = 'gestor',
   SUPERVISOR = 'supervisor',
   COORDINATOR = 'coordenador',
+  MANAGER = 'gerente',
+  DIRECTOR = 'diretor',
+  ADMIN = 'admin',
+  /** @deprecated Use SUPERVISOR for patio-level management */
+  LEGACY_MANAGER = 'gestor',
+  SUPPORT = 'suporte',
 }
 
 /** Código do pátio operacional (v1.1.0) */
@@ -106,12 +111,16 @@ export enum YardRegionEnum {
   LITORAL = 'litoral',
 }
 
-/** Nível hierárquico de autoridade (v3.2 — admin removido) */
+/** Nível hierárquico de autoridade (v3.3 — 8 níveis com herança) */
 export enum HierarchyLevel {
-  OPERATIVE = 1,     // Maquinista, Oficial
-  INSPECTION = 2,    // Inspetor
-  MANAGEMENT = 3,    // Gestor (herda permissões do antigo admin)
-  TECHNICAL = 4,     // Suporte Técnico
+  OPERATIVE = 1,       // Maquinista, Oficial, Operador
+  INSPECTION = 2,      // Inspetor
+  SUPERVISION = 3,     // Supervisor, Gestor (pátio)
+  COORDINATION = 4,    // Coordenador (multi-pátio)
+  MANAGEMENT = 5,      // Gerente (regional)
+  DIRECTION = 6,       // Diretor (estratégico)
+  ADMINISTRATION = 7,  // Admin (sistema, RBAC, tenants)
+  TECHNICAL = 8,       // Suporte Técnico
 }
 
 /** Status do usuário no sistema (v1.1.0) */

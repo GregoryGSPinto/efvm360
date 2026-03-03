@@ -44,8 +44,20 @@ const CREDENCIAIS = [
     { mat: 'VTO2001', funcao: 'Inspetor', turno: 'A (07-19)' },
     { mat: 'VTO3001', funcao: 'Gestor', turno: '-' },
   ]},
-  { patio: 'Admin', nome: 'Global', usuarios: [
-    { mat: 'ADM9001', funcao: 'Gestor Global', turno: '-' },
+  { patio: 'Supervisor', nome: 'Patio VFZ', usuarios: [
+    { mat: 'SUP1001', funcao: 'Supervisor', turno: '-' },
+  ]},
+  { patio: 'Coordenador', nome: 'Multi-Patio', usuarios: [
+    { mat: 'CRD1001', funcao: 'Coordenador', turno: '-' },
+  ]},
+  { patio: 'Gerente', nome: 'Regional EFVM', usuarios: [
+    { mat: 'GER1001', funcao: 'Gerente', turno: '-' },
+  ]},
+  { patio: 'Diretor', nome: 'Estrategico', usuarios: [
+    { mat: 'DIR1001', funcao: 'Diretor', turno: '-' },
+  ]},
+  { patio: 'Admin', nome: 'Sistema', usuarios: [
+    { mat: 'ADM9001', funcao: 'Admin Global', turno: '-' },
   ]},
   { patio: 'Suporte', nome: 'Tecnico', usuarios: [
     { mat: 'SUP0001', funcao: 'Suporte', turno: '-' },
@@ -183,7 +195,7 @@ export default function PaginaSuporte({ tema, styles }: Props) {
               Senha padrao para todos os usuarios: <span style={{ fontFamily: 'monospace', color: '#007e7a', fontWeight: 700 }}>123456</span>
             </div>
             <div style={{ fontSize: 12, color: tema.textoSecundario, marginTop: 4 }}>
-              5 patios com 7 usuarios cada + 1 admin global. Formato: XXX1001 (maquinista), XXX2001 (inspetor), XXX3001 (gestor).
+              5 patios com 7 usuarios cada + supervisor, coordenador, gerente, diretor, admin, suporte. Formato: XXX1001 (maquinista), XXX2001 (inspetor), XXX3001 (gestor).
             </div>
           </div>
 

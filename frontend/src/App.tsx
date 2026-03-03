@@ -76,7 +76,8 @@ function getFuncaoLabel(funcao?: string): string {
   const map: Record<string, string> = {
     maquinista: 'Maquinista', operador: 'Operador', oficial: 'Oficial',
     oficial_operacao: 'Oficial de Operacao', inspetor: 'Inspetor',
-    gestor: 'Gestor', supervisor: 'Supervisor', coordenador: 'Coordenador',
+    supervisor: 'Supervisor', gestor: 'Gestor', coordenador: 'Coordenador',
+    gerente: 'Gerente', diretor: 'Diretor', admin: 'Administrador',
     suporte: 'Suporte Tecnico',
   };
   return map[funcao || ''] || funcao || 'Operador';
@@ -383,10 +384,10 @@ export default function App(): JSX.Element {
   const pendingCount = useMemo(() => {
     if (!usuarioLogado) return 0;
     const level = getHierarchyLevelForRole(usuarioLogado.funcao);
-    if (level < HierarchyLevel.MANAGEMENT) return 0;
+    if (level < HierarchyLevel.SUPERVISION) return 0;
     try {
       const yard = usuarioLogado?.primaryYard as YardCode | undefined;
-      const isGestor = level >= HierarchyLevel.MANAGEMENT;
+      const isGestor = level >= HierarchyLevel.SUPERVISION;
       const regs = getPendingRegistrations(isGestor ? yard as YardCode | undefined : undefined).length;
       const pwds = getPendingPasswordResets(isGestor ? yard as YardCode | undefined : undefined).length;
       return regs + pwds;
