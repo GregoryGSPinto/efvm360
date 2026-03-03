@@ -4,6 +4,7 @@
 
 import { Request, Response } from 'express';
 import * as orgService from '../services/orgService';
+import { Usuario, CadastroPendente } from '../models/index';
 
 export const getTree = async (req: Request, res: Response): Promise<void> => {
   if (!req.user) { res.status(401).json({ error: 'Não autenticado' }); return; }
@@ -71,4 +72,37 @@ export const removeYard = async (req: Request, res: Response): Promise<void> => 
   const removed = await orgService.removeYard(matricula, yard);
   if (!removed) { res.status(404).json({ error: 'Vínculo não encontrado' }); return; }
   res.json({ message: 'Pátio removido', matricula, yard });
+};
+
+// GET /org/coordinators?yard=VFZ — returns coordinators/supervisors for a yard
+export const getCoordinators = async (req: Request, res: Response): Promise<void> => {
+  const yardCode = req.query.yard as string;
+  if (!yardCode) { res.status(400).json({ error: 'yard query parameter é obrigatório' }); return; }
+
+  const coordinators = await orgService.getCoordinatorsForYard(yardCode);
+  res.json({ yard: yardCode, coordinators });
+};
+
+// POST /org/approve-registration — approve or reject pending registration
+export const approveRegistration = async (req: Request, res: Response): Promise<void> => {
+  if (!req.user) { res.status(401).json({ error: 'Não autenticado' }); return; }
+
+  const { matricula, approved } = req.body;
+  if (!matricula || typeof approved !== 'boolean') {
+    res.status(400).json({ error: 'matricula e approved (boolean) são obrigatórios' });
+    return;
+  }
+
+  const pendente = await CadastroPendente.findOne({ where: { matricula } });
+  if (!pendente) { res.status(404).json({ error: 'Cadastro pendente não encontrado' }); return; }
+
+  if (approved) {
+    await pendente.update({ status: 'aprovado', aprovado_por: req.user.matricula });
+    // Activate user if exists
+    await Usuario.update({ ativo: true }, { where: { matricula } });
+  } else {
+    await pendente.update({ status: 'rejeitado', aprovado_por: req.user.matricula });
+  }
+
+  res.json({ message: approved ? 'Cadastro aprovado' : 'Cadastro rejeitado', matricula });
 };

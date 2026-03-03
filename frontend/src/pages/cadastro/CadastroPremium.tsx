@@ -5,7 +5,10 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { usePatio } from '../../hooks/usePatio';
 
 // Funções NÃO disponíveis para auto-cadastro (requerem nomeação por gestor/admin)
-const FUNCOES_BLOQUEADAS_CADASTRO = ['supervisor', 'coordenador', 'outra'];
+const FUNCOES_BLOQUEADAS_CADASTRO = ['supervisor', 'coordenador', 'gerente', 'diretor', 'admin', 'suporte', 'outra'];
+
+// Hierarchy levels for coordinator lookup
+const COORDINATOR_FUNCOES = ['coordenador', 'supervisor', 'gestor'];
 
 interface CadastroPremiumProps {
   cadastroForm: Record<string, string>;
@@ -37,6 +40,23 @@ const CadastroPremium: React.FC<CadastroPremiumProps> = ({
     );
   }, []);
 
+  // Coordinator lookup — finds coordinators/supervisors for the selected pátio
+  const selectedYard = cadastroForm?.primaryYard || '';
+  const coordinators = useMemo(() => {
+    if (!selectedYard) return [];
+    try {
+      const usuarios = JSON.parse(localStorage.getItem('efvm360-usuarios') || '[]') as Array<{
+        matricula: string; nome: string; funcao: string; primaryYard?: string;
+        allowedYards?: string[]; status?: string;
+      }>;
+      return usuarios.filter(u =>
+        COORDINATOR_FUNCOES.includes(u.funcao) &&
+        u.status !== 'inactive' &&
+        (u.primaryYard === selectedYard || (u.allowedYards || []).includes(selectedYard))
+      ).map(u => ({ matricula: u.matricula, nome: u.nome, funcao: u.funcao }));
+    } catch { return []; }
+  }, [selectedYard]);
+
   // Clear multi-patio selection when function changes away from gestor/inspetor
   const funcaoAtual = cadastroForm?.funcao || '';
   useEffect(() => {
@@ -44,6 +64,14 @@ const CadastroPremium: React.FC<CadastroPremiumProps> = ({
       setPatiosCadastro([]);
     }
   }, [funcaoAtual]);
+
+  // Clear coordinator selection when yard changes
+  useEffect(() => {
+    if (cadastroForm?.coordinator) {
+      update('coordinator', '');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedYard]);
 
   // Filtrar funções que NÃO devem aparecer no auto-cadastro
   const funcoesDisponiveis = useMemo(() =>
@@ -294,6 +322,26 @@ const CadastroPremium: React.FC<CadastroPremiumProps> = ({
                   <option value="">Selecione o pátio...</option>
                   {patiosAtivos.map(patio => (
                     <option key={patio.codigo} value={patio.codigo}>{patio.codigo} — {patio.nome}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
+          {/* Coordenador responsável — shown for maquinista/oficial/inspetor after yard selection */}
+          {selectedYard && !['gestor', 'inspetor'].includes(funcaoAtual) && coordinators.length > 0 && (
+            <div>
+              <div style={lbl}>Coordenador Responsável</div>
+              <div style={ic('coord')}>
+                <select style={selSt}
+                  value={cadastroForm?.coordinator || ''}
+                  onChange={e => update('coordinator', e.target.value)}
+                  onFocus={() => setFoc('coord')} onBlur={() => setFoc(null)}>
+                  <option value="">Selecione o coordenador...</option>
+                  {coordinators.map(c => (
+                    <option key={c.matricula} value={c.matricula}>
+                      {c.nome} ({c.funcao}) — {c.matricula}
+                    </option>
                   ))}
                 </select>
               </div>

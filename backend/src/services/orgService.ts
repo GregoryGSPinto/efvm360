@@ -138,6 +138,31 @@ export async function removeYard(matricula: string, yardCode: string) {
   return deleted > 0;
 }
 
+// ── Get coordinators/supervisors for a yard ─────────────────────────
+export async function getCoordinatorsForYard(yardCode: string) {
+  // Find users assigned to this yard who are coordinators or supervisors
+  const yardUsers = await UsuarioPatio.findAll({ where: { yard_code: yardCode } });
+  const matriculas = yardUsers.map(y => y.matricula);
+
+  if (matriculas.length === 0) return [];
+
+  const users = await Usuario.findAll({
+    where: {
+      matricula: { [Op.in]: matriculas },
+      funcao: { [Op.in]: ['coordenador', 'supervisor', 'gestor'] },
+      ativo: true,
+    },
+    attributes: ['nome', 'matricula', 'funcao', 'primary_yard'],
+  });
+
+  return users.map(u => ({
+    matricula: u.matricula,
+    nome: u.nome,
+    funcao: u.funcao,
+    primaryYard: u.primary_yard,
+  }));
+}
+
 // ── Resolve organizational scope (for middleware) ───────────────────────
 export async function resolveScope(matricula: string, funcao: string): Promise<string[]> {
   const ALL_YARDS = ['VFZ', 'VBR', 'VCS', 'P6', 'VTO'];

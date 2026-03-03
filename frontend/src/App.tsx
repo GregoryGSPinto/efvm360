@@ -38,6 +38,7 @@ import type { ContextoBot } from './components/AdamBot';
 import { adamPrecarregarVozes } from './components/AdamBot/AdamBotVoice';
 import { TopNavbar } from './components/layout/TopNavbar';
 import { MobileBottomNav } from './components/layout/MobileBottomNav';
+import { YardSelector } from './components/YardSelector';
 import { OnlineIndicator } from './components/layout/OnlineIndicator';
 import { GuidedTour, TOUR_STEPS } from './components/ui/GuidedTour';
 import { UpdateNotification } from './components/ui/UpdateNotification';
@@ -264,9 +265,30 @@ export default function App(): JSX.Element {
 
   // ── Logout wrapper (clears tour sessionStorage) ────────────────────
   const handleLogout = useCallback(() => {
-    try { sessionStorage.removeItem('efvm360-tour-completo'); } catch { /* fail silently */ }
+    try { sessionStorage.removeItem('efvm360-tour-completo'); sessionStorage.removeItem('efvm360-yard-selected'); } catch { /* fail silently */ }
     realizarLogout();
   }, [realizarLogout]);
+
+  // ── Multi-yard selection for coordinator+ users ───────────────────
+  const [yardSelected, setYardSelected] = useState(() => !!sessionStorage.getItem('efvm360-yard-selected'));
+  const needsYardSelection = useMemo(() => {
+    if (!usuarioLogado || yardSelected) return false;
+    const level = getHierarchyLevelForRole(usuarioLogado.funcao);
+    // Coordinator+ users with multiple yards need to select
+    if (level < HierarchyLevel.COORDINATION) return false;
+    const yards = usuarioLogado.allowedYards || [];
+    return yards.length > 1;
+  }, [usuarioLogado, yardSelected]);
+
+  const handleYardSelect = useCallback((yardCode: string) => {
+    if (!usuarioLogado) return;
+    // Update the user's active yard context
+    const updated = { ...usuarioLogado, primaryYard: yardCode };
+    // Persist to session and localStorage
+    sessionStorage.setItem('efvm360-yard-selected', yardCode);
+    localStorage.setItem(STORAGE_KEYS.USUARIO, JSON.stringify(updated));
+    setYardSelected(true);
+  }, [usuarioLogado]);
 
   // Auto-start tour after login (first time only)
   useEffect(() => {
@@ -523,6 +545,11 @@ export default function App(): JSX.Element {
   // v3.2: Forced password change gate
   if (telaAtual === 'trocarSenha' && usuarioLogado) {
     return <TrocaSenhaScreen tema={tema} isDark={isDark} onTrocar={realizarTrocaSenha} />;
+  }
+
+  // v3.3: Multi-yard selection gate for coordinator+ users
+  if (needsYardSelection && usuarioLogado) {
+    return <YardSelector user={usuarioLogado} onSelect={handleYardSelect} isDark={isDark} />;
   }
 
   // Terms acceptance gate

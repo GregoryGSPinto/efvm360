@@ -173,6 +173,8 @@ router.get('/org/tree/:matricula', authenticate, authorize('supervisor'), orgCtr
 router.get('/org/superiors/:matricula', authenticate, orgCtrl.getSuperiors);
 router.post('/org/assign', authenticate, authorize('coordenador'), orgCtrl.assignSubordinate);
 router.delete('/org/assign/:id', authenticate, authorize('coordenador'), orgCtrl.removeRelationship);
+router.get('/org/coordinators', orgCtrl.getCoordinators);
+router.post('/org/approve-registration', authenticate, authorize('supervisor'), orgCtrl.approveRegistration);
 router.get('/users/:matricula/yards', authenticate, orgCtrl.getUserYards);
 router.post('/users/:matricula/yards', authenticate, authorize('coordenador'), orgCtrl.assignYard);
 router.delete('/users/:matricula/yards/:yard', authenticate, authorize('coordenador'), orgCtrl.removeYard);
