@@ -58,6 +58,7 @@ const PaginaPerfil = lazy(() => import('./pages/perfil'));
 const PaginaLayoutPatio = lazy(() => import('./pages/layout-patio'));
 const PaginaGrausRisco = lazy(() => import('./pages/graus-risco'));
 
+const PaginaDashboard = lazy(() => import('./pages/dashboard'));
 const PaginaComposicoes = lazy(() => import('./pages/composicoes'));
 const PaginaInterYard = lazy(() => import('./pages/passagem-interpatio'));
 const PaginaHistorico = lazy(() => import('./pages/historico'));
@@ -814,6 +815,14 @@ export default function App(): JSX.Element {
                   confirmarNovaSenha={handlers.confirmarNovaSenha} setConfirmarNovaSenha={handlers.setConfirmarNovaSenha}
                   erroAlterarSenha={handlers.erroAlterarSenha} setErroAlterarSenha={handlers.setErroAlterarSenha}
                   sucessoAlterarSenha={handlers.sucessoAlterarSenha} setSucessoAlterarSenha={handlers.setSucessoAlterarSenha} />
+              </ModuleErrorBoundary>
+            } />
+
+            {/* Dashboard (hierarchy-level auto-select) */}
+            <Route path="/dashboard/*" element={
+              <ModuleErrorBoundary module="dashboard">
+                <PaginaDashboard tema={tema} styles={styles} config={config}
+                  usuarioLogado={usuarioLogado} />
               </ModuleErrorBoundary>
             } />
 

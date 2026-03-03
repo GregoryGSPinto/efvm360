@@ -15,6 +15,10 @@ export const ROUTES = {
   LAYOUT: '/layout',
   GRAUS_RISCO: '/graus-risco',
 
+  DASHBOARD: '/dashboard',
+  DASHBOARD_SUPERVISOR: '/dashboard/supervisor',
+  DASHBOARD_COORDENADOR: '/dashboard/coordenador',
+  DASHBOARD_GERENTE: '/dashboard/gerente',
   COMPOSICOES: '/composicoes',
   INTER_YARD: '/passagem-interpatio',
   GESTAO: '/gestao',
@@ -33,6 +37,10 @@ export const NAV_ID_TO_PATH: Record<string, string> = {
   layout: ROUTES.LAYOUT,
   'graus-risco': ROUTES.GRAUS_RISCO,
 
+  dashboard: ROUTES.DASHBOARD,
+  'dashboard-supervisor': ROUTES.DASHBOARD_SUPERVISOR,
+  'dashboard-coordenador': ROUTES.DASHBOARD_COORDENADOR,
+  'dashboard-gerente': ROUTES.DASHBOARD_GERENTE,
   composicoes: ROUTES.COMPOSICOES,
   'passagem-interpatio': ROUTES.INTER_YARD,
   gestao: ROUTES.GESTAO,
