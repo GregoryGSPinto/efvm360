@@ -179,6 +179,15 @@ router.get('/users/:matricula/yards', authenticate, orgCtrl.getUserYards);
 router.post('/users/:matricula/yards', authenticate, authorize('coordenador'), orgCtrl.assignYard);
 router.delete('/users/:matricula/yards/:yard', authenticate, authorize('coordenador'), orgCtrl.removeYard);
 
+// ── ANALYTICS (Dashboards) ──────────────────────────────────────────────
+import * as analyticsCtrl from '../controllers/analyticsController';
+router.post('/analytics/refresh', authenticate, authorize('gestor'), analyticsCtrl.refresh);
+router.get('/analytics/dashboard/supervisor', authenticate, authorize('supervisor'), analyticsCtrl.dashboardSupervisor);
+router.get('/analytics/dashboard/coordenador', authenticate, authorize('coordenador'), analyticsCtrl.dashboardCoordenador);
+router.get('/analytics/dashboard/gerente', authenticate, authorize('gerente'), analyticsCtrl.dashboardGerente);
+router.get('/analytics/trends', authenticate, authorize('supervisor'), analyticsCtrl.trends);
+router.get('/analytics/operators', authenticate, authorize('supervisor'), analyticsCtrl.operators);
+
 // ── TRAIN COMPOSITIONS ──────────────────────────────────────────────────
 import * as compositionsCtrl from '../controllers/compositionsController';
 router.post('/compositions', authenticate, authorize('supervisor'), compositionsCtrl.create);

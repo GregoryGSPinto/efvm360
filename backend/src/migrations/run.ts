@@ -14,6 +14,7 @@ import { runMigration006 } from './006_add_primary_yard';
 import { runMigration007 } from './007_organizational_tree';
 import { runMigration008 } from './008_inter_yard_handover';
 import { runMigration009 } from './009_train_compositions';
+import { runMigration010 } from './010_analytics_views';
 
 (async () => {
   try {
@@ -25,6 +26,7 @@ import { runMigration009 } from './009_train_compositions';
     await runMigration007();      // 007 (organizational_tree + usuario_patios)
     await runMigration008();      // 008 (inter_yard_handovers)
     await runMigration009();      // 009 (train_compositions + handover_chain)
+    await runMigration010();      // 010 (analytics materialized views)
     console.log('\n✅ Todas as migrações executadas com sucesso.');
     process.exit(0);
   } catch (error) {
