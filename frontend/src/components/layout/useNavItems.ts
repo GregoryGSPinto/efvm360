@@ -14,6 +14,10 @@ const ROTA_MAP: Record<string, string> = {
   historico: 'historico',
   configuracoes: 'configuracoes',
   dss: 'dss',
+  dashboard: 'dashboard',
+  composicoes: 'composicoes',
+  'passagem-interpatio': 'passagem-interpatio',
+  aprovacoes: 'aprovacoes',
 };
 
 export interface NavItem extends SidebarItem {

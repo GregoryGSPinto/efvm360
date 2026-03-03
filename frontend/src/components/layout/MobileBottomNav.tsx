@@ -41,9 +41,15 @@ export const MobileBottomNav = memo<MobileBottomNavProps>(({
     }
     items.push({ id: 'historico', label: 'Historico', icon: '\uD83D\uDCCB' });
     if (hierarchyLevel >= HierarchyLevel.SUPERVISION) {
+      items.push({ id: 'dashboard', label: 'Dashboard', icon: '\uD83D\uDCCA' });
+      items.push({ id: 'composicoes', label: 'Composicoes', icon: '\uD83D\uDE83' });
+      items.push({ id: 'passagem-interpatio', label: 'Inter-Patio', icon: '\uD83D\uDD04' });
       items.push({ id: 'layout', label: 'Layout', icon: '\uD83D\uDDFA\uFE0F' });
       items.push({ id: 'graus-risco', label: 'Grau Risco', icon: '\u26A0\uFE0F' });
       items.push({ id: 'gestao', label: 'Gestao', icon: '\uD83D\uDC65' });
+    }
+    if (hierarchyLevel >= HierarchyLevel.COORDINATION) {
+      items.push({ id: 'aprovacoes', label: 'Aprovacoes', icon: '\u2705' });
     }
     return items;
   }, [hierarchyLevel, userRole]);
@@ -58,6 +64,7 @@ export const MobileBottomNav = memo<MobileBottomNavProps>(({
   const isActive = (id: string): boolean => {
     if (id === 'dss') return currentPath === ROUTES.DSS;
     if (id === 'passagem') return currentPath === ROUTES.PASSAGEM || currentPath === ROUTES.HOME;
+    if (id === 'dashboard') return currentPath.startsWith('/dashboard');
     return currentPath === (NAV_ID_TO_PATH[id] || `/${id}`);
   };
 
@@ -110,7 +117,7 @@ export const MobileBottomNav = memo<MobileBottomNavProps>(({
               position: 'relative',
             }}>
               {icon}
-              {id === 'gestao' && pendingCount > 0 && (
+              {(id === 'gestao' || id === 'aprovacoes') && pendingCount > 0 && (
                 <span style={{
                   position: 'absolute', top: -4, right: -8,
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',

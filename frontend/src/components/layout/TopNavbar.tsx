@@ -24,6 +24,10 @@ const NAV_LABEL_KEYS: Record<string, string> = {
   'graus-risco': 'nav.grausRisco',
 
   gestao: 'nav.gestao',
+  dashboard: 'nav.dashboard',
+  composicoes: 'nav.composicoes',
+  'passagem-interpatio': 'nav.interPatio',
+  aprovacoes: 'nav.aprovacoes',
 };
 
 // Nav items are now built dynamically per role in buildNavItems()
@@ -64,11 +68,18 @@ export const TopNavbar = memo<TopNavbarProps>(({
       items.push({ id: 'analytics', label: 'BI+' });
     }
     items.push({ id: 'historico', label: 'Historico' });
-    // supervisor+: Gestao, Layout, Grau Risco
+    // supervisor+: Dashboard, Composicoes, Inter-Yard, Gestao, Layout, Grau Risco
     if (hierarchyLevel >= HierarchyLevel.SUPERVISION) {
+      items.push({ id: 'dashboard', label: 'Dashboard' });
+      items.push({ id: 'composicoes', label: 'Composicoes' });
+      items.push({ id: 'passagem-interpatio', label: 'Inter-Patio' });
       items.push({ id: 'layout', label: 'Layout' });
       items.push({ id: 'graus-risco', label: 'Grau Risco' });
       items.push({ id: 'gestao', label: 'Gestao' });
+    }
+    // coordinator+: Aprovacoes
+    if (hierarchyLevel >= HierarchyLevel.COORDINATION) {
+      items.push({ id: 'aprovacoes', label: 'Aprovacoes' });
     }
     return items;
   };
@@ -101,6 +112,7 @@ export const TopNavbar = memo<TopNavbarProps>(({
     const targetPath = NAV_ID_TO_PATH[id];
     if (id === 'dss') return currentPath === ROUTES.DSS;
     if (id === 'passagem') return currentPath === ROUTES.PASSAGEM || currentPath === ROUTES.HOME;
+    if (id === 'dashboard') return currentPath.startsWith('/dashboard');
     return currentPath === targetPath;
   };
 
@@ -132,7 +144,7 @@ export const TopNavbar = memo<TopNavbarProps>(({
       }}>
         {NAV_ITEMS.map(({ id, label }) => {
           const active = isActive(id);
-          const showBadge = id === 'gestao' && pendingCount > 0;
+          const showBadge = (id === 'gestao' || id === 'aprovacoes') && pendingCount > 0;
           const translatedLabel = NAV_LABEL_KEYS[id] ? t(NAV_LABEL_KEYS[id]) : label;
           return (
             <button
