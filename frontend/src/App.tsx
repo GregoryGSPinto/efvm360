@@ -58,6 +58,7 @@ const PaginaPerfil = lazy(() => import('./pages/perfil'));
 const PaginaLayoutPatio = lazy(() => import('./pages/layout-patio'));
 const PaginaGrausRisco = lazy(() => import('./pages/graus-risco'));
 
+const PaginaAprovacoes = lazy(() => import('./pages/aprovacoes'));
 const PaginaDashboard = lazy(() => import('./pages/dashboard'));
 const PaginaComposicoes = lazy(() => import('./pages/composicoes'));
 const PaginaInterYard = lazy(() => import('./pages/passagem-interpatio'));
@@ -815,6 +816,14 @@ export default function App(): JSX.Element {
                   confirmarNovaSenha={handlers.confirmarNovaSenha} setConfirmarNovaSenha={handlers.setConfirmarNovaSenha}
                   erroAlterarSenha={handlers.erroAlterarSenha} setErroAlterarSenha={handlers.setErroAlterarSenha}
                   sucessoAlterarSenha={handlers.sucessoAlterarSenha} setSucessoAlterarSenha={handlers.setSucessoAlterarSenha} />
+              </ModuleErrorBoundary>
+            } />
+
+            {/* Aprovacoes */}
+            <Route path={ROUTES.APROVACOES} element={
+              <ModuleErrorBoundary module="aprovacoes">
+                <PaginaAprovacoes tema={tema} styles={styles} config={config}
+                  usuarioLogado={usuarioLogado} />
               </ModuleErrorBoundary>
             } />
 
