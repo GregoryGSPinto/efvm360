@@ -179,6 +179,16 @@ router.get('/users/:matricula/yards', authenticate, orgCtrl.getUserYards);
 router.post('/users/:matricula/yards', authenticate, authorize('coordenador'), orgCtrl.assignYard);
 router.delete('/users/:matricula/yards/:yard', authenticate, authorize('coordenador'), orgCtrl.removeYard);
 
+// ── APPROVAL WORKFLOWS ──────────────────────────────────────────────────
+import * as workflowCtrl from '../controllers/workflowController';
+router.get('/workflows/inbox', authenticate, authorize('supervisor'), workflowCtrl.inbox);
+router.get('/workflows/:id', authenticate, authorize('supervisor'), workflowCtrl.getWorkflow);
+router.post('/workflows/:id/approve', authenticate, authorize('supervisor'), workflowCtrl.approve);
+router.post('/workflows/:id/reject', authenticate, authorize('supervisor'), workflowCtrl.reject);
+router.post('/workflows/:id/escalate', authenticate, authorize('supervisor'), workflowCtrl.escalate);
+router.post('/workflows/:id/comment', authenticate, workflowCtrl.comment);
+router.post('/workflows/check-sla', authenticate, authorize('gestor'), workflowCtrl.checkSla);
+
 // ── ANALYTICS (Dashboards) ──────────────────────────────────────────────
 import * as analyticsCtrl from '../controllers/analyticsController';
 router.post('/analytics/refresh', authenticate, authorize('gestor'), analyticsCtrl.refresh);

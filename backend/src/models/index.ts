@@ -370,4 +370,5 @@ export { InterYardHandover } from './InterYardHandover';
 export { TrainComposition } from './TrainComposition';
 export { CompositionHandoverChain } from './CompositionHandoverChain';
 export { DailyHandoverStats, OperatorPerformance, YardCompliance } from './AnalyticsModels';
+export { ApprovalWorkflow, WorkflowAction } from './WorkflowModels';
 export default { Usuario, Passagem, AuditTrail, Patio: PatioModel, DSS, CadastroPendente, SenhaReset, UsuarioConfig, AdamBootPerfil };
