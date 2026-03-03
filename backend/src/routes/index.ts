@@ -179,6 +179,15 @@ router.get('/users/:matricula/yards', authenticate, orgCtrl.getUserYards);
 router.post('/users/:matricula/yards', authenticate, authorize('coordenador'), orgCtrl.assignYard);
 router.delete('/users/:matricula/yards/:yard', authenticate, authorize('coordenador'), orgCtrl.removeYard);
 
+// ── TRAIN COMPOSITIONS ──────────────────────────────────────────────────
+import * as compositionsCtrl from '../controllers/compositionsController';
+router.post('/compositions', authenticate, authorize('supervisor'), compositionsCtrl.create);
+router.get('/compositions', authenticate, compositionsCtrl.list);
+router.get('/compositions/:code', authenticate, compositionsCtrl.getByCode);
+router.patch('/compositions/:code/depart', authenticate, authorize('supervisor'), compositionsCtrl.depart);
+router.patch('/compositions/:code/arrive', authenticate, authorize('supervisor'), compositionsCtrl.arrive);
+router.get('/compositions/:code/journey', authenticate, compositionsCtrl.journey);
+
 // ── INTER-YARD HANDOVER ─────────────────────────────────────────────────
 import * as interYardCtrl from '../controllers/interYardController';
 router.post('/inter-yard', authenticate, authorize('supervisor'), interYardCtrl.create);

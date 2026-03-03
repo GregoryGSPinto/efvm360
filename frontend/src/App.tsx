@@ -58,6 +58,7 @@ const PaginaPerfil = lazy(() => import('./pages/perfil'));
 const PaginaLayoutPatio = lazy(() => import('./pages/layout-patio'));
 const PaginaGrausRisco = lazy(() => import('./pages/graus-risco'));
 
+const PaginaComposicoes = lazy(() => import('./pages/composicoes'));
 const PaginaInterYard = lazy(() => import('./pages/passagem-interpatio'));
 const PaginaHistorico = lazy(() => import('./pages/historico'));
 const PaginaConfiguracoes = lazy(() => import('./pages/configuracoes'));
@@ -813,6 +814,14 @@ export default function App(): JSX.Element {
                   confirmarNovaSenha={handlers.confirmarNovaSenha} setConfirmarNovaSenha={handlers.setConfirmarNovaSenha}
                   erroAlterarSenha={handlers.erroAlterarSenha} setErroAlterarSenha={handlers.setErroAlterarSenha}
                   sucessoAlterarSenha={handlers.sucessoAlterarSenha} setSucessoAlterarSenha={handlers.setSucessoAlterarSenha} />
+              </ModuleErrorBoundary>
+            } />
+
+            {/* Composicoes */}
+            <Route path={ROUTES.COMPOSICOES} element={
+              <ModuleErrorBoundary module="composicoes">
+                <PaginaComposicoes tema={tema} styles={styles} config={config}
+                  usuarioLogado={usuarioLogado} />
               </ModuleErrorBoundary>
             } />
 

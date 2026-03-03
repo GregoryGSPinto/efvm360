@@ -367,4 +367,6 @@ import { Patio as PatioModel } from './Patio';
 export { OrganizationalTree } from './OrganizationalTree';
 export { UsuarioPatio } from './UsuarioPatio';
 export { InterYardHandover } from './InterYardHandover';
+export { TrainComposition } from './TrainComposition';
+export { CompositionHandoverChain } from './CompositionHandoverChain';
 export default { Usuario, Passagem, AuditTrail, Patio: PatioModel, DSS, CadastroPendente, SenhaReset, UsuarioConfig, AdamBootPerfil };
