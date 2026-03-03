@@ -40,15 +40,14 @@ export const MobileBottomNav = memo<MobileBottomNavProps>(({
     (config.tema === 'automatico' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
 
   const hierarchyLevel = getHierarchyLevelForRole(userRole);
-  const NAV_ITEMS = useMemo(() => [
-    ...BASE_NAV_ITEMS,
-    ...(hierarchyLevel >= HierarchyLevel.INSPECTION
-      ? [{ id: 'gestao', label: 'Gestao', icon: '\uD83D\uDC65' }]
-      : []),
-    ...(userRole === 'suporte'
-      ? [{ id: 'suporte', label: 'Suporte', icon: '\uD83D\uDEE0\uFE0F' }]
-      : []),
-  ], [hierarchyLevel, userRole]);
+  const NAV_ITEMS = useMemo(() => userRole === 'suporte'
+    ? [{ id: 'suporte', label: 'Suporte', icon: '\uD83D\uDEE0\uFE0F' }]
+    : [
+        ...BASE_NAV_ITEMS,
+        ...(hierarchyLevel >= HierarchyLevel.INSPECTION
+          ? [{ id: 'gestao', label: 'Gestao', icon: '\uD83D\uDC65' }]
+          : []),
+      ], [hierarchyLevel, userRole]);
 
   const bg = dk ? '#1a1a1a' : '#ffffff';
   const bd = dk ? '#2a2a2a' : '#e8e8e8';

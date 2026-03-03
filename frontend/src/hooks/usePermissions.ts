@@ -20,6 +20,7 @@ interface UsePermissionsReturn {
   isAdmin: boolean;
   isGestor: boolean;
   isInspetor: boolean;
+  isSuporte: boolean;
 }
 
 // Map legacy module names to SystemActions
@@ -103,5 +104,6 @@ export function usePermissions(usuarioLogado?: { funcao?: string; matricula?: st
     isAdmin: (userProfile?.hierarchyLevel || 0) >= HierarchyLevel.MANAGEMENT, // v3.2: gestor is top
     isGestor: (userProfile?.hierarchyLevel || 0) >= HierarchyLevel.MANAGEMENT,
     isInspetor: (userProfile?.hierarchyLevel || 0) >= HierarchyLevel.INSPECTION,
+    isSuporte: usuarioLogado?.funcao === 'suporte',
   };
 }

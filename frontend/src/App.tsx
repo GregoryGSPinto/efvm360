@@ -304,6 +304,8 @@ export default function App(): JSX.Element {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (!e.altKey || !usuarioLogado) return;
+      // Suporte users — shortcuts disabled (they only see /suporte)
+      if (usuarioLogado.funcao === 'suporte') return;
       const map: Record<string, string> = { '1': 'passagem', '2': 'dss', '3': 'analytics', '4': 'gestao', '5': 'configuracoes' };
       if (map[e.key]) { e.preventDefault(); navigate(NAV_ID_TO_PATH[map[e.key]] || '/'); }
       if (e.key === '/') { e.preventDefault(); setShowShortcuts(p => !p); }
@@ -480,7 +482,15 @@ export default function App(): JSX.Element {
 
   // Redirect authenticated users away from public routes
   if (isAuthenticated && isPublicPath) {
-    return <Navigate to={ROUTES.HOME} replace />;
+    // Suporte users go straight to /suporte after login
+    const dest = usuarioLogado?.funcao === 'suporte' ? ROUTES.SUPORTE : ROUTES.HOME;
+    return <Navigate to={dest} replace />;
+  }
+
+  // Suporte users can only access /suporte and /perfil — redirect everything else
+  if (isAuthenticated && usuarioLogado?.funcao === 'suporte'
+      && location.pathname !== ROUTES.SUPORTE && location.pathname !== ROUTES.PERFIL) {
+    return <Navigate to={ROUTES.SUPORTE} replace />;
   }
 
   // ==================================================================

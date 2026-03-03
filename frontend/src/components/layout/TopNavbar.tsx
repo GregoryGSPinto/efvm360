@@ -59,17 +59,16 @@ export const TopNavbar = memo<TopNavbarProps>(({
   const [avatarOpen, setAvatarOpen] = useState(false);
   const avatarRef = useRef<HTMLDivElement>(null);
 
-  // Build nav items — add "Gestao" if user has inspection level or higher
+  // Build nav items — suporte sees ONLY Suporte; others get base + role items
   const hierarchyLevel = getHierarchyLevelForRole(usuarioLogado?.funcao || '');
-  const NAV_ITEMS = [
-    ...BASE_NAV_ITEMS,
-    ...(hierarchyLevel >= HierarchyLevel.INSPECTION
-      ? [{ id: 'gestao', label: 'Gestao' }]
-      : []),
-    ...(usuarioLogado?.funcao === 'suporte'
-      ? [{ id: 'suporte', label: 'Suporte' }]
-      : []),
-  ];
+  const NAV_ITEMS = usuarioLogado?.funcao === 'suporte'
+    ? [{ id: 'suporte', label: 'Suporte' }]
+    : [
+        ...BASE_NAV_ITEMS,
+        ...(hierarchyLevel >= HierarchyLevel.INSPECTION
+          ? [{ id: 'gestao', label: 'Gestao' }]
+          : []),
+      ];
 
   const dk = config.tema === 'escuro' ||
     (config.tema === 'automatico' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
@@ -250,6 +249,7 @@ export const TopNavbar = memo<TopNavbarProps>(({
                 >
                   {t('nav.meuPerfil')}
                 </button>
+                {usuarioLogado?.funcao !== 'suporte' && (
                 <button
                   onClick={() => { onNavigate('configuracoes'); setAvatarOpen(false); }}
                   style={{
@@ -265,6 +265,7 @@ export const TopNavbar = memo<TopNavbarProps>(({
                 >
                   {t('nav.configuracoes')}
                 </button>
+                )}
                 <div style={{ borderTop: `1px solid ${bd}` }}>
                   <button
                     onClick={() => { setAvatarOpen(false); onLogout(); }}
