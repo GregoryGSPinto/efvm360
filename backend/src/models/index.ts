@@ -366,4 +366,5 @@ AdamBootPerfil.belongsTo(Usuario, { as: 'usuario', foreignKey: 'usuario_id' });
 import { Patio as PatioModel } from './Patio';
 export { OrganizationalTree } from './OrganizationalTree';
 export { UsuarioPatio } from './UsuarioPatio';
+export { InterYardHandover } from './InterYardHandover';
 export default { Usuario, Passagem, AuditTrail, Patio: PatioModel, DSS, CadastroPendente, SenhaReset, UsuarioConfig, AdamBootPerfil };

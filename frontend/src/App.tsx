@@ -58,6 +58,7 @@ const PaginaPerfil = lazy(() => import('./pages/perfil'));
 const PaginaLayoutPatio = lazy(() => import('./pages/layout-patio'));
 const PaginaGrausRisco = lazy(() => import('./pages/graus-risco'));
 
+const PaginaInterYard = lazy(() => import('./pages/passagem-interpatio'));
 const PaginaHistorico = lazy(() => import('./pages/historico'));
 const PaginaConfiguracoes = lazy(() => import('./pages/configuracoes'));
 const PaginaSuporte = lazy(() => import('./pages/suporte'));
@@ -812,6 +813,14 @@ export default function App(): JSX.Element {
                   confirmarNovaSenha={handlers.confirmarNovaSenha} setConfirmarNovaSenha={handlers.setConfirmarNovaSenha}
                   erroAlterarSenha={handlers.erroAlterarSenha} setErroAlterarSenha={handlers.setErroAlterarSenha}
                   sucessoAlterarSenha={handlers.sucessoAlterarSenha} setSucessoAlterarSenha={handlers.setSucessoAlterarSenha} />
+              </ModuleErrorBoundary>
+            } />
+
+            {/* Inter-Yard Handover */}
+            <Route path={ROUTES.INTER_YARD} element={
+              <ModuleErrorBoundary module="inter-yard">
+                <PaginaInterYard tema={tema} styles={styles} config={config}
+                  usuarioLogado={usuarioLogado} />
               </ModuleErrorBoundary>
             } />
 

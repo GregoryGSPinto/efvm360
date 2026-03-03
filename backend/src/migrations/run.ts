@@ -12,6 +12,7 @@ import { runMigration004 } from './004_patios';
 import { runMigration005 } from './005_missing_tables';
 import { runMigration006 } from './006_add_primary_yard';
 import { runMigration007 } from './007_organizational_tree';
+import { runMigration008 } from './008_inter_yard_handover';
 
 (async () => {
   try {
@@ -21,6 +22,7 @@ import { runMigration007 } from './007_organizational_tree';
     await runMigration005();      // 005 (DSS, gestão, adamboot, config, notificações, error reports, user seed)
     await runMigration006();      // 006 (primary_yard + funcao VARCHAR)
     await runMigration007();      // 007 (organizational_tree + usuario_patios)
+    await runMigration008();      // 008 (inter_yard_handovers)
     console.log('\n✅ Todas as migrações executadas com sucesso.');
     process.exit(0);
   } catch (error) {

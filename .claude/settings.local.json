@@ -20,7 +20,14 @@
       "Bash(pnpm type-check:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(docker exec:*)",
+      "Bash(open:*)",
+      "Bash(docker ps:*)",
+      "Bash(curl:*)",
+      "Bash(docker compose:*)",
+      "Bash(python3:*)",
+      "Bash(rm:*)"
     ]
   }
 }

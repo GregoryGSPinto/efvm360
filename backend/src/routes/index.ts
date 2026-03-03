@@ -179,6 +179,16 @@ router.get('/users/:matricula/yards', authenticate, orgCtrl.getUserYards);
 router.post('/users/:matricula/yards', authenticate, authorize('coordenador'), orgCtrl.assignYard);
 router.delete('/users/:matricula/yards/:yard', authenticate, authorize('coordenador'), orgCtrl.removeYard);
 
+// ── INTER-YARD HANDOVER ─────────────────────────────────────────────────
+import * as interYardCtrl from '../controllers/interYardController';
+router.post('/inter-yard', authenticate, authorize('supervisor'), interYardCtrl.create);
+router.patch('/inter-yard/:id/dispatch', authenticate, authorize('supervisor'), interYardCtrl.dispatch);
+router.patch('/inter-yard/:id/receive', authenticate, authorize('supervisor'), interYardCtrl.receive);
+router.post('/inter-yard/:id/divergence', authenticate, interYardCtrl.addDivergence);
+router.patch('/inter-yard/:id/resolve', authenticate, authorize('supervisor'), interYardCtrl.resolve);
+router.post('/inter-yard/:id/seal', authenticate, authorize('coordenador'), interYardCtrl.seal);
+router.get('/inter-yard', authenticate, interYardCtrl.list);
+
 // ── METRICS (Observability) ──────────────────────────────────────────────
 import * as metricsCtrl from '../controllers/metricsController';
 router.get('/metrics/resumo', authenticate, authorize('inspetor'), metricsCtrl.resumo);
