@@ -49,6 +49,7 @@ const CREDENCIAIS = [
   ]},
   { patio: 'Coordenador', nome: 'Multi-Patio', usuarios: [
     { mat: 'CRD1001', funcao: 'Coordenador', turno: '-' },
+    { mat: 'CRD2001', funcao: 'Coordenador', turno: '-' },
   ]},
   { patio: 'Gerente', nome: 'Regional EFVM', usuarios: [
     { mat: 'GER1001', funcao: 'Gerente', turno: '-' },

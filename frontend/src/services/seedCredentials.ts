@@ -1,6 +1,6 @@
 // ============================================================================
 // EFVM PÁTIO 360 — Seed de Credenciais v8
-// 41 operadores: 7 por pátio × 5 pátios + 1 supervisor + 1 coordenador
+// 42 operadores: 7 por pátio × 5 pátios + 1 supervisor + 2 coordenadores
 //   + 1 gerente + 1 diretor + 1 admin global + 1 suporte
 // Senha padrão: 123456
 // ============================================================================
@@ -77,8 +77,9 @@ const EFVM360_USERS: SeedUser[] = [
   // ═══ SUPERVISOR (pátio VFZ) ═══
   { nome: 'Lucas Supervisor Ferreira',   matricula: 'SUP1001', funcao: 'supervisor',                                    primaryYard: 'VFZ' },
 
-  // ═══ COORDENADOR (multi-pátio VFZ+VBR) ═══
+  // ═══ COORDENADORES (multi-pátio) ═══
   { nome: 'Ricardo Coordenador Silva',   matricula: 'CRD1001', funcao: 'coordenador',                                   primaryYard: 'VFZ' },
+  { nome: 'Marina Coordenadora Santos',  matricula: 'CRD2001', funcao: 'coordenador',                                   primaryYard: 'VCS' },
 
   // ═══ GERENTE (regional EFVM) ═══
   { nome: 'Fernando Gerente Almeida',    matricula: 'GER1001', funcao: 'gerente',                                       primaryYard: 'VFZ' },

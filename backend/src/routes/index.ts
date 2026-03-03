@@ -167,6 +167,16 @@ import * as configCtrl from '../controllers/configController';
 router.get('/config', authenticate, configCtrl.obter);
 router.patch('/config', authenticate, configCtrl.atualizar);
 
+// ── ORGANIZAÇÃO (Árvore hierárquica + pátios do usuário) ────────────────
+import * as orgCtrl from '../controllers/orgController';
+router.get('/org/tree/:matricula', authenticate, authorize('supervisor'), orgCtrl.getTree);
+router.get('/org/superiors/:matricula', authenticate, orgCtrl.getSuperiors);
+router.post('/org/assign', authenticate, authorize('coordenador'), orgCtrl.assignSubordinate);
+router.delete('/org/assign/:id', authenticate, authorize('coordenador'), orgCtrl.removeRelationship);
+router.get('/users/:matricula/yards', authenticate, orgCtrl.getUserYards);
+router.post('/users/:matricula/yards', authenticate, authorize('coordenador'), orgCtrl.assignYard);
+router.delete('/users/:matricula/yards/:yard', authenticate, authorize('coordenador'), orgCtrl.removeYard);
+
 // ── METRICS (Observability) ──────────────────────────────────────────────
 import * as metricsCtrl from '../controllers/metricsController';
 router.get('/metrics/resumo', authenticate, authorize('inspetor'), metricsCtrl.resumo);
