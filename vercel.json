@@ -1,6 +1,6 @@
 {
   "installCommand": "cd frontend && npm install --legacy-peer-deps",
-  "buildCommand": "cd frontend && npm run build",
+  "buildCommand": "cd frontend && VITE_SHOW_DEMO_CREDENTIALS=true VITE_ENV=production npm run build",
   "outputDirectory": "frontend/dist",
   "framework": "vite",
   "env": {
