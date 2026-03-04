@@ -607,7 +607,8 @@ export default function App(): JSX.Element {
         }} />
       )}
 
-      {/* Demo Banner */}
+      {/* Demo Banner — only shown when VITE_SHOW_DEMO_CREDENTIALS is enabled */}
+      {import.meta.env.VITE_SHOW_DEMO_CREDENTIALS === 'true' && (
       <div data-tour="demo-banner" style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 10000,
         background: '#d9a010', color: '#fff', textAlign: 'center',
@@ -616,6 +617,7 @@ export default function App(): JSX.Element {
       }}>
         VERSAO DEMONSTRACAO — Dados fictícios para validacao
       </div>
+      )}
 
       {/* Toast Notification */}
       {toastMsg && (
