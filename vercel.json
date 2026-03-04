@@ -3,6 +3,9 @@
   "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/dist",
   "framework": "vite",
+  "env": {
+    "VITE_SHOW_DEMO_CREDENTIALS": "true"
+  },
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ],
