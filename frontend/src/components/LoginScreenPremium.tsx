@@ -4,6 +4,7 @@ import type { LoginForm, TemaEstilos, ConfiguracaoSistema, UsuarioCadastro } fro
 import { useI18n } from '../hooks/useI18n';
 import { requestPasswordReset } from '../services/approvalService';
 import type { YardCode } from '../domain/aggregates/YardRegistry';
+import { seedCredentials } from '../services/seedCredentials';
 
 interface Props {
   loginForm: LoginForm; loginErro: string;
@@ -29,8 +30,10 @@ export const LoginScreenPremium = memo<Props>(({
   const showDemoPanel = import.meta.env.VITE_SHOW_DEMO_CREDENTIALS === 'true';
 
   // Dynamic credentials: group users by yard, pick up to 4 per yard
+  // Ensure seed data exists before reading (fixes empty panel on first visit)
   const credenciaisPorPatio = useMemo(() => {
     try {
+      if (showDemoPanel) seedCredentials();
       const usuarios: Array<{ matricula: string; funcao: string; primaryYard?: string; nome?: string; status?: string; senha?: string }> =
         JSON.parse(localStorage.getItem('efvm360-usuarios') || '[]');
       const porPatio: Record<string, Array<{ mat: string; role: string; pwd: string }>> = {};
@@ -82,7 +85,7 @@ export const LoginScreenPremium = memo<Props>(({
       }
       return porPatio;
     } catch { return {}; }
-  }, []);
+  }, [showDemoPanel]);
 
   const bg    = dk ? '#121212' : '#f5f5f5';
   const cardBg = dk ? '#1e1e1e' : '#ffffff';
