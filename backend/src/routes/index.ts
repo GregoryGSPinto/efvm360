@@ -222,6 +222,20 @@ router.patch('/inter-yard/:id/resolve', authenticate, authorize('supervisor'), i
 router.post('/inter-yard/:id/seal', authenticate, authorize('coordenador'), interYardCtrl.seal);
 router.get('/inter-yard', authenticate, interYardCtrl.list);
 
+// ── EQUIPMENT (Inventário) ───────────────────────────────────────────────
+import * as equipmentCtrl from '../controllers/equipmentController';
+router.get('/equipment', authenticate, equipmentCtrl.list);
+router.get('/equipment/:uuid', authenticate, uuidParamValidator, handleValidationErrors, equipmentCtrl.getByUuid);
+router.post('/equipment', authenticate, authorize('inspetor', 'gestor', 'administrador'), equipmentCtrl.create);
+router.patch('/equipment/:uuid', authenticate, authorize('inspetor', 'gestor', 'administrador'), uuidParamValidator, handleValidationErrors, equipmentCtrl.update);
+
+// ── RISK GRADES (Matriz de Risco) ───────────────────────────────────────
+import * as riskGradesCtrl from '../controllers/riskGradesController';
+router.get('/risk-grades', authenticate, riskGradesCtrl.list);
+router.get('/risk-grades/:uuid', authenticate, uuidParamValidator, handleValidationErrors, riskGradesCtrl.getByUuid);
+router.post('/risk-grades', authenticate, authorize('inspetor', 'gestor', 'administrador'), riskGradesCtrl.create);
+router.patch('/risk-grades/:uuid', authenticate, authorize('inspetor', 'gestor', 'administrador'), uuidParamValidator, handleValidationErrors, riskGradesCtrl.update);
+
 // ── METRICS (Observability) ──────────────────────────────────────────────
 import * as metricsCtrl from '../controllers/metricsController';
 router.get('/metrics/resumo', authenticate, authorize('inspetor'), metricsCtrl.resumo);

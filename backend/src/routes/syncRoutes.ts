@@ -12,6 +12,9 @@ const router = Router();
 // POST /api/v1/sync/passagens — Batch sync (offline-first)
 router.post('/passagens', authenticate, sincronizarBatchValidator, handleValidationErrors, syncCtrl.sincronizarBatch);
 
+// POST /api/v1/sync/events — Domain event batch sync (offline-first)
+router.post('/events', authenticate, syncCtrl.sincronizarEvents);
+
 // GET /api/v1/sync/status — Sync diagnostics
 router.get('/status', authenticate, syncCtrl.statusSync);
 

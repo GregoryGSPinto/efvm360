@@ -17,6 +17,8 @@ import { runMigration009 } from './009_train_compositions';
 import { runMigration010 } from './010_analytics_views';
 import { runMigration011 } from './011_approval_workflows';
 import { runMigration012 } from './012_multi_tenancy';
+import { runMigration013 } from './013_operational_tables';
+import { runMigration014 } from './014_seed_operational';
 
 (async () => {
   try {
@@ -31,6 +33,8 @@ import { runMigration012 } from './012_multi_tenancy';
     await runMigration010();      // 010 (analytics materialized views)
     await runMigration011();      // 011 (approval_workflows + workflow_actions)
     await runMigration012();      // 012 (multi-tenancy: railways + railway_id)
+    await runMigration013();      // 013 (equipment, risk_grades, shift_crews, five_s_inspections)
+    await runMigration014();      // 014 (seed: equipment, risk grades, patios)
     console.log('\n✅ Todas as migrações executadas com sucesso.');
     process.exit(0);
   } catch (error) {

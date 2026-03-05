@@ -21,6 +21,7 @@ import { Request, Response } from 'express';
 import { Passagem } from '../models';
 import { hashFormulario, verifyHMAC } from '../utils/crypto';
 import { Op } from 'sequelize';
+import sequelize from '../config/database';
 import * as auditService from '../services/auditService';
 
 interface SyncItem {
@@ -283,4 +284,122 @@ export const listarConflitos = async (req: Request, res: Response): Promise<void
   } catch (err: unknown) {
     res.status(500).json({ error: 'Erro interno ao listar conflitos' });
   }
+};
+
+// ── Domain Event Sync ────────────────────────────────────────────────────
+
+interface DomainEventPayload {
+  eventId: string;
+  aggregateId: string;
+  aggregateType: string;
+  eventType: string;
+  version: number;
+  payload: Record<string, unknown>;
+  metadata?: {
+    timestamp?: string;
+    operatorMatricula?: string;
+    deviceId?: string;
+    yardId?: string;
+  };
+}
+
+/**
+ * POST /api/v1/sync/events
+ * Receives domain events from the frontend SyncEngine.
+ * Stores in event_store table (append-only).
+ */
+export const sincronizarEvents = async (req: Request, res: Response): Promise<void> => {
+  if (!req.user) {
+    res.status(401).json({ error: 'Não autenticado' });
+    return;
+  }
+
+  const { events } = req.body as { events: DomainEventPayload[] };
+
+  if (!Array.isArray(events) || events.length === 0) {
+    res.status(400).json({ error: 'events array obrigatório e não vazio' });
+    return;
+  }
+
+  if (events.length > 50) {
+    res.status(400).json({ error: 'Máximo 50 eventos por batch' });
+    return;
+  }
+
+  const synced: string[] = [];
+  const conflicts: string[] = [];
+  const failed: string[] = [];
+  const errors: Record<string, string> = {};
+
+  for (const event of events) {
+    try {
+      if (!event.eventId || !event.aggregateId || !event.eventType) {
+        failed.push(event.eventId || 'unknown');
+        errors[event.eventId || 'unknown'] = 'Campos obrigatórios: eventId, aggregateId, eventType';
+        continue;
+      }
+
+      // Idempotency: check if event already exists
+      const [existing] = await sequelize.query(
+        'SELECT id FROM event_store WHERE event_id = ? LIMIT 1',
+        { replacements: [event.eventId] },
+      );
+
+      if ((existing as Array<Record<string, unknown>>).length > 0) {
+        synced.push(event.eventId);
+        continue;
+      }
+
+      // Version conflict check
+      const [versionCheck] = await sequelize.query(
+        'SELECT MAX(version) as max_version FROM event_store WHERE aggregate_id = ? AND aggregate_type = ?',
+        { replacements: [event.aggregateId, event.aggregateType || 'Unknown'] },
+      );
+      const maxVersion = ((versionCheck as Array<Record<string, unknown>>)[0]?.max_version as number) || 0;
+
+      if (event.version <= maxVersion) {
+        conflicts.push(event.eventId);
+        errors[event.eventId] = `Version conflict: server has v${maxVersion}, received v${event.version}`;
+        continue;
+      }
+
+      // Insert into event_store
+      await sequelize.query(
+        `INSERT INTO event_store (event_id, aggregate_id, aggregate_type, event_type, version, payload, metadata, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        {
+          replacements: [
+            event.eventId,
+            event.aggregateId,
+            event.aggregateType || 'Unknown',
+            event.eventType,
+            event.version,
+            JSON.stringify(event.payload),
+            JSON.stringify(event.metadata || {}),
+            event.metadata?.timestamp ? new Date(event.metadata.timestamp) : new Date(),
+          ],
+        },
+      );
+
+      synced.push(event.eventId);
+    } catch (err) {
+      failed.push(event.eventId);
+      errors[event.eventId] = err instanceof Error ? err.message : 'Erro interno';
+    }
+  }
+
+  // Audit
+  if (synced.length > 0 || conflicts.length > 0) {
+    await auditService.registrar({
+      usuarioId: req.user.userId,
+      matricula: req.user.matricula,
+      acao: 'SYNC_EVENTS',
+      recurso: 'event_store',
+      detalhes: `Event sync: ${synced.length} ok, ${conflicts.length} conflitos, ${failed.length} falhas`,
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.headers['user-agent'] || 'unknown',
+    });
+  }
+
+  res.json({ synced, conflicts, failed, errors });
 };
