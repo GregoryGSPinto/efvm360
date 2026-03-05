@@ -106,9 +106,9 @@ export class Usuario extends Model<UsuarioAttributes, Optional<UsuarioAttributes
 Usuario.init({
   id: { type: DataTypes.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
   uuid: { type: DataTypes.CHAR(36), allowNull: false, unique: true, defaultValue: DataTypes.UUIDV4 },
-  nome: { type: DataTypes.STRING(120), allowNull: false },
-  matricula: { type: DataTypes.STRING(20), allowNull: false, unique: true },
-  funcao: { type: DataTypes.STRING(30), allowNull: false, defaultValue: 'operador' },
+  nome: { type: DataTypes.STRING(120), allowNull: false, validate: { notEmpty: true, len: [2, 120] as [number, number] } },
+  matricula: { type: DataTypes.STRING(20), allowNull: false, unique: true, validate: { notEmpty: true, len: [3, 20] as [number, number] } },
+  funcao: { type: DataTypes.STRING(30), allowNull: false, defaultValue: 'operador', validate: { isIn: [['operador', 'maquinista', 'inspetor', 'supervisor', 'coordenador', 'gestor', 'gerente', 'diretor', 'administrador', 'suporte']] } },
   turno: { type: DataTypes.STRING(1), allowNull: true },
   horario_turno: { type: DataTypes.STRING(20), allowNull: true },
   primary_yard: { type: DataTypes.STRING(10), allowNull: false, defaultValue: 'VFZ' },
@@ -151,7 +151,7 @@ Passagem.init({
   uuid: { type: DataTypes.CHAR(36), allowNull: false, unique: true, defaultValue: DataTypes.UUIDV4 },
   data_passagem: { type: DataTypes.DATEONLY, allowNull: false },
   dss: { type: DataTypes.STRING(50), allowNull: true },
-  turno: { type: DataTypes.STRING(1), allowNull: false },
+  turno: { type: DataTypes.STRING(1), allowNull: false, validate: { isIn: [['A', 'B', 'C', 'D', 'M', 'V', 'N']] } },
   horario_turno: { type: DataTypes.STRING(20), allowNull: false },
   operador_sai_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: true },
   operador_entra_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: true },
@@ -168,7 +168,7 @@ Passagem.init({
   assinatura_entra_confirmado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   assinatura_entra_hash: { type: DataTypes.STRING(128), allowNull: true },
   assinatura_entra_timestamp: { type: DataTypes.DATE, allowNull: true },
-  status: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'rascunho' },
+  status: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'rascunho', validate: { isIn: [['rascunho', 'assinado_parcial', 'assinado_completo', 'sincronizada', 'finalizada']] } },
   hash_integridade: { type: DataTypes.STRING(128), allowNull: true },
 }, { sequelize, tableName: 'passagens', modelName: 'Passagem' });
 
@@ -246,7 +246,7 @@ DSS.init({
   topicos: { type: DataTypes.JSON, allowNull: true },
   participantes: { type: DataTypes.JSON, allowNull: true },
   passagem_uuid: { type: DataTypes.CHAR(36), allowNull: true },
-  status: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'rascunho' },
+  status: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'rascunho', validate: { isIn: [['rascunho', 'realizado', 'cancelado']] } },
 }, { sequelize, tableName: 'dss', modelName: 'DSS' });
 
 // ── CADASTROS PENDENTES ─────────────────────────────────────────────────
@@ -274,7 +274,7 @@ CadastroPendente.init({
   horario_turno: { type: DataTypes.STRING(20), allowNull: true },
   patio_codigo: { type: DataTypes.STRING(5), allowNull: true },
   senha_hash: { type: DataTypes.STRING(255), allowNull: false },
-  status: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'pendente' },
+  status: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'pendente', validate: { isIn: [['pendente', 'aprovado', 'rejeitado']] } },
   aprovado_por: { type: DataTypes.STRING(20), allowNull: true },
   motivo_rejeicao: { type: DataTypes.TEXT, allowNull: true },
 }, { sequelize, tableName: 'cadastros_pendentes', modelName: 'CadastroPendente' });
@@ -297,7 +297,7 @@ SenhaReset.init({
   uuid: { type: DataTypes.CHAR(36), allowNull: false, unique: true, defaultValue: DataTypes.UUIDV4 },
   usuario_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: true },
   matricula: { type: DataTypes.STRING(20), allowNull: false },
-  status: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'pendente' },
+  status: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'pendente', validate: { isIn: [['pendente', 'aprovado', 'rejeitado']] } },
   aprovado_por: { type: DataTypes.STRING(20), allowNull: true },
   nova_senha_hash: { type: DataTypes.STRING(255), allowNull: true },
 }, { sequelize, tableName: 'senha_resets', modelName: 'SenhaReset' });
@@ -349,7 +349,7 @@ AdamBootPerfil.init({
   total_sessoes: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false, defaultValue: 0 },
   paginas_visitadas: { type: DataTypes.JSON, allowNull: true },
   acoes_realizadas: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false, defaultValue: 0 },
-  nivel_proficiencia: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'iniciante' },
+  nivel_proficiencia: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'iniciante', validate: { isIn: [['iniciante', 'basico', 'intermediario', 'avancado', 'especialista']] } },
   ultimo_acesso: { type: DataTypes.DATE, allowNull: true },
 }, { sequelize, tableName: 'adamboot_perfis', modelName: 'AdamBootPerfil' });
 

@@ -45,8 +45,8 @@ export class Patio extends Model<PatioAttributes, PatioCreationAttributes> imple
 Patio.init({
   id: { type: DataTypes.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
   uuid: { type: DataTypes.CHAR(36), allowNull: false, unique: true, defaultValue: DataTypes.UUIDV4 },
-  codigo: { type: DataTypes.STRING(5), allowNull: false, unique: true },
-  nome: { type: DataTypes.STRING(120), allowNull: false },
+  codigo: { type: DataTypes.STRING(5), allowNull: false, unique: true, validate: { notEmpty: true, len: [1, 5] as [number, number] } },
+  nome: { type: DataTypes.STRING(120), allowNull: false, validate: { notEmpty: true, len: [2, 120] as [number, number] } },
   ativo: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
   padrao: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   criado_por: { type: DataTypes.STRING(20), allowNull: true },

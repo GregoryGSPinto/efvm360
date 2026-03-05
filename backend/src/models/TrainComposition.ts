@@ -36,13 +36,13 @@ export class TrainComposition extends Model<
 
 TrainComposition.init({
   id: { type: DataTypes.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
-  composition_code: { type: DataTypes.STRING(30), allowNull: false, unique: true },
-  origin_yard: { type: DataTypes.STRING(10), allowNull: false },
-  destination_yard: { type: DataTypes.STRING(10), allowNull: false },
-  current_yard: { type: DataTypes.STRING(10), allowNull: false },
-  status: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'loading' },
+  composition_code: { type: DataTypes.STRING(30), allowNull: false, unique: true, validate: { notEmpty: true, len: [1, 30] as [number, number] } },
+  origin_yard: { type: DataTypes.STRING(10), allowNull: false, validate: { notEmpty: true } },
+  destination_yard: { type: DataTypes.STRING(10), allowNull: false, validate: { notEmpty: true } },
+  current_yard: { type: DataTypes.STRING(10), allowNull: false, validate: { notEmpty: true } },
+  status: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'loading', validate: { isIn: [['loading', 'in_transit', 'arrived', 'unloading', 'completed']] } },
   cargo_type: { type: DataTypes.STRING(100), allowNull: true },
-  wagon_count: { type: DataTypes.INTEGER.UNSIGNED, allowNull: true },
+  wagon_count: { type: DataTypes.INTEGER.UNSIGNED, allowNull: true, validate: { min: 1 } },
   departed_at: { type: DataTypes.DATE, allowNull: true },
   arrived_at: { type: DataTypes.DATE, allowNull: true },
 }, {

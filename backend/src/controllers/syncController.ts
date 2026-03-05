@@ -203,22 +203,26 @@ async function processItem(
  * Returns sync diagnostics for the requesting user
  */
 export const statusSync = async (req: Request, res: Response): Promise<void> => {
-  if (!req.user) {
-    res.status(401).json({ error: 'Não autenticado' });
-    return;
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Não autenticado' });
+      return;
+    }
+
+    const totalPassagens = await Passagem.count();
+    const ultimaPassagem = await Passagem.findOne({
+      order: [['created_at', 'DESC']],
+      attributes: ['uuid', 'turno', 'data_passagem', 'status', 'created_at'],
+    });
+
+    res.json({
+      totalPassagens,
+      ultimaPassagem: ultimaPassagem?.toJSON() || null,
+      serverTime: new Date().toISOString(),
+    });
+  } catch (err: unknown) {
+    res.status(500).json({ error: 'Erro interno ao obter status de sync' });
   }
-
-  const totalPassagens = await Passagem.count();
-  const ultimaPassagem = await Passagem.findOne({
-    order: [['created_at', 'DESC']],
-    attributes: ['uuid', 'turno', 'data_passagem', 'status', 'created_at'],
-  });
-
-  res.json({
-    totalPassagens,
-    ultimaPassagem: ultimaPassagem?.toJSON() || null,
-    serverTime: new Date().toISOString(),
-  });
 };
 
 /**
@@ -226,41 +230,45 @@ export const statusSync = async (req: Request, res: Response): Promise<void> => 
  * Returns unresolved conflicts visible to supervisors
  */
 export const listarConflitos = async (req: Request, res: Response): Promise<void> => {
-  if (!req.user) {
-    res.status(401).json({ error: 'Não autenticado' });
-    return;
-  }
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Não autenticado' });
+      return;
+    }
 
-  // Only supervisors and above can see conflicts
-  const funcao = req.user.funcao;
-  const allowed = ['supervisor', 'coordenador', 'administrador', 'inspetor'];
-  if (!allowed.includes(funcao)) {
-    res.status(403).json({ error: 'Apenas supervisores podem ver conflitos' });
-    return;
-  }
+    // Only supervisors and above can see conflicts
+    const funcao = req.user.funcao;
+    const allowed = ['supervisor', 'coordenador', 'administrador', 'inspetor'];
+    if (!allowed.includes(funcao)) {
+      res.status(403).json({ error: 'Apenas supervisores podem ver conflitos' });
+      return;
+    }
 
-  // Find passagens with same turno+data (duplicates)
-  const duplicates = await Passagem.findAll({
-    attributes: ['turno', 'data_passagem'],
-    group: ['turno', 'data_passagem'],
-    having: Passagem.sequelize!.literal('COUNT(*) > 1'),
-  });
+    // Find passagens with same turno+data (duplicates)
+    const duplicates = await Passagem.findAll({
+      attributes: ['turno', 'data_passagem'],
+      group: ['turno', 'data_passagem'],
+      having: Passagem.sequelize!.literal('COUNT(*) > 1'),
+    });
 
-  const conflicts = [];
-  for (const dup of duplicates) {
-    const versions = await Passagem.findAll({
-      where: {
+    const conflicts = [];
+    for (const dup of duplicates) {
+      const versions = await Passagem.findAll({
+        where: {
+          turno: dup.turno,
+          data_passagem: dup.data_passagem,
+        },
+        order: [['created_at', 'ASC']],
+      });
+      conflicts.push({
         turno: dup.turno,
-        data_passagem: dup.data_passagem,
-      },
-      order: [['created_at', 'ASC']],
-    });
-    conflicts.push({
-      turno: dup.turno,
-      data: dup.data_passagem,
-      versions: versions.map((v) => v.toJSON()),
-    });
-  }
+        data: dup.data_passagem,
+        versions: versions.map((v) => v.toJSON()),
+      });
+    }
 
-  res.json({ conflicts });
+    res.json({ conflicts });
+  } catch (err: unknown) {
+    res.status(500).json({ error: 'Erro interno ao listar conflitos' });
+  }
 };

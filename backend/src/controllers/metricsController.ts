@@ -13,8 +13,12 @@ import { getRequestMetrics } from '../middleware/telemetry';
  * Requires: authenticate + authorize('inspetor')
  */
 export const resumo = (_req: Request, res: Response): void => {
-  const resumo = metrics.obterResumo();
-  res.json(resumo);
+  try {
+    const resumo = metrics.obterResumo();
+    res.json(resumo);
+  } catch (err: unknown) {
+    res.status(500).json({ error: 'Erro interno ao obter métricas' });
+  }
 };
 
 /**
@@ -23,6 +27,10 @@ export const resumo = (_req: Request, res: Response): void => {
  * Requires: authenticate + authorize('administrador')
  */
 export const requests = (_req: Request, res: Response): void => {
-  const metricsData = getRequestMetrics();
-  res.json(metricsData);
+  try {
+    const metricsData = getRequestMetrics();
+    res.json(metricsData);
+  } catch (err: unknown) {
+    res.status(500).json({ error: 'Erro interno ao obter telemetria' });
+  }
 };

@@ -49,51 +49,55 @@ import { metrics } from '../services/metricsService';
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 export const login = async (req: Request, res: Response): Promise<void> => {
-  const { matricula, senha } = req.body;
+  try {
+    const { matricula, senha } = req.body;
 
-  if (!matricula || !senha) {
-    res.status(400).json({ error: 'Matricula e senha sao obrigatorios', code: 'VALIDATION_ERROR' });
-    return;
-  }
+    if (!matricula || !senha) {
+      res.status(400).json({ error: 'Matricula e senha sao obrigatorios', code: 'VALIDATION_ERROR' });
+      return;
+    }
 
-  const result = await authService.login(
-    matricula.trim(),
-    senha,
-    req.ip,
-    req.headers['user-agent']
-  );
+    const result = await authService.login(
+      matricula.trim(),
+      senha,
+      req.ip,
+      req.headers['user-agent']
+    );
 
-  if (!result.success) {
-    metrics.incrementar('logins_falha', 1, { matricula: matricula.trim() });
+    if (!result.success) {
+      metrics.incrementar('logins_falha', 1, { matricula: matricula.trim() });
+      await auditService.registrar({
+        matricula: matricula.trim(),
+        acao: 'LOGIN_FALHA',
+        recurso: 'autenticacao',
+        detalhes: result.code,
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+      });
+      res.status(401).json({ error: result.error, code: result.code });
+      return;
+    }
+
+    metrics.incrementar('logins_sucesso', 1, { matricula: matricula.trim() });
+
     await auditService.registrar({
       matricula: matricula.trim(),
-      acao: 'LOGIN_FALHA',
+      acao: 'LOGIN',
       recurso: 'autenticacao',
-      detalhes: result.code,
+      detalhes: `Login bem-sucedido | IP: ${req.ip}`,
       ipAddress: req.ip,
       userAgent: req.headers['user-agent'],
     });
-    res.status(401).json({ error: result.error, code: result.code });
-    return;
+
+    res.json({
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      user: result.user,
+      expiresIn: result.expiresIn,
+    });
+  } catch (err: unknown) {
+    res.status(500).json({ error: 'Erro interno ao processar login' });
   }
-
-  metrics.incrementar('logins_sucesso', 1, { matricula: matricula.trim() });
-
-  await auditService.registrar({
-    matricula: matricula.trim(),
-    acao: 'LOGIN',
-    recurso: 'autenticacao',
-    detalhes: `Login bem-sucedido | IP: ${req.ip}`,
-    ipAddress: req.ip,
-    userAgent: req.headers['user-agent'],
-  });
-
-  res.json({
-    accessToken: result.accessToken,
-    refreshToken: result.refreshToken,
-    user: result.user,
-    expiresIn: result.expiresIn,
-  });
 };
 
 /**
@@ -144,25 +148,29 @@ export const login = async (req: Request, res: Response): Promise<void> => {
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 export const refresh = async (req: Request, res: Response): Promise<void> => {
-  const { refreshToken } = req.body;
+  try {
+    const { refreshToken } = req.body;
 
-  if (!refreshToken) {
-    res.status(400).json({ error: 'Refresh token e obrigatorio', code: 'VALIDATION_ERROR' });
-    return;
+    if (!refreshToken) {
+      res.status(400).json({ error: 'Refresh token e obrigatorio', code: 'VALIDATION_ERROR' });
+      return;
+    }
+
+    const result = await authService.refreshAccessToken(refreshToken, req.ip);
+
+    if (!result.success) {
+      res.status(401).json({ error: result.error, code: result.code });
+      return;
+    }
+
+    res.json({
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      expiresIn: result.expiresIn,
+    });
+  } catch (err: unknown) {
+    res.status(500).json({ error: 'Erro interno ao renovar token' });
   }
-
-  const result = await authService.refreshAccessToken(refreshToken, req.ip);
-
-  if (!result.success) {
-    res.status(401).json({ error: result.error, code: result.code });
-    return;
-  }
-
-  res.json({
-    accessToken: result.accessToken,
-    refreshToken: result.refreshToken,
-    expiresIn: result.expiresIn,
-  });
 };
 
 /**
@@ -193,22 +201,26 @@ export const refresh = async (req: Request, res: Response): Promise<void> => {
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 export const logout = async (req: Request, res: Response): Promise<void> => {
-  if (!req.user) {
-    res.status(401).json({ error: 'Nao autenticado' });
-    return;
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Nao autenticado' });
+      return;
+    }
+
+    await authService.logout(req.user.userId);
+
+    await auditService.registrar({
+      matricula: req.user.matricula,
+      acao: 'LOGOUT',
+      recurso: 'autenticacao',
+      usuarioId: req.user.userId,
+      ipAddress: req.ip,
+    });
+
+    res.json({ message: 'Logout realizado com sucesso' });
+  } catch (err: unknown) {
+    res.status(500).json({ error: 'Erro interno ao processar logout' });
   }
-
-  await authService.logout(req.user.userId);
-
-  await auditService.registrar({
-    matricula: req.user.matricula,
-    acao: 'LOGOUT',
-    recurso: 'autenticacao',
-    usuarioId: req.user.userId,
-    ipAddress: req.ip,
-  });
-
-  res.json({ message: 'Logout realizado com sucesso' });
 };
 
 /**
@@ -262,34 +274,38 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 export const alterarSenha = async (req: Request, res: Response): Promise<void> => {
-  if (!req.user) {
-    res.status(401).json({ error: 'Nao autenticado' });
-    return;
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Nao autenticado' });
+      return;
+    }
+
+    const { senhaAtual, novaSenha } = req.body;
+
+    if (!senhaAtual || !novaSenha) {
+      res.status(400).json({ error: 'Senha atual e nova senha sao obrigatorias' });
+      return;
+    }
+
+    const result = await authService.alterarSenha(req.user.userId, senhaAtual, novaSenha);
+
+    if (!result.success) {
+      res.status(400).json({ error: result.error });
+      return;
+    }
+
+    await auditService.registrar({
+      matricula: req.user.matricula,
+      acao: 'SENHA_ALTERADA',
+      recurso: 'configuracoes',
+      usuarioId: req.user.userId,
+      ipAddress: req.ip,
+    });
+
+    res.json({ message: 'Senha alterada com sucesso. Realize login novamente.' });
+  } catch (err: unknown) {
+    res.status(500).json({ error: 'Erro interno ao alterar senha' });
   }
-
-  const { senhaAtual, novaSenha } = req.body;
-
-  if (!senhaAtual || !novaSenha) {
-    res.status(400).json({ error: 'Senha atual e nova senha sao obrigatorias' });
-    return;
-  }
-
-  const result = await authService.alterarSenha(req.user.userId, senhaAtual, novaSenha);
-
-  if (!result.success) {
-    res.status(400).json({ error: result.error });
-    return;
-  }
-
-  await auditService.registrar({
-    matricula: req.user.matricula,
-    acao: 'SENHA_ALTERADA',
-    recurso: 'configuracoes',
-    usuarioId: req.user.userId,
-    ipAddress: req.ip,
-  });
-
-  res.json({ message: 'Senha alterada com sucesso. Realize login novamente.' });
 };
 
 /**
@@ -325,17 +341,21 @@ export const alterarSenha = async (req: Request, res: Response): Promise<void> =
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 export const me = async (req: Request, res: Response): Promise<void> => {
-  if (!req.user) {
-    res.status(401).json({ error: 'Nao autenticado' });
-    return;
-  }
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: 'Nao autenticado' });
+      return;
+    }
 
-  const { Usuario } = require('../models');
-  const usuario = await Usuario.findByPk(req.user.userId);
-  if (!usuario) {
-    res.status(404).json({ error: 'Usuario nao encontrado' });
-    return;
-  }
+    const { Usuario } = require('../models');
+    const usuario = await Usuario.findByPk(req.user.userId);
+    if (!usuario) {
+      res.status(404).json({ error: 'Usuario nao encontrado' });
+      return;
+    }
 
-  res.json({ user: usuario.toSafeJSON() });
+    res.json({ user: usuario.toSafeJSON() });
+  } catch (err: unknown) {
+    res.status(500).json({ error: 'Erro interno ao obter perfil' });
+  }
 };
