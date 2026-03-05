@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0] - 2026-03-05
+
+### Added — Go-to-Market Infrastructure
+- **Terms of Service** — Comprehensive legal document at `docs/TERMS_OF_SERVICE.md` covering service description, SLA (99.9%), liability limitation for safety-critical operations, LGPD + GDPR data processing, governing law (BR + international)
+- **Privacy Policy** — LGPD + GDPR compliant policy at `docs/PRIVACY_POLICY.md` with data collection disclosures, retention periods, user rights, DPO contact, cookie policy, breach notification procedures
+- **Landing Page** — Public-facing page at `/landing` with hero section, social proof stats, 6-feature grid (Handover, Yard, Risk, Equipment, BI+, AdamBot), 3-tier pricing (Starter $499, Professional $1,499, Enterprise custom), 6-item FAQ, CTA sections
+- **Help Center** — Searchable documentation at `/help` with 4 sections: Getting Started (4 articles), Feature Documentation (6 articles), Administration (2 articles), Troubleshooting (4 articles) — 16 articles total
+- **Product Analytics Service** — Privacy-friendly event tracking (`services/productAnalytics.ts`) with 8 pre-defined events: `handover.created`, `handover.signed`, `yard.layout.updated`, `risk.grade.created`, `adambot.query`, `sync.completed`, `user.login`, `page.viewed`; aggregation functions for admin dashboard
+- **Admin Business Dashboard** — Business metrics page at `/admin/business` with MRR, active users, churn rate, NPS score KPIs; 12-month revenue trend chart; feature usage breakdown; customer pipeline (Trial/Starter/Professional/Enterprise); recent events feed
+- **Analytics Integration** — Page view tracking on route changes, login event tracking with device detection, wired into App.tsx orchestrator
+- **Public Routes** — Landing page and Help Center accessible without authentication
+
+### Changed
+- **Router** — Added `LANDING`, `HELP`, `ADMIN_BUSINESS` routes; landing and help marked as public paths
+- **App.tsx** — 3 new lazy-loaded page imports, 3 new routes with error boundaries, product analytics integration
+
+### Stats
+- 785 tests passing (588 frontend + 197 backend)
+- Zero TypeScript errors
+- Build clean with code splitting
+
 ## [3.3.1] - 2026-03-05
 
 ### Security Audit

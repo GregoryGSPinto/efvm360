@@ -67,6 +67,9 @@ const PaginaInterYard = lazy(() => import('./pages/passagem-interpatio'));
 const PaginaHistorico = lazy(() => import('./pages/historico'));
 const PaginaConfiguracoes = lazy(() => import('./pages/configuracoes'));
 const PaginaSuporte = lazy(() => import('./pages/suporte'));
+const LandingPage = lazy(() => import('./pages/landing'));
+const HelpCenterPage = lazy(() => import('./pages/help'));
+const AdminBusinessDashboard = lazy(() => import('./pages/admin-business'));
 
 // ── Organizational Services ─────────────────────────────────────────────
 import { seedTeams } from './services/teamPerformanceService';
@@ -74,6 +77,7 @@ import { getPendingRegistrations, getPendingPasswordResets } from './services/ap
 import { getHierarchyLevelForRole } from './domain/aggregates/UserAggregate';
 import { HierarchyLevel } from './domain/contracts';
 import { registrarAcesso } from './services/AdamBootService';
+import { trackPageViewed, trackUserLogin } from './services/productAnalytics';
 
 import './styles/navigation.css';
 
@@ -376,9 +380,10 @@ export default function App(): JSX.Element {
     [location.pathname],
   );
 
-  // Sync AdamBoot with current page on route changes + track proficiency
+  // Sync AdamBoot with current page on route changes + track proficiency + analytics
   useEffect(() => {
     adamBoot.setPaginaAtual(currentPageId);
+    trackPageViewed(currentPageId);
     if (usuarioLogado?.matricula) {
       registrarAcesso(usuarioLogado.matricula, currentPageId);
     }
@@ -418,6 +423,7 @@ export default function App(): JSX.Element {
   useEffect(() => {
     if (usuarioLogado && telaAtual === 'sistema') {
       registrarAuditoria('LOGIN', 'sistema', `Login: ${usuarioLogado.matricula}`);
+      trackUserLogin('password', navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop');
       showToast(`Boa jornada, ${usuarioLogado.nome.split(' ')[0]}! 🚂`);
     }
   }, [telaAtual === 'sistema' && !!usuarioLogado]);
@@ -530,8 +536,10 @@ export default function App(): JSX.Element {
     return <Navigate to={ROUTES.LOGIN} replace />;
   }
 
-  // Redirect authenticated users away from public routes
-  if (isAuthenticated && isPublicPath) {
+  // Redirect authenticated users away from auth-only public routes (login/cadastro)
+  // Landing and Help pages remain accessible to all users
+  const isAuthOnlyPath = location.pathname === ROUTES.LOGIN || location.pathname === ROUTES.CADASTRO;
+  if (isAuthenticated && isAuthOnlyPath) {
     // Suporte users go straight to /suporte after login
     const dest = usuarioLogado?.funcao === 'suporte' ? ROUTES.SUPORTE : ROUTES.HOME;
     return <Navigate to={dest} replace />;
@@ -885,6 +893,20 @@ export default function App(): JSX.Element {
             <Route path={ROUTES.SUPORTE} element={
               <ModuleErrorBoundary module="suporte">
                 <PaginaSuporte tema={tema} styles={styles} config={config}
+                  usuarioLogado={usuarioLogado} />
+              </ModuleErrorBoundary>
+            } />
+
+            {/* Landing (public) */}
+            <Route path={ROUTES.LANDING} element={<LandingPage />} />
+
+            {/* Help Center (public) */}
+            <Route path={ROUTES.HELP} element={<HelpCenterPage />} />
+
+            {/* Admin Business Dashboard */}
+            <Route path={ROUTES.ADMIN_BUSINESS} element={
+              <ModuleErrorBoundary module="admin-business">
+                <AdminBusinessDashboard tema={tema} styles={styles} config={config}
                   usuarioLogado={usuarioLogado} />
               </ModuleErrorBoundary>
             } />

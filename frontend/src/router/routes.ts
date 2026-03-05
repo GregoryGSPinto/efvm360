@@ -26,6 +26,9 @@ export const ROUTES = {
   PERFIL: '/perfil',
   CONFIGURACOES: '/configuracoes',
   SUPORTE: '/suporte',
+  LANDING: '/landing',
+  HELP: '/help',
+  ADMIN_BUSINESS: '/admin/business',
 } as const;
 
 /** Map legacy nav IDs (from sidebar/nav items) → URL paths */
@@ -49,6 +52,9 @@ export const NAV_ID_TO_PATH: Record<string, string> = {
   perfil: ROUTES.PERFIL,
   configuracoes: ROUTES.CONFIGURACOES,
   suporte: ROUTES.SUPORTE,
+  landing: ROUTES.LANDING,
+  help: ROUTES.HELP,
+  'admin-business': ROUTES.ADMIN_BUSINESS,
 };
 
 /** Map URL paths → legacy nav IDs (for AdamBoot sync, badges, etc.) */
@@ -57,4 +63,4 @@ export const PATH_TO_NAV_ID: Record<string, string> = Object.fromEntries(
 );
 
 /** Public routes that don't require authentication */
-export const PUBLIC_PATHS = new Set<string>([ROUTES.LOGIN, ROUTES.CADASTRO]);
+export const PUBLIC_PATHS = new Set<string>([ROUTES.LOGIN, ROUTES.CADASTRO, ROUTES.LANDING, ROUTES.HELP]);
