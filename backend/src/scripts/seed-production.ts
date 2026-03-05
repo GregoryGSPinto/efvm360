@@ -15,7 +15,21 @@ import sequelize from '../config/database';
 
 const BCRYPT_ROUNDS = parseInt(process.env.BCRYPT_ROUNDS || '12', 10);
 
+// Generate a random temporary password for production seed users
+function generateTempPassword(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';
+  let result = '';
+  for (let i = 0; i < 16; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
 // Only the minimum users needed for the system to function
+// Passwords are generated at seed time and printed once — must be changed on first login
+const adminPassword = process.env.SEED_ADMIN_PASSWORD || generateTempPassword();
+const supervisorPassword = process.env.SEED_SUPERVISOR_PASSWORD || generateTempPassword();
+
 const PRODUCTION_USERS = [
   {
     matricula: 'ADM9001',
@@ -24,7 +38,7 @@ const PRODUCTION_USERS = [
     turno: null,
     horario_turno: null,
     primary_yard: 'VFZ',
-    senha: 'EFVM360@Admin!', // Must be changed on first login
+    senha: adminPassword,
     must_change_password: true,
   },
   {
@@ -34,7 +48,7 @@ const PRODUCTION_USERS = [
     turno: null,
     horario_turno: null,
     primary_yard: 'VFZ',
-    senha: 'EFVM360@Sup!', // Must be changed on first login
+    senha: supervisorPassword,
     must_change_password: true,
   },
 ];
@@ -187,9 +201,9 @@ async function main(): Promise<void> {
 
   console.log('');
   console.log('[SEED-PROD] Production seed complete!');
-  console.log('[SEED-PROD] Default credentials:');
-  console.log('[SEED-PROD]   ADM9001 / EFVM360@Admin! (must change on first login)');
-  console.log('[SEED-PROD]   SUP1001 / EFVM360@Sup!   (must change on first login)');
+  console.log('[SEED-PROD] Default credentials (SAVE THESE — shown only once):');
+  console.log(`[SEED-PROD]   ADM9001 / ${adminPassword} (must change on first login)`);
+  console.log(`[SEED-PROD]   SUP1001 / ${supervisorPassword} (must change on first login)`);
   console.log('');
 
   await sequelize.close();

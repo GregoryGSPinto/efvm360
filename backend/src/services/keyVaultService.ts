@@ -42,10 +42,16 @@ export async function loadSecrets(): Promise<VFZSecrets> {
   // If no Key Vault configured, fall back to env vars (dev mode)
   if (!client) {
     console.log('[KeyVault] No AZURE_KEYVAULT_URL — using environment variables');
+    if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
+      throw new Error('[KeyVault] FATAL: JWT_SECRET and JWT_REFRESH_SECRET must be set in environment variables');
+    }
+    if (!process.env.DB_PASSWORD) {
+      throw new Error('[KeyVault] FATAL: DB_PASSWORD must be set in environment variables');
+    }
     cachedSecrets = {
-      JWT_SECRET: process.env.JWT_SECRET || 'dev-jwt-secret-change-in-production',
-      JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret-change-in-production',
-      DB_PASSWORD: process.env.DB_PASSWORD || 'vfz_dev_2024',
+      JWT_SECRET: process.env.JWT_SECRET,
+      JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
+      DB_PASSWORD: process.env.DB_PASSWORD,
       DB_HOST: process.env.DB_HOST || 'localhost',
       DB_USER: process.env.DB_USER || 'vfz_app',
       DB_NAME: process.env.DB_NAME || 'vfz_railway',

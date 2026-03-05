@@ -12,10 +12,10 @@ services:
     container_name: vfz-mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: vfz_root_2024
-      MYSQL_DATABASE: vfz_railway
-      MYSQL_USER: vfz_app
-      MYSQL_PASSWORD: vfz_dev_2024
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-changeme_root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-vfz_railway}
+      MYSQL_USER: ${MYSQL_USER:-vfz_app}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-changeme_app}
     ports:
       - "3306:3306"
     volumes:
@@ -27,7 +27,7 @@ services:
       --collation-server=utf8mb4_unicode_ci
       --innodb-buffer-pool-size=256M
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pvfz_root_2024"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-changeme_root}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -48,9 +48,9 @@ services:
       DB_PORT: 3306
       DB_NAME: vfz_railway
       DB_USER: vfz_app
-      DB_PASSWORD: vfz_dev_2024
-      JWT_SECRET: dev-jwt-secret-trocar-em-producao-mínimo-64-chars-aleatorios
-      JWT_REFRESH_SECRET: dev-refresh-secret-trocar-em-producao-mínimo-64-chars-aleatorios
+      DB_PASSWORD: ${MYSQL_PASSWORD:-changeme_app}
+      JWT_SECRET: ${JWT_SECRET:-changeme_jwt_secret_min_64_chars}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-changeme_jwt_refresh_min_64_chars}
       CORS_ORIGIN: http://localhost:5173,http://localhost:3000
     depends_on:
       mysql:

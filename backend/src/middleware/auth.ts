@@ -23,7 +23,10 @@ declare global {
   }
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || '';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('FATAL: JWT_SECRET environment variable is required');
+}
 
 /**
  * Middleware de autenticação — verifica JWT no header Authorization
