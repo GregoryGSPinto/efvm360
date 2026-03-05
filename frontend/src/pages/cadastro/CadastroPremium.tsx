@@ -2,6 +2,7 @@
 // EFVM360 - CADASTRO — Mesma paleta do Login (Ultra-defensive)
 // ============================================================================
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { usePatio } from '../../hooks/usePatio';
 
 // Funções NÃO disponíveis para auto-cadastro (requerem nomeação por gestor/admin)
@@ -27,6 +28,7 @@ const CadastroPremium: React.FC<CadastroPremiumProps> = ({
   cadastroForm, cadastroErro, cadastroSucesso, funcoes,
   onFormChange, onCadastro, onVoltar, config,
 }) => {
+  const { t } = useTranslation();
   const [showPwd, setShowPwd] = useState(false);
   const [showPwd2, setShowPwd2] = useState(false);
   const [foc, setFoc] = useState<string | null>(null);
@@ -230,7 +232,7 @@ const CadastroPremium: React.FC<CadastroPremiumProps> = ({
           </div>
           <div style={{ width: 44, height: 3, margin: '0 auto 8px', background: '#69be28', borderRadius: 2 }} />
           <div style={{ fontSize: 17, fontWeight: 600, color: txt, letterSpacing: 0.8, marginBottom: 4 }}>
-            SOLICITAR ACESSO
+            {t('cadastro.titulo')}
           </div>
           <div style={{ fontSize: 13, color: txt2 }}>Preencha seus dados para criar sua conta</div>
         </div>
@@ -419,14 +421,14 @@ const CadastroPremium: React.FC<CadastroPremiumProps> = ({
 
           {/* Submit */}
           <button style={bp} onClick={doSubmit} disabled={submitting}>
-            {submitting ? '⏳ ENVIANDO...' : 'SOLICITAR ACESSO'}
+            {submitting ? t('common.loading') : t('cadastro.titulo')}
           </button>
 
           {/* Voltar */}
           <div style={{ textAlign: 'center', marginTop: 14 }}>
             <span style={{ cursor: 'pointer', fontSize: 12, color: '#007e7a', fontWeight: 500 }}
               onClick={onVoltar}>
-              ← Voltar ao login
+              {t('common.back')}
             </span>
           </div>
 

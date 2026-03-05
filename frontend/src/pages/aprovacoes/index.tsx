@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { useState, useMemo, useCallback, useEffect, type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { TemaComputed, StylesObject } from '../types';
 import type { ConfiguracaoSistema, Usuario } from '../../types';
 import type { ApprovalWorkflow, WorkflowSeverity } from '../../domain/aggregates/ApprovalWorkflow';
@@ -119,6 +120,7 @@ function SlaCountdown({ wf, tema }: { wf: ApprovalWorkflow; tema: TemaComputed }
 // ── Component ───────────────────────────────────────────────────────────
 
 function PaginaAprovacoes({ tema, usuarioLogado }: Props) {
+  const { t } = useTranslation();
   const matricula = usuarioLogado?.matricula || 'UNKNOWN';
   const [workflows, setWorkflows] = useState<ApprovalWorkflow[]>(() => seedDemoWorkflows(matricula));
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -228,7 +230,7 @@ function PaginaAprovacoes({ tema, usuarioLogado }: Props) {
       <div style={{ padding: 20, maxWidth: 700, margin: '0 auto' }}>
         <button style={{ ...btn('#6b7280'), marginBottom: 16 }}
           onClick={() => { setSelectedId(null); setActionComment(''); }}>
-          Voltar
+          {t('common.back')}
         </button>
 
         <div style={card}>
@@ -304,8 +306,8 @@ function PaginaAprovacoes({ tema, usuarioLogado }: Props) {
               }}
             />
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <button style={btn('#10b981')} onClick={handleApprove}>Aprovar</button>
-              <button style={btn('#ef4444')} onClick={handleReject}>Rejeitar</button>
+              <button style={btn('#10b981')} onClick={handleApprove}>{t('aprovacoes.aprovar')}</button>
+              <button style={btn('#ef4444')} onClick={handleReject}>{t('aprovacoes.rejeitar')}</button>
               <button style={btn('#f59e0b')} onClick={handleEscalate}>Escalar</button>
             </div>
           </div>
@@ -321,7 +323,7 @@ function PaginaAprovacoes({ tema, usuarioLogado }: Props) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <h2 style={{ color: tema.texto, margin: 0 }}>
-          Aprovacoes
+          {t('aprovacoes.titulo')}
           {pending.length > 0 && (
             <span style={{
               background: '#ef4444', color: '#fff', borderRadius: '50%',
@@ -337,7 +339,7 @@ function PaginaAprovacoes({ tema, usuarioLogado }: Props) {
 
       {pending.length === 0 ? (
         <div style={{ ...card, textAlign: 'center', color: tema.textoSecundario }}>
-          Nenhuma aprovacao pendente.
+          {t('aprovacoes.nenhuma')}
         </div>
       ) : (
         pending.map(wf => (

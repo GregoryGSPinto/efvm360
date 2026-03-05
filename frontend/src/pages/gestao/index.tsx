@@ -4,6 +4,7 @@
 // ============================================================================
 
 import React, { useState, useMemo, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { TemaEstilos, ConfiguracaoSistema, Usuario } from '../../types';
 import { Card } from '../../components';
 import { usePermissions } from '../../hooks/usePermissions';
@@ -25,6 +26,7 @@ interface PaginaGestaoProps {
 }
 
 export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGestaoProps) {
+  const { t } = useTranslation();
   const { isGestor, isInspetor } = usePermissions(usuarioLogado);
   const yardCode = (usuarioLogado?.primaryYard || 'VFZ') as YardCode;
   const { teamPerformance, yardPerformance, userRanking } = useProjections(yardCode, usuarioLogado?.matricula);
@@ -174,7 +176,7 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
     <div>
       <div style={{ marginBottom: 20 }}>
         <h1 style={{ color: tema.texto, fontSize: 22, fontWeight: 700, margin: '0 0 4px' }}>
-          {isGestor ? '👥 Gestão' : '🔧 Gestão Técnica'}
+          {isGestor ? t('gestao.titulo') : t('gestao.titulo')}
         </h1>
         <p style={{ color: tema.textoSecundario, fontSize: 13, margin: 0 }}>
           {getYardName(yardCode)} {isGestor && '(Visão Global — Pessoas + Técnica)'}
@@ -191,7 +193,7 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
               📈 Dashboard
             </button>
             <button style={tabStyle(secao === 'equipe')} onClick={() => setSecao('equipe')}>
-              📊 Equipe
+              {t('gestao.equipes')}
             </button>
             <button style={tabStyle(secao === 'cadastros')} onClick={() => setSecao('cadastros')}>
               📥 Cadastros {badge(pendingRegistrations.length)}
@@ -361,7 +363,7 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
           <Card title="⚡ Centro de Decisões" styles={styles}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(150px, 100%), 1fr))', gap: 10 }}>
               {[
-                { label: 'Aprovar Cadastros', icon: '📥', action: () => setSecao('cadastros'), count: pendingRegistrations.length },
+                { label: t('gestao.aprovacoes'), icon: '📥', action: () => setSecao('cadastros'), count: pendingRegistrations.length },
                 { label: 'Revisar Senhas', icon: '🔑', action: () => setSecao('senhas'), count: pendingPasswords.length },
                 { label: 'Ver Equipe', icon: '👥', action: () => setSecao('equipe'), count: 0 },
                 { label: 'Listar Usuários', icon: '⚙️', action: () => setSecao('usuarios'), count: 0 },
@@ -431,7 +433,7 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
 
           {/* User ranking */}
           {userRanking.length > 0 && (
-            <Card title="🏆 Ranking Individual" styles={styles}>
+            <Card title={t('gestao.ranking')} styles={styles}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                 <thead>
                   <tr style={{ borderBottom: `1px solid ${tema.cardBorda}` }}>

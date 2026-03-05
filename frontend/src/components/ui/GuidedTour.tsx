@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
@@ -27,70 +28,85 @@ interface GuidedTourProps {
 
 // ── Tour Steps (strategic, 9 steps) ───────────────────────────────────────
 
+export function getTourSteps(t: (key: string) => string): TourStep[] {
+  return [
+    {
+      id: 'welcome',
+      title: t('guidedTour.welcomeTitle'),
+      content: t('guidedTour.welcomeContent'),
+    },
+    {
+      id: 'nav',
+      target: '[data-tour="nav-principal"]',
+      title: t('guidedTour.navTitle'),
+      content: t('guidedTour.navContent'),
+      placement: 'bottom',
+    },
+    {
+      id: 'passagem',
+      target: '[data-tour="nav-passagem"]',
+      title: t('guidedTour.passagemTitle'),
+      content: t('guidedTour.passagemContent'),
+      placement: 'bottom',
+      page: 'passagem',
+    },
+    {
+      id: 'dss',
+      target: '[data-tour="nav-dss"]',
+      title: t('guidedTour.dssTitle'),
+      content: t('guidedTour.dssContent'),
+      placement: 'bottom',
+      page: 'dss',
+    },
+    {
+      id: 'bi',
+      target: '[data-tour="nav-analytics"]',
+      title: t('guidedTour.biTitle'),
+      content: t('guidedTour.biContent'),
+      placement: 'bottom',
+      page: 'analytics',
+    },
+    {
+      id: 'gestao',
+      target: '[data-tour="nav-gestao"]',
+      title: t('guidedTour.gestaoTitle'),
+      content: t('guidedTour.gestaoContent'),
+      placement: 'bottom',
+      page: 'gestao',
+    },
+    {
+      id: 'user-menu',
+      target: '[data-tour="user-menu"]',
+      title: t('guidedTour.profileTitle'),
+      content: t('guidedTour.profileContent'),
+      placement: 'bottom',
+    },
+    {
+      id: 'adamboot',
+      target: '[data-tour="adamboot-btn"]',
+      title: t('guidedTour.adambotTitle'),
+      content: t('guidedTour.adambotContent'),
+      placement: 'left',
+    },
+    {
+      id: 'conclusion',
+      title: t('guidedTour.conclusionTitle'),
+      content: t('guidedTour.conclusionContent'),
+    },
+  ];
+}
+
+/** @deprecated Use getTourSteps(t) instead */
 export const TOUR_STEPS: TourStep[] = [
-  {
-    id: 'welcome',
-    title: 'Bem-vindo ao EFVM360!',
-    content: 'Este e o sistema digital de Passagem de Servico da EFVM. Vamos fazer um tour rapido pelas principais funcionalidades. Voce pode pular a qualquer momento.',
-  },
-  {
-    id: 'nav',
-    target: '[data-tour="nav-principal"]',
-    title: 'Navegacao Principal',
-    content: 'Use o menu superior para acessar os modulos: Boa Jornada (gestao de troca de turno), DSS (dialogo de seguranca), BI+ (indicadores) e Gestao.',
-    placement: 'bottom',
-  },
-  {
-    id: 'passagem',
-    target: '[data-tour="nav-passagem"]',
-    title: 'Gestao de Troca de Turno',
-    content: 'A Boa Jornada e o coracao do sistema. Aqui voce preenche todos os dados da troca de turno: cabecalho, equipamentos, seguranca e assinatura.',
-    placement: 'bottom',
-    page: 'passagem',
-  },
-  {
-    id: 'dss',
-    target: '[data-tour="nav-dss"]',
-    title: 'DSS — Dialogo de Seguranca',
-    content: 'Registre os Dialogos de Seguranca conforme a norma PRO-041945 da Vale. Inclua tema, participantes e observacoes.',
-    placement: 'bottom',
-    page: 'dss',
-  },
-  {
-    id: 'bi',
-    target: '[data-tour="nav-analytics"]',
-    title: 'BI+ Dashboard',
-    content: 'Acompanhe indicadores operacionais em tempo real: score do turno, trocas realizadas, DSS e exportacao de relatorios profissionais.',
-    placement: 'bottom',
-    page: 'analytics',
-  },
-  {
-    id: 'gestao',
-    target: '[data-tour="nav-gestao"]',
-    title: 'Gestao de Equipe',
-    content: 'Area para lideres e gestores: dashboard executivo, aprovacao de cadastros, ranking da equipe e auditoria de alteracoes.',
-    placement: 'bottom',
-    page: 'gestao',
-  },
-  {
-    id: 'user-menu',
-    target: '[data-tour="user-menu"]',
-    title: 'Seu Perfil',
-    content: 'Clique no seu avatar para acessar Meu Perfil, alterar foto, ajustar configuracoes ou sair do sistema.',
-    placement: 'bottom',
-  },
-  {
-    id: 'adamboot',
-    target: '[data-tour="adamboot-btn"]',
-    title: 'AdamBoot — Assistente',
-    content: 'O AdamBoot e seu assistente inteligente. Clique nele para tirar duvidas sobre qualquer funcionalidade do sistema.',
-    placement: 'left',
-  },
-  {
-    id: 'conclusion',
-    title: '🎉 Parabens! Tutorial Concluido!',
-    content: 'Voce completou o tour do EFVM360! Lembre-se: seguranca e prioridade absoluta em cada passagem de servico. Preencha todos os campos com atencao, comunique pendencias a equipe e registre qualquer anomalia. Boa jornada e trabalho seguro! 🚂🛡️',
-  },
+  { id: 'welcome', title: 'Bem-vindo ao EFVM360!', content: 'Este e o sistema digital de Passagem de Servico da EFVM.' },
+  { id: 'nav', target: '[data-tour="nav-principal"]', title: 'Navegacao Principal', content: 'Use o menu superior para acessar os modulos.', placement: 'bottom' },
+  { id: 'passagem', target: '[data-tour="nav-passagem"]', title: 'Gestao de Troca de Turno', content: 'A Boa Jornada e o coracao do sistema.', placement: 'bottom', page: 'passagem' },
+  { id: 'dss', target: '[data-tour="nav-dss"]', title: 'DSS', content: 'Registre os Dialogos de Seguranca.', placement: 'bottom', page: 'dss' },
+  { id: 'bi', target: '[data-tour="nav-analytics"]', title: 'BI+ Dashboard', content: 'Acompanhe indicadores operacionais.', placement: 'bottom', page: 'analytics' },
+  { id: 'gestao', target: '[data-tour="nav-gestao"]', title: 'Gestao de Equipe', content: 'Area para lideres e gestores.', placement: 'bottom', page: 'gestao' },
+  { id: 'user-menu', target: '[data-tour="user-menu"]', title: 'Seu Perfil', content: 'Clique no seu avatar.', placement: 'bottom' },
+  { id: 'adamboot', target: '[data-tour="adamboot-btn"]', title: 'AdamBoot', content: 'O AdamBoot e seu assistente inteligente.', placement: 'left' },
+  { id: 'conclusion', title: 'Tutorial Concluido!', content: 'Voce completou o tour do EFVM360!' },
 ];
 
 // ── Position helpers ──────────────────────────────────────────────────────
@@ -145,6 +161,7 @@ export function GuidedTour({
   onNavigate,
   isDark,
 }: GuidedTourProps): JSX.Element | null {
+  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
   const [ready, setReady] = useState(false);
@@ -377,7 +394,7 @@ export function GuidedTour({
         {/* Progress */}
         <div style={{ marginBottom: 12 }}>
           <div style={{ fontSize: 11, color: '#888', marginBottom: 4 }}>
-            Passo {currentStep + 1} de {steps.length}
+            {t('guidedTour.step', { current: currentStep + 1, total: steps.length })}
           </div>
           <div style={{
             height: 4, background: isDark ? '#333' : '#e0e0e0',
@@ -406,7 +423,7 @@ export function GuidedTour({
                 background: 'transparent', color: '#888', fontSize: 12,
                 fontWeight: 500, cursor: 'pointer', minHeight: 44,
               }}>
-                Pular
+                {t('guidedTour.skip')}
               </button>
               {currentStep > 0 && (
                 <button onClick={prev} style={{
@@ -415,7 +432,7 @@ export function GuidedTour({
                   color: isDark ? '#e0e0e0' : '#333', fontSize: 13, fontWeight: 600,
                   minHeight: 44,
                 }}>
-                  ← Anterior
+                  {t('guidedTour.previous')}
                 </button>
               )}
               <button onClick={next} style={{
@@ -423,7 +440,7 @@ export function GuidedTour({
                 background: '#007e7a', color: '#fff', fontSize: 13,
                 fontWeight: 600, cursor: 'pointer', minHeight: 44,
               }}>
-                {isLast ? '✓ Concluir' : 'Proximo →'}
+                {isLast ? t('guidedTour.finish') : t('guidedTour.next')}
               </button>
             </>
           ) : (
@@ -434,7 +451,7 @@ export function GuidedTour({
                   border: `1px solid ${border}`, background: 'transparent',
                   color: isDark ? '#e0e0e0' : '#333', fontSize: 13, fontWeight: 600,
                 }}>
-                  ← Anterior
+                  {t('guidedTour.previous')}
                 </button>
               ) : <div />}
 
@@ -443,7 +460,7 @@ export function GuidedTour({
                 background: 'transparent', color: '#888', fontSize: 12,
                 fontWeight: 500, cursor: 'pointer',
               }}>
-                Pular Tutorial
+                {t('guidedTour.skipTutorial')}
               </button>
 
               <button onClick={next} style={{
@@ -451,7 +468,7 @@ export function GuidedTour({
                 background: '#007e7a', color: '#fff', fontSize: 13,
                 fontWeight: 600, cursor: 'pointer',
               }}>
-                {isLast ? '✓ Concluir e Ir para Inicio' : 'Proximo →'}
+                {isLast ? t('guidedTour.finishAndGoHome') : t('guidedTour.next')}
               </button>
             </>
           )}

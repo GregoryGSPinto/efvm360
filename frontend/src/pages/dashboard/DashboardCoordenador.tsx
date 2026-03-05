@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { useState, useEffect, type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { TemaComputed } from '../types';
 import type { Usuario } from '../../types';
 import {
@@ -22,6 +23,7 @@ const TREND_ICON: Record<string, string> = { improving: '↑', stable: '→', de
 const TREND_COLOR: Record<string, string> = { improving: '#10b981', stable: '#6b7280', declining: '#ef4444' };
 
 export default function DashboardCoordenador({ tema }: Props) {
+  const { t } = useTranslation();
   const [isLive, setIsLive] = useState(false);
   const [summaries, setSummaries] = useState<YardSummary[]>(() => generateMockYardSummaries());
 
@@ -45,10 +47,10 @@ export default function DashboardCoordenador({ tema }: Props) {
   return (
     <div style={{ padding: 20, maxWidth: 1000, margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <h2 style={{ color: tema.texto, marginBottom: 4 }}>Dashboard Coordenador</h2>
-        {!isLive && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 8, background: 'rgba(249,115,22,0.1)', color: '#f97316', fontWeight: 600 }}>Modo Demo</span>}
+        <h2 style={{ color: tema.texto, marginBottom: 4 }}>{t('dashboard.coordenador.title')}</h2>
+        {!isLive && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 8, background: 'rgba(249,115,22,0.1)', color: '#f97316', fontWeight: 600 }}>{t('dashboard.demoMode')}</span>}
       </div>
-      <div style={{ color: tema.textoSecundario, fontSize: 14, marginBottom: 20 }}>Comparativo entre patios</div>
+      <div style={{ color: tema.textoSecundario, fontSize: 14, marginBottom: 20 }}>{t('dashboard.coordenador.subtitle')}</div>
 
       {/* Yard Comparison Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280, 1fr))', gap: 16, marginBottom: 24 }}>
@@ -62,23 +64,23 @@ export default function DashboardCoordenador({ tema }: Props) {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
               <div>
-                <div style={{ color: tema.textoSecundario, fontSize: 11 }}>Compliance</div>
+                <div style={{ color: tema.textoSecundario, fontSize: 11 }}>{t('dashboard.coordenador.compliance')}</div>
                 <div style={{ color: STATUS_COLOR[getComplianceStatus(ys.compliance30d)], fontSize: 22, fontWeight: 700 }}>
                   {ys.compliance30d}%
                 </div>
               </div>
               <div>
-                <div style={{ color: tema.textoSecundario, fontSize: 11 }}>Passagens 30d</div>
+                <div style={{ color: tema.textoSecundario, fontSize: 11 }}>{t('dashboard.coordenador.handovers30d')}</div>
                 <div style={{ color: tema.texto, fontSize: 22, fontWeight: 700 }}>{ys.handovers30d}</div>
               </div>
               <div>
-                <div style={{ color: tema.textoSecundario, fontSize: 11 }}>Anomalias 30d</div>
+                <div style={{ color: tema.textoSecundario, fontSize: 11 }}>{t('dashboard.coordenador.anomalies30d')}</div>
                 <div style={{ color: ys.anomalies30d > 5 ? '#ef4444' : tema.texto, fontSize: 22, fontWeight: 700 }}>
                   {ys.anomalies30d}
                 </div>
               </div>
               <div>
-                <div style={{ color: tema.textoSecundario, fontSize: 11 }}>Resolucao (h)</div>
+                <div style={{ color: tema.textoSecundario, fontSize: 11 }}>{t('dashboard.coordenador.resolution')}</div>
                 <div style={{ color: tema.texto, fontSize: 22, fontWeight: 700 }}>{ys.avgResolutionHours}</div>
               </div>
             </div>
@@ -88,7 +90,7 @@ export default function DashboardCoordenador({ tema }: Props) {
 
       {/* Bar Chart Comparison */}
       <div style={{ ...card, marginBottom: 24 }}>
-        <h3 style={{ color: tema.texto, marginTop: 0 }}>Compliance por Patio</h3>
+        <h3 style={{ color: tema.texto, marginTop: 0 }}>{t('dashboard.coordenador.complianceByYard')}</h3>
         {summaries
           .sort((a, b) => b.compliance30d - a.compliance30d)
           .map(ys => (
@@ -112,12 +114,12 @@ export default function DashboardCoordenador({ tema }: Props) {
 
       {/* Summary Table */}
       <div style={card}>
-        <h3 style={{ color: tema.texto, marginTop: 0 }}>Resumo Comparativo</h3>
+        <h3 style={{ color: tema.texto, marginTop: 0 }}>{t('dashboard.coordenador.comparativeSummary')}</h3>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
-                {['Patio', 'Compliance', 'Tendencia', 'Passagens', 'Anomalias', 'Resolucao'].map(h => (
+                {[t('dashboard.table.yard'), t('dashboard.table.compliance'), t('dashboard.table.trend'), t('dashboard.table.handovers'), t('dashboard.table.anomalies'), t('dashboard.table.resolution')].map(h => (
                   <th key={h} style={{ textAlign: 'left', padding: '8px 12px', color: tema.textoSecundario, fontSize: 12, borderBottom: `1px solid ${tema.cardBorda}` }}>{h}</th>
                 ))}
               </tr>

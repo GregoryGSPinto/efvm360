@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { useState, useEffect, type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { TemaComputed } from '../types';
 import type { Usuario } from '../../types';
 import {
@@ -24,6 +25,7 @@ interface Props {
 const STATUS_COLOR = { green: '#10b981', yellow: '#f59e0b', red: '#ef4444' };
 
 export default function DashboardSupervisor({ tema, usuarioLogado }: Props) {
+  const { t } = useTranslation();
   const yard = usuarioLogado?.primaryYard || 'VFZ';
   const [days] = useState(30);
   const [isLive, setIsLive] = useState(false);
@@ -66,22 +68,22 @@ export default function DashboardSupervisor({ tema, usuarioLogado }: Props) {
   return (
     <div style={{ padding: 20, maxWidth: 900, margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <h2 style={{ color: tema.texto, marginBottom: 4 }}>Dashboard Supervisor</h2>
-        {!isLive && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 8, background: 'rgba(249,115,22,0.1)', color: '#f97316', fontWeight: 600 }}>Modo Demo</span>}
+        <h2 style={{ color: tema.texto, marginBottom: 4 }}>{t('dashboard.supervisor.title')}</h2>
+        {!isLive && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 8, background: 'rgba(249,115,22,0.1)', color: '#f97316', fontWeight: 600 }}>{t('dashboard.demoMode')}</span>}
       </div>
-      <div style={{ color: tema.textoSecundario, fontSize: 14, marginBottom: 20 }}>Patio {yard}</div>
+      <div style={{ color: tema.textoSecundario, fontSize: 14, marginBottom: 20 }}>{t('dashboard.supervisor.yard', { yard })}</div>
 
       {/* KPI Cards */}
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 24 }}>
-        {kpiCard('Passagens Hoje', todayStats?.totalHandovers || 0)}
-        {kpiCard('Compliance', `${avgCompliance}%`, complianceColor)}
-        {kpiCard('5S Medio', avgFiveS.toFixed(1))}
-        {kpiCard('Anomalias', totalAnomalies, totalAnomalies > 10 ? '#ef4444' : undefined)}
+        {kpiCard(t('dashboard.supervisor.handoversToday'), todayStats?.totalHandovers || 0)}
+        {kpiCard(t('dashboard.supervisor.compliance'), `${avgCompliance}%`, complianceColor)}
+        {kpiCard(t('dashboard.supervisor.fiveSAvg'), avgFiveS.toFixed(1))}
+        {kpiCard(t('dashboard.supervisor.anomalies'), totalAnomalies, totalAnomalies > 10 ? '#ef4444' : undefined)}
       </div>
 
       {/* Compliance Trend (text-based chart) */}
       <div style={{ ...card, marginBottom: 24 }}>
-        <h3 style={{ color: tema.texto, marginTop: 0, marginBottom: 16 }}>Compliance - Ultimos {days} dias</h3>
+        <h3 style={{ color: tema.texto, marginTop: 0, marginBottom: 16 }}>{t('dashboard.supervisor.complianceTrend', { days })}</h3>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 120 }}>
           {stats.map((s, i) => {
             const height = Math.max(4, (s.compliance / 100) * 100);
@@ -100,12 +102,12 @@ export default function DashboardSupervisor({ tema, usuarioLogado }: Props) {
 
       {/* Recent Stats Table */}
       <div style={{ ...card }}>
-        <h3 style={{ color: tema.texto, marginTop: 0, marginBottom: 16 }}>Ultimas 10 Passagens</h3>
+        <h3 style={{ color: tema.texto, marginTop: 0, marginBottom: 16 }}>{t('dashboard.supervisor.lastHandovers')}</h3>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
-                {['Data', 'Passagens', 'Compliance', '5S', 'Anomalias'].map(h => (
+                {[t('dashboard.table.date'), t('dashboard.table.handovers'), t('dashboard.table.compliance'), t('dashboard.table.fiveS'), t('dashboard.table.anomalies')].map(h => (
                   <th key={h} style={{ textAlign: 'left', padding: '8px 12px', color: tema.textoSecundario, fontSize: 12, borderBottom: `1px solid ${tema.cardBorda}` }}>{h}</th>
                 ))}
               </tr>
@@ -128,7 +130,7 @@ export default function DashboardSupervisor({ tema, usuarioLogado }: Props) {
       {/* Summary */}
       <div style={{ ...card, marginTop: 16 }}>
         <div style={{ color: tema.textoSecundario, fontSize: 13 }}>
-          Total de passagens no periodo: <strong style={{ color: tema.texto }}>{totalHandovers}</strong>
+          {t('dashboard.supervisor.totalInPeriod')} <strong style={{ color: tema.texto }}>{totalHandovers}</strong>
         </div>
       </div>
     </div>

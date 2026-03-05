@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { PaginaGrausRiscoProps } from '../types';
 import type { GrauRisco, CategoriaRisco, SeveridadeRisco, MedidaMitigacao } from '../../types';
 import { SectionHeader } from '../../components';
@@ -68,6 +69,7 @@ const FORM_VAZIO: FormGrau = {
 // ── Component ───────────────────────────────────────────────────────────
 
 export default function PaginaGrausRisco(props: PaginaGrausRiscoProps): JSX.Element {
+  const { t } = useTranslation();
   const { tema, usuarioLogado } = props;
   const { isGestor, isInspetor } = usePermissions(usuarioLogado);
   const canEdit = isGestor || isInspetor;
@@ -241,14 +243,14 @@ export default function PaginaGrausRisco(props: PaginaGrausRiscoProps): JSX.Elem
   if (!usuarioLogado) {
     return (
       <div style={{ padding: 40, textAlign: 'center', color: tema.textoSecundario }}>
-        Carregando graus de risco...
+        {t('common.loading')}
       </div>
     );
   }
 
   return (
     <>
-      <SectionHeader title="Gestão de Graus de Risco Operacional" tema={tema} />
+      <SectionHeader title={t('risk.title')} tema={tema} />
       <div style={{ fontSize: 12, color: tema.textoSecundario, marginTop: -12, marginBottom: 16 }}>
         VPS — A Vida em Primeiro Lugar | Ref: NR-01 / Diretriz Vale Life First
       </div>
@@ -331,7 +333,7 @@ export default function PaginaGrausRisco(props: PaginaGrausRiscoProps): JSX.Elem
         overflowX: 'auto',
       }}>
         <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 700, color: tema.texto }}>
-          Matriz de Risco — Probabilidade x Impacto
+          {t('risk.title')} — {t('risk.probability')} x {t('risk.impact')}
         </h3>
         <div style={{ display: 'flex', gap: 4, minWidth: 400 }}>
           {/* Y axis label */}
@@ -340,7 +342,7 @@ export default function PaginaGrausRisco(props: PaginaGrausRiscoProps): JSX.Elem
               writingMode: 'vertical-rl', transform: 'rotate(180deg)',
               fontSize: 10, fontWeight: 600, color: tema.textoSecundario, textAlign: 'center',
             }}>
-              PROBABILIDADE
+              {t('risk.probability')}
             </div>
           </div>
           <div style={{ flex: 1 }}>
@@ -398,7 +400,7 @@ export default function PaginaGrausRisco(props: PaginaGrausRiscoProps): JSX.Elem
             </div>
             {/* X axis label */}
             <div style={{ textAlign: 'center', fontSize: 10, fontWeight: 600, color: tema.textoSecundario, marginTop: 6 }}>
-              IMPACTO
+              {t('risk.impact')}
             </div>
           </div>
         </div>
@@ -871,11 +873,11 @@ export default function PaginaGrausRisco(props: PaginaGrausRiscoProps): JSX.Elem
                 flex: 1, padding: '10px 20px', borderRadius: 8,
                 border: `1px solid ${tema.cardBorda}`, background: tema.backgroundSecundario,
                 color: tema.texto, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-              }}>Cancelar</button>
+              }}>{t('common.cancel')}</button>
               <button onClick={handleSaveGrau} style={{
                 flex: 1, padding: '10px 20px', borderRadius: 8, border: 'none',
                 background: tema.primaria, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer',
-              }}>{editingId ? 'Salvar Alterações' : 'Criar Grau de Risco'}</button>
+              }}>{editingId ? t('common.save') : t('common.save')}</button>
             </div>
           </div>
         </div>

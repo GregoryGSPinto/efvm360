@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 // ── Types ──────────────────────────────────────────────────────────────
 
@@ -187,6 +188,7 @@ function formatUptime(seconds: number): string {
 // ── Component ──────────────────────────────────────────────────────────
 
 export function MetricasDashboard({ apiBaseUrl, token, role }: MetricasDashboardProps) {
+  const { t } = useTranslation();
   const [data, setData] = useState<MetricasResumo | null>(null);
   const [state, setState] = useState<LoadingState>('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -194,7 +196,7 @@ export function MetricasDashboard({ apiBaseUrl, token, role }: MetricasDashboard
   const fetchMetrics = useCallback(async () => {
     if (!apiBaseUrl || !token) {
       setState('error');
-      setErrorMessage('Configuracao de API ausente');
+      setErrorMessage(t('metricas.apiMissing'));
       return;
     }
 
@@ -219,7 +221,7 @@ export function MetricasDashboard({ apiBaseUrl, token, role }: MetricasDashboard
     } catch (err) {
       setState('error');
       setErrorMessage(
-        err instanceof Error ? err.message : 'Erro ao carregar metricas'
+        err instanceof Error ? err.message : t('metricas.errorLoading')
       );
     }
   }, [apiBaseUrl, token]);
@@ -234,7 +236,7 @@ export function MetricasDashboard({ apiBaseUrl, token, role }: MetricasDashboard
   if (!hasMinimumRole(role, 'inspetor')) {
     return (
       <div data-testid="metricas-access-denied" style={styles.accessDenied}>
-        Acesso restrito a inspetores e superiores
+        {t('metricas.accessDenied')}
       </div>
     );
   }
@@ -243,7 +245,7 @@ export function MetricasDashboard({ apiBaseUrl, token, role }: MetricasDashboard
   if (state === 'loading') {
     return (
       <div data-testid="metricas-loading" style={styles.loadingContainer}>
-        Carregando metricas operacionais...
+        {t('metricas.loadingMetrics')}
       </div>
     );
   }
@@ -252,13 +254,13 @@ export function MetricasDashboard({ apiBaseUrl, token, role }: MetricasDashboard
   if (state === 'error') {
     return (
       <div data-testid="metricas-error" style={styles.errorContainer}>
-        <span>Erro ao carregar metricas: {errorMessage}</span>
+        <span>{t('metricas.errorLoadingDetail', { message: errorMessage })}</span>
         <button
           data-testid="metricas-retry"
           style={styles.retryButton}
           onClick={fetchMetrics}
         >
-          Tentar novamente
+          {t('metricas.retry')}
         </button>
       </div>
     );
@@ -279,30 +281,30 @@ export function MetricasDashboard({ apiBaseUrl, token, role }: MetricasDashboard
 
   const cards = [
     {
-      label: 'Total Passagens',
+      label: t('metricas.totalPassagens'),
       value: totalPassagens,
-      footer: `${totalAssinadas} assinadas`,
+      footer: t('metricas.signed', { count: totalAssinadas }),
       color: '#00A651',
       testId: 'kpi-passagens',
     },
     {
-      label: 'Login Success Rate',
+      label: t('metricas.loginSuccessRate'),
       value: `${loginSuccessRate}%`,
-      footer: `${loginsSucesso} ok / ${loginsFalha} falhas`,
+      footer: t('metricas.loginDetail', { ok: loginsSucesso, fail: loginsFalha }),
       color: loginSuccessRate >= 90 ? '#00A651' : '#ef4444',
       testId: 'kpi-login-rate',
     },
     {
-      label: 'Sync Operations',
+      label: t('metricas.syncOperations'),
       value: syncOps,
-      footer: `${syncConflicts} conflitos`,
+      footer: t('metricas.conflicts', { count: syncConflicts }),
       color: syncConflicts > 0 ? '#FFD100' : '#00A651',
       testId: 'kpi-sync',
     },
     {
-      label: 'Active Alerts',
+      label: t('metricas.activeAlerts'),
       value: syncConflicts,
-      footer: uptime > 0 ? `Uptime: ${formatUptime(uptime)}` : 'Sem dados de uptime',
+      footer: uptime > 0 ? t('metricas.uptime', { time: formatUptime(uptime) }) : t('metricas.noUptime'),
       color: syncConflicts > 0 ? '#ef4444' : '#00A651',
       testId: 'kpi-alerts',
     },
@@ -311,7 +313,7 @@ export function MetricasDashboard({ apiBaseUrl, token, role }: MetricasDashboard
   return (
     <div data-testid="metricas-dashboard" style={styles.container}>
       <div style={styles.header}>
-        Metricas Operacionais
+        {t('metricas.title')}
         {data?.appInsightsAtivo && (
           <span
             data-testid="badge-insights"
@@ -326,7 +328,7 @@ export function MetricasDashboard({ apiBaseUrl, token, role }: MetricasDashboard
         )}
       </div>
       <div style={styles.subtitle}>
-        Atualizado em {data?.timestamp ? new Date(data.timestamp).toLocaleString('pt-BR') : '--'}
+        {t('metricas.updatedAt', { date: data?.timestamp ? new Date(data.timestamp).toLocaleString('pt-BR') : '--' })}
       </div>
 
       <div style={styles.grid}>

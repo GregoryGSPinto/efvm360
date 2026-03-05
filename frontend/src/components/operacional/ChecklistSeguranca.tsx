@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { memo, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { TemaEstilos, DadosFormulario } from '../../types';
 import type { StylesObject } from '../../hooks/useStyles';
 
@@ -16,18 +17,19 @@ export const ChecklistSeguranca = memo<ChecklistSegurancaProps>(({
   dadosFormulario,
   tema,
 }) => {
+  const { t } = useTranslation();
   const seg = dadosFormulario.segurancaManobras;
 
   const itens = useMemo(() => [
     {
       id: 'manobras',
-      label: 'Manobras críticas informadas',
+      label: t('checklist.manobrasCriticas'),
       ok: seg.houveManobras !== null,
       critico: true,
     },
     {
       id: 'freios',
-      label: 'Condição de freios verificada',
+      label: t('checklist.freiosVerified'),
       ok: seg.houveManobras.resposta === false || (
         seg.freios.automatico ||
         seg.freios.independente ||
@@ -38,35 +40,35 @@ export const ChecklistSeguranca = memo<ChecklistSegurancaProps>(({
     },
     {
       id: 'pontoCritico',
-      label: 'Ponto crítico para próximo turno',
+      label: t('checklist.pontoCritico'),
       ok: !!(seg.pontoCriticoProximoTurno?.observacao ?? '').trim(),
       critico: false,
     },
     {
       id: 'linhaLimpa',
-      label: 'Condição da linha informada',
+      label: t('checklist.linhaCondition'),
       ok: seg.linhaLimpa?.resposta !== null && seg.linhaLimpa?.resposta !== undefined,
       critico: true,
     },
     {
       id: 'comunicacao',
-      label: 'Comunicação operacional confirmada',
+      label: t('checklist.comunicacao'),
       ok: seg.comunicacao.ccoCpt || seg.comunicacao.oof,
       critico: false,
     },
     {
       id: 'restricao',
-      label: 'Restrições operacionais verificadas',
+      label: t('checklist.restricao'),
       ok: seg.restricaoAtiva !== null,
       critico: true,
     },
     {
       id: 'intervencao',
-      label: 'Intervenções VP informadas',
+      label: t('checklist.intervencao'),
       ok: dadosFormulario.intervencoes.temIntervencao !== null,
       critico: false,
     },
-  ], [seg, dadosFormulario.intervencoes]);
+  ], [seg, dadosFormulario.intervencoes, t]);
 
   const todosOk = itens.every((item) => item.ok);
   const criticosPendentes = itens.filter((item) => item.critico && !item.ok);
@@ -93,7 +95,7 @@ export const ChecklistSeguranca = memo<ChecklistSegurancaProps>(({
         }}
       >
         <span style={{ fontSize: '18px' }}>{todosOk ? '✅' : '📋'}</span>
-        CHECKLIST DE SEGURANÇA
+        {t('checklist.title')}
         {!todosOk && criticosPendentes.length > 0 && (
           <span
             style={{
@@ -105,7 +107,7 @@ export const ChecklistSeguranca = memo<ChecklistSegurancaProps>(({
               color: tema.perigo,
             }}
           >
-            {criticosPendentes.length} crítico(s) pendente(s)
+            {t('checklist.criticalPending', { count: criticosPendentes.length })}
           </span>
         )}
       </div>
@@ -150,8 +152,7 @@ export const ChecklistSeguranca = memo<ChecklistSegurancaProps>(({
             color: tema.texto,
           }}
         >
-          💡 <strong>Dica:</strong> Complete os itens pendentes antes de assinar para garantir
-          uma passagem de turno segura e completa.
+          {t('checklist.tip')}
         </div>
       )}
     </div>

@@ -4,6 +4,7 @@
 // Uses React Router for active state detection.
 // ============================================================================
 import { memo, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import type { TemaEstilos, ConfiguracaoSistema } from '../../types';
 import { getHierarchyLevelForRole } from '../../domain/aggregates/UserAggregate';
@@ -26,33 +27,34 @@ export const MobileBottomNav = memo<MobileBottomNavProps>(({
   tema: _tema, config, onNavigate,
   userRole = '', pendingCount = 0,
 }) => {
+  const { t } = useTranslation();
   const location = useLocation();
   const dk = config.tema === 'escuro' ||
     (config.tema === 'automatico' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
 
   const hierarchyLevel = getHierarchyLevelForRole(userRole);
   const NAV_ITEMS = useMemo(() => {
-    if (userRole === 'suporte') return [{ id: 'suporte', label: 'Suporte', icon: '\uD83D\uDEE0\uFE0F' }];
+    if (userRole === 'suporte') return [{ id: 'suporte', label: t('nav.suporte'), icon: '\uD83D\uDEE0\uFE0F' }];
     const items: Array<{ id: string; label: string; icon: string }> = [];
-    items.push({ id: 'passagem', label: 'Boa Jornada', icon: '\uD83D\uDE82' });
+    items.push({ id: 'passagem', label: t('nav.boaJornada'), icon: '\uD83D\uDE82' });
     if (hierarchyLevel >= HierarchyLevel.INSPECTION) {
-      items.push({ id: 'dss', label: 'DSS', icon: '\uD83D\uDEE1\uFE0F' });
-      items.push({ id: 'analytics', label: 'BI+', icon: '\uD83D\uDCCA' });
+      items.push({ id: 'dss', label: t('nav.dss'), icon: '\uD83D\uDEE1\uFE0F' });
+      items.push({ id: 'analytics', label: t('nav.biPlus'), icon: '\uD83D\uDCCA' });
     }
-    items.push({ id: 'historico', label: 'Historico', icon: '\uD83D\uDCCB' });
+    items.push({ id: 'historico', label: t('nav.historico'), icon: '\uD83D\uDCCB' });
     if (hierarchyLevel >= HierarchyLevel.SUPERVISION) {
-      items.push({ id: 'dashboard', label: 'Dashboard', icon: '\uD83D\uDCCA' });
-      items.push({ id: 'composicoes', label: 'Composicoes', icon: '\uD83D\uDE83' });
-      items.push({ id: 'passagem-interpatio', label: 'Inter-Patio', icon: '\uD83D\uDD04' });
-      items.push({ id: 'layout', label: 'Layout', icon: '\uD83D\uDDFA\uFE0F' });
-      items.push({ id: 'graus-risco', label: 'Grau Risco', icon: '\u26A0\uFE0F' });
-      items.push({ id: 'gestao', label: 'Gestao', icon: '\uD83D\uDC65' });
+      items.push({ id: 'dashboard', label: t('nav.dashboard'), icon: '\uD83D\uDCCA' });
+      items.push({ id: 'composicoes', label: t('nav.composicoes'), icon: '\uD83D\uDE83' });
+      items.push({ id: 'passagem-interpatio', label: t('nav.interPatio'), icon: '\uD83D\uDD04' });
+      items.push({ id: 'layout', label: t('nav.layout'), icon: '\uD83D\uDDFA\uFE0F' });
+      items.push({ id: 'graus-risco', label: t('nav.grausRisco'), icon: '\u26A0\uFE0F' });
+      items.push({ id: 'gestao', label: t('nav.gestao'), icon: '\uD83D\uDC65' });
     }
     if (hierarchyLevel >= HierarchyLevel.COORDINATION) {
-      items.push({ id: 'aprovacoes', label: 'Aprovacoes', icon: '\u2705' });
+      items.push({ id: 'aprovacoes', label: t('nav.aprovacoes'), icon: '\u2705' });
     }
     return items;
-  }, [hierarchyLevel, userRole]);
+  }, [hierarchyLevel, userRole, t]);
 
   const bg = dk ? '#1a1a1a' : '#ffffff';
   const bd = dk ? '#2a2a2a' : '#e8e8e8';
@@ -69,7 +71,7 @@ export const MobileBottomNav = memo<MobileBottomNavProps>(({
   };
 
   return (
-    <nav className="efvm360-mobilenav" aria-label="Navegação mobile" style={{
+    <nav className="efvm360-mobilenav" aria-label={t('nav.boaJornada')} style={{
       position: 'fixed',
       bottom: 0,
       left: 0,

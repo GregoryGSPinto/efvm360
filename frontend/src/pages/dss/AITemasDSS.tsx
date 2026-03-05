@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { TemaEstilos } from '../../types';
 import { useAI } from '../../hooks/useAI';
 import { PROMPTS } from '../../services/aiService';
@@ -37,6 +38,7 @@ function SparkleIcon({ size = 16, color = '#69be28' }: { size?: number; color?: 
 }
 
 export default function AITemasDSS({ tema, patio, turno, resumoOperacional, onUsarTema }: AITemasDSSProps) {
+  const { t } = useTranslation();
   const ai = useAI<TemasResponse>();
   const [expandido, setExpandido] = useState(true);
 
@@ -75,7 +77,7 @@ export default function AITemasDSS({ tema, patio, turno, resumoOperacional, onUs
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <SparkleIcon size={18} />
           <span style={{ fontSize: 14, fontWeight: 700, color: tema.texto }}>
-            Sugestões de IA para DSS de Hoje
+            {t('dss.titulo')}
           </span>
         </div>
         <span style={{ fontSize: 16, color: tema.textoSecundario, transform: expandido ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
@@ -89,7 +91,7 @@ export default function AITemasDSS({ tema, patio, turno, resumoOperacional, onUs
           {ai.status === 'idle' && (
             <div style={{ textAlign: 'center', padding: 16 }}>
               <p style={{ fontSize: 13, color: tema.textoSecundario, marginBottom: 14 }}>
-                A IA pode sugerir temas relevantes para o DSS de hoje com base no contexto operacional.
+                {t('dss.aiIdleDescription')}
               </p>
               <button
                 onClick={gerarTemas}
@@ -100,7 +102,7 @@ export default function AITemasDSS({ tema, patio, turno, resumoOperacional, onUs
                   boxShadow: '0 2px 12px rgba(0,126,122,0.3)',
                 }}
               >
-                <SparkleIcon size={14} color="#fff" /> Gerar Sugestões
+                <SparkleIcon size={14} color="#fff" /> {t('dss.gerarSugestoes')}
               </button>
             </div>
           )}
@@ -122,7 +124,7 @@ export default function AITemasDSS({ tema, patio, turno, resumoOperacional, onUs
           {ai.status === 'error' && (
             <div style={{ textAlign: 'center', padding: 16 }}>
               <p style={{ fontSize: 13, color: tema.textoSecundario, marginBottom: 12 }}>
-                Sugestões indisponíveis no momento.
+                {t('dss.indisponivel')}
               </p>
               <button
                 onClick={gerarTemas}
@@ -131,7 +133,7 @@ export default function AITemasDSS({ tema, patio, turno, resumoOperacional, onUs
                   borderRadius: 8, padding: '8px 20px', fontSize: 12, cursor: 'pointer', fontWeight: 600,
                 }}
               >
-                Tentar novamente
+                {t('dss.tentarNovamente')}
               </button>
             </div>
           )}
@@ -139,7 +141,7 @@ export default function AITemasDSS({ tema, patio, turno, resumoOperacional, onUs
           {/* Results */}
           {ai.data?.temas && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {ai.data.temas.map((t, i) => (
+              {ai.data.temas.map((sugestao, i) => (
                 <div key={i} style={{
                   padding: 14, borderRadius: 12,
                   background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,126,122,0.03)',
@@ -148,10 +150,10 @@ export default function AITemasDSS({ tema, patio, turno, resumoOperacional, onUs
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10, marginBottom: 8 }}>
                     <div>
                       <div style={{ fontSize: 14, fontWeight: 600, color: tema.texto, marginBottom: 4 }}>
-                        {t.titulo}
+                        {sugestao.titulo}
                       </div>
                       <div style={{ fontSize: 12, color: tema.textoSecundario, lineHeight: 1.5 }}>
-                        {t.justificativa}
+                        {sugestao.justificativa}
                       </div>
                     </div>
                     <span style={{
@@ -163,7 +165,7 @@ export default function AITemasDSS({ tema, patio, turno, resumoOperacional, onUs
                   </div>
 
                   <div style={{ marginBottom: 10 }}>
-                    {t.pontos_discussao.map((p, j) => (
+                    {sugestao.pontos_discussao.map((p, j) => (
                       <div key={j} style={{
                         fontSize: 12, color: tema.texto, padding: '3px 0', paddingLeft: 14,
                         position: 'relative', lineHeight: 1.5,
@@ -175,14 +177,14 @@ export default function AITemasDSS({ tema, patio, turno, resumoOperacional, onUs
                   </div>
 
                   <button
-                    onClick={() => onUsarTema(t.titulo, t.pontos_discussao)}
+                    onClick={() => onUsarTema(sugestao.titulo, sugestao.pontos_discussao)}
                     style={{
                       width: '100%', background: 'rgba(0,126,122,0.08)', color: tema.primaria,
                       border: `1px solid rgba(0,126,122,0.2)`, borderRadius: 8,
                       padding: '8px 0', fontSize: 12, fontWeight: 600, cursor: 'pointer',
                     }}
                   >
-                    Usar este tema
+                    {t('dss.tema')}
                   </button>
                 </div>
               ))}
@@ -195,11 +197,11 @@ export default function AITemasDSS({ tema, patio, turno, resumoOperacional, onUs
                   alignSelf: 'center',
                 }}
               >
-                Gerar novos temas
+                {t('dss.gerarNovos')}
               </button>
 
               <div style={{ fontSize: 10, color: tema.textoSecundario, fontStyle: 'italic', textAlign: 'center' }}>
-                Sugestão gerada por IA — confirme com sua experiência operacional
+                {t('dss.avisoIA')}
               </div>
             </div>
           )}

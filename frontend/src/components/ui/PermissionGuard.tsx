@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface PermissionGuardProps {
   perfisPermitidos: string[];
@@ -16,8 +17,10 @@ export const PermissionGuard = memo<PermissionGuardProps>(({
   perfisPermitidos,
   children,
   funcaoUsuario,
-  mensagemBloqueio = 'Acesso restrito ao seu perfil',
+  mensagemBloqueio,
 }) => {
+  const { t } = useTranslation();
+  const bloqueioText = mensagemBloqueio || t('permissionGuard.accessRestricted');
   const funcao = funcaoUsuario || (() => {
     try {
       const u = JSON.parse(localStorage.getItem('efvm360-usuario') || '{}');
@@ -39,7 +42,7 @@ export const PermissionGuard = memo<PermissionGuardProps>(({
       color: '#888',
       fontSize: '13px',
     }}>
-      🔒 {mensagemBloqueio}
+      {bloqueioText}
     </div>
   );
 });

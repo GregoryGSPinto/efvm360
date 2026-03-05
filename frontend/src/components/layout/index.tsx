@@ -3,6 +3,7 @@
 // ============================================================================
 
 import React, { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { TemaEstilos } from '../../types';
 import type { StylesObject } from '../../hooks/useStyles';
 
@@ -52,10 +53,11 @@ interface StatusBadgeProps {
 }
 
 export const StatusBadge = memo<StatusBadgeProps>(({ status, tema }) => {
+  const { t } = useTranslation();
   const config = {
-    livre: { bg: tema.sucesso, text: '✓ LIVRE' },
-    ocupada: { bg: tema.aviso, text: '● OCUPADA' },
-    interditada: { bg: tema.perigo, text: '⛔ INTERDITADA' },
+    livre: { bg: tema.sucesso, text: t('tables.free') },
+    ocupada: { bg: tema.aviso, text: t('tables.occupied') },
+    interditada: { bg: tema.perigo, text: t('tables.blocked') },
   };
 
   const { bg, text } = config[status];

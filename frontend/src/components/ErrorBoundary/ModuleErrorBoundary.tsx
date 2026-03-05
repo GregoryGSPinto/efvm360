@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import i18n from '../../i18n';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -53,12 +54,12 @@ export class ModuleErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoun
 
     const { module, fallbackTitle, isCritical } = this.props;
     const err = this.state.error;
-    const title = fallbackTitle || `Erro no módulo: ${module}`;
+    const title = fallbackTitle || i18n.t('errorBoundary.moduleError', { module });
 
     // Build error details string
     const errorName = err?.name || 'UnknownError';
-    const errorMessage = err?.message || String(err) || '(sem mensagem)';
-    const errorStack = err?.stack || '(sem stack trace)';
+    const errorMessage = err?.message || String(err) || i18n.t('errorBoundary.noMessage');
+    const errorStack = err?.stack || i18n.t('errorBoundary.noStack');
     const componentStack = this.state.errorInfo?.componentStack || '';
 
     return (
@@ -69,7 +70,7 @@ export class ModuleErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoun
         <div style={{ fontSize: '40px', marginBottom: '12px' }}>{isCritical ? '🚨' : '⚠️'}</div>
         <h3 style={{ color: '#E0E0E0', marginBottom: '6px' }}>{title}</h3>
         <p style={{ color: '#9E9E9E', fontSize: '13px', marginBottom: '16px' }}>
-          {isCritical ? 'Erro em operação crítica.' : 'Ocorreu um erro inesperado.'}
+          {isCritical ? i18n.t('errorBoundary.criticalError') : i18n.t('errorBoundary.unexpectedErrorGeneric')}
         </p>
 
         {/* ERROR NAME + MESSAGE — always visible */}
@@ -85,7 +86,7 @@ export class ModuleErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoun
         {/* STACK TRACE — collapsible */}
         <details style={{ marginBottom: '12px', textAlign: 'left', color: '#9E9E9E', fontSize: '11px' }}>
           <summary style={{ cursor: 'pointer', marginBottom: '6px', fontSize: '12px' }}>
-            📋 Stack Trace Completo
+            {i18n.t('errorBoundary.stackTraceComplete')}
           </summary>
           <pre style={{
             background: '#0d0d1a', padding: '10px', borderRadius: '6px',
@@ -117,14 +118,14 @@ export class ModuleErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoun
             padding: '10px 24px', borderRadius: '8px', border: 'none',
             background: '#00843D', color: '#fff', cursor: 'pointer', fontWeight: 600,
           }}>
-            Tentar Novamente
+            {i18n.t('errorBoundary.tryAgain')}
           </button>
           {isCritical && (
             <button onClick={() => window.location.reload()} style={{
               padding: '10px 24px', borderRadius: '8px', border: '1px solid #666',
               background: 'transparent', color: '#ccc', cursor: 'pointer',
             }}>
-              Recarregar
+              {i18n.t('errorBoundary.reload')}
             </button>
           )}
         </div>

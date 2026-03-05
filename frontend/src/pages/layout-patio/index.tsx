@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { PaginaLayoutPatioProps } from '../types';
 import type { LinhaPatioInfo, CategoriaPatio, AMV } from '../../types';
 import { SectionHeader, StatusBadge } from '../../components';
@@ -12,6 +13,7 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { usePatio } from '../../hooks/usePatio';
 
 export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.Element {
+  const { t } = useTranslation();
   const { tema, styles, usuarioLogado } = props;
   const { isGestor, isInspetor } = usePermissions(usuarioLogado);
   const { patiosAtivos, criarPatio: criarPatioHook, excluirPatio, renomearPatio, editarCategoriasPatio, editarAmvsPatio } = usePatio();
@@ -367,7 +369,7 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
               <button onClick={() => { setShowCriarPatioModal(false); setNovoPatConfirm(false); }} style={{
                 flex: 1, padding: '10px 20px', borderRadius: 8, border: `1px solid ${tema.cardBorda}`,
                 background: tema.backgroundSecundario, color: tema.texto, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-              }}>Cancelar</button>
+              }}>{t('common.cancel')}</button>
               <button onClick={handleCriarPatio} style={{
                 flex: 1, padding: '10px 20px', borderRadius: 8, border: 'none',
                 background: novoPatConfirm ? '#16a34a' : tema.primaria, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer',
@@ -386,7 +388,7 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
         </div>
       )}
 
-      <SectionHeader title={`Layout do Pátio — ${getYardName(selectedYard)}`} tema={tema} />
+      <SectionHeader title={`${t('yard.title')} — ${getYardName(selectedYard)}`} tema={tema} />
 
       {/* Legenda */}
       <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
@@ -446,7 +448,7 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
                 border: `1px solid ${tema.cardBorda}`, background: 'transparent',
                 color: tema.texto, minHeight: 36,
               }}>
-                Editar Pátio
+                {t('common.edit')}
               </button>
             )}
             {canDeleteYard && !isEditing && (
@@ -455,7 +457,7 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
                 padding: '6px 14px', color: '#ef4444', fontWeight: 600, fontSize: 12,
                 cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, minHeight: 44,
               }}>
-                Excluir Pátio
+                {t('common.delete')}
               </button>
             )}
             {isEditing && (
@@ -465,12 +467,12 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
                   border: '2px solid #007e7a', background: 'rgba(0,126,122,0.1)',
                   color: '#007e7a', minHeight: 36,
                 }}>
-                  Salvar Alterações
+                  {t('common.save')}
                 </button>
                 <button onClick={cancelarEdicao} style={{
                   padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
                   border: `1px solid ${tema.cardBorda}`, background: 'transparent', color: tema.texto, minHeight: 36,
-                }}>Cancelar</button>
+                }}>{t('common.cancel')}</button>
               </>
             )}
           </div>

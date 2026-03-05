@@ -5,6 +5,7 @@
 // ============================================================================
 
 import React, { useState, memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { UseSyncStatusReturn } from '../../hooks/useSyncStatus';
 
 interface SyncIndicatorProps {
@@ -24,6 +25,7 @@ interface SyncIndicatorProps {
 }
 
 export const SyncIndicator = memo<SyncIndicatorProps>(({ sync, tema, compact = false }) => {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
   const pillStyle: React.CSSProperties = {
@@ -81,7 +83,7 @@ export const SyncIndicator = memo<SyncIndicatorProps>(({ sync, tema, compact = f
         <div
           style={pillStyle}
           onClick={() => setExpanded(!expanded)}
-          title={`Sync: ${sync.syncLabel}${sync.lastSync ? ` | Último: ${formatRelativeTime(sync.lastSync)}` : ''}`}
+          title={`Sync: ${sync.syncLabel}${sync.lastSync ? ` | ${t('sync.lastSync', { time: formatRelativeTime(sync.lastSync, t) })}` : ''}`}
         >
           <span style={iconStyle}>{sync.syncIcon}</span>
           {!compact && <span>{sync.syncLabel}</span>}
@@ -106,7 +108,7 @@ export const SyncIndicator = memo<SyncIndicatorProps>(({ sync, tema, compact = f
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <span style={{ fontSize: '14px', fontWeight: 700, color: tema.texto }}>
-                Sincronização
+                {t('sync.title')}
               </span>
               <span style={{
                 fontSize: '11px',
@@ -122,14 +124,14 @@ export const SyncIndicator = memo<SyncIndicatorProps>(({ sync, tema, compact = f
 
             {/* Stats Grid */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
-              <StatBox label="Pendentes" value={sync.pendingCount} color={sync.pendingCount > 0 ? tema.aviso : tema.sucesso} tema={tema} />
-              <StatBox label="Conflitos" value={sync.conflictCount} color={sync.conflictCount > 0 ? tema.perigo : tema.sucesso} tema={tema} />
+              <StatBox label={t('sync.pending')} value={sync.pendingCount} color={sync.pendingCount > 0 ? tema.aviso : tema.sucesso} tema={tema} />
+              <StatBox label={t('sync.conflicts')} value={sync.conflictCount} color={sync.conflictCount > 0 ? tema.perigo : tema.sucesso} tema={tema} />
             </div>
 
             {/* Last Sync */}
             {sync.lastSync && (
               <div style={{ fontSize: '11px', color: tema.textoSecundario, marginBottom: '12px' }}>
-                Última sincronização: {formatRelativeTime(sync.lastSync)}
+                {t('sync.lastSync', { time: formatRelativeTime(sync.lastSync, t) })}
               </div>
             )}
 
@@ -151,7 +153,7 @@ export const SyncIndicator = memo<SyncIndicatorProps>(({ sync, tema, compact = f
             {sync.conflicts.length > 0 && (
               <div style={{ marginBottom: '12px' }}>
                 <div style={{ fontSize: '12px', fontWeight: 600, color: tema.perigo, marginBottom: '6px' }}>
-                  ⚠️ Conflitos para resolução
+                  {t('sync.conflictsToResolve')}
                 </div>
                 {sync.conflicts.slice(0, 3).map((c) => (
                   <div key={c.id} style={{
@@ -163,15 +165,15 @@ export const SyncIndicator = memo<SyncIndicatorProps>(({ sync, tema, compact = f
                     fontSize: '11px',
                     color: tema.texto,
                   }}>
-                    <div>Turno {c.localItem.turno} — {c.localItem.data}</div>
+                    <div>{t('sync.turnShift', { shift: c.localItem.turno, date: c.localItem.data })}</div>
                     <div style={{ color: tema.textoSecundario, marginTop: '2px' }}>
-                      Detectado: {formatRelativeTime(c.detectedAt)}
+                      {t('sync.detected', { time: formatRelativeTime(c.detectedAt, t) })}
                     </div>
                   </div>
                 ))}
                 {sync.conflicts.length > 3 && (
                   <div style={{ fontSize: '11px', color: tema.textoSecundario }}>
-                    +{sync.conflicts.length - 3} mais
+                    {t('sync.more', { count: sync.conflicts.length - 3 })}
                   </div>
                 )}
               </div>
@@ -194,7 +196,7 @@ export const SyncIndicator = memo<SyncIndicatorProps>(({ sync, tema, compact = f
                   cursor: sync.isOnline && sync.pendingCount > 0 ? 'pointer' : 'not-allowed',
                 }}
               >
-                {sync.isSyncing ? 'Sincronizando...' : 'Sincronizar Agora'}
+                {sync.isSyncing ? t('sync.syncingNow') : t('sync.syncNow')}
               </button>
             </div>
           </div>
@@ -237,9 +239,16 @@ StatBox.displayName = 'StatBox';
 
 // ── Utility ─────────────────────────────────────────────────────────────
 
-function formatRelativeTime(iso: string): string {
+function formatRelativeTime(iso: string, t?: (key: string, opts?: Record<string, unknown>) => string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const seconds = Math.floor(diff / 1000);
+
+  if (t) {
+    if (seconds < 60) return t('sync.now');
+    if (seconds < 3600) return t('sync.minutesAgo', { count: Math.floor(seconds / 60) });
+    if (seconds < 86400) return t('sync.hoursAgo', { count: Math.floor(seconds / 3600) });
+    return t('sync.daysAgo', { count: Math.floor(seconds / 86400) });
+  }
 
   if (seconds < 60) return 'agora';
   if (seconds < 3600) return `${Math.floor(seconds / 60)}min atrás`;

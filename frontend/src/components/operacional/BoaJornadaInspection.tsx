@@ -5,6 +5,7 @@
 // ============================================================================
 
 import React, { useState, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BOA_JORNADA_ITEMS, type InspectionItem } from '../../domain/aggregates/LocomotiveInspection';
 
 type BoaJornadaItem = Omit<InspectionItem, 'status' | 'observation'>;
@@ -50,13 +51,22 @@ export interface BoaJornadaResult {
 
 // ── Agrupamento dos itens ───────────────────────────────────────────────
 
-const ITEM_GROUPS: Record<string, { label: string; icon: string }> = {
-  'safety-systems': { label: 'Sistemas de Segurança', icon: '🛡️' },
-  'cabin': { label: 'Cabine e Controles', icon: '🎛️' },
-  'mechanical': { label: 'Mecânica e Estrutura', icon: '⚙️' },
-  'fluids': { label: 'Níveis e Fluidos', icon: '🛢️' },
-  'emergency': { label: 'Emergência e EPIs', icon: '🚨' },
-  'external': { label: 'Inspeção Externa', icon: '🔍' },
+const ITEM_GROUP_ICONS: Record<string, string> = {
+  'safety-systems': '🛡️',
+  'cabin': '🎛️',
+  'mechanical': '⚙️',
+  'fluids': '🛢️',
+  'emergency': '🚨',
+  'external': '🔍',
+};
+
+const ITEM_GROUP_KEYS: Record<string, string> = {
+  'safety-systems': 'boaJornada.safetySystems',
+  'cabin': 'boaJornada.cabinControls',
+  'mechanical': 'boaJornada.mechanical',
+  'fluids': 'boaJornada.fluids',
+  'emergency': 'boaJornada.emergency',
+  'external': 'boaJornada.externalInspection',
 };
 
 function getItemGroup(item: BoaJornadaItem): string {
@@ -78,6 +88,7 @@ export const BoaJornadaInspection: React.FC<BoaJornadaInspectionProps> = ({
   onCancel,
   theme = 'dark',
 }) => {
+  const { t } = useTranslation();
   const isDark = theme === 'dark';
 
   // ── State ─────────────────────────────────────────────────────────
@@ -123,7 +134,7 @@ export const BoaJornadaInspection: React.FC<BoaJornadaInspectionProps> = ({
       if (item.status === 'NOK') {
         const boaJornadaItem = BOA_JORNADA_ITEMS.find(bj => bj.id === item.itemId);
         if (boaJornadaItem?.isSafetyItem) {
-          violations.push(`${boaJornadaItem.description}: NOK — ${item.observation || 'Sem observação'}`);
+          violations.push(`${boaJornadaItem.description}: NOK — ${item.observation || t('boaJornada.noObservation')}`);
         }
       }
     });
@@ -201,11 +212,11 @@ export const BoaJornadaInspection: React.FC<BoaJornadaInspectionProps> = ({
 
   // ── Trigger reason label ──────────────────────────────────────────
   const triggerLabels: Record<string, string> = {
-    origin: '🔧 Origem: Oficina',
-    model: '🚂 Modelo: BB36/DDM',
-    hours_stopped: '⏱️ Parada > 24h',
-    shift_change: '🔄 Troca de turno',
-    manual: '📋 Solicitação manual',
+    origin: t('boaJornada.triggerOrigin'),
+    model: t('boaJornada.triggerModel'),
+    hours_stopped: t('boaJornada.triggerHours'),
+    shift_change: t('boaJornada.triggerShift'),
+    manual: t('boaJornada.triggerManual'),
   };
 
   return (
@@ -222,7 +233,7 @@ export const BoaJornadaInspection: React.FC<BoaJornadaInspectionProps> = ({
         </div>
         <div style={{ flex: 1 }}>
           <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>
-            Inspeção Boa Jornada EFVM
+            {t('boaJornada.inspectionTitle')}
           </h2>
           <p style={{ margin: '2px 0 0', fontSize: '12px', opacity: 0.7 }}>
             PGS-005023 Rev.01 • {BOA_JORNADA_ITEMS.length} itens •
@@ -242,7 +253,7 @@ export const BoaJornadaInspection: React.FC<BoaJornadaInspectionProps> = ({
       <div style={{ marginBottom: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
           <span style={{ fontSize: '12px', fontWeight: 600 }}>
-            Progresso: {progress.answered}/{progress.total}
+            {t('boaJornada.progress', { answered: progress.answered, total: progress.total })}
           </span>
           <span style={{ fontSize: '12px', fontWeight: 700, color: '#FFB800' }}>
             {progress.percent}%
@@ -271,18 +282,18 @@ export const BoaJornadaInspection: React.FC<BoaJornadaInspectionProps> = ({
         border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
       }}>
         <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: 700, opacity: 0.8 }}>
-          📄 Dados do Trem
+          {t('boaJornada.trainData')}
         </h4>
         <div className="efvm360-grid-responsive-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
           {[
-            { key: 'trainPrefix', label: 'Prefixo', placeholder: 'Ex: XYZ-001' },
-            { key: 'ospl', label: 'OSPL', placeholder: 'Nº OSPL' },
-            { key: 'formation', label: 'Formação', placeholder: 'Ex: 2+1' },
-            { key: 'atcConfig', label: 'Config. ATC', placeholder: 'Config.' },
-            { key: 'wagonCount', label: 'Qtd. Vagões', placeholder: '0', type: 'number' },
-            { key: 'totalWeight', label: 'Peso Total (t)', placeholder: '0', type: 'number' },
-            { key: 'gradient', label: 'Gradiente', placeholder: 'Ex: 1.2%' },
-            { key: 'vmaTrain', label: 'VMA Trem (km/h)', placeholder: '0', type: 'number' },
+            { key: 'trainPrefix', label: t('boaJornada.prefix'), placeholder: t('boaJornada.prefixPlaceholder') },
+            { key: 'ospl', label: t('boaJornada.ospl'), placeholder: t('boaJornada.osplPlaceholder') },
+            { key: 'formation', label: t('boaJornada.formation'), placeholder: t('boaJornada.formationPlaceholder') },
+            { key: 'atcConfig', label: t('boaJornada.atcConfig'), placeholder: t('boaJornada.atcConfigPlaceholder') },
+            { key: 'wagonCount', label: t('boaJornada.wagonCount'), placeholder: '0', type: 'number' },
+            { key: 'totalWeight', label: t('boaJornada.totalWeight'), placeholder: '0', type: 'number' },
+            { key: 'gradient', label: t('boaJornada.gradient'), placeholder: t('boaJornada.gradientPlaceholder') },
+            { key: 'vmaTrain', label: t('boaJornada.vmaTrain'), placeholder: '0', type: 'number' },
           ].map(field => (
             <div key={field.key}>
               <label style={{ fontSize: '11px', fontWeight: 600, opacity: 0.6 }}>
@@ -312,7 +323,7 @@ export const BoaJornadaInspection: React.FC<BoaJornadaInspectionProps> = ({
       {/* ── Tabs de grupos ──────────────────────────────────────────── */}
       <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', flexWrap: 'wrap' }}>
         {groupKeys.map((key, idx) => {
-          const group = ITEM_GROUPS[key] || { label: key, icon: '📋' };
+          const group = { label: ITEM_GROUP_KEYS[key] ? t(ITEM_GROUP_KEYS[key]) : key, icon: ITEM_GROUP_ICONS[key] || '📋' };
           const groupItems = groupedItems[key];
           const answered = groupItems.filter(i => i.state.status !== null).length;
           const hasNOK = groupItems.some(i => i.state.status === 'NOK' && i.isSafetyItem);
@@ -368,7 +379,7 @@ export const BoaJornadaInspection: React.FC<BoaJornadaInspectionProps> = ({
                       fontWeight: 700, background: '#f4433620', color: '#f44336',
                       border: '1px solid #f4433640',
                     }}>
-                      SEGURANÇA
+                      {t('boaJornada.safety')}
                     </span>
                   )}
                 </div>
@@ -398,7 +409,7 @@ export const BoaJornadaInspection: React.FC<BoaJornadaInspectionProps> = ({
               <div style={{ marginTop: '10px' }}>
                 <input
                   type="text"
-                  placeholder={`Descrever anomalia: ${item.description}`}
+                  placeholder={t('boaJornada.describeAnomaly', { item: item.description })}
                   value={item.state.observation}
                   onChange={(e) => handleObservation(item.id, e.target.value)}
                   style={{
@@ -415,7 +426,7 @@ export const BoaJornadaInspection: React.FC<BoaJornadaInspectionProps> = ({
                   <p style={{
                     margin: '6px 0 0', fontSize: '11px', color: '#f44336', fontWeight: 600,
                   }}>
-                    🚫 Item de segurança NOK — circulação será BLOQUEADA
+                    {t('boaJornada.safetyItemBlocked')}
                   </p>
                 )}
               </div>
@@ -432,10 +443,10 @@ export const BoaJornadaInspection: React.FC<BoaJornadaInspectionProps> = ({
           borderRadius: '12px', padding: '16px', marginBottom: '20px',
         }}>
           <h4 style={{ margin: '0 0 8px', fontSize: '14px', fontWeight: 700, color: '#f44336' }}>
-            🚫 CIRCULAÇÃO BLOQUEADA
+            {t('boaJornada.circulationBlocked')}
           </h4>
           <p style={{ margin: '0 0 8px', fontSize: '12px', color: '#f44336' }}>
-            {safetyViolations.length} item(ns) de segurança com falha:
+            {t('boaJornada.safetyFailures', { count: safetyViolations.length })}
           </p>
           {safetyViolations.map((v, i) => (
             <p key={i} style={{ margin: '2px 0', fontSize: '11px', color: '#ef5350' }}>
@@ -457,7 +468,7 @@ export const BoaJornadaInspection: React.FC<BoaJornadaInspectionProps> = ({
             checked={helpDeskCalled}
             onChange={(e) => setHelpDeskCalled(e.target.checked)}
           />
-          📞 Help Desk acionado
+          {t('boaJornada.helpDeskCalled')}
         </label>
         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px' }}>
           <input
@@ -465,7 +476,7 @@ export const BoaJornadaInspection: React.FC<BoaJornadaInspectionProps> = ({
             checked={interventionRequired}
             onChange={(e) => setInterventionRequired(e.target.checked)}
           />
-          🔧 Intervenção necessária
+          {t('boaJornada.interventionRequired')}
         </label>
       </div>
 
@@ -481,7 +492,7 @@ export const BoaJornadaInspection: React.FC<BoaJornadaInspectionProps> = ({
             fontWeight: 600, fontSize: '14px', cursor: 'pointer',
           }}
         >
-          Cancelar
+          {t('common.cancel')}
         </button>
         <button
           onClick={handleComplete}
@@ -500,12 +511,12 @@ export const BoaJornadaInspection: React.FC<BoaJornadaInspectionProps> = ({
           }}
         >
           {progress.answered < progress.total
-            ? `Faltam ${progress.total - progress.answered} itens`
+            ? t('boaJornada.itemsRemaining', { count: progress.total - progress.answered })
             : overallResult === 'rejected'
-              ? '🚫 Registrar — Circulação Bloqueada'
+              ? t('boaJornada.registerBlocked')
               : overallResult === 'conditional'
-                ? '⚠️ Registrar — Aprovação Condicional'
-                : '✅ Registrar — Aprovado'}
+                ? t('boaJornada.registerConditional')
+                : t('boaJornada.registerApproved')}
         </button>
       </div>
     </div>

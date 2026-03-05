@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { useState, useMemo, useEffect, type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { TemaComputed } from '../types';
 import type { Usuario } from '../../types';
 import {
@@ -37,6 +38,7 @@ function generateMockGerenteData(): GerenteData {
 }
 
 export default function DashboardGerente({ tema }: Props) {
+  const { t } = useTranslation();
   const [isLive, setIsLive] = useState(false);
   const [data, setData] = useState<GerenteData>(() => generateMockGerenteData());
 
@@ -80,22 +82,22 @@ export default function DashboardGerente({ tema }: Props) {
   return (
     <div style={{ padding: 20, maxWidth: 1000, margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <h2 style={{ color: tema.texto, marginBottom: 4 }}>Dashboard Gerencial</h2>
-        {!isLive && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 8, background: 'rgba(249,115,22,0.1)', color: '#f97316', fontWeight: 600 }}>Modo Demo</span>}
+        <h2 style={{ color: tema.texto, marginBottom: 4 }}>{t('dashboard.gerente.title')}</h2>
+        {!isLive && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 8, background: 'rgba(249,115,22,0.1)', color: '#f97316', fontWeight: 600 }}>{t('dashboard.demoMode')}</span>}
       </div>
-      <div style={{ color: tema.textoSecundario, fontSize: 14, marginBottom: 20 }}>Visao consolidada da regional</div>
+      <div style={{ color: tema.textoSecundario, fontSize: 14, marginBottom: 20 }}>{t('dashboard.gerente.subtitle')}</div>
 
       {/* KPI Cards */}
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 24 }}>
-        {kpiCard('Total Patios', summaries.length)}
-        {kpiCard('Compliance Media', `${avgCompliance}%`, STATUS_COLOR[getComplianceStatus(avgCompliance)])}
-        {kpiCard('Passagens 30d', totalHandovers)}
-        {kpiCard('Anomalias 30d', totalAnomalies, totalAnomalies > 30 ? '#ef4444' : undefined)}
+        {kpiCard(t('dashboard.gerente.totalYards'), summaries.length)}
+        {kpiCard(t('dashboard.gerente.avgCompliance'), `${avgCompliance}%`, STATUS_COLOR[getComplianceStatus(avgCompliance)])}
+        {kpiCard(t('dashboard.gerente.handovers30d'), totalHandovers)}
+        {kpiCard(t('dashboard.gerente.anomalies30d'), totalAnomalies, totalAnomalies > 30 ? '#ef4444' : undefined)}
       </div>
 
       {/* Yard Ranking */}
       <div style={{ ...card, marginBottom: 24 }}>
-        <h3 style={{ color: tema.texto, marginTop: 0 }}>Ranking de Patios por Compliance</h3>
+        <h3 style={{ color: tema.texto, marginTop: 0 }}>{t('dashboard.gerente.yardRanking')}</h3>
         {summaries
           .sort((a, b) => b.compliance30d - a.compliance30d)
           .map((ys, i) => (
@@ -130,14 +132,14 @@ export default function DashboardGerente({ tema }: Props) {
             </div>
           ))}
         <div style={{ color: tema.textoSecundario, fontSize: 11, marginTop: 8 }}>
-          Linha vertical = Meta {TARGET}%
+          {t('dashboard.gerente.targetLine', { target: TARGET })}
         </div>
       </div>
 
       {/* SLA Alerts */}
       {belowTarget.length > 0 && (
         <div style={{ ...card, marginBottom: 24, borderColor: '#ef4444' }}>
-          <h3 style={{ color: '#ef4444', marginTop: 0 }}>Patios Abaixo da Meta</h3>
+          <h3 style={{ color: '#ef4444', marginTop: 0 }}>{t('dashboard.gerente.belowTarget')}</h3>
           {belowTarget.map(ys => (
             <div key={ys.yard} style={{
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -150,7 +152,7 @@ export default function DashboardGerente({ tema }: Props) {
                 </span>
               </div>
               <span style={{ color: '#ef4444', fontSize: 13, fontWeight: 600 }}>
-                {ys.anomalies30d} anomalias
+                {t('dashboard.gerente.anomaliesCount', { count: ys.anomalies30d })}
               </span>
             </div>
           ))}
@@ -159,12 +161,12 @@ export default function DashboardGerente({ tema }: Props) {
 
       {/* Monthly Trend */}
       <div style={card}>
-        <h3 style={{ color: tema.texto, marginTop: 0 }}>Tendencia Mensal (3 meses)</h3>
+        <h3 style={{ color: tema.texto, marginTop: 0 }}>{t('dashboard.gerente.monthlyTrend')}</h3>
         <div style={{ display: 'flex', gap: 16 }}>
           {[
-            { label: '3 meses atras', days: [60, 90] },
-            { label: '2 meses atras', days: [30, 60] },
-            { label: 'Ultimo mes', days: [0, 30] },
+            { label: t('dashboard.gerente.threeMonthsAgo'), days: [60, 90] },
+            { label: t('dashboard.gerente.twoMonthsAgo'), days: [30, 60] },
+            { label: t('dashboard.gerente.lastMonth'), days: [0, 30] },
           ].map(period => {
             const periodStats = allStats.filter(s => {
               const d = new Date(s.date);

@@ -10,6 +10,7 @@ import type { TemaEstilos, ConfiguracaoSistema, Usuario } from '../../types';
 import { OnlineStatusInline } from './OnlineIndicator';
 import { NAV_ID_TO_PATH, PATH_TO_NAV_ID, ROUTES } from '../../router/routes';
 import { useI18n } from '../../hooks/useI18n';
+import { LanguageSwitcher } from '../LanguageSwitcher';
 
 import { getHierarchyLevelForRole } from '../../domain/aggregates/UserAggregate';
 import { HierarchyLevel } from '../../domain/contracts';
@@ -183,7 +184,9 @@ export const TopNavbar = memo<TopNavbarProps>(({
         })}
       </nav>
 
-      {/* ── RIGHT: Avatar (only dropdown in the system) ── */}
+      {/* ── RIGHT: Language + Avatar ── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        <LanguageSwitcher />
       <div ref={avatarRef} data-tour="user-menu" style={{ position: 'relative', flexShrink: 0 }}>
         {usuarioLogado && (
           <>
@@ -302,6 +305,7 @@ export const TopNavbar = memo<TopNavbarProps>(({
             )}
           </>
         )}
+      </div>
       </div>
 
       <style>{`@keyframes efvm360FadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}`}</style>

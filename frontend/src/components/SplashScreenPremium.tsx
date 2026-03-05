@@ -3,6 +3,7 @@
 // Theme-aware | Indicador circular único | Continuidade visual total
 // ============================================================================
 import { useState, useEffect, memo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   duration?: number;
@@ -10,15 +11,16 @@ interface Props {
   isDark?: boolean;
 }
 
-const MSGS = [
-  'Carregando Sistema Operacional...',
-  'Verificando integridade dos dados...',
-  'Preparando ambiente operacional...',
-  'Carregando módulos de segurança...',
-  'Estabelecendo conexão segura...',
-];
-
 export const SplashScreenPremium = memo<Props>(({ duration = 4000, onComplete, isDark }) => {
+  const { t } = useTranslation();
+
+  const MSGS = [
+    t('splash.loadingSystem'),
+    t('splash.verifyingData'),
+    t('splash.preparingEnv'),
+    t('splash.loadingSecurity'),
+    t('splash.establishingConn'),
+  ];
   const [p, setP] = useState(0);
   const [m, setM] = useState(0);
   const [exit, setExit] = useState(false);
@@ -70,10 +72,10 @@ export const SplashScreenPremium = memo<Props>(({ duration = 4000, onComplete, i
         </div>
         <div style={{ width: 44, height: 3, margin: '0 auto 8px', background: '#69be28', borderRadius: 2 }} />
         <div style={{ fontSize: 17, fontWeight: 600, color: txt, letterSpacing: 0.8, marginBottom: 4 }}>
-          GESTÃO DE TROCA DE TURNO
+          {t('splash.shiftManagement')}
         </div>
         <div style={{ fontSize: 13, color: txt2, marginBottom: 32 }}>
-          Sistema Corporativo de Missão Crítica
+          {t('splash.missionCritical')}
         </div>
 
         {/* Circular progress */}
@@ -97,7 +99,7 @@ export const SplashScreenPremium = memo<Props>(({ duration = 4000, onComplete, i
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: txt2 }}>
             <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#69be28',
               boxShadow: '0 0 6px #69be28', animation: 'efvmPulse 2s infinite' }} />
-            Sistema Online
+            {t('common.systemOnline')}
           </div>
           <span style={{ fontSize: 10, color: txt2 }}>v3.2</span>
         </div>

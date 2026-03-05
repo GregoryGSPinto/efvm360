@@ -6,6 +6,7 @@
 // ============================================================================
 
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { TemaEstilos, HistoricoDSS } from '../../types';
 import { useDSS } from '../../hooks/useDSS';
 import AITemasDSS from './AITemasDSS';
@@ -30,6 +31,7 @@ interface PaginaDSSProps {
 }
 
 export const PaginaDSS: React.FC<PaginaDSSProps> = ({ tema, styles, onVoltar, sugestaoDSSAnterior }) => {
+  const { t } = useTranslation();
   const {
     dadosDSS,
     historicoDSS,
@@ -240,12 +242,12 @@ export const PaginaDSS: React.FC<PaginaDSSProps> = ({ tema, styles, onVoltar, su
             marginBottom: '12px',
           }}
         >
-          ← Voltar
+          {t('common.back')}
         </button>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <h1 style={{ color: tema.texto, fontSize: '22px', fontWeight: 700, margin: 0 }}>
-              DSS - Dialogo de Saude, Seguranca e Meio Ambiente
+              {t('dss.titulo')}
             </h1>
             <p style={{ color: tema.textoSecundario, fontSize: '12px', margin: '4px 0 0' }}>
               PRO-041945 Rev. 02 - Espaco de dialogo aberto e participativo
@@ -261,7 +263,7 @@ export const PaginaDSS: React.FC<PaginaDSSProps> = ({ tema, styles, onVoltar, su
               color: mostrarHistorico ? '#fff' : tema.texto,
             }}
           >
-            Historico ({historicoDSS.length})
+            {t('historico.titulo')} ({historicoDSS.length})
           </button>
         </div>
       </div>
@@ -451,7 +453,7 @@ export const PaginaDSS: React.FC<PaginaDSSProps> = ({ tema, styles, onVoltar, su
           </div>
           
           <div style={{ gridColumn: '1 / -1' }}>
-            <label style={styles.label}>Facilitador *</label>
+            <label style={styles.label}>{t('dss.facilitador')} *</label>
             <input
               type="text"
               style={styles.input}
@@ -502,7 +504,7 @@ export const PaginaDSS: React.FC<PaginaDSSProps> = ({ tema, styles, onVoltar, su
 
       {/* CARD 2 - Tema do DSS */}
       <div style={cardStyle}>
-        <h3 style={cardTitleStyle}>🎯 2. Tema do DSS (Obrigatório)</h3>
+        <h3 style={cardTitleStyle}>{t('dss.tema')}</h3>
 
         {/* CAMPO DE PESQUISA DE TEMAS */}
         <div style={{ marginBottom: '16px', position: 'relative' }}>
@@ -843,7 +845,7 @@ export const PaginaDSS: React.FC<PaginaDSSProps> = ({ tema, styles, onVoltar, su
             />
           </div>
           <div>
-            <label style={styles.label}>Observações gerais (opcional)</label>
+            <label style={styles.label}>{t('dss.observacoes')}</label>
             <textarea
               style={styles.textarea}
               placeholder="Outras observações..."
@@ -908,7 +910,7 @@ export const PaginaDSS: React.FC<PaginaDSSProps> = ({ tema, styles, onVoltar, su
             <div style={{ display: 'flex', gap: '8px', marginTop: '10px', justifyContent: 'flex-end' }}>
               <button type="button" onClick={() => { setMostrarFormExperiencia(false); setNovaExperiencia(''); }}
                 style={{ ...styles.button, padding: '8px 16px', background: tema.buttonInativo, color: tema.texto, border: `1px solid ${tema.cardBorda}`, fontSize: '12px' }}>
-                Cancelar
+                {t('common.cancel')}
               </button>
               <button type="button"
                 onClick={() => {
@@ -1006,7 +1008,7 @@ export const PaginaDSS: React.FC<PaginaDSSProps> = ({ tema, styles, onVoltar, su
             fontWeight: 700,
           }}
         >
-          ✓ Registrar DSS
+          {t('common.save')}
         </button>
       </div>
     </div>

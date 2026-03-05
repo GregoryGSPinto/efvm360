@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { PaginaHistoricoProps } from '../types';
 import { SectionHeader, Card } from '../../components';
 import { obterLogsPorMatricula, obterResumoAtividades } from '../../services/logging';
@@ -11,6 +12,7 @@ import type { LogEntry } from '../../services/logging';
 import { TEMAS_DSS_SUGERIDOS } from '../../utils/constants';
 
 export default function PaginaHistorico(props: PaginaHistoricoProps): JSX.Element {
+  const { t } = useTranslation();
   const {
     tema, styles, historicoTurnos, historicoDSS, usuarioLogado,
     secaoHistoricoAtiva, setSecaoHistoricoAtiva, filtroTemaHistorico,
@@ -196,9 +198,9 @@ export default function PaginaHistorico(props: PaginaHistoricoProps): JSX.Elemen
 
     // Menu de navegação do Histórico
     const menuHistorico = [
-      { id: 'resumo' as const, icon: '📊', label: 'Meu Resumo' },
-      { id: 'atividades' as const, icon: '📋', label: 'Atividades Recentes' },
-      { id: 'dss-temas' as const, icon: '📚', label: 'DSS por Temas' },
+      { id: 'resumo' as const, icon: '📊', label: t('historico.passagens') },
+      { id: 'atividades' as const, icon: '📋', label: t('historico.atividadesSistema') },
+      { id: 'dss-temas' as const, icon: '📚', label: t('historico.dssHistorico') },
       { id: 'rankings' as const, icon: '🏆', label: 'Rankings' },
     ];
 
@@ -800,7 +802,7 @@ export default function PaginaHistorico(props: PaginaHistoricoProps): JSX.Elemen
     if (!usuarioLogado) {
       return (
         <div style={{ padding: 40, textAlign: 'center', color: tema.textoSecundario }}>
-          Carregando histórico...
+          {t('common.loading')}
         </div>
       );
     }
@@ -808,7 +810,7 @@ export default function PaginaHistorico(props: PaginaHistoricoProps): JSX.Elemen
     // ========== RENDER PRINCIPAL ==========
     return (
       <>
-        <SectionHeader title="🗂️ Histórico" tema={tema} />
+        <SectionHeader title={t('historico.titulo')} tema={tema} />
 
         {/* Layout com menu lateral */}
         <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>

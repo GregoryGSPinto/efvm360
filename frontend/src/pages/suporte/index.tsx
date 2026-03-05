@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { TemaEstilos, ConfiguracaoSistema, Usuario } from '../../types';
 import type { StylesObject } from '../../hooks/useStyles';
 import { Card } from '../../components';
@@ -84,6 +85,7 @@ const SEGURANCA = [
 ];
 
 export default function PaginaSuporte({ tema, styles }: Props) {
+  const { t } = useTranslation();
   const [secao, setSecao] = useState<'credenciais' | 'arquitetura' | 'seguranca' | 'erros'>('credenciais');
   const [refreshKey, setRefreshKey] = useState(0);
   const [pagina, setPagina] = useState(0);
@@ -168,7 +170,7 @@ export default function PaginaSuporte({ tema, styles }: Props) {
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
         <h1 style={{ color: tema.texto, fontSize: 22, fontWeight: 700, margin: '0 0 4px' }}>
-          Painel de Suporte
+          {t('suporte.titulo')}
         </h1>
         <p style={{ color: tema.textoSecundario, fontSize: 13, margin: 0 }}>
           Credenciais demo, arquitetura do sistema, seguranca e monitoramento de erros

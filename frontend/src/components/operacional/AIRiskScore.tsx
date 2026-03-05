@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { TemaEstilos, DadosFormulario } from '../../types';
 import { useAI } from '../../hooks/useAI';
 import { PROMPTS } from '../../services/aiService';
@@ -139,6 +140,7 @@ function GaugeCircle({ score, size = 100 }: { score: number; size?: number }) {
 // ── Component ───────────────────────────────────────────────────────────
 
 export default function AIRiskScore({ tema, dadosFormulario, patio }: AIRiskScoreProps) {
+  const { t } = useTranslation();
   const { score, fatores } = useMemo(() => calcularRisco(dadosFormulario), [dadosFormulario]);
   const ai = useAI<RiskNarrativeResponse>();
   const [showFactors, setShowFactors] = useState(false);
@@ -160,7 +162,7 @@ export default function AIRiskScore({ tema, dadosFormulario, patio }: AIRiskScor
   }, [score > 0]);
 
   const isDark = tema.card === '#1e1e1e';
-  const nivelLabel = score <= 30 ? 'Baixo' : score <= 60 ? 'Moderado' : 'Alto';
+  const nivelLabel = score <= 30 ? t('aiRisk.low') : score <= 60 ? t('aiRisk.moderate') : t('aiRisk.high');
   const nivelColor = score <= 30 ? '#69be28' : score <= 60 ? '#edb111' : '#dc2626';
 
   return (
@@ -175,7 +177,7 @@ export default function AIRiskScore({ tema, dadosFormulario, patio }: AIRiskScor
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
         <SparkleIcon size={16} />
-        <span style={{ fontSize: 13, fontWeight: 700, color: tema.texto }}>Risco Operacional do Turno</span>
+        <span style={{ fontSize: 13, fontWeight: 700, color: tema.texto }}>{t('aiRisk.title')}</span>
         <span style={{
           marginLeft: 'auto', fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 8,
           color: nivelColor, background: `${nivelColor}15`,
@@ -195,15 +197,15 @@ export default function AIRiskScore({ tema, dadosFormulario, patio }: AIRiskScor
             </p>
           ) : ai.status === 'loading' ? (
             <p style={{ fontSize: 12, color: tema.textoSecundario, fontStyle: 'italic', margin: 0 }}>
-              Analisando risco...
+              {t('aiRisk.analyzing')}
             </p>
           ) : score === 0 ? (
             <p style={{ fontSize: 13, color: tema.textoSecundario, margin: 0 }}>
-              Nenhum fator de risco detectado. Preencha a passagem para ativar a análise.
+              {t('aiRisk.noRisk')}
             </p>
           ) : (
             <p style={{ fontSize: 13, color: tema.textoSecundario, margin: 0 }}>
-              {fatores.length} fator(es) identificado(s).
+              {t('aiRisk.factorsFound', { count: fatores.length })}
             </p>
           )}
         </div>
@@ -220,7 +222,7 @@ export default function AIRiskScore({ tema, dadosFormulario, patio }: AIRiskScor
               color: tema.textoSecundario, fontWeight: 500,
             }}
           >
-            {showFactors ? 'Ocultar fatores' : `Ver ${fatores.length} fator(es) de risco`}
+            {showFactors ? t('aiRisk.hideFactors') : t('aiRisk.showFactors', { count: fatores.length })}
           </button>
 
           {showFactors && (
@@ -249,7 +251,7 @@ export default function AIRiskScore({ tema, dadosFormulario, patio }: AIRiskScor
 
       {/* Disclaimer */}
       <div style={{ marginTop: 10, fontSize: 10, color: tema.textoSecundario, fontStyle: 'italic', textAlign: 'center' }}>
-        Sugestão gerada por IA — confirme com sua experiência operacional
+        {t('aiRisk.disclaimer')}
       </div>
     </div>
   );

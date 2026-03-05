@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { memo, useState, useRef, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAdamBotContext } from './AdamBotContext';
 import { AdamBotPanel } from './AdamBotPanel';
 import { IMAGENS } from '../../assets/images';
@@ -22,6 +23,7 @@ const STORAGE_KEY_POSITION = 'adambot-position';
 const DEFAULT_POSITION: WidgetPosition = { x: -1, y: -1 }; // -1 = default corner
 
 const AdamBotInner = ({ tema }: AdamBotProps) => {
+  const { t } = useTranslation();
   const { isOpen, toggle, unreadCount } = useAdamBotContext();
 
   // ── Drag state ──────────────────────────────────────────────────────
@@ -127,7 +129,7 @@ const AdamBotInner = ({ tema }: AdamBotProps) => {
       >
         <button
           type="button"
-          aria-label={isOpen ? 'Fechar assistente Adam' : 'Abrir assistente Adam (arraste para mover)'}
+          aria-label={isOpen ? t('adambot.closeAssistant') : t('adambot.openAssistant')}
           style={{
             width: '56px',
             height: '56px',
@@ -149,7 +151,7 @@ const AdamBotInner = ({ tema }: AdamBotProps) => {
             if (!isDragging) toggle();
             e.stopPropagation();
           }}
-          title="AdamBot - IA Central EFVM360 (arraste para mover)"
+          title={t('adambot.dragToMove')}
         >
           <img
             src={IMAGENS.adamboot}

@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { useState, useMemo, useCallback, useEffect, type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { TemaComputed, StylesObject } from '../types';
 import type { ConfiguracaoSistema, Usuario } from '../../types';
 import type { InterYardHandover, InterYardStatus, ChecklistItem } from '../../domain/aggregates/InterYardHandover';
@@ -85,6 +86,7 @@ interface Props {
 // ── Component ───────────────────────────────────────────────────────────
 
 function PaginaInterYard({ tema, usuarioLogado }: Props) {
+  const { t } = useTranslation();
   const [handovers, setHandovers] = useState<InterYardHandover[]>(loadHandovers);
   const [view, setView] = useState<'list' | 'create' | 'detail'>('list');
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -264,7 +266,7 @@ function PaginaInterYard({ tema, usuarioLogado }: Props) {
   if (view === 'create') {
     return (
       <div style={{ padding: 20, maxWidth: 600, margin: '0 auto' }}>
-        <h2 style={{ color: tema.texto, marginBottom: 20 }}>Nova Passagem Inter-Patio</h2>
+        <h2 style={{ color: tema.texto, marginBottom: 20 }}>{t('interPatio.titulo')}</h2>
         <div style={card}>
           <label style={{ color: tema.textoSecundario, fontSize: 13, display: 'block', marginBottom: 4 }}>
             Codigo da Composicao
@@ -288,8 +290,8 @@ function PaginaInterYard({ tema, usuarioLogado }: Props) {
           </select>
 
           <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
-            <button style={btn('#007e7a')} onClick={handleCreate}>Criar Handover</button>
-            <button style={btn('#6b7280')} onClick={() => setView('list')}>Cancelar</button>
+            <button style={btn('#007e7a')} onClick={handleCreate}>{t('common.save')}</button>
+            <button style={btn('#6b7280')} onClick={() => setView('list')}>{t('common.cancel')}</button>
           </div>
         </div>
       </div>
@@ -441,7 +443,7 @@ function PaginaInterYard({ tema, usuarioLogado }: Props) {
     <div style={{ padding: 20, maxWidth: 700, margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <h2 style={{ color: tema.texto, margin: 0 }}>Passagens Inter-Patio</h2>
+          <h2 style={{ color: tema.texto, margin: 0 }}>{t('interPatio.titulo')}</h2>
           {!isLive && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 8, background: 'rgba(249,115,22,0.1)', color: '#f97316', fontWeight: 600 }}>Offline</span>}
         </div>
         <button style={btn('#007e7a')} onClick={() => setView('create')}>

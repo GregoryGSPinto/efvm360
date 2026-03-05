@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { TemaComputed, StylesObject } from '../types';
 import type { ConfiguracaoSistema, Usuario } from '../../types';
 import { getHierarchyLevelForRole } from '../../domain/aggregates/UserAggregate';
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export default function DashboardRouter({ tema, usuarioLogado }: Props) {
+  const { t } = useTranslation();
   const level = useMemo(() => {
     if (!usuarioLogado) return HierarchyLevel.OPERATIVE;
     return getHierarchyLevelForRole(usuarioLogado.funcao);
@@ -28,7 +30,7 @@ export default function DashboardRouter({ tema, usuarioLogado }: Props) {
   if (!usuarioLogado) {
     return (
       <div style={{ padding: 40, textAlign: 'center', color: tema.textoSecundario }}>
-        Carregando dashboard...
+        {t('dashboard.loading')}
       </div>
     );
   }

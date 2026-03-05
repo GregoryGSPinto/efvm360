@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { memo, useRef, useEffect, useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAdamBotContext } from './AdamBotContext';
 import { isTTSSupported, adamFalar, adamCalar, adamFalando, sttDisponivel } from './AdamBotVoice';
 import { IMAGENS } from '../../assets/images';
@@ -19,6 +20,7 @@ function formatBold(text: string): string {
 }
 
 const AdamBotPanelInner = ({ tema, fabPosition }: AdamBotPanelProps) => {
+  const { t } = useTranslation();
   const {
     isOpen, messages, voiceOn, isListening, sugestoes, notifications, input,
     setInput, close, sendMessage, toggleVoice, startListening, stopListening,
@@ -160,13 +162,13 @@ const AdamBotPanelInner = ({ tema, fabPosition }: AdamBotPanelProps) => {
         />
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 700, color: '#fff', fontSize: '14px' }}>AdamBot</div>
-          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)' }}>Assistente EFVM360</div>
+          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)' }}>{t('adambot.assistant')}</div>
         </div>
         {isTTSSupported && (
           <button
             type="button"
             onClick={toggleVoice}
-            aria-label={voiceOn ? 'Desativar voz' : 'Ativar voz'}
+            aria-label={voiceOn ? t('adambot.deactivateVoice') : t('adambot.activateVoice')}
             style={{
               background: voiceOn ? 'rgba(255,255,255,0.25)' : 'transparent',
               border: '1px solid rgba(255,255,255,0.3)',
@@ -181,8 +183,8 @@ const AdamBotPanelInner = ({ tema, fabPosition }: AdamBotPanelProps) => {
           <button
             type="button"
             onClick={handleLerTudo}
-            aria-label={adamFalando() ? 'Parar leitura' : 'Ler todas as mensagens'}
-            title={adamFalando() ? 'Parar leitura' : 'Ler tudo'}
+            aria-label={adamFalando() ? t('adambot.stopReading') : t('adambot.readAll')}
+            title={adamFalando() ? t('adambot.stopReading') : t('adambot.readAllShort')}
             style={{
               background: 'transparent', border: '1px solid rgba(255,255,255,0.3)',
               borderRadius: '8px', padding: '6px 8px', cursor: 'pointer',
@@ -195,7 +197,7 @@ const AdamBotPanelInner = ({ tema, fabPosition }: AdamBotPanelProps) => {
         <button
           type="button"
           onClick={clearHistory}
-          aria-label="Limpar conversa"
+          aria-label={t('adambot.clearConversation')}
           style={{
             background: 'transparent', border: '1px solid rgba(255,255,255,0.3)',
             borderRadius: '8px', padding: '6px 8px', cursor: 'pointer',
@@ -207,7 +209,7 @@ const AdamBotPanelInner = ({ tema, fabPosition }: AdamBotPanelProps) => {
         <button
           type="button"
           onClick={close}
-          aria-label="Fechar chat"
+          aria-label={t('adambot.closeChat')}
           style={{
             background: 'transparent', border: '1px solid rgba(255,255,255,0.3)',
             borderRadius: '8px', padding: '6px 8px', cursor: 'pointer',
@@ -288,7 +290,7 @@ const AdamBotPanelInner = ({ tema, fabPosition }: AdamBotPanelProps) => {
                 <button
                   type="button"
                   onClick={() => handleFalarMensagem(msg.text)}
-                  title="Ouvir esta mensagem"
+                  title={t('adambot.listenMessage')}
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer',
                     fontSize: '13px', padding: '1px 4px', opacity: 0.5,
@@ -336,7 +338,7 @@ const AdamBotPanelInner = ({ tema, fabPosition }: AdamBotPanelProps) => {
         <input
           ref={inputRef}
           type="text"
-          placeholder="Pergunte ao Adam..."
+          placeholder={t('adambot.placeholder')}
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -354,8 +356,8 @@ const AdamBotPanelInner = ({ tema, fabPosition }: AdamBotPanelProps) => {
             onMouseUp={stopListening}
             onTouchStart={startListening}
             onTouchEnd={stopListening}
-            aria-label={isListening ? 'Ouvindo...' : 'Falar com AdamBot'}
-            title={isListening ? 'Ouvindo...' : 'Falar com AdamBot'}
+            aria-label={isListening ? t('adambot.listening') : t('adambot.speakToAdam')}
+            title={isListening ? t('adambot.listening') : t('adambot.speakToAdam')}
             style={{
               width: '44px', height: '44px', borderRadius: '50%',
               border: isListening ? '2px solid #ef4444' : `1px solid ${tema.cardBorda}`,
@@ -374,7 +376,7 @@ const AdamBotPanelInner = ({ tema, fabPosition }: AdamBotPanelProps) => {
         <button
           type="button"
           onClick={() => sendMessage()}
-          aria-label="Enviar mensagem"
+          aria-label={t('adambot.sendMessage')}
           style={{
             width: '40px', height: '40px', borderRadius: '50%',
             border: 'none', cursor: 'pointer', fontSize: '18px',

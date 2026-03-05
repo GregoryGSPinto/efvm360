@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { LinhaPatio, StatusLinha, TemaEstilos } from '../../types';
 import type { StylesObject } from '../../hooks/useStyles';
 
@@ -19,16 +20,18 @@ export const TabelaPatio = memo<TabelaPatioProps>(({
   onUpdate,
   styles,
   tema,
-}) => (
+}) => {
+  const { t } = useTranslation();
+  return (
   <div style={{ overflowX: 'auto' }}>
     <table style={styles.table}>
       <thead>
         <tr>
-          <th style={styles.th}>Linha</th>
-          <th style={styles.th}>Status</th>
-          <th style={styles.th}>Prefixo</th>
-          <th style={styles.th}>Vagões</th>
-          <th style={styles.th}>Descrição</th>
+          <th style={styles.th}>{t('tables.line')}</th>
+          <th style={styles.th}>{t('tables.status')}</th>
+          <th style={styles.th}>{t('tables.prefix')}</th>
+          <th style={styles.th}>{t('tables.wagons')}</th>
+          <th style={styles.th}>{t('tables.description')}</th>
         </tr>
       </thead>
       <tbody>
@@ -54,16 +57,16 @@ export const TabelaPatio = memo<TabelaPatioProps>(({
                 value={linha.status}
                 onChange={(e) => onUpdate(index, 'status', e.target.value as StatusLinha)}
               >
-                <option value="livre">✓ Livre</option>
-                <option value="ocupada">● Ocupada</option>
-                <option value="interditada">⛔ Interditada</option>
+                <option value="livre">{t('tables.free')}</option>
+                <option value="ocupada">{t('tables.occupied')}</option>
+                <option value="interditada">{t('tables.blocked')}</option>
               </select>
             </td>
             <td style={styles.td}>
               <input
                 type="text"
                 style={{ ...styles.input, padding: '8px' }}
-                placeholder="Prefixo"
+                placeholder={t('tables.prefix')}
                 value={linha.prefixo}
                 onChange={(e) => onUpdate(index, 'prefixo', e.target.value)}
                 disabled={linha.status === 'livre'}
@@ -83,7 +86,7 @@ export const TabelaPatio = memo<TabelaPatioProps>(({
               <input
                 type="text"
                 style={{ ...styles.input, padding: '8px' }}
-                placeholder="Observações"
+                placeholder={t('tables.observations')}
                 value={linha.descricao}
                 onChange={(e) => onUpdate(index, 'descricao', e.target.value)}
               />
@@ -93,7 +96,8 @@ export const TabelaPatio = memo<TabelaPatioProps>(({
       </tbody>
     </table>
   </div>
-));
+  );
+});
 
 TabelaPatio.displayName = 'TabelaPatio';
 
@@ -138,6 +142,7 @@ export const TabelaEquipamentos = memo<TabelaEquipamentosProps>(({
   userName,
   userMatricula,
 }) => {
+  const { t } = useTranslation();
   const canEdit = !userRole || ROLES_CAN_EDIT_EQUIP.has(userRole);
 
   const handleUpdate = (index: number, campo: 'quantidade' | 'emCondicoes' | 'observacao', valor: number | boolean | string) => {
@@ -169,16 +174,16 @@ export const TabelaEquipamentos = memo<TabelaEquipamentosProps>(({
           background: `${tema.aviso}15`, border: `1px solid ${tema.aviso}40`,
           fontSize: '12px', color: tema.aviso, fontWeight: 600,
         }}>
-          🔒 Somente Líder/Gestor pode editar equipamentos. Visualização apenas.
+          {t('tables.editRestricted')}
         </div>
       )}
       <table style={styles.table}>
         <thead>
           <tr>
-            <th style={styles.th}>Equipamento</th>
-            <th style={styles.th}>Quantidade</th>
-            <th style={styles.th}>Condição</th>
-            <th style={styles.th}>Observação</th>
+            <th style={styles.th}>{t('tables.equipment')}</th>
+            <th style={styles.th}>{t('tables.quantity')}</th>
+            <th style={styles.th}>{t('tables.condition')}</th>
+            <th style={styles.th}>{t('tables.observation')}</th>
           </tr>
         </thead>
         <tbody>
@@ -188,7 +193,7 @@ export const TabelaEquipamentos = memo<TabelaEquipamentosProps>(({
                 {eq.nome}
                 {eq.alteradoPor && (
                   <div style={{ fontSize: '9px', color: tema.textoSecundario, fontWeight: 400, marginTop: 2 }}>
-                    Editado: {eq.alteradoPor} {eq.alteradoEm ? `· ${new Date(eq.alteradoEm).toLocaleString('pt-BR')}` : ''}
+                    {t('tables.edited', { by: eq.alteradoPor })} {eq.alteradoEm ? `· ${new Date(eq.alteradoEm).toLocaleString('pt-BR')}` : ''}
                   </div>
                 )}
               </td>
@@ -222,14 +227,14 @@ export const TabelaEquipamentos = memo<TabelaEquipamentosProps>(({
                   onClick={() => canEdit && handleUpdate(index, 'emCondicoes', !eq.emCondicoes)}
                   disabled={!canEdit}
                 >
-                  {eq.emCondicoes ? '✓ OK' : '✗ Problema'}
+                  {eq.emCondicoes ? t('tables.ok') : t('tables.problem')}
                 </button>
               </td>
               <td style={styles.td}>
                 <input
                   type="text"
                   style={{ ...styles.input, padding: '8px', opacity: canEdit ? 1 : 0.6 }}
-                  placeholder="Observação"
+                  placeholder={t('tables.observation')}
                   value={eq.observacao}
                   onChange={(e) => handleUpdate(index, 'observacao', e.target.value)}
                   disabled={!canEdit}

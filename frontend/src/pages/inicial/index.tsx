@@ -5,6 +5,7 @@
 
 import { useMemo, useCallback, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import type { PaginaInicialProps } from '../types';
 import { GaugeCircular, StatCard, AlertaCard, ProgressBar } from '../../components/ui';
 import { ROUTES } from '../../router/routes';
@@ -55,18 +56,18 @@ const SCOPED_CSS = `
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
-function getSaudacao(): string {
+function getSaudacao(t: (key: string) => string): string {
   const hora = new Date().getHours();
-  if (hora < 12) return 'Bom dia';
-  if (hora < 18) return 'Boa tarde';
-  return 'Boa noite';
+  if (hora < 12) return t('inicial.goodMorning');
+  if (hora < 18) return t('inicial.goodAfternoon');
+  return t('inicial.goodEvening');
 }
 
-function getLabelRisco(valor: number): string {
-  if (valor <= 25) return 'BAIXO';
-  if (valor <= 50) return 'MODERADO';
-  if (valor <= 75) return 'ELEVADO';
-  return 'CRITICO';
+function getLabelRisco(valor: number, t: (key: string) => string): string {
+  if (valor <= 25) return t('inicial.riskLow');
+  if (valor <= 50) return t('inicial.riskModerate');
+  if (valor <= 75) return t('inicial.riskElevated');
+  return t('inicial.riskCritical');
 }
 
 function formatarDataOperacional(dataStr?: string): { principal: string; secundario: string } {
@@ -90,20 +91,21 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
     usuarioLogado,
   } = props;
 
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   // ── Loading guard ──
   if (!usuarioLogado) {
     return (
       <div style={{ padding: 40, textAlign: 'center', color: tema.textoSecundario }}>
-        Carregando dados do operador...
+        {t('inicial.loadingOperator')}
       </div>
     );
   }
 
   // ── Memoized values ───────────────────────────────────────────────────
 
-  const saudacao = useMemo(() => getSaudacao(), []);
+  const saudacao = useMemo(() => getSaudacao(t), [t]);
 
   const nomeUsuario = useMemo(() => {
     if (usuarioLogado?.nome) return usuarioLogado.nome.split(' ')[0];
@@ -173,7 +175,7 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
 
       // Inject into AdamBot chat panel
       const badge = resultado.severidade === 'critico' ? 'CRITICO' : resultado.severidade === 'atencao' ? 'ATENCAO' : 'ESTAVEL';
-      const msgChat = `📋 **Briefing do Turno** [${badge}]\n\n${resultado.itensDestaque.join('\n')}\n\n${resultado.severidade === 'critico' ? '⚠️ Atenção redobrada.' : resultado.severidade === 'atencao' ? '⚡ Pontos de atenção.' : '✅ Situação estável.'}`;
+      const msgChat = `📋 **${t('inicial.shiftBriefing')}** [${badge}]\n\n${resultado.itensDestaque.join('\n')}\n\n${resultado.severidade === 'critico' ? '⚠️ Atenção redobrada.' : resultado.severidade === 'atencao' ? '⚡ Pontos de atenção.' : '✅ Situação estável.'}`;
       addBotMessage(msgChat);
 
       // Trend analysis
@@ -181,12 +183,12 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
       if (analise.alertas.length > 0) {
         setTendencias(analise);
 
-        let msgTendencias = '📊 **Análise de Tendências**\n';
+        let msgTendencias = `📊 **${t('inicial.trendAnalysis')}**\n`;
         analise.alertas.forEach(a => {
           const icon = a.severidade === 'critico' ? '🔴' : a.severidade === 'aviso' ? '🟡' : 'ℹ️';
           msgTendencias += `\n${icon} ${a.titulo}`;
         });
-        msgTendencias += `\n\n📈 ${analise.totalPassagensAnalisadas} passagens analisadas`;
+        msgTendencias += `\n\n📈 ${analise.totalPassagensAnalisadas} ${t('inicial.analyzedHandovers')}`;
         addBotMessage(msgTendencias);
       }
     }, 2000);
@@ -254,13 +256,13 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
             <span style={{ fontSize: 18 }}>📋</span>
-            <span style={{ fontWeight: 700, fontSize: 14, color: tema.texto }}>Briefing do Turno</span>
+            <span style={{ fontWeight: 700, fontSize: 14, color: tema.texto }}>{t('inicial.shiftBriefing')}</span>
             <span style={{
               fontSize: 10, padding: '2px 10px', borderRadius: 999, fontWeight: 700, color: '#fff',
               background: ultimoBriefing.severidade === 'critico' ? '#ef4444'
                 : ultimoBriefing.severidade === 'atencao' ? '#f59e0b' : '#22c55e',
             }}>
-              {ultimoBriefing.severidade === 'critico' ? 'CRÍTICO' : ultimoBriefing.severidade === 'atencao' ? 'ATENÇÃO' : 'ESTÁVEL'}
+              {ultimoBriefing.severidade === 'critico' ? t('inicial.critical') : ultimoBriefing.severidade === 'atencao' ? t('inicial.attention') : t('inicial.stable')}
             </span>
             <button
               type="button"
@@ -272,7 +274,7 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
                 display: 'flex', alignItems: 'center', gap: 4, minHeight: 32,
               }}
             >
-              Ouvir briefing
+              {t('inicial.listenBriefing')}
             </button>
             <span style={{ fontSize: 10, color: tema.textoSecundario }}>
               {new Date(ultimoBriefing.timestamp).toLocaleTimeString('pt-BR')}
@@ -304,7 +306,7 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
             <span style={{ fontSize: 16 }}>📊</span>
             <span style={{ fontWeight: 700, fontSize: 13, color: tema.texto, flex: 1 }}>
-              Tendências — {tendencias.periodoAnalisado}
+              {t('inicial.trends')} — {tendencias.periodoAnalisado}
             </span>
             <span style={{
               fontSize: 10, padding: '2px 8px', borderRadius: 999, fontWeight: 600,
@@ -339,7 +341,7 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
         {/* Turno */}
         <StatCard
           icon={obterJanelaHoraria().startsWith('07') ? <Sun size={28} /> : <Moon size={28} />}
-          label="TURNO ATUAL"
+          label={t('inicial.currentShift')}
           valor={`Turno ${obterLetraTurno()}`}
           destaque
           tema={tema}
@@ -369,7 +371,7 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
         {/* Data */}
         <StatCard
           icon={<Calendar size={28} />}
-          label="DATA OPERACIONAL"
+          label={t('inicial.operationalDate')}
           valor={dataOp.principal}
           subtexto={dataOp.secundario}
           tema={tema}
@@ -378,7 +380,7 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
         {/* Ocupacao */}
         <StatCard
           icon={<TrainFront size={28} />}
-          label="LINHAS OCUPADAS"
+          label={t('inicial.occupiedLines')}
           valor={ocupacaoTexto}
           tema={tema}
         >
@@ -390,9 +392,9 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
         {/* Risco */}
         <StatCard
           icon=""
-          label="NIVEL DE RISCO"
+          label={t('inicial.riskLevel')}
           valor=""
-          subtexto={`${alertasCriticos.length} alerta(s) ativo(s)`}
+          subtexto={`${alertasCriticos.length} ${t('inicial.activeAlerts')}`}
           tema={tema}
         >
           <GaugeCircular valor={pontuacaoRisco} tema={tema} tamanho={72} />
@@ -405,7 +407,7 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
               : tema.perigo,
             marginTop: 2,
           }}>
-            {getLabelRisco(pontuacaoRisco)}
+            {getLabelRisco(pontuacaoRisco, t)}
           </div>
         </StatCard>
       </div>
@@ -429,12 +431,12 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
             <MessageCircle size={32} />
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700, color: tema.texto, fontSize: 15 }}>
-                DSS
+                {t('inicial.dss')}
               </div>
               <div style={{ fontSize: 12, color: tema.textoSecundario, marginTop: 2 }}>
                 {temaDSSAnterior
-                  ? <>Ultimo tema: <strong>{temaDSSAnterior}</strong></>
-                  : <>{historicoDSS.length} registro(s)</>
+                  ? <>{t('inicial.lastTopic')} <strong>{temaDSSAnterior}</strong></>
+                  : <>{historicoDSS.length} {t('inicial.records')}</>
                 }
               </div>
             </div>
@@ -454,7 +456,7 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
               width: '100%',
             }}
           >
-            <FileText size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} /> Acessar DSS
+            <FileText size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} /> {t('inicial.accessDSS')}
           </button>
         </div>
 
@@ -472,7 +474,7 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
           }}
         >
           <div style={{ fontWeight: 700, color: tema.texto, fontSize: 15, marginBottom: 4 }}>
-            <AlertTriangle size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} /> Alertas ({alertasCriticos.length})
+            <AlertTriangle size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} /> {t('inicial.alerts')} ({alertasCriticos.length})
           </div>
           {alertasCriticos.length === 0 ? (
             <div style={{
@@ -486,7 +488,7 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
             }}>
               <CheckCircle size={24} />
               <div style={{ fontSize: 13, color: tema.sucesso, fontWeight: 600 }}>
-                Nenhum alerta critico
+                {t('inicial.noCriticalAlerts')}
               </div>
             </div>
           ) : (
@@ -501,7 +503,7 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
               ))}
               {alertasCriticos.length > 3 && (
                 <div style={{ fontSize: 12, color: tema.textoSecundario, textAlign: 'center', marginTop: 4 }}>
-                  + {alertasCriticos.length - 3} alerta(s) adicional(is)
+                  + {alertasCriticos.length - 3} {t('inicial.additionalAlerts')}
                 </div>
               )}
             </>
@@ -522,7 +524,7 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
           }}
         >
           <div style={{ fontWeight: 700, color: tema.texto, fontSize: 15, marginBottom: 12 }}>
-            <ClipboardList size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} /> Passagem de Servico
+            <ClipboardList size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} /> {t('inicial.shiftHandover')}
           </div>
           {temPassagemEmAndamento ? (
             <>
@@ -551,20 +553,20 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
                 style={{ ...styles.button, ...styles.buttonPrimary, width: '100%' }}
                 onClick={continuarPassagem}
               >
-                Continuar Passagem <ArrowRight size={16} style={{ verticalAlign: 'middle', marginLeft: 4 }} />
+                {t('inicial.continueHandover')} <ArrowRight size={16} style={{ verticalAlign: 'middle', marginLeft: 4 }} />
               </button>
             </>
           ) : (
             <div style={{ textAlign: 'center', padding: '16px 0' }}>
               <div style={{ fontSize: 13, color: tema.textoSecundario, marginBottom: 12 }}>
-                Nenhuma passagem em andamento
+                {t('inicial.noHandoverInProgress')}
               </div>
               <button
                 type="button"
                 style={{ ...styles.button, ...styles.buttonPrimary, width: '100%' }}
                 onClick={irParaPassagem}
               >
-                <ClipboardList size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} /> Iniciar Nova Troca de Turno
+                <ClipboardList size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} /> {t('inicial.startNewHandover')}
               </button>
             </div>
           )}
@@ -581,11 +583,11 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
           }}
         >
           <div style={{ fontWeight: 700, color: tema.texto, fontSize: 15, marginBottom: 12 }}>
-            <FolderOpen size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} /> Ultimas Passagens ({historicoTurnos.length})
+            <FolderOpen size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} /> {t('inicial.lastHandovers')} ({historicoTurnos.length})
           </div>
           {historicoTurnos.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 20, color: tema.textoSecundario, fontSize: 13 }}>
-              Nenhuma passagem registrada ainda.
+              {t('inicial.noHandoversYet')}
             </div>
           ) : (
             historicoTurnos.slice(0, 5).map((registro, idx) => (
@@ -610,8 +612,8 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
                   </div>
                 </div>
                 <div style={{ fontSize: 11, color: tema.textoSecundario, textAlign: 'right' }}>
-                  <div>Saiu: {registro.assinaturas.sai.nome?.split(' ')[0] || '-'}</div>
-                  <div>Entrou: {registro.assinaturas.entra.nome?.split(' ')[0] || '-'}</div>
+                  <div>{t('inicial.left')} {registro.assinaturas.sai.nome?.split(' ')[0] || '-'}</div>
+                  <div>{t('inicial.entered')} {registro.assinaturas.entra.nome?.split(' ')[0] || '-'}</div>
                 </div>
               </div>
             ))
@@ -638,7 +640,7 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
           onClick={irParaPassagem}
         >
           <ClipboardList size={28} />
-          Nova Troca de Turno
+          {t('inicial.newShiftChange')}
         </button>
         <button
           type="button"
@@ -657,7 +659,7 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
           onClick={abrirBI}
         >
           <BarChart3 size={28} />
-          BI+ Avancado
+          {t('inicial.biAdvanced')}
         </button>
       </div>
 
@@ -669,10 +671,10 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
         textAlign: 'center',
       }}>
         <div style={{ fontSize: 12, color: tema.textoSecundario, lineHeight: 1.8 }}>
-          &copy; 2025 EFVM360 Enterprise &mdash; Todos os direitos reservados
+          &copy; 2025 EFVM360 Enterprise &mdash; {t('common.allRights')}
         </div>
         <div style={{ fontSize: 11, color: tema.textoSecundario, opacity: 0.7 }}>
-          Desenvolvido por Gregory Guimaraes
+          {t('common.developedBy')}
         </div>
       </footer>
     </>

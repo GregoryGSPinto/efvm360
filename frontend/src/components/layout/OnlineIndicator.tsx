@@ -4,6 +4,7 @@
 // Mobile: inline component rendered in TopNavbar
 // ============================================================================
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   status: 'online' | 'offline' | 'syncing';
@@ -13,8 +14,9 @@ interface Props {
 
 // ── Desktop Floating Badge (hidden on mobile) ──
 export const OnlineIndicator = memo<Props>(({ status, pendingCount, isDark }) => {
+  const { t } = useTranslation();
   const color = status === 'online' ? '#0A7F5A' : status === 'offline' ? '#dc2626' : '#d9a010';
-  const label = status === 'online' ? 'Online' : status === 'offline' ? 'Offline' : 'Sincronizando';
+  const label = status === 'online' ? t('onlineIndicator.online') : status === 'offline' ? t('onlineIndicator.offline') : t('onlineIndicator.syncing');
 
   return (
     <div className="efvm360-online-desktop" style={{
@@ -52,8 +54,9 @@ OnlineIndicator.displayName = 'OnlineIndicator';
 // ── Mobile Inline Badge (for TopNavbar) ──
 // v3.2: On mobile, show ONLY the green dot (no text label)
 export const OnlineStatusInline = memo<Props>(({ status }) => {
+  const { t } = useTranslation();
   const color = status === 'online' ? '#0A7F5A' : status === 'offline' ? '#dc2626' : '#d9a010';
-  const label = status === 'online' ? 'Online' : status === 'offline' ? 'Offline' : 'Sync...';
+  const label = status === 'online' ? t('onlineIndicator.online') : status === 'offline' ? t('onlineIndicator.offline') : t('onlineIndicator.syncShort');
 
   return (
     <span className="efvm360-online-mobile" style={{

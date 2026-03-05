@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState, useRef, useCallback, useMemo, useEffect, memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { PaginaPassagemProps } from '../types';
 import type { DadosFormulario, UsuarioCadastro, TemaEstilos, EquipamentoConfig, CategoriaEquipamento, CriticidadeEquipamento } from '../../types';
 import { ChecklistSeguranca, Card, StatusBadge } from '../../components';
@@ -45,6 +46,7 @@ const ItemSegurancaSimNao = memo<ItemSegurancaSimNaoProps>(({
   tema,
   styles,
 }) => {
+  const { t } = useTranslation();
   const resposta = typeof valor === 'object' && valor !== null ? valor.resposta : valor;
   const obs = typeof valor === 'object' && valor !== null ? valor.observacao : observacao || '';
   const showDetails = mostrarDetalhesQuandoSim && resposta === true && !!detalhesRender;
@@ -96,7 +98,7 @@ const ItemSegurancaSimNao = memo<ItemSegurancaSimNaoProps>(({
       {/* Observação sempre visível */}
       <div style={{ marginTop: '12px' }}>
         <label style={{ fontSize: '11px', color: tema.textoSecundario, marginBottom: '4px', display: 'block' }}>
-          📝 Observação (opcional)
+          📝 {t('common.observationOptional')}
         </label>
         <input
           type="text"
@@ -124,6 +126,8 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
     avaliacoes5S, setAvaliacoes5S, observacoes5S, setObservacoes5S,
     temaDSSAnterior,
   } = props;
+
+  const { t } = useTranslation();
 
   // ── Local state (was in App.tsx scope) ──
   const [modoEdicao, setModoEdicao] = useState(false);
@@ -1195,11 +1199,11 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
                       flex: 1, padding: '10px 20px', borderRadius: 8,
                       border: `1px solid ${tema.cardBorda}`, background: tema.backgroundSecundario,
                       color: tema.texto, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                    }}>Cancelar</button>
+                    }}>{t('common.cancel')}</button>
                     <button onClick={handleEquipSave} style={{
                       flex: 1, padding: '10px 20px', borderRadius: 8, border: 'none',
                       background: tema.primaria, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                    }}>{equipEditingId ? 'Salvar Alterações' : 'Criar Equipamento'}</button>
+                    }}>{equipEditingId ? t('common.saveChanges') : t('common.create')}</button>
                   </div>
                 </div>
               </div>

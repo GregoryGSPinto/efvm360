@@ -4,12 +4,14 @@
 // ============================================================================
 
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface UpdateNotificationProps {
   onUpdate: () => void;
 }
 
 export function UpdateNotification({ onUpdate }: UpdateNotificationProps) {
+  const { t } = useTranslation();
   const [dismissed, setDismissed] = useState(false);
 
   const handleUpdate = useCallback(() => {
@@ -22,17 +24,17 @@ export function UpdateNotification({ onUpdate }: UpdateNotificationProps) {
     <div style={styles.container}>
       <div style={styles.content}>
         <div style={styles.textBlock}>
-          <strong style={styles.title}>Nova versao disponivel</strong>
+          <strong style={styles.title}>{t('updateNotification.newVersion')}</strong>
           <span style={styles.subtitle}>
-            Atualize para obter melhorias e correcoes.
+            {t('updateNotification.updateMessage')}
           </span>
         </div>
         <div style={styles.actions}>
           <button onClick={() => setDismissed(true)} style={styles.dismissBtn}>
-            Depois
+            {t('updateNotification.later')}
           </button>
           <button onClick={handleUpdate} style={styles.updateBtn}>
-            Atualizar
+            {t('updateNotification.update')}
           </button>
         </div>
       </div>

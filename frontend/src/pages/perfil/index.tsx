@@ -120,7 +120,7 @@ export default function PaginaPerfil({
       streamRef.current = stream;
       if (videoRef.current) { videoRef.current.srcObject = stream; videoRef.current.play(); }
       setAvatarMode('camera');
-    } catch { alert('Nao foi possivel acessar a camera'); }
+    } catch { alert(t('perfil.cameraAccessError')); }
   }, []);
   const capturePhoto = useCallback(() => {
     if (!videoRef.current || !canvasRef.current) return;
@@ -180,7 +180,7 @@ export default function PaginaPerfil({
     try {
       const usuarios: Array<{ matricula: string; senha?: string }> = JSON.parse(localStorage.getItem(STORAGE_KEYS.USUARIOS) || '[]');
       const user = usuarios.find(u => u.matricula === usuarioLogado?.matricula);
-      if (!user) { setErroAlterarSenha('Usuário não encontrado'); return; }
+      if (!user) { setErroAlterarSenha(t('auth.userNotFound')); return; }
       if (user.senha !== senhaAtual) { setErroAlterarSenha(t('config.senhaAtualIncorreta')); return; }
       if (!novaSenha || novaSenha.length < 6) { setErroAlterarSenha(t('config.senhaMinimo')); return; }
       if (novaSenha !== confirmarNovaSenha) { setErroAlterarSenha(t('config.senhasNaoConferem')); return; }
@@ -191,7 +191,7 @@ export default function PaginaPerfil({
         setSucessoAlterarSenha(true);
         setSenhaAtual(''); setNovaSenha(''); setConfirmarNovaSenha('');
       }
-    } catch { setErroAlterarSenha('Erro ao alterar senha'); }
+    } catch { setErroAlterarSenha(t('auth.passwordChangeError')); }
   }, [novaSenha, confirmarNovaSenha, senhaAtual, usuarioLogado, t, setErroAlterarSenha, setSucessoAlterarSenha, setSenhaAtual, setNovaSenha, setConfirmarNovaSenha]);
 
   const avataresPadrao = [
@@ -230,7 +230,7 @@ export default function PaginaPerfil({
         </div>
         <div style={{ flex: 1, minWidth: 180 }}>
           <h1 style={{ color: tema.texto, fontSize: 22, fontWeight: 700, margin: '0 0 4px' }}>
-            {usuarioLogado?.nome || 'Operador'}
+            {usuarioLogado?.nome || t('roles.operador')}
           </h1>
           <div style={{ color: tema.textoSecundario, fontSize: 13, display: 'flex', flexWrap: 'wrap', gap: 12 }}>
             <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{usuarioLogado?.matricula}</span>
@@ -253,12 +253,12 @@ export default function PaginaPerfil({
               <span style={{ fontSize: 9, color: tema.textoSecundario }}>SCORE</span>
             </div>
           </div>
-          {rankPosition > 0 && <div style={{ fontSize: 11, color: tema.textoSecundario, marginTop: 4 }}>#{rankPosition} no pátio</div>}
+          {rankPosition > 0 && <div style={{ fontSize: 11, color: tema.textoSecundario, marginTop: 4 }}>#{rankPosition} {t('perfil.noPatioRank')}</div>}
         </div>
       </div>
 
       {/* Conquistas */}
-      <Card title="🏆 Conquistas" styles={styles}>
+      <Card title={`🏆 ${t('perfil.conquistas')}`} styles={styles}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
           {badges.map((b, i) => (
             <div key={i} style={{
@@ -276,14 +276,14 @@ export default function PaginaPerfil({
       </Card>
 
       {/* Estatísticas */}
-      <Card title="📋 Estatísticas" styles={styles}>
+      <Card title={`📋 ${t('perfil.estatisticas')}`} styles={styles}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
           {[
-            { label: 'Boa Jornadas', value: myPerformance?.handoversCompleted || 0, icon: '🚂' },
-            { label: 'DSS Enviadas', value: myPerformance?.dssSubmitted || 0, icon: '📝' },
-            { label: 'DSS Aprovadas', value: myPerformance?.dssApproved || 0, icon: '✅' },
-            { label: 'Quiz Realizados', value: myPerformance?.quizResults?.length || 0, icon: '🎯' },
-            { label: 'Erros', value: myPerformance?.operationalErrors || 0, icon: '⚠️' },
+            { label: t('perfil.boaJornadas'), value: myPerformance?.handoversCompleted || 0, icon: '🚂' },
+            { label: t('perfil.dssEnviadas'), value: myPerformance?.dssSubmitted || 0, icon: '📝' },
+            { label: t('perfil.dssAprovadas'), value: myPerformance?.dssApproved || 0, icon: '✅' },
+            { label: t('perfil.quizRealizados'), value: myPerformance?.quizResults?.length || 0, icon: '🎯' },
+            { label: t('perfil.erros'), value: myPerformance?.operationalErrors || 0, icon: '⚠️' },
           ].map((s, i) => (
             <div key={i} style={{
               padding: 14, borderRadius: 10, textAlign: 'center',
@@ -298,12 +298,12 @@ export default function PaginaPerfil({
       </Card>
 
       {/* Organização */}
-      <Card title="🏢 Organização" styles={styles}>
+      <Card title={`🏢 ${t('perfil.organizacao')}`} styles={styles}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 13 }}>
           {[
-            { label: 'Pátio Principal', value: getYardName(yardCode) },
-            { label: 'Equipe', value: team?.name || 'Sem equipe' },
-            { label: 'Turno', value: usuarioLogado?.turno ? `Turno ${usuarioLogado.turno} (${usuarioLogado.horarioTurno || ''})` : 'N/A' },
+            { label: t('perfil.patioPrincipal'), value: getYardName(yardCode) },
+            { label: t('perfil.equipe'), value: team?.name || t('common.noTeam') },
+            { label: t('perfil.turno'), value: usuarioLogado?.turno ? `${t('perfil.turno')} ${usuarioLogado.turno} (${usuarioLogado.horarioTurno || ''})` : 'N/A' },
           ].map((row, i) => (
             <div key={i} style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ color: tema.textoSecundario }}>{row.label}</span>
@@ -315,7 +315,7 @@ export default function PaginaPerfil({
             <span style={{
               padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 600,
               background: '#dcfce7', color: '#16a34a',
-            }}>Ativo</span>
+            }}>{t('common.active')}</span>
           </div>
         </div>
       </Card>
@@ -344,7 +344,7 @@ export default function PaginaPerfil({
                 position: 'absolute', top: -8, right: 10,
                 fontSize: 9, padding: '1px 8px', borderRadius: 999,
                 background: tema.primaria, color: '#fff', fontWeight: 700,
-              }}>{'VOC\u00CA'}</span>
+              }}>{t('common.you')}</span>
             )}
             <div style={{
               width: 36, height: 36, borderRadius: '50%',
@@ -381,7 +381,7 @@ export default function PaginaPerfil({
                     {equipe.nomePatio}
                   </div>
                   <div style={{ fontSize: 11, color: tema.textoSecundario }}>
-                    {equipe.codigoPatio} · {equipe.totalMembros} membro{equipe.totalMembros !== 1 ? 's' : ''}
+                    {equipe.codigoPatio} · {equipe.totalMembros} {t('common.members')}
                   </div>
                 </div>
               </div>
@@ -458,7 +458,7 @@ export default function PaginaPerfil({
         // Admin: show all yards with selector
         if (isAdmin) {
           return (
-            <Card title="👥 Equipes — Todos os Pátios" styles={styles}>
+            <Card title={`👥 ${t('perfil.equipesTodosPatios')}`} styles={styles}>
               <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
                 {ALL_YARD_CODES.map((code, idx) => (
                   <button key={code} onClick={() => setAdminPatioSelecionado(idx)} style={{
@@ -482,7 +482,7 @@ export default function PaginaPerfil({
         // Regular user: show own yard
         if (minhaEquipe && minhaEquipe.totalMembros > 0) {
           return (
-            <Card title="👥 Minha Equipe" styles={styles}>
+            <Card title={`👥 ${t('perfil.minhaEquipe')}`} styles={styles}>
               <ArvoreEquipe equipe={minhaEquipe} />
             </Card>
           );
@@ -492,53 +492,53 @@ export default function PaginaPerfil({
       })()}
 
       {/* ── Identificação Pessoal ── */}
-      <Card title="📋 Identificação Pessoal" styles={styles}>
+      <Card title={`📋 ${t('perfil.identificacao')}`} styles={styles}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(250px, 100%), 1fr))', gap: 16 }}>
           <div>
-            <label style={styles.label}>Nome Completo</label>
-            <input type="text" style={styles.input} value={editNome} onChange={e => { setEditNome(e.target.value); setPerfilSalvo(false); }} placeholder="Seu nome completo" />
+            <label style={styles.label}>{t('perfil.nomeCompleto')}</label>
+            <input type="text" style={styles.input} value={editNome} onChange={e => { setEditNome(e.target.value); setPerfilSalvo(false); }} placeholder={t('perfil.seuNome')} />
           </div>
           <div>
-            <label style={styles.label}>Nome Social (opcional)</label>
-            <input type="text" style={styles.input} placeholder="Como prefere ser chamado..." value={config.perfilExtendido.nomeSocial} onChange={e => atualizarPerfilExtendido('nomeSocial', e.target.value)} />
+            <label style={styles.label}>{t('perfil.nomeSocial')}</label>
+            <input type="text" style={styles.input} placeholder={t('perfil.comoSerChamado')} value={config.perfilExtendido.nomeSocial} onChange={e => atualizarPerfilExtendido('nomeSocial', e.target.value)} />
           </div>
           <div>
-            <label style={styles.label}>Matrícula</label>
-            <input type="text" style={{ ...styles.input, background: tema.backgroundSecundario }} value={usuarioLogado?.matricula || ''} disabled title="Campo não editável" />
-            <span style={{ fontSize: 11, color: tema.textoSecundario }}>🔒 Não editável</span>
+            <label style={styles.label}>{t('config.matriculaLabel')}</label>
+            <input type="text" style={{ ...styles.input, background: tema.backgroundSecundario }} value={usuarioLogado?.matricula || ''} disabled title={t('perfil.naoEditavel')} />
+            <span style={{ fontSize: 11, color: tema.textoSecundario }}>🔒 {t('perfil.naoEditavel')}</span>
           </div>
           <div>
-            <label style={styles.label}>Função / Cargo</label>
-            <input type="text" style={{ ...styles.input, background: tema.backgroundSecundario }} value={funcaoLabel} disabled title="Campo não editável" />
-            <span style={{ fontSize: 11, color: tema.textoSecundario }}>🔒 Não editável</span>
+            <label style={styles.label}>{t('perfil.funcaoCargo')}</label>
+            <input type="text" style={{ ...styles.input, background: tema.backgroundSecundario }} value={funcaoLabel} disabled title={t('perfil.naoEditavel')} />
+            <span style={{ fontSize: 11, color: tema.textoSecundario }}>🔒 {t('perfil.naoEditavel')}</span>
           </div>
           <div>
-            <label style={styles.label}>Turno</label>
+            <label style={styles.label}>{t('perfil.turno')}</label>
             <select style={styles.select || styles.input} value={editTurno} onChange={e => { setEditTurno(e.target.value); setPerfilSalvo(false); }}>
-              <option value="">Selecione</option>
+              <option value="">{t('common.select')}</option>
               {TURNOS_LETRAS.map(tl => <option key={tl.value} value={tl.value}>{tl.label}</option>)}
             </select>
           </div>
           <div>
-            <label style={styles.label}>Unidade / Local</label>
+            <label style={styles.label}>{t('perfil.unidade')}</label>
             <input type="text" style={styles.input} placeholder="Ex: Pátio do Fazendão" value={config.perfilExtendido.unidade} onChange={e => atualizarPerfilExtendido('unidade', e.target.value)} />
           </div>
           <div>
-            <label style={styles.label}>Área / Setor</label>
+            <label style={styles.label}>{t('perfil.areaSetor')}</label>
             <input type="text" style={styles.input} placeholder="Ex: Operação Ferroviária" value={config.perfilExtendido.area} onChange={e => atualizarPerfilExtendido('area', e.target.value)} />
           </div>
           <div>
-            <label style={styles.label}>E-mail Corporativo</label>
+            <label style={styles.label}>{t('perfil.emailCorporativo')}</label>
             <input type="email" style={styles.input} placeholder="seu.email@vale.com" value={config.perfilExtendido.emailCorporativo} onChange={e => atualizarPerfilExtendido('emailCorporativo', e.target.value)} />
           </div>
           <div>
-            <label style={styles.label}>Telefone (opcional)</label>
+            <label style={styles.label}>{t('perfil.telefone')}</label>
             <input type="tel" style={styles.input} placeholder="(XX) XXXXX-XXXX" value={config.perfilExtendido.telefone} onChange={e => atualizarPerfilExtendido('telefone', e.target.value)} />
           </div>
           {/* Save button for editable fields */}
           <div style={{ gridColumn: '1 / -1', marginTop: 8 }}>
             {perfilSalvo && (
-              <div style={{ padding: 10, background: `${tema.sucesso}15`, border: `1px solid ${tema.sucesso}40`, borderRadius: 8, marginBottom: 12, color: tema.sucesso, fontSize: 13 }}>Perfil atualizado com sucesso!</div>
+              <div style={{ padding: 10, background: `${tema.sucesso}15`, border: `1px solid ${tema.sucesso}40`, borderRadius: 8, marginBottom: 12, color: tema.sucesso, fontSize: 13 }}>{t('common.profileUpdated')}</div>
             )}
             <button
               onClick={salvarPerfilEditavel}
@@ -547,7 +547,7 @@ export default function PaginaPerfil({
                 background: perfilSalvo ? tema.sucesso : tema.primaria, color: '#fff', fontWeight: 600, fontSize: 13,
               }}
             >
-              {perfilSalvo ? 'Salvo!' : 'Salvar Alteracoes'}
+              {perfilSalvo ? t('common.saved') : t('common.saveChanges')}
             </button>
           </div>
         </div>
@@ -570,7 +570,7 @@ export default function PaginaPerfil({
                   : avataresPadrao.find(a => a.id === config.perfilExtendido.avatarPadrao)?.emoji || '👤'}
             </div>
             <span style={{ fontSize: 12, color: tema.textoSecundario }}>
-              {config.perfilExtendido.nomeSocial || usuarioLogado?.nome || 'Usuário'}
+              {config.perfilExtendido.nomeSocial || usuarioLogado?.nome || t('roles.operador')}
             </span>
           </div>
           <div style={{ flex: 1, minWidth: 240 }}>
@@ -634,17 +634,17 @@ export default function PaginaPerfil({
       </Card>
 
       {/* ── Preferências Operacionais ── */}
-      <Card title="⚙️ Preferências Operacionais" styles={styles}>
+      <Card title={`⚙️ ${t('perfil.operationalPrefs')}`} styles={styles}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: 20 }}>
           <div>
-            <label style={styles.label}>Turno Preferencial</label>
+            <label style={styles.label}>{t('perfil.preferredShift')}</label>
             <select style={styles.select} value={config.preferenciasOperacionais.turnoPreferencial} onChange={e => atualizarPreferenciasOperacionais('turnoPreferencial', e.target.value)}>
-              <option value="">Nenhuma preferência</option>
+              <option value="">{t('common.noPreference')}</option>
               {TURNOS_LETRAS.map(tl => <option key={tl.value} value={tl.value}>{tl.label}</option>)}
             </select>
           </div>
           <div>
-            <label style={styles.label}>Tamanho da Fonte</label>
+            <label style={styles.label}>{t('perfil.fontSize')}</label>
             <div style={{ display: 'flex', gap: 8 }}>
               {([{ value: 'pequeno', label: 'A', size: '12px' }, { value: 'medio', label: 'A', size: '16px' }, { value: 'grande', label: 'A', size: '20px' }] as const).map(opt => (
                 <button key={opt.value} style={{
@@ -660,31 +660,31 @@ export default function PaginaPerfil({
       </Card>
 
       {/* ── Segurança — Alterar Senha ── */}
-      <Card title="🔐 Segurança" styles={styles}>
+      <Card title={`🔐 ${t('perfil.seguranca')}`} styles={styles}>
         {!mostrarAlterarSenha ? (
           <button style={{ ...styles.button, ...styles.buttonSecondary, width: '100%' }} onClick={() => setMostrarAlterarSenha(true)}>
-            🔑 Alterar Senha
+            🔑 {t('perfil.changePassword')}
           </button>
         ) : (
           <div style={{ padding: 20, background: tema.backgroundSecundario, borderRadius: 12, border: `1px solid ${tema.cardBorda}` }}>
-            <h4 style={{ color: tema.texto, marginBottom: 16 }}>🔑 Alterar Senha</h4>
+            <h4 style={{ color: tema.texto, marginBottom: 16 }}>🔑 {t('perfil.changePassword')}</h4>
             {erroAlterarSenha && (
               <div style={{ padding: 10, background: `${tema.perigo}15`, border: `1px solid ${tema.perigo}40`, borderRadius: 8, marginBottom: 12, color: tema.perigo, fontSize: 13 }}>⚠️ {erroAlterarSenha}</div>
             )}
             {sucessoAlterarSenha && (
-              <div style={{ padding: 10, background: `${tema.sucesso}15`, border: `1px solid ${tema.sucesso}40`, borderRadius: 8, marginBottom: 12, color: tema.sucesso, fontSize: 13 }}>✅ Senha alterada com sucesso!</div>
+              <div style={{ padding: 10, background: `${tema.sucesso}15`, border: `1px solid ${tema.sucesso}40`, borderRadius: 8, marginBottom: 12, color: tema.sucesso, fontSize: 13 }}>✅ {t('perfil.passwordChanged')}</div>
             )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div><label style={styles.label}>Senha Atual</label><input type="password" style={styles.input} value={senhaAtual} onChange={e => setSenhaAtual(e.target.value)} placeholder="Digite sua senha atual" /></div>
-              <div><label style={styles.label}>Nova Senha</label><input type="password" style={styles.input} value={novaSenha} onChange={e => setNovaSenha(e.target.value)} placeholder="Digite a nova senha" /></div>
+              <div><label style={styles.label}>{t('perfil.currentPassword')}</label><input type="password" style={styles.input} value={senhaAtual} onChange={e => setSenhaAtual(e.target.value)} placeholder={t('perfil.enterCurrentPassword')} /></div>
+              <div><label style={styles.label}>{t('perfil.newPassword')}</label><input type="password" style={styles.input} value={novaSenha} onChange={e => setNovaSenha(e.target.value)} placeholder={t('perfil.enterNewPassword')} /></div>
               {novaSenha && (
                 <div style={{ padding: '10px 12px', background: tema.backgroundSecundario, borderRadius: 8, border: `1px solid ${tema.cardBorda}` }}>
-                  <div style={{ fontSize: 10, color: tema.textoSecundario, fontWeight: 600, marginBottom: 6, textTransform: 'uppercase' }}>Requisitos da senha:</div>
+                  <div style={{ fontSize: 10, color: tema.textoSecundario, fontWeight: 600, marginBottom: 6, textTransform: 'uppercase' }}>{t('perfil.passwordRequirements')}</div>
                   {[
-                    { label: 'Mínimo 6 caracteres', ok: senhaRequisitos.minimo },
-                    { label: 'Contém letra maiúscula', ok: senhaRequisitos.maiuscula },
-                    { label: 'Contém número', ok: senhaRequisitos.numero },
-                    { label: 'Senhas conferem', ok: senhaRequisitos.confere },
+                    { label: t('perfil.min6chars'), ok: senhaRequisitos.minimo },
+                    { label: t('perfil.hasUppercase'), ok: senhaRequisitos.maiuscula },
+                    { label: t('perfil.hasNumber'), ok: senhaRequisitos.numero },
+                    { label: t('perfil.passwordsMatch'), ok: senhaRequisitos.confere },
                   ].map((req, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: req.ok ? tema.sucesso : tema.textoSecundario, marginBottom: 3 }}>
                       <span style={{ fontSize: 12 }}>{req.ok ? '✅' : '⬜'}</span>{req.label}
@@ -692,9 +692,9 @@ export default function PaginaPerfil({
                   ))}
                 </div>
               )}
-              <div><label style={styles.label}>Confirmar Nova Senha</label><input type="password" style={styles.input} value={confirmarNovaSenha} onChange={e => setConfirmarNovaSenha(e.target.value)} placeholder="Confirme a nova senha" /></div>
+              <div><label style={styles.label}>{t('perfil.confirmPassword')}</label><input type="password" style={styles.input} value={confirmarNovaSenha} onChange={e => setConfirmarNovaSenha(e.target.value)} placeholder={t('perfil.confirmNewPassword')} /></div>
               <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
-                <button style={{ ...styles.button, ...styles.buttonSecondary, flex: 1 }} onClick={() => { setMostrarAlterarSenha(false); setSenhaAtual(''); setNovaSenha(''); setConfirmarNovaSenha(''); setErroAlterarSenha(''); }}>Cancelar</button>
+                <button style={{ ...styles.button, ...styles.buttonSecondary, flex: 1 }} onClick={() => { setMostrarAlterarSenha(false); setSenhaAtual(''); setNovaSenha(''); setConfirmarNovaSenha(''); setErroAlterarSenha(''); }}>{t('common.cancel')}</button>
                 <button style={{ ...styles.button, ...styles.buttonPrimary, flex: 1, opacity: senhaValida ? 1 : 0.5, cursor: senhaValida ? 'pointer' : 'not-allowed' }} onClick={handleAlterarSenha} disabled={!senhaValida}>{t('config.confirmarAlteracao')}</button>
               </div>
             </div>
@@ -710,7 +710,7 @@ export default function PaginaPerfil({
           onChange={e => { setIntensificacao(e.target.value); setIntensificacaoSalva(false); }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
           <span style={{ fontSize: 11, color: tema.textoSecundario }}>{intensificacao.length}/500 {t('config.caracteres')}</span>
-          {ultimaAtualizacao && <span style={{ fontSize: 11, color: tema.textoSecundario }}>{t('config.ultimaAtualizacao')}: {new Date(ultimaAtualizacao).toLocaleString(locale === 'en-US' ? 'en-US' : 'pt-BR')}</span>}
+          {ultimaAtualizacao && <span style={{ fontSize: 11, color: tema.textoSecundario }}>{t('config.ultimaAtualizacao')}: {new Date(ultimaAtualizacao).toLocaleString(locale === 'en' ? 'en-US' : 'pt-BR')}</span>}
         </div>
         <div style={{ display: 'flex', gap: 12, marginTop: 12, alignItems: 'center' }}>
           <button style={{

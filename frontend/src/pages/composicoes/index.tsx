@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { useState, useMemo, useCallback, useEffect, type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { TemaComputed, StylesObject } from '../types';
 import type { ConfiguracaoSistema, Usuario } from '../../types';
 import type { TrainComposition, CompositionStatus } from '../../domain/aggregates/TrainComposition';
@@ -62,6 +63,7 @@ interface Props {
 // ── Component ───────────────────────────────────────────────────────────
 
 function PaginaComposicoes({ tema }: Props) {
+  const { t } = useTranslation();
   const [compositions, setCompositions] = useState<TrainComposition[]>(loadCompositions);
   const [view, setView] = useState<'list' | 'create' | 'detail'>('list');
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -199,7 +201,7 @@ function PaginaComposicoes({ tema }: Props) {
   if (view === 'create') {
     return (
       <div style={{ padding: 20, maxWidth: 600, margin: '0 auto' }}>
-        <h2 style={{ color: tema.texto, marginBottom: 20 }}>Nova Composicao</h2>
+        <h2 style={{ color: tema.texto, marginBottom: 20 }}>{t('composicoes.titulo')}</h2>
         <div style={card}>
           <label style={{ color: tema.textoSecundario, fontSize: 13, display: 'block', marginBottom: 4 }}>Codigo</label>
           <input style={input} value={code} onChange={e => setCode(e.target.value)} placeholder="Ex: COMP-2024-001" />
@@ -221,8 +223,8 @@ function PaginaComposicoes({ tema }: Props) {
           <input style={input} value={wagons} onChange={e => setWagons(e.target.value)} placeholder="80" type="number" />
 
           <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
-            <button style={btn('#007e7a')} onClick={handleCreate}>Criar</button>
-            <button style={btn('#6b7280')} onClick={() => setView('list')}>Cancelar</button>
+            <button style={btn('#007e7a')} onClick={handleCreate}>{t('common.save')}</button>
+            <button style={btn('#6b7280')} onClick={() => setView('list')}>{t('common.cancel')}</button>
           </div>
         </div>
       </div>
@@ -238,7 +240,7 @@ function PaginaComposicoes({ tema }: Props) {
       <div style={{ padding: 20, maxWidth: 700, margin: '0 auto' }}>
         <button style={{ ...btn('#6b7280'), marginBottom: 16 }}
           onClick={() => { setView('list'); setSelectedId(null); }}>
-          Voltar
+          {t('common.back')}
         </button>
 
         <div style={card}>
@@ -334,7 +336,7 @@ function PaginaComposicoes({ tema }: Props) {
     <div style={{ padding: 20, maxWidth: 700, margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <h2 style={{ color: tema.texto, margin: 0 }}>Composicoes</h2>
+          <h2 style={{ color: tema.texto, margin: 0 }}>{t('composicoes.titulo')}</h2>
           {!isLive && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 8, background: 'rgba(249,115,22,0.1)', color: '#f97316', fontWeight: 600 }}>Modo Demo</span>}
         </div>
         <button style={btn('#007e7a')} onClick={() => setView('create')}>+ Nova</button>
