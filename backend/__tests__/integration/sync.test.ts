@@ -58,7 +58,7 @@ app.use(express.json());
 app.use('/api/v1', routes);
 
 // Helper: login and return access token
-const loginAndGetToken = async (matricula = 'VALE001', senha = 'Vale@2024') => {
+const loginAndGetToken = async (matricula = 'VFZ1001', senha = 'Vale@2024') => {
   const res = await request(app)
     .post('/api/v1/auth/login')
     .send({ matricula, senha });
@@ -94,7 +94,7 @@ describe('Sync Routes — Integration', () => {
   beforeEach(async () => {
     await clearTestDb();
     // Create a default user for all tests
-    await createTestUser({ matricula: 'VALE001', nome: 'Operador Teste' });
+    await createTestUser({ matricula: 'VFZ1001', nome: 'Operador Teste' });
   });
 
   // ── POST /sync/passagens ────────────────────────────────────────────────
@@ -190,8 +190,8 @@ describe('Sync Routes — Integration', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({ items: [item] });
 
-      expect(res.status).toBe(400);
-      expect(res.body.code).toBe('VALIDATION_ERROR');
+      expect(res.status).toBe(422);
+      expect(res.body.code).toBe('VALIDATION_ERROR'); // Now returns 422 via handleValidationErrors
     });
 
     it('should reject items without hmac field', async () => {
@@ -204,7 +204,7 @@ describe('Sync Routes — Integration', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({ items: [item] });
 
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(422);
     });
 
     it('should reject empty items array', async () => {
@@ -215,7 +215,7 @@ describe('Sync Routes — Integration', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({ items: [] });
 
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(422);
     });
 
     it('should reject items without required fields (id, type, payload)', async () => {
@@ -231,7 +231,7 @@ describe('Sync Routes — Integration', () => {
           }],
         });
 
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(422);
     });
 
     it('should reject batch with more than 50 items', async () => {
@@ -243,7 +243,7 @@ describe('Sync Routes — Integration', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({ items });
 
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(422);
     });
 
     it('should return 401 without authentication', async () => {

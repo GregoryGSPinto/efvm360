@@ -35,7 +35,7 @@ describe('loginValidator', () => {
   it('aceita payload válido', async () => {
     const res = await request(app)
       .post('/test')
-      .send({ matricula: 'VALE001', senha: 'senha123' });
+      .send({ matricula: 'VFZ1001', senha: 'senha123' });
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
   });
@@ -61,7 +61,7 @@ describe('loginValidator', () => {
   it('rejeita senha com menos de 6 caracteres', async () => {
     const res = await request(app)
       .post('/test')
-      .send({ matricula: 'VALE001', senha: '12345' });
+      .send({ matricula: 'VFZ1001', senha: '12345' });
     expect(res.status).toBe(422);
     expect(res.body.detalhes).toEqual(
       expect.arrayContaining([expect.objectContaining({ campo: 'senha' })]),
@@ -71,7 +71,7 @@ describe('loginValidator', () => {
   it('bloqueia mass assignment — campos extras rejeitados', async () => {
     const res = await request(app)
       .post('/test')
-      .send({ matricula: 'VALE001', senha: 'senha123', role: 'admin', isAdmin: true });
+      .send({ matricula: 'VFZ1001', senha: 'senha123', role: 'admin', isAdmin: true });
     expect(res.status).toBe(422);
     expect(res.body.detalhes).toEqual(
       expect.arrayContaining([
@@ -91,14 +91,14 @@ describe('loginValidator', () => {
   it('rejeita SQL injection via matrícula', async () => {
     const res = await request(app)
       .post('/test')
-      .send({ matricula: "VALE001' OR '1'='1", senha: 'senha123' });
+      .send({ matricula: "VFZ1001' OR '1'='1", senha: 'senha123' });
     expect(res.status).toBe(422);
   });
 
   it('aceita matrícula ADMIN', async () => {
     const res = await request(app)
       .post('/test')
-      .send({ matricula: 'ADMIN001', senha: 'senha123' });
+      .send({ matricula: 'ADM9001', senha: 'senha123' });
     expect(res.status).toBe(200);
   });
 });
@@ -177,7 +177,7 @@ describe('criarUsuarioValidator', () => {
       .post('/test')
       .send({
         nome: 'João Silva',
-        matricula: 'VALE100',
+        matricula: 'VFZ1100',
         senha: 'senhasegura',
         funcao: 'operador',
         turno: 'A',
@@ -189,14 +189,14 @@ describe('criarUsuarioValidator', () => {
   it('aceita payload com campos opcionais ausentes', async () => {
     const res = await request(app)
       .post('/test')
-      .send({ nome: 'João Silva', matricula: 'VALE100', senha: 'senhasegura' });
+      .send({ nome: 'João Silva', matricula: 'VFZ1100', senha: 'senhasegura' });
     expect(res.status).toBe(200);
   });
 
   it('rejeita função inválida', async () => {
     const res = await request(app)
       .post('/test')
-      .send({ nome: 'João Silva', matricula: 'VALE100', senha: 'senhasegura', funcao: 'hacker' });
+      .send({ nome: 'João Silva', matricula: 'VFZ1100', senha: 'senhasegura', funcao: 'hacker' });
     expect(res.status).toBe(422);
     expect(res.body.detalhes).toEqual(
       expect.arrayContaining([expect.objectContaining({ campo: 'funcao' })]),
@@ -206,7 +206,7 @@ describe('criarUsuarioValidator', () => {
   it('rejeita turno inválido', async () => {
     const res = await request(app)
       .post('/test')
-      .send({ nome: 'João Silva', matricula: 'VALE100', senha: 'senhasegura', turno: 'Z' });
+      .send({ nome: 'João Silva', matricula: 'VFZ1100', senha: 'senhasegura', turno: 'Z' });
     expect(res.status).toBe(422);
   });
 
@@ -214,7 +214,7 @@ describe('criarUsuarioValidator', () => {
     const res = await request(app)
       .post('/test')
       .send({
-        nome: 'João Silva', matricula: 'VALE100', senha: 'senhasegura',
+        nome: 'João Silva', matricula: 'VFZ1100', senha: 'senhasegura',
         isAdmin: true, role: 'root',
       });
     expect(res.status).toBe(422);
@@ -230,7 +230,7 @@ describe('criarUsuarioValidator', () => {
       .post('/test')
       .send({
         nome: '<img src=x onerror=alert(1)>',
-        matricula: 'VALE100',
+        matricula: 'VFZ1100',
         senha: 'senhasegura',
       });
     // Should pass validation but with escaped content

@@ -33,6 +33,7 @@ const createValidToken = (overrides: Partial<JWTPayload> = {}): string => {
     uuid: 'test-uuid-123',
     matricula: 'VALE001',
     funcao: 'operador',
+    primaryYard: 'VFZ',
     type: 'access',
     ...overrides,
   };
@@ -190,12 +191,12 @@ describe('authorize middleware', () => {
     expect(mockNext).toHaveBeenCalled();
   });
 
-  it('should map "supervisor" to "gestor" profile', () => {
+  it('should map "supervisor" to "supervisor" profile', () => {
     const req = mockRequest({}) as any;
     req.user = { userId: 1, uuid: 'x', matricula: 'V001', funcao: 'supervisor', type: 'access' };
     const res = mockResponse();
 
-    // gestor (level 4) should access inspetor-level routes (level 3)
+    // supervisor (level 3) should access inspetor-level routes (level 2)
     authorize('inspetor')(req as Request, res as Response, mockNext);
     expect(mockNext).toHaveBeenCalled();
   });
@@ -221,13 +222,17 @@ describe('authorize middleware', () => {
 
   // ── Hierarchy order tests ─────────────────────────────────────────────
 
-  it('should enforce hierarchy: operador < oficial < inspetor < gestor < administrador', () => {
+  it('should enforce 8-level hierarchy: operador < inspetor < supervisor < coordenador < gerente < diretor < administrador < suporte', () => {
+    // Matches the actual middleware mapping (v3.3 — 8 níveis)
+    // Note: oficial maps to level 1 (same as operador)
     const roles = [
       { funcao: 'operador', level: 1 },
-      { funcao: 'oficial', level: 2 },
-      { funcao: 'inspetor', level: 3 },
-      { funcao: 'gestor', level: 4 },
-      { funcao: 'administrador', level: 5 },
+      { funcao: 'inspetor', level: 2 },
+      { funcao: 'supervisor', level: 3 },
+      { funcao: 'coordenador', level: 4 },
+      { funcao: 'gerente', level: 5 },
+      { funcao: 'diretor', level: 6 },
+      { funcao: 'administrador', level: 7 },
     ];
 
     // Each role should be able to access its own level and below, but not above
@@ -241,7 +246,7 @@ describe('authorize middleware', () => {
       authorize(roles[i].funcao)(req as Request, resOwn as Response, nextOwn);
       expect(nextOwn).toHaveBeenCalled();
 
-      // Should NOT access the next higher level (except admin who is top)
+      // Should NOT access the next higher level (except last)
       if (i < roles.length - 1) {
         const resHigher = mockResponse();
         const nextHigher = jest.fn();

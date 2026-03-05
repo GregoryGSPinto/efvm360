@@ -74,17 +74,17 @@ describe('Auth Routes — Integration', () => {
 
   describe('POST /api/v1/auth/login', () => {
     it('should login with valid credentials and return tokens + user', async () => {
-      await createTestUser({ matricula: 'VALE001', funcao: 'operador' });
+      await createTestUser({ matricula: 'VFZ1001', funcao: 'operador' });
 
       const res = await request(app)
         .post('/api/v1/auth/login')
-        .send({ matricula: 'VALE001', senha: 'Vale@2024' });
+        .send({ matricula: 'VFZ1001', senha: 'Vale@2024' });
 
       expect(res.status).toBe(200);
       expect(res.body.accessToken).toBeDefined();
       expect(res.body.refreshToken).toBeDefined();
       expect(res.body.user).toBeDefined();
-      expect(res.body.user.matricula).toBe('VALE001');
+      expect(res.body.user.matricula).toBe('VFZ1001');
       expect(res.body.expiresIn).toBeDefined();
       // Ensure password hash is NOT returned
       expect(res.body.user.senha_hash).toBeUndefined();
@@ -94,7 +94,7 @@ describe('Auth Routes — Integration', () => {
     it('should return 401 with generic message for non-existent matricula', async () => {
       const res = await request(app)
         .post('/api/v1/auth/login')
-        .send({ matricula: 'NONEXIST', senha: 'anypassword' });
+        .send({ matricula: 'VFZ9999', senha: 'anypassword' });
 
       expect(res.status).toBe(401);
       expect(res.body.code).toBe('AUTH_INVALID_CREDENTIALS');
@@ -103,42 +103,42 @@ describe('Auth Routes — Integration', () => {
     });
 
     it('should return 401 for incorrect password', async () => {
-      await createTestUser({ matricula: 'VALE001' });
+      await createTestUser({ matricula: 'VFZ1001' });
 
       const res = await request(app)
         .post('/api/v1/auth/login')
-        .send({ matricula: 'VALE001', senha: 'WrongPassword' });
+        .send({ matricula: 'VFZ1001', senha: 'WrongPassword' });
 
       expect(res.status).toBe(401);
       expect(res.body.code).toBe('AUTH_INVALID_CREDENTIALS');
     });
 
-    it('should return 400 if matricula or senha missing', async () => {
+    it('should return 422 if matricula or senha missing (validation)', async () => {
       const res1 = await request(app)
         .post('/api/v1/auth/login')
-        .send({ matricula: 'VALE001' });
-      expect(res1.status).toBe(400);
+        .send({ matricula: 'VFZ1001' });
+      expect(res1.status).toBe(422);
 
       const res2 = await request(app)
         .post('/api/v1/auth/login')
         .send({ senha: 'Vale@2024' });
-      expect(res2.status).toBe(400);
+      expect(res2.status).toBe(422);
     });
 
     it('should lock account after 5 failed attempts', async () => {
-      await createTestUser({ matricula: 'VALE001' });
+      await createTestUser({ matricula: 'VFZ1001' });
 
       // Make 5 failed login attempts
       for (let i = 0; i < 5; i++) {
         await request(app)
           .post('/api/v1/auth/login')
-          .send({ matricula: 'VALE001', senha: 'WrongPass' });
+          .send({ matricula: 'VFZ1001', senha: 'WrongPass' });
       }
 
       // 6th attempt — account should be locked
       const res = await request(app)
         .post('/api/v1/auth/login')
-        .send({ matricula: 'VALE001', senha: 'Vale@2024' }); // Even correct password
+        .send({ matricula: 'VFZ1001', senha: 'Vale@2024' }); // Even correct password
 
       expect(res.status).toBe(401);
       expect(res.body.code).toBe('AUTH_ACCOUNT_LOCKED');
@@ -149,12 +149,12 @@ describe('Auth Routes — Integration', () => {
 
   describe('POST /api/v1/auth/refresh', () => {
     it('should return new tokens with a valid refresh token', async () => {
-      await createTestUser({ matricula: 'VALE001' });
+      await createTestUser({ matricula: 'VFZ1001' });
 
       // Login first to get refresh token
       const loginRes = await request(app)
         .post('/api/v1/auth/login')
-        .send({ matricula: 'VALE001', senha: 'Vale@2024' });
+        .send({ matricula: 'VFZ1001', senha: 'Vale@2024' });
 
       const refreshToken = loginRes.body.refreshToken;
       expect(refreshToken).toBeDefined();
@@ -172,11 +172,11 @@ describe('Auth Routes — Integration', () => {
     });
 
     it('should reject a revoked/used refresh token', async () => {
-      await createTestUser({ matricula: 'VALE001' });
+      await createTestUser({ matricula: 'VFZ1001' });
 
       const loginRes = await request(app)
         .post('/api/v1/auth/login')
-        .send({ matricula: 'VALE001', senha: 'Vale@2024' });
+        .send({ matricula: 'VFZ1001', senha: 'Vale@2024' });
 
       const refreshToken = loginRes.body.refreshToken;
 
@@ -193,12 +193,12 @@ describe('Auth Routes — Integration', () => {
       expect(res.status).toBe(401);
     });
 
-    it('should return 400 if refresh token is missing', async () => {
+    it('should return 422 if refresh token is missing (validation)', async () => {
       const res = await request(app)
         .post('/api/v1/auth/refresh')
         .send({});
 
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(422);
     });
   });
 
@@ -206,12 +206,12 @@ describe('Auth Routes — Integration', () => {
 
   describe('POST /api/v1/auth/logout', () => {
     it('should revoke refresh tokens on logout', async () => {
-      await createTestUser({ matricula: 'VALE001' });
+      await createTestUser({ matricula: 'VFZ1001' });
 
       // Login
       const loginRes = await request(app)
         .post('/api/v1/auth/login')
-        .send({ matricula: 'VALE001', senha: 'Vale@2024' });
+        .send({ matricula: 'VFZ1001', senha: 'Vale@2024' });
 
       const { accessToken, refreshToken } = loginRes.body;
 
@@ -235,11 +235,11 @@ describe('Auth Routes — Integration', () => {
 
   describe('GET /api/v1/auth/me', () => {
     it('should return user data without password', async () => {
-      await createTestUser({ matricula: 'VALE001', nome: 'João Silva', funcao: 'operador' });
+      await createTestUser({ matricula: 'VFZ1001', nome: 'João Silva', funcao: 'operador' });
 
       const loginRes = await request(app)
         .post('/api/v1/auth/login')
-        .send({ matricula: 'VALE001', senha: 'Vale@2024' });
+        .send({ matricula: 'VFZ1001', senha: 'Vale@2024' });
 
       const res = await request(app)
         .get('/api/v1/auth/me')
@@ -247,7 +247,7 @@ describe('Auth Routes — Integration', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.user.nome).toBe('João Silva');
-      expect(res.body.user.matricula).toBe('VALE001');
+      expect(res.body.user.matricula).toBe('VFZ1001');
       expect(res.body.user.senha_hash).toBeUndefined();
     });
 
@@ -261,11 +261,11 @@ describe('Auth Routes — Integration', () => {
 
   describe('POST /api/v1/auth/alterar-senha', () => {
     it('should change password with correct current password', async () => {
-      await createTestUser({ matricula: 'VALE001' });
+      await createTestUser({ matricula: 'VFZ1001' });
 
       const loginRes = await request(app)
         .post('/api/v1/auth/login')
-        .send({ matricula: 'VALE001', senha: 'Vale@2024' });
+        .send({ matricula: 'VFZ1001', senha: 'Vale@2024' });
 
       const res = await request(app)
         .post('/api/v1/auth/alterar-senha')
@@ -278,17 +278,17 @@ describe('Auth Routes — Integration', () => {
       // Login with new password should work
       const newLoginRes = await request(app)
         .post('/api/v1/auth/login')
-        .send({ matricula: 'VALE001', senha: 'NovaSenha@2024' });
+        .send({ matricula: 'VFZ1001', senha: 'NovaSenha@2024' });
 
       expect(newLoginRes.status).toBe(200);
     });
 
     it('should reject change with incorrect current password', async () => {
-      await createTestUser({ matricula: 'VALE001' });
+      await createTestUser({ matricula: 'VFZ1001' });
 
       const loginRes = await request(app)
         .post('/api/v1/auth/login')
-        .send({ matricula: 'VALE001', senha: 'Vale@2024' });
+        .send({ matricula: 'VFZ1001', senha: 'Vale@2024' });
 
       const res = await request(app)
         .post('/api/v1/auth/alterar-senha')
@@ -299,20 +299,22 @@ describe('Auth Routes — Integration', () => {
       expect(res.body.error).toContain('incorreta');
     });
 
-    it('should reject new password shorter than 8 characters', async () => {
-      await createTestUser({ matricula: 'VALE001' });
+    it('should reject new password shorter than 8 characters (validation)', async () => {
+      await createTestUser({ matricula: 'VFZ1001' });
 
       const loginRes = await request(app)
         .post('/api/v1/auth/login')
-        .send({ matricula: 'VALE001', senha: 'Vale@2024' });
+        .send({ matricula: 'VFZ1001', senha: 'Vale@2024' });
 
       const res = await request(app)
         .post('/api/v1/auth/alterar-senha')
         .set('Authorization', `Bearer ${loginRes.body.accessToken}`)
         .send({ senhaAtual: 'Vale@2024', novaSenha: 'short' });
 
-      expect(res.status).toBe(400);
-      expect(res.body.error).toContain('8 caracteres');
+      expect(res.status).toBe(422);
+      expect(res.body.detalhes).toEqual(
+        expect.arrayContaining([expect.objectContaining({ campo: 'novaSenha' })]),
+      );
     });
   });
 });

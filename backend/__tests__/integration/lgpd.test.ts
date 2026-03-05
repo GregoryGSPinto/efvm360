@@ -57,7 +57,7 @@ app.use(express.json());
 app.use('/api/v1', routes);
 
 // Helper: login and return access token
-const loginAndGetToken = async (matricula = 'VALE001', senha = 'Vale@2024') => {
+const loginAndGetToken = async (matricula = 'VFZ1001', senha = 'Vale@2024') => {
   const res = await request(app)
     .post('/api/v1/auth/login')
     .send({ matricula, senha });
@@ -82,7 +82,7 @@ describe('LGPD Routes — Integration', () => {
   describe('GET /api/v1/lgpd/meus-dados', () => {
     it('should return authenticated user personal data', async () => {
       await createTestUser({
-        matricula: 'VALE001',
+        matricula: 'VFZ1001',
         nome: 'Operador Teste',
         funcao: 'operador',
         turno: 'A',
@@ -96,7 +96,7 @@ describe('LGPD Routes — Integration', () => {
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty('dadosPessoais');
       expect(res.body.dadosPessoais.nome).toBe('Operador Teste');
-      expect(res.body.dadosPessoais.matricula).toBe('VALE001');
+      expect(res.body.dadosPessoais.matricula).toBe('VFZ1001');
       expect(res.body.dadosPessoais.funcao).toBe('operador');
       // Must NOT contain password hash
       expect(res.body.dadosPessoais.senha_hash).toBeUndefined();
@@ -104,7 +104,7 @@ describe('LGPD Routes — Integration', () => {
     });
 
     it('should include passagens count and audit records', async () => {
-      await createTestUser({ matricula: 'VALE001' });
+      await createTestUser({ matricula: 'VFZ1001' });
       const token = await loginAndGetToken();
 
       const res = await request(app)
@@ -142,7 +142,7 @@ describe('LGPD Routes — Integration', () => {
 
   describe('POST /api/v1/lgpd/exportar', () => {
     it('should generate a JSON export with Content-Disposition header', async () => {
-      await createTestUser({ matricula: 'VALE001', nome: 'Operador Export' });
+      await createTestUser({ matricula: 'VFZ1001', nome: 'Operador Export' });
       const token = await loginAndGetToken();
 
       const res = await request(app)
@@ -152,12 +152,12 @@ describe('LGPD Routes — Integration', () => {
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(/application\/json/);
       expect(res.headers['content-disposition']).toBeDefined();
-      expect(res.headers['content-disposition']).toContain('lgpd_export_VALE001');
+      expect(res.headers['content-disposition']).toContain('lgpd_export_VFZ1001');
       expect(res.headers['content-disposition']).toContain('.json');
     });
 
     it('should include user data in the export', async () => {
-      await createTestUser({ matricula: 'VALE001', nome: 'Operador Export' });
+      await createTestUser({ matricula: 'VFZ1001', nome: 'Operador Export' });
       const token = await loginAndGetToken();
 
       const res = await request(app)
@@ -166,7 +166,7 @@ describe('LGPD Routes — Integration', () => {
 
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty('usuario');
-      expect(res.body.usuario.matricula).toBe('VALE001');
+      expect(res.body.usuario.matricula).toBe('VFZ1001');
       expect(res.body.usuario.nome).toBe('Operador Export');
       // Must NOT include password hash in export
       expect(res.body.usuario.senha_hash).toBeUndefined();
@@ -187,13 +187,13 @@ describe('LGPD Routes — Integration', () => {
 
   describe('POST /api/v1/lgpd/anonimizar', () => {
     it('should require admin role (403 for operador)', async () => {
-      await createTestUser({ matricula: 'VALE001', funcao: 'operador' });
+      await createTestUser({ matricula: 'VFZ1001', funcao: 'operador' });
       const token = await loginAndGetToken();
 
       const res = await request(app)
         .post('/api/v1/lgpd/anonimizar')
         .set('Authorization', `Bearer ${token}`)
-        .send({ matriculaAlvo: 'VALE002' });
+        .send({ matriculaAlvo: 'VFZ1002' });
 
       expect(res.status).toBe(403);
       expect(res.body.code).toBe('AUTH_FORBIDDEN');
@@ -201,15 +201,15 @@ describe('LGPD Routes — Integration', () => {
 
     it('should allow admin to anonymize a user', async () => {
       // Create admin and target user
-      await createTestAdmin({ matricula: 'ADMIN001' });
-      await createTestUser({ matricula: 'VALE002', nome: 'Usuário Alvo' });
+      await createTestAdmin({ matricula: 'ADM9001' });
+      await createTestUser({ matricula: 'VFZ1002', nome: 'Usuário Alvo' });
 
-      const adminToken = await loginAndGetToken('ADMIN001', 'Vale@2024');
+      const adminToken = await loginAndGetToken('ADM9001', 'Vale@2024');
 
       const res = await request(app)
         .post('/api/v1/lgpd/anonimizar')
         .set('Authorization', `Bearer ${adminToken}`)
-        .send({ matriculaAlvo: 'VALE002' });
+        .send({ matriculaAlvo: 'VFZ1002' });
 
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty('message');
@@ -219,8 +219,8 @@ describe('LGPD Routes — Integration', () => {
     });
 
     it('should return 404 for non-existent user', async () => {
-      await createTestAdmin({ matricula: 'ADMIN001' });
-      const adminToken = await loginAndGetToken('ADMIN001', 'Vale@2024');
+      await createTestAdmin({ matricula: 'ADM9001' });
+      const adminToken = await loginAndGetToken('ADM9001', 'Vale@2024');
 
       const res = await request(app)
         .post('/api/v1/lgpd/anonimizar')
@@ -231,38 +231,38 @@ describe('LGPD Routes — Integration', () => {
     });
 
     it('should return 400 if matriculaAlvo is missing', async () => {
-      await createTestAdmin({ matricula: 'ADMIN001' });
-      const adminToken = await loginAndGetToken('ADMIN001', 'Vale@2024');
+      await createTestAdmin({ matricula: 'ADM9001' });
+      const adminToken = await loginAndGetToken('ADM9001', 'Vale@2024');
 
       const res = await request(app)
         .post('/api/v1/lgpd/anonimizar')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({});
 
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(422);
     });
 
     it('should return 401 without authentication', async () => {
       const res = await request(app)
         .post('/api/v1/lgpd/anonimizar')
-        .send({ matriculaAlvo: 'VALE002' });
+        .send({ matriculaAlvo: 'VFZ1002' });
 
       expect(res.status).toBe(401);
     });
 
     it('should actually anonymize user data in the database', async () => {
-      await createTestAdmin({ matricula: 'ADMIN001' });
-      await createTestUser({ matricula: 'VALE002', nome: 'Usuário Original' });
+      await createTestAdmin({ matricula: 'ADM9001' });
+      await createTestUser({ matricula: 'VFZ1002', nome: 'Usuário Original' });
 
-      const adminToken = await loginAndGetToken('ADMIN001', 'Vale@2024');
+      const adminToken = await loginAndGetToken('ADM9001', 'Vale@2024');
 
       await request(app)
         .post('/api/v1/lgpd/anonimizar')
         .set('Authorization', `Bearer ${adminToken}`)
-        .send({ matriculaAlvo: 'VALE002' });
+        .send({ matriculaAlvo: 'VFZ1002' });
 
       // Verify user was anonymized in the database
-      const originalUser = await TestUsuario.findOne({ where: { matricula: 'VALE002' } });
+      const originalUser = await TestUsuario.findOne({ where: { matricula: 'VFZ1002' } });
       expect(originalUser).toBeNull(); // Original matrícula should no longer exist
 
       // Find the anonymized user

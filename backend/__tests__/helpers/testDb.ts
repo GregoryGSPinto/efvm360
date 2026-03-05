@@ -28,6 +28,7 @@ interface UsuarioAttributes {
   funcao: string;
   turno: string | null;
   horario_turno: string | null;
+  primary_yard: string;
   senha_hash: string;
   ativo: boolean;
   ultimo_login: Date | null;
@@ -45,13 +46,13 @@ interface PassagemAttributes {
   horario_turno: string;
   operador_sai_id: number | null;
   operador_entra_id: number | null;
-  dados_patio_cima: string;
-  dados_patio_baixo: string;
-  dados_equipamentos: string | null;
-  dados_seguranca_manobras: string | null;
-  dados_pontos_atencao: string | null;
-  dados_intervencoes: string | null;
-  dados_sala_5s: string | null;
+  dados_patio_cima: object;
+  dados_patio_baixo: object;
+  dados_equipamentos: object | null;
+  dados_seguranca_manobras: object | null;
+  dados_pontos_atencao: object | null;
+  dados_intervencoes: object | null;
+  dados_sala_5s: object | null;
   assinatura_sai_confirmado: boolean;
   assinatura_sai_hash: string | null;
   assinatura_sai_timestamp: Date | null;
@@ -76,7 +77,7 @@ interface AuditTrailAttributes {
   hash_registro: string;
 }
 
-export class TestUsuario extends Model<UsuarioAttributes, Optional<UsuarioAttributes, 'id' | 'uuid' | 'ativo' | 'ultimo_login' | 'tentativas_login' | 'bloqueado_ate' | 'azure_ad_oid'>> implements UsuarioAttributes {
+export class TestUsuario extends Model<UsuarioAttributes, Optional<UsuarioAttributes, 'id' | 'uuid' | 'ativo' | 'ultimo_login' | 'tentativas_login' | 'bloqueado_ate' | 'azure_ad_oid' | 'primary_yard'>> implements UsuarioAttributes {
   declare id: number;
   declare uuid: string;
   declare nome: string;
@@ -84,6 +85,7 @@ export class TestUsuario extends Model<UsuarioAttributes, Optional<UsuarioAttrib
   declare funcao: string;
   declare turno: string | null;
   declare horario_turno: string | null;
+  declare primary_yard: string;
   declare senha_hash: string;
   declare ativo: boolean;
   declare ultimo_login: Date | null;
@@ -101,6 +103,7 @@ export class TestUsuario extends Model<UsuarioAttributes, Optional<UsuarioAttrib
       funcao: this.funcao,
       turno: this.turno,
       horarioTurno: this.horario_turno,
+      primaryYard: this.primary_yard,
       ativo: this.ativo,
       ultimoLogin: this.ultimo_login,
     };
@@ -115,6 +118,7 @@ TestUsuario.init({
   funcao: { type: DataTypes.STRING(30), allowNull: false, defaultValue: 'operador' },
   turno: { type: DataTypes.STRING(1), allowNull: true },
   horario_turno: { type: DataTypes.STRING(10), allowNull: true },
+  primary_yard: { type: DataTypes.STRING(10), allowNull: false, defaultValue: 'VFZ' },
   senha_hash: { type: DataTypes.STRING(255), allowNull: false },
   ativo: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
   ultimo_login: { type: DataTypes.DATE, allowNull: true },
@@ -132,13 +136,13 @@ export class TestPassagem extends Model<PassagemAttributes, Optional<PassagemAtt
   declare horario_turno: string;
   declare operador_sai_id: number | null;
   declare operador_entra_id: number | null;
-  declare dados_patio_cima: string;
-  declare dados_patio_baixo: string;
-  declare dados_equipamentos: string | null;
-  declare dados_seguranca_manobras: string | null;
-  declare dados_pontos_atencao: string | null;
-  declare dados_intervencoes: string | null;
-  declare dados_sala_5s: string | null;
+  declare dados_patio_cima: object;
+  declare dados_patio_baixo: object;
+  declare dados_equipamentos: object | null;
+  declare dados_seguranca_manobras: object | null;
+  declare dados_pontos_atencao: object | null;
+  declare dados_intervencoes: object | null;
+  declare dados_sala_5s: object | null;
   declare assinatura_sai_confirmado: boolean;
   declare assinatura_sai_hash: string | null;
   declare assinatura_sai_timestamp: Date | null;
@@ -152,20 +156,19 @@ export class TestPassagem extends Model<PassagemAttributes, Optional<PassagemAtt
 TestPassagem.init({
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
   uuid: { type: DataTypes.STRING(36), allowNull: false, unique: true, defaultValue: DataTypes.UUIDV4 },
-  data_passagem: { type: DataTypes.STRING, allowNull: false },
+  data_passagem: { type: DataTypes.DATEONLY, allowNull: false },
   dss: { type: DataTypes.STRING(50), allowNull: true },
   turno: { type: DataTypes.STRING(1), allowNull: false },
   horario_turno: { type: DataTypes.STRING(10), allowNull: false },
   operador_sai_id: { type: DataTypes.INTEGER, allowNull: true },
   operador_entra_id: { type: DataTypes.INTEGER, allowNull: true },
-  // SQLite doesn't have JSON type natively — use TEXT
-  dados_patio_cima: { type: DataTypes.TEXT, allowNull: false, defaultValue: '[]' },
-  dados_patio_baixo: { type: DataTypes.TEXT, allowNull: false, defaultValue: '[]' },
-  dados_equipamentos: { type: DataTypes.TEXT, allowNull: true },
-  dados_seguranca_manobras: { type: DataTypes.TEXT, allowNull: true },
-  dados_pontos_atencao: { type: DataTypes.TEXT, allowNull: true },
-  dados_intervencoes: { type: DataTypes.TEXT, allowNull: true },
-  dados_sala_5s: { type: DataTypes.TEXT, allowNull: true },
+  dados_patio_cima: { type: DataTypes.JSON, allowNull: false, defaultValue: [] },
+  dados_patio_baixo: { type: DataTypes.JSON, allowNull: false, defaultValue: [] },
+  dados_equipamentos: { type: DataTypes.JSON, allowNull: true },
+  dados_seguranca_manobras: { type: DataTypes.JSON, allowNull: true },
+  dados_pontos_atencao: { type: DataTypes.JSON, allowNull: true },
+  dados_intervencoes: { type: DataTypes.JSON, allowNull: true },
+  dados_sala_5s: { type: DataTypes.JSON, allowNull: true },
   assinatura_sai_confirmado: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   assinatura_sai_hash: { type: DataTypes.STRING(128), allowNull: true },
   assinatura_sai_timestamp: { type: DataTypes.DATE, allowNull: true },
@@ -254,7 +257,7 @@ export const createTestUser = async (overrides: Partial<UsuarioAttributes> = {})
   return TestUsuario.create({
     uuid,
     nome: overrides.nome || 'Operador Teste',
-    matricula: overrides.matricula || 'VALE001',
+    matricula: overrides.matricula || 'VFZ1001',
     funcao: overrides.funcao || 'operador',
     turno: overrides.turno || 'A',
     horario_turno: overrides.horario_turno || '07:00-15:00',
@@ -270,7 +273,7 @@ export const createTestUser = async (overrides: Partial<UsuarioAttributes> = {})
 export const createTestAdmin = async (overrides: Partial<UsuarioAttributes> = {}) => {
   return createTestUser({
     nome: 'Admin Teste',
-    matricula: 'ADMIN001',
+    matricula: 'ADM9001',
     funcao: 'administrador',
     ...overrides,
   });

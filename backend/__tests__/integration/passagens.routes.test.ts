@@ -56,7 +56,7 @@ app.use(express.json());
 app.use('/api/v1', routes);
 
 // Helper: login and return access token
-const loginAndGetToken = async (matricula = 'VALE001', senha = 'Vale@2024') => {
+const loginAndGetToken = async (matricula = 'VFZ1001', senha = 'Vale@2024') => {
   const res = await request(app)
     .post('/api/v1/auth/login')
     .send({ matricula, senha });
@@ -75,7 +75,7 @@ describe('Passagens Routes — Integration', () => {
   beforeEach(async () => {
     await clearTestDb();
     // Create a default user for all tests
-    await createTestUser({ matricula: 'VALE001', nome: 'Operador Teste' });
+    await createTestUser({ matricula: 'VFZ1001', nome: 'Operador Teste' });
   });
 
   // ── POST /passagens ───────────────────────────────────────────────────
@@ -111,7 +111,7 @@ describe('Passagens Routes — Integration', () => {
           patioCima: [],
           patioBaixo: [],
           assinaturas: {
-            sai: { confirmado: true, matricula: 'VALE001', hashIntegridade: 'abc123' },
+            sai: { confirmado: true, matricula: 'VFZ1001', hashIntegridade: 'abc123' },
             entra: { confirmado: false },
           },
         });
@@ -131,8 +131,8 @@ describe('Passagens Routes — Integration', () => {
           patioCima: [],
           patioBaixo: [],
           assinaturas: {
-            sai: { confirmado: true, matricula: 'VALE001', hashIntegridade: 'abc' },
-            entra: { confirmado: true, matricula: 'VALE001', hashIntegridade: 'def' },
+            sai: { confirmado: true, matricula: 'VFZ1001', hashIntegridade: 'abc' },
+            entra: { confirmado: true, matricula: 'VFZ1001', hashIntegridade: 'def' },
           },
         });
 
@@ -140,7 +140,7 @@ describe('Passagens Routes — Integration', () => {
       expect(res.body.status).toBe('assinado_completo');
     });
 
-    it('should return 400 if data or turno missing', async () => {
+    it('should return 422 if data or turno missing (validation)', async () => {
       const token = await loginAndGetToken();
 
       const res = await request(app)
@@ -148,7 +148,7 @@ describe('Passagens Routes — Integration', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({ cabecalho: {} });
 
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(422);
       expect(res.body.code).toBe('VALIDATION_ERROR');
     });
 
@@ -250,7 +250,7 @@ describe('Passagens Routes — Integration', () => {
       const token = await loginAndGetToken();
 
       const res = await request(app)
-        .get('/api/v1/passagens/non-existent-uuid')
+        .get('/api/v1/passagens/00000000-0000-4000-8000-000000000000')
         .set('Authorization', `Bearer ${token}`);
 
       expect(res.status).toBe(404);
