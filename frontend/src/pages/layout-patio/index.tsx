@@ -339,7 +339,7 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
 
       {/* Modal: Criar Novo Pátio */}
       {showCriarPatioModal && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} onClick={() => setShowCriarPatioModal(false)}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }} onClick={() => setShowCriarPatioModal(false)}>
           <div style={{ background: tema.card, borderRadius: 16, padding: '28px 32px', maxWidth: 420, width: '90%', border: `1px solid ${tema.cardBorda}`, boxShadow: '0 16px 48px rgba(0,0,0,0.2)' }} onClick={e => e.stopPropagation()}>
             <h3 style={{ color: tema.texto, margin: '0 0 16px', fontSize: 17, fontWeight: 700 }}>Criar Novo Pátio</h3>
             {novoPatErro && (

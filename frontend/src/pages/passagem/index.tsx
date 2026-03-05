@@ -1095,7 +1095,7 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
               <div style={{
                 position: 'fixed', inset: 0, zIndex: 9999,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+                background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
               }} onClick={() => setShowEquipModal(false)}>
                 <div style={{
                   background: tema.card, borderRadius: 16, padding: '24px 28px',
@@ -3129,7 +3129,7 @@ SEGURANÇA EM MANOBRAS
         <div style={{
           position: 'fixed', inset: 0, zIndex: 9999,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+          background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
         }} onClick={() => setShowCriarPatioModal(false)}>
           <div style={{
             background: tema.card, borderRadius: 16, padding: '28px 32px', maxWidth: 420, width: '90%',
@@ -3293,7 +3293,7 @@ SEGURANÇA EM MANOBRAS
           background: copilotAlertas.some(a => a.nivel === 'bloqueante')
             ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.12)',
           border: `1px solid ${copilotAlertas.some(a => a.nivel === 'bloqueante') ? '#ef4444' : '#f59e0b'}40`,
-          backdropFilter: 'blur(8px)',
+          backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
             <span style={{ fontSize: 16 }}>🤖</span>

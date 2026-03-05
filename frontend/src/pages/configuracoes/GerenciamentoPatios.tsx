@@ -304,7 +304,7 @@ export default function GerenciamentoPatios({ styles, tema }: GerenciamentoPatio
         <div style={{
           position: 'fixed', inset: 0, zIndex: 9999,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+          background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
         }} onClick={() => setConfirmar(null)}>
           <div style={{
             background: tema.card, borderRadius: 16, padding: '28px 32px', maxWidth: 400, width: '90%',

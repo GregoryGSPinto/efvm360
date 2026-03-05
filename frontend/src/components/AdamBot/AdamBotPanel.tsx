@@ -15,8 +15,12 @@ interface AdamBotPanelProps {
   fabPosition?: { x: number; y: number };
 }
 
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 function formatBold(text: string): string {
-  return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  return escapeHtml(text).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 }
 
 const AdamBotPanelInner = ({ tema, fabPosition }: AdamBotPanelProps) => {

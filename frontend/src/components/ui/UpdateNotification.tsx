@@ -59,7 +59,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '12px 16px',
     borderRadius: 12,
     background: 'rgba(0, 164, 81, 0.95)',
-    backdropFilter: 'blur(12px)',
+    backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
     boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
     color: '#fff',
   },

@@ -594,7 +594,7 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
             <div style={{
               position: 'fixed', inset: 0, zIndex: 9999,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+              background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
             }} onClick={() => setShowCriarUsuario(false)}>
               <div style={{
                 background: tema.card, borderRadius: 16, padding: '28px 32px', maxWidth: 480, width: '92%',

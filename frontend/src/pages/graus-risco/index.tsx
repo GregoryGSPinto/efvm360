@@ -667,7 +667,7 @@ export default function PaginaGrausRisco(props: PaginaGrausRiscoProps): JSX.Elem
           style={{
             position: 'fixed', inset: 0, zIndex: 9999,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+            background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
           }}
           onClick={() => setShowModal(false)}
         >

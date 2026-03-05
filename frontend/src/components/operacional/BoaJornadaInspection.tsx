@@ -181,7 +181,7 @@ export const BoaJornadaInspection: React.FC<BoaJornadaInspectionProps> = ({
   // ── Estilos ───────────────────────────────────────────────────────
   const containerStyle: React.CSSProperties = {
     background: isDark ? 'rgba(0, 30, 15, 0.9)' : 'rgba(255, 255, 255, 0.98)',
-    backdropFilter: 'blur(20px)',
+    backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
     border: `1px solid ${isDark ? 'rgba(0, 114, 63, 0.4)' : 'rgba(0, 114, 63, 0.2)'}`,
     borderRadius: '20px',
     padding: '28px',

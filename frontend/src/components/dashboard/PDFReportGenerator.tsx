@@ -299,7 +299,7 @@ const PDFReportGenerator = memo(function PDFReportGenerator({
     try {
       await generatePDFReport(registros, filtros, chartContainerRef);
     } catch (err) {
-      console.error('PDF generation error:', err);
+      if (import.meta.env?.DEV) console.error('PDF generation error:', err);
     } finally {
       setGenerating(false);
     }

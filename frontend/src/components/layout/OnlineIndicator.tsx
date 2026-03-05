@@ -32,7 +32,7 @@ export const OnlineIndicator = memo<Props>(({ status, pendingCount, isDark }) =>
       padding: '6px 12px', borderRadius: 20,
       background: isDark ? 'rgba(30,30,30,0.92)' : 'rgba(255,255,255,0.92)',
       border: `1px solid ${isDark ? '#333' : '#e5e5e5'}`,
-      backdropFilter: 'blur(8px)',
+      backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
       boxShadow: isDark ? '0 2px 8px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.06)',
       fontSize: 11, color: isDark ? '#aaa' : '#666',
       pointerEvents: 'none', userSelect: 'none',

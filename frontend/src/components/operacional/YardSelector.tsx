@@ -86,7 +86,7 @@ export const YardSelector: React.FC<YardSelectorProps> = ({
     background: isDark
       ? 'rgba(0, 30, 15, 0.85)'
       : 'rgba(255, 255, 255, 0.95)',
-    backdropFilter: 'blur(16px)',
+    backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
     border: `1px solid ${isDark ? 'rgba(0, 114, 63, 0.4)' : 'rgba(0, 114, 63, 0.2)'}`,
     borderRadius: '16px',
     padding: '24px',

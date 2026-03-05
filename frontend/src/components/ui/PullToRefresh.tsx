@@ -24,7 +24,7 @@ export function PullToRefresh({ onRefresh, children, disabled, accentColor = '#0
 
   return (
     <div
-      ref={containerRef}
+      ref={containerRef as React.RefObject<HTMLDivElement>}
       style={{
         position: 'relative',
         overflow: 'auto',

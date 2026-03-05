@@ -81,7 +81,7 @@ export function useWebSocket(): UseWebSocketReturn {
 
     socket.on('connect_error', (err) => {
       setConnectionState('error');
-      console.warn('[WS] Connection error:', err.message);
+      if (import.meta.env?.DEV) console.warn('[WS] Connection error:', err.message);
     });
 
     socket.io.on('reconnect_attempt', (attempt) => {
