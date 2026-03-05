@@ -43,3 +43,13 @@ export {
 export {
   sincronizarBatchValidator,
 } from './syncValidator';
+
+// Integration APIs (Webhooks + Export)
+export {
+  exportRateLimit,
+  createWebhookValidator,
+  updateWebhookValidator,
+  exportHandoversValidator,
+  exportFormatValidator,
+  exportKpisValidator,
+} from './integrationValidator';

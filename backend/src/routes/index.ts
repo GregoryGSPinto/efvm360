@@ -243,6 +243,31 @@ import * as metricsCtrl from '../controllers/metricsController';
 router.get('/metrics/resumo', authenticate, authorize('inspetor'), metricsCtrl.resumo);
 router.get('/metrics/requests', authenticate, authorize('administrador'), metricsCtrl.requests);
 
+// ── INTEGRATION APIs (Webhooks) ─────────────────────────────────────────
+import * as webhookCtrl from '../controllers/webhookController';
+import {
+  exportRateLimit,
+  createWebhookValidator,
+  updateWebhookValidator,
+  exportHandoversValidator,
+  exportFormatValidator,
+  exportKpisValidator,
+} from '../middleware/validators';
+
+router.post('/integrations/webhooks', authenticate, authorize('administrador'), createWebhookValidator, handleValidationErrors, webhookCtrl.create);
+router.get('/integrations/webhooks', authenticate, authorize('administrador'), webhookCtrl.list);
+router.get('/integrations/webhooks/:uuid', authenticate, authorize('administrador'), uuidParamValidator, handleValidationErrors, webhookCtrl.getById);
+router.patch('/integrations/webhooks/:uuid', authenticate, authorize('administrador'), uuidParamValidator, updateWebhookValidator, handleValidationErrors, webhookCtrl.update);
+router.delete('/integrations/webhooks/:uuid', authenticate, authorize('administrador'), uuidParamValidator, handleValidationErrors, webhookCtrl.remove);
+
+// ── EXPORT APIs ─────────────────────────────────────────────────────────
+import * as exportCtrl from '../controllers/exportController';
+
+router.get('/export/handovers', authenticate, authorize('supervisor'), exportRateLimit, exportHandoversValidator, handleValidationErrors, exportCtrl.handovers);
+router.get('/export/equipment', authenticate, authorize('supervisor'), exportRateLimit, exportFormatValidator, handleValidationErrors, exportCtrl.equipment);
+router.get('/export/risk-matrix', authenticate, authorize('supervisor'), exportRateLimit, exportFormatValidator, handleValidationErrors, exportCtrl.riskMatrix);
+router.get('/export/kpis', authenticate, authorize('supervisor'), exportRateLimit, exportKpisValidator, handleValidationErrors, exportCtrl.kpis);
+
 // ── SYNC (Offline-First) ─────────────────────────────────────────────────
 import syncRoutes from './syncRoutes';
 router.use('/sync', syncRoutes);

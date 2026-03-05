@@ -19,6 +19,7 @@ import { runMigration011 } from './011_approval_workflows';
 import { runMigration012 } from './012_multi_tenancy';
 import { runMigration013 } from './013_operational_tables';
 import { runMigration014 } from './014_seed_operational';
+import { runMigration015 } from './015_webhooks';
 
 (async () => {
   try {
@@ -35,6 +36,7 @@ import { runMigration014 } from './014_seed_operational';
     await runMigration012();      // 012 (multi-tenancy: railways + railway_id)
     await runMigration013();      // 013 (equipment, risk_grades, shift_crews, five_s_inspections)
     await runMigration014();      // 014 (seed: equipment, risk grades, patios)
+    await runMigration015();      // 015 (webhooks + webhook_deliveries)
     console.log('\n✅ Todas as migrações executadas com sucesso.');
     process.exit(0);
   } catch (error) {
