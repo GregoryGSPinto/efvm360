@@ -41,7 +41,7 @@ export async function loadSecrets(): Promise<VFZSecrets> {
 
   // If no Key Vault configured, fall back to env vars (dev mode)
   if (!client) {
-    console.log('[KeyVault] No AZURE_KEYVAULT_URL — using environment variables');
+    console.info('[KeyVault] No AZURE_KEYVAULT_URL — using environment variables');
     if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
       throw new Error('[KeyVault] FATAL: JWT_SECRET and JWT_REFRESH_SECRET must be set in environment variables');
     }
@@ -61,7 +61,7 @@ export async function loadSecrets(): Promise<VFZSecrets> {
   }
 
   // Load from Key Vault
-  console.log('[KeyVault] Loading secrets from Azure Key Vault...');
+  console.info('[KeyVault] Loading secrets from Azure Key Vault...');
   try {
     const [jwt, jwtRefresh, dbPass, dbHost, dbUser, dbName, aiKey] = await Promise.all([
       client.getSecret('vfz-jwt-secret'),
@@ -83,7 +83,7 @@ export async function loadSecrets(): Promise<VFZSecrets> {
       APPINSIGHTS_KEY: (aiKey as { value?: string }).value || '',
     };
 
-    console.log('[KeyVault] ✅ Secrets loaded successfully');
+    console.info('[KeyVault] ✅ Secrets loaded successfully');
     return cachedSecrets;
   } catch (error) {
     console.error('[KeyVault] ❌ Failed to load secrets:', error);
@@ -104,5 +104,5 @@ export function getSecret(key: keyof VFZSecrets): string {
 
 export function invalidateSecretCache(): void {
   cachedSecrets = null;
-  console.log('[KeyVault] Secret cache invalidated');
+  console.info('[KeyVault] Secret cache invalidated');
 }

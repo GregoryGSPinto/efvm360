@@ -96,7 +96,7 @@ export function mapGroupsToRole(groups: string[]): string {
 export function azureADAuth() {
   const config = getAzureADConfig();
 
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, _res: Response, next: NextFunction) => {
     // If Azure AD not configured, skip (use local auth)
     if (!config) return next();
 
@@ -136,7 +136,7 @@ export function azureADAuth() {
       // Map to VFZ user
       const role = mapGroupsToRole(verified.groups || []);
 
-      (req as any).user = {
+      req.azureAdUser = {
         matricula: verified.preferred_username || verified.oid,
         nome: verified.name,
         funcao: role,

@@ -18,7 +18,7 @@
 // ============================================================================
 
 import { Request, Response } from 'express';
-import { Passagem, AuditTrail } from '../models';
+import { Passagem } from '../models';
 import { hashFormulario } from '../utils/crypto';
 import { Op } from 'sequelize';
 import * as auditService from '../services/auditService';
@@ -152,7 +152,7 @@ async function processItem(
 
   // 5. Insert
   try {
-    const passagem = await Passagem.create({
+    await Passagem.create({
       uuid: item.id,
       data_passagem: (cabecalho.dataPassagem as string) || item.data || new Date().toISOString().slice(0, 10),
       dss: (cabecalho.dss as string) || null,

@@ -176,7 +176,7 @@ export function initSTT(
   onListeningChange: (listening: boolean) => void,
 ): STTControls {
   const SpeechRecognitionCtor =
-    (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    window.SpeechRecognition || window.webkitSpeechRecognition;
 
   if (!SpeechRecognitionCtor) {
     return { start: () => {}, stop: () => {}, isSupported: false };
@@ -187,13 +187,13 @@ export function initSTT(
   recognition.continuous = false;
   recognition.interimResults = false;
 
-  recognition.onresult = (event: any) => {
+  recognition.onresult = (event: SpeechRecognitionEvent) => {
     const text = event.results[0][0].transcript;
     onResult(text);
     onListeningChange(false);
   };
 
-  recognition.onerror = (event: any) => {
+  recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
     onError(event.error);
     onListeningChange(false);
   };
@@ -219,8 +219,7 @@ export function initSTT(
 
 // ── Standalone STT API (for simpler usage) ──────────────────────────────
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let _reconhecimento: any = null;
+let _reconhecimento: SpeechRecognition | null = null;
 
 /**
  * Verifica se STT está disponível no browser.
@@ -228,8 +227,8 @@ let _reconhecimento: any = null;
 export function sttDisponivel(): boolean {
   if (typeof window === 'undefined') return false;
   return !!(
-    (window as any).SpeechRecognition ||
-    (window as any).webkitSpeechRecognition
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition
   );
 }
 
@@ -254,20 +253,20 @@ export function iniciarReconhecimento(
   }
 
   const SpeechRecognitionCtor =
-    (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  _reconhecimento = new SpeechRecognitionCtor();
+  _reconhecimento = new SpeechRecognitionCtor!();
   _reconhecimento.lang = 'pt-BR';
   _reconhecimento.continuous = false;
   _reconhecimento.interimResults = false;
   _reconhecimento.maxAlternatives = 1;
 
-  _reconhecimento.onresult = (event: any) => {
+  _reconhecimento.onresult = (event: SpeechRecognitionEvent) => {
     const texto = event.results[0][0].transcript;
     if (texto.trim()) onResultado(texto.trim());
   };
 
-  _reconhecimento.onerror = (event: any) => {
+  _reconhecimento.onerror = (event: SpeechRecognitionErrorEvent) => {
     if (event.error !== 'no-speech') onErro(event.error);
   };
 

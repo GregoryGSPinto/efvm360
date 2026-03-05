@@ -7,7 +7,7 @@ interface SecretCache { value: string; expiresAt: number; }
 const cache = new Map<string, SecretCache>();
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hora
 
-let kvClient: any = null;
+let kvClient: { getSecret: (name: string) => Promise<{ value?: string }> } | null = null;
 let initialized = false;
 
 async function initKeyVault(): Promise<void> {
@@ -19,7 +19,7 @@ async function initKeyVault(): Promise<void> {
     const { DefaultAzureCredential } = await import('@azure/identity');
     const { SecretClient } = await import('@azure/keyvault-secrets');
     kvClient = new SecretClient(vaultUrl, new DefaultAzureCredential());
-    console.log('[VFZ-KV] Azure Key Vault conectado:', vaultUrl);
+    console.info('[VFZ-KV] Azure Key Vault conectado:', vaultUrl);
   } catch (err) {
     console.warn('[VFZ-KV] Key Vault indisponível, usando fallback .env:', (err as Error).message);
   }

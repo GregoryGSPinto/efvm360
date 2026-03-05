@@ -215,7 +215,8 @@ export class IndexedDBSnapshotStore implements ISnapshotStore {
         store.get(aggregateId)
       );
       if (!result) return null;
-      return { version: (result as any).version, state: (result as any).state };
+      const snapshot = result as { version: number; state: unknown };
+      return { version: snapshot.version, state: snapshot.state };
     } catch {
       return null;
     }

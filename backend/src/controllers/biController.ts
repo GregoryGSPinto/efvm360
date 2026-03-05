@@ -71,7 +71,7 @@ export const kpis = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const resumoYard = async (req: Request, res: Response): Promise<void> => {
+export const resumoYard = async (_req: Request, res: Response): Promise<void> => {
   try {
     const [resumo] = await sequelize.query(`
       SELECT

@@ -349,7 +349,7 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
   const buscarDSSDoTurno = useCallback((data: string) => {
     try {
       const historico = JSON.parse(localStorage.getItem(STORAGE_KEYS.DSS_HISTORICO) || '[]');
-      return historico.find((d: any) => d.identificacao?.data === data) || null;
+      return historico.find((d: { identificacao?: { data?: string } }) => d.identificacao?.data === data) || null;
     } catch { return null; }
   }, []);
 

@@ -9,17 +9,7 @@ import type { MensagemChat, DadosFormulario, AlertaIA } from '../types';
 import { STATUS_LINHA } from '../utils/constants';
 import { callClaudeAPI, PROMPTS, type AIStatus } from '../services/aiService';
 
-// Web Speech API type augmentation
-interface SpeechRecognitionCompat extends EventTarget {
-  lang: string;
-  continuous: boolean;
-  interimResults: boolean;
-  onresult: ((event: { results: { [index: number]: { [index: number]: { transcript: string } } } }) => void) | null;
-  onerror: (() => void) | null;
-  onend: (() => void) | null;
-  start(): void;
-  stop(): void;
-}
+// SpeechRecognition types defined in types/web-speech.d.ts
 
 interface UseAdamBootReturn {
   mensagensChat: MensagemChat[];
@@ -107,7 +97,7 @@ export function useAdamBoot(
   const [isListening, setIsListening] = useState(false);
   const [paginaAtual, setPaginaAtual] = useState('inicial');
   const chatRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<SpeechRecognitionCompat | null>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   // Auto-scroll do chat
   useEffect(() => {
@@ -313,12 +303,11 @@ export function useAdamBoot(
   // ── Voice Input (Web Speech API) ──────────────────────────────────
 
   const startVoice = useCallback(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const w = window as any;
-    const SpeechRecognitionCtor = w.SpeechRecognition || w.webkitSpeechRecognition;
+    const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+
     if (!SpeechRecognitionCtor) return;
 
-    const recognition: SpeechRecognitionCompat = new SpeechRecognitionCtor();
+    const recognition: SpeechRecognition = new SpeechRecognitionCtor();
     recognition.lang = 'pt-BR';
     recognition.continuous = false;
     recognition.interimResults = false;

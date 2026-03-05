@@ -56,9 +56,9 @@ export class MetricsService {
 
     if (connectionString && appInsights.defaultClient) {
       this.client = appInsights.defaultClient;
-      console.log('[METRICS] App Insights client attached');
+      console.info('[METRICS] App Insights client attached');
     } else {
-      console.log('[METRICS] App Insights unavailable — logging to console');
+      console.info('[METRICS] App Insights unavailable — logging to console');
     }
   }
 
@@ -93,7 +93,7 @@ export class MetricsService {
         properties: labels,
       });
     } else {
-      console.log(
+      console.info(
         `[METRICS] ${metrica} += ${valor} (total: ${this.contadores[metrica]})` +
           (labels ? ` labels=${JSON.stringify(labels)}` : '')
       );

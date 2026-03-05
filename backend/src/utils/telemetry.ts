@@ -3,7 +3,14 @@
 // No-op em dev local se App Insights não configurado
 // ============================================================================
 
-let client: any = null;
+interface TelemetryClient {
+  trackEvent: (t: { name: string; properties?: Record<string, string> }) => void;
+  trackMetric: (t: { name: string; value: number }) => void;
+  trackException: (t: { exception: Error; properties?: Record<string, string> }) => void;
+  trackDependency: (t: { target: string; name: string; duration: number; resultCode: string; success: boolean; dependencyTypeName: string }) => void;
+}
+
+let client: TelemetryClient | null = null;
 
 function getClient() {
   if (client) return client;

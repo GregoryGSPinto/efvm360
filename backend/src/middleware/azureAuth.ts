@@ -6,7 +6,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 import { Usuario } from '../models';
-import { generateSecureToken, hashToken } from '../utils/crypto';
+import { generateSecureToken } from '../utils/crypto';
 
 const TENANT_ID = process.env.AZURE_AD_TENANT_ID || '';
 const CLIENT_ID = process.env.AZURE_AD_CLIENT_ID || '';
@@ -33,9 +33,9 @@ export const validateAzureToken = async (req: Request, res: Response, next: Next
   if (!azureToken) { res.status(400).json({ error: 'Azure token required' }); return; }
 
   try {
-    const decoded = await new Promise<any>((resolve, reject) => {
+    const decoded = await new Promise<jwt.JwtPayload>((resolve, reject) => {
       jwt.verify(azureToken, getKey, { audience: CLIENT_ID, issuer: ISSUER, algorithms: ['RS256'] },
-        (err, payload) => err ? reject(err) : resolve(payload));
+        (err, payload) => err ? reject(err) : resolve(payload as jwt.JwtPayload));
     });
 
     // Extract claims
@@ -64,7 +64,7 @@ export const validateAzureToken = async (req: Request, res: Response, next: Next
       await usuario.update({ nome: name, funcao });
     }
 
-    (req as any).azureUser = usuario;
+    req.azureUser = usuario;
     next();
   } catch (err) {
     res.status(401).json({ error: 'Azure AD token inválido', details: (err as Error).message });

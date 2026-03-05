@@ -11,7 +11,7 @@ const router = Router();
 // Direito de Acesso (Art. 18, II)
 router.get('/meus-dados', async (req: Request, res: Response) => {
   try {
-    const user = (req as any).user;
+    const user = req.azureAdUser;
     if (!user) return res.status(401).json({ erro: 'Não autenticado' });
 
     // In production: query all tables for user data
@@ -53,7 +53,7 @@ router.get('/meus-dados', async (req: Request, res: Response) => {
 // Direito de Portabilidade (Art. 18, V)
 router.post('/exportar', async (req: Request, res: Response) => {
   try {
-    const user = (req as any).user;
+    const user = req.azureAdUser;
     if (!user) return res.status(401).json({ erro: 'Não autenticado' });
 
     // In production: export all user data as structured JSON
@@ -83,7 +83,7 @@ router.post('/exportar', async (req: Request, res: Response) => {
 // Registros operacionais preservados por obrigação legal
 router.post('/anonimizar', async (req: Request, res: Response) => {
   try {
-    const user = (req as any).user;
+    const user = req.azureAdUser;
     if (!user) return res.status(401).json({ erro: 'Não autenticado' });
 
     // In production:

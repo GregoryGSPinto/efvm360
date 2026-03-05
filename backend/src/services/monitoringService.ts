@@ -13,7 +13,7 @@ export function initMonitoring(): void {
   const key = process.env.APPINSIGHTS_INSTRUMENTATIONKEY || process.env.APPLICATIONINSIGHTS_CONNECTION_STRING;
 
   if (!key) {
-    console.log('[Monitoring] No App Insights key — telemetry disabled');
+    console.info('[Monitoring] No App Insights key — telemetry disabled');
     return;
   }
 
@@ -30,7 +30,7 @@ export function initMonitoring(): void {
   client = appInsights.defaultClient;
   client.context.tags[client.context.keys.cloudRole] = 'vfz-backend';
 
-  console.log('[Monitoring] ✅ Application Insights initialized');
+  console.info('[Monitoring] ✅ Application Insights initialized');
 }
 
 // ── Custom Events ──────────────────────────────────────────────────────

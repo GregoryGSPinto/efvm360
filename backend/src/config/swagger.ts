@@ -240,8 +240,8 @@ export function setupSwagger(app: Express): void {
     },
   }));
 
-  console.log('[VFZ] Swagger UI:   http://localhost:3001/api/docs');
-  console.log('[VFZ] Swagger JSON:  http://localhost:3001/api/docs/json');
+  console.info('[VFZ] Swagger UI:   http://localhost:3001/api/docs');
+  console.info('[VFZ] Swagger JSON:  http://localhost:3001/api/docs/json');
 }
 
 export { swaggerSpec };

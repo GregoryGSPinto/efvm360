@@ -47,7 +47,7 @@ export const sequelize = new Sequelize(
 export const testConnection = async (): Promise<void> => {
   try {
     await sequelize.authenticate();
-    console.log('[VFZ-DB] Conexão MySQL estabelecida com sucesso');
+    console.info('[VFZ-DB] Conexão MySQL estabelecida com sucesso');
   } catch (error) {
     console.error('[VFZ-DB] Falha na conexão MySQL:', error);
     throw error;

@@ -11,7 +11,7 @@ if (process.env.APPLICATIONINSIGHTS_CONNECTION_STRING) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const appInsights = require('applicationinsights');
   appInsights.setup().setSendLiveMetrics(true).start();
-  console.log('[VFZ] Azure Application Insights ativo');
+  console.info('[VFZ] Azure Application Insights ativo');
 }
 
 import express from 'express';
@@ -139,17 +139,17 @@ const startServer = async (): Promise<void> => {
 
     // Inicia servidor
     app.listen(PORT, '0.0.0.0', () => {
-      console.log('');
-      console.log('══════════════════════════════════════════════════════════');
-      console.log('  VFZ Backend — Gestão de Troca de Turno Ferroviária');
-      console.log('══════════════════════════════════════════════════════════');
-      console.log(`  🚀 Servidor:    http://localhost:${PORT}`);
-      console.log(`  📡 API:         http://localhost:${PORT}${API_PREFIX}`);
-      console.log(`  💊 Health:      http://localhost:${PORT}${API_PREFIX}/health`);
-      console.log(`  🔐 Ambiente:    ${process.env.NODE_ENV || 'development'}`);
-      console.log(`  🗄️  MySQL:      ${process.env.DB_HOST || 'localhost'}:${process.env.DB_PORT || '3306'}`);
-      console.log('══════════════════════════════════════════════════════════');
-      console.log('');
+      console.info('');
+      console.info('══════════════════════════════════════════════════════════');
+      console.info('  VFZ Backend — Gestão de Troca de Turno Ferroviária');
+      console.info('══════════════════════════════════════════════════════════');
+      console.info(`  🚀 Servidor:    http://localhost:${PORT}`);
+      console.info(`  📡 API:         http://localhost:${PORT}${API_PREFIX}`);
+      console.info(`  💊 Health:      http://localhost:${PORT}${API_PREFIX}/health`);
+      console.info(`  🔐 Ambiente:    ${process.env.NODE_ENV || 'development'}`);
+      console.info(`  🗄️  MySQL:      ${process.env.DB_HOST || 'localhost'}:${process.env.DB_PORT || '3306'}`);
+      console.info('══════════════════════════════════════════════════════════');
+      console.info('');
     });
   } catch (error) {
     console.error('[VFZ] Falha na inicialização:', error);

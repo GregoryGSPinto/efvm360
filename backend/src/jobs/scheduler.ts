@@ -33,7 +33,7 @@ function scheduleDailyJob(name: string, targetHourUTC: number, job: () => Promis
   const delay = msUntilNextHour(targetHourUTC);
   const delayHours = (delay / ONE_HOUR_MS).toFixed(1);
 
-  console.log(`[SCHEDULER] Job "${name}" scheduled — first run in ${delayHours}h (${targetHourUTC}:00 UTC daily)`);
+  console.info(`[SCHEDULER] Job "${name}" scheduled — first run in ${delayHours}h (${targetHourUTC}:00 UTC daily)`);
 
   // First execution at the target hour
   setTimeout(() => {
@@ -54,7 +54,7 @@ async function runCleanupExpiredTokens(): Promise<void> {
   try {
     const deletedCount = await cleanupExpiredTokens();
     const durationMs = Date.now() - startTime;
-    console.log(`[SCHEDULER] cleanupExpiredTokens completed — ${deletedCount} tokens removed (${durationMs}ms)`);
+    console.info(`[SCHEDULER] cleanupExpiredTokens completed — ${deletedCount} tokens removed (${durationMs}ms)`);
   } catch (error) {
     console.error('[SCHEDULER] cleanupExpiredTokens FAILED:', error);
   }
@@ -65,10 +65,10 @@ async function runCleanupExpiredTokens(): Promise<void> {
  * Call this once after the database connection is established.
  */
 export function initScheduler(): void {
-  console.log('[SCHEDULER] Initializing scheduled jobs...');
+  console.info('[SCHEDULER] Initializing scheduled jobs...');
 
   // Clean expired/revoked refresh tokens daily at 03:00 UTC
   scheduleDailyJob('cleanupExpiredTokens', 3, runCleanupExpiredTokens);
 
-  console.log('[SCHEDULER] All jobs registered.');
+  console.info('[SCHEDULER] All jobs registered.');
 }

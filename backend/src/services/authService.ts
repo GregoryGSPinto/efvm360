@@ -5,7 +5,6 @@
 
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { Op } from 'sequelize';
 import { Usuario } from '../models';
 import { generateSecureToken, hashToken } from '../utils/crypto';
 import sequelize from '../config/database';
@@ -15,7 +14,6 @@ if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET é obrigatório — def
 if (!process.env.JWT_REFRESH_SECRET) throw new Error('JWT_REFRESH_SECRET é obrigatório — defina no .env ou Azure Key Vault');
 
 const JWT_SECRET: string = process.env.JWT_SECRET;
-const JWT_REFRESH_SECRET: string = process.env.JWT_REFRESH_SECRET;
 const JWT_EXPIRES_IN: string = process.env.JWT_EXPIRES_IN || '8h';
 const JWT_REFRESH_EXPIRES_IN: string = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
 const BCRYPT_ROUNDS = parseInt(process.env.BCRYPT_ROUNDS || '12', 10);
