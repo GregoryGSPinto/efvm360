@@ -19,34 +19,34 @@ import type { UUID } from '../contracts';
 
 export interface IntegritySeal {
   /** ID da passagem selada */
-  passId: UUID;
+  readonly passId: UUID;
   /** Hash SHA-256 do estado final (todos os eventos) */
-  stateHash: string;
+  readonly stateHash: string;
   /** Hash SHA-256 da cadeia de eventos individual */
-  eventChainHash: string;
+  readonly eventChainHash: string;
   /** Hash do selo anterior (cadeia entre passagens) */
-  previousSealHash: string | null;
+  readonly previousSealHash: string | null;
   /** Hash composto: stateHash + eventChainHash + previousSealHash */
-  sealHash: string;
+  readonly sealHash: string;
   /** Metadados do selamento */
-  metadata: {
-    yardCode: string;
-    turno: string;
-    eventCount: number;
-    sealedAt: string;
-    sealedBy: string; // matrícula
-    deviceId: string;
+  readonly metadata: {
+    readonly yardCode: string;
+    readonly turno: string;
+    readonly eventCount: number;
+    readonly sealedAt: string;
+    readonly sealedBy: string; // matrícula
+    readonly deviceId: string;
   };
 }
 
 export interface IntegrityVerification {
-  passId: UUID;
-  isValid: boolean;
-  stateHashMatch: boolean;
-  eventChainValid: boolean;
-  chainLinkValid: boolean; // Link com passagem anterior
-  violations: string[];
-  verifiedAt: string;
+  readonly passId: UUID;
+  readonly isValid: boolean;
+  readonly stateHashMatch: boolean;
+  readonly eventChainValid: boolean;
+  readonly chainLinkValid: boolean; // Link com passagem anterior
+  readonly violations: readonly string[];
+  readonly verifiedAt: string;
 }
 
 // ═══════════════════════════════════════════════════════════════════════

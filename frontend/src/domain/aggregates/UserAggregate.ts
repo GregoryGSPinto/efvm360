@@ -62,9 +62,13 @@ export function createUserProfile(data: {
   teamId?: UUID;
   status?: UserStatus;
   approvedBy?: Matricula;
+  id?: UUID;
+  now?: ISODateTime;
 }): UserProfile {
+  const id = data.id ?? (crypto.randomUUID?.() || `user-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  const now = data.now ?? new Date().toISOString();
   return {
-    id: crypto.randomUUID?.() || `user-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    id,
     matricula: data.matricula,
     nome: data.nome,
     funcao: data.funcao,
@@ -75,9 +79,9 @@ export function createUserProfile(data: {
     status: data.status || UserStatus.ACTIVE,
     turno: data.turno,
     horarioTurno: data.horarioTurno,
-    createdAt: new Date().toISOString(),
+    createdAt: now,
     approvedBy: data.approvedBy,
-    approvedAt: data.approvedBy ? new Date().toISOString() : undefined,
+    approvedAt: data.approvedBy ? now : undefined,
   };
 }
 

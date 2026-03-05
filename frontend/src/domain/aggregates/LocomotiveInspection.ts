@@ -187,16 +187,19 @@ export interface LocomotiveInspection {
 
 // ── Factory ─────────────────────────────────────────────────────────────
 
-/** Cria uma nova inspeção com todos os 26 itens em branco */
+/** Cria uma nova inspeção com todos os 26 itens em branco.
+ *  id and now are injectable for domain purity — defaults provided for backward compat. */
 export function createBlankInspection(
   servicePassId: UUID,
   yardId: string,
   triggerReason: LocomotiveInspection['triggerReason'],
   locomotiveModel: string,
   inspectedBy: Matricula,
+  id: UUID = crypto.randomUUID(),
+  now: ISODateTime = new Date().toISOString(),
 ): LocomotiveInspection {
   return {
-    id: crypto.randomUUID(),
+    id,
     servicePassId,
     yardId,
     triggerReason,
@@ -204,9 +207,9 @@ export function createBlankInspection(
     locomotiveIds: [],
     origin: '',
     inspectedBy,
-    startedAt: new Date().toISOString(),
+    startedAt: now,
     header: {
-      date: new Date().toISOString().split('T')[0],
+      date: now.split('T')[0],
       trainPrefix: '',
       ospl: '',
       composition: '',

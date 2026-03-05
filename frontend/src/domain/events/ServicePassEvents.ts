@@ -10,29 +10,29 @@ import type { UUID, ISODateTime, Matricula, DeviceFingerprint } from '../contrac
 /** Metadados comuns a todos os domain events */
 export interface DomainEventMetadata {
   /** UUID v4 do evento (idempotency key) */
-  eventId: UUID;
+  readonly eventId: UUID;
   /** ID do aggregate afetado */
-  aggregateId: UUID;
+  readonly aggregateId: UUID;
   /** Tipo do aggregate */
-  aggregateType: 'ServicePass' | 'YardConfiguration' | 'LocomotiveInspection';
+  readonly aggregateType: 'ServicePass' | 'YardConfiguration' | 'LocomotiveInspection';
   /** Tipo do evento */
-  eventType: string;
+  readonly eventType: string;
   /** Versão do aggregate após este evento */
-  version: number;
+  readonly version: number;
   /** Timestamp do evento (device clock) */
-  timestamp: ISODateTime;
+  readonly timestamp: ISODateTime;
   /** Matrícula do operador que gerou o evento */
-  operatorMatricula: Matricula;
+  readonly operatorMatricula: Matricula;
   /** Device fingerprint */
-  deviceId: DeviceFingerprint;
+  readonly deviceId: DeviceFingerprint;
   /** ID do pátio (contexto) */
-  yardId?: string;
+  readonly yardId?: string;
 }
 
 /** Base interface para todos os domain events */
 export interface DomainEvent<T = unknown> extends DomainEventMetadata {
   /** Payload específico do evento */
-  payload: T;
+  readonly payload: T;
 }
 
 // ── ServicePass Events ──────────────────────────────────────────────────
@@ -243,7 +243,7 @@ export function createDomainEvent<T>(
   yardId?: string,
 ): DomainEvent<T> {
   eventVersion++;
-  return {
+  return Object.freeze({
     eventId: crypto.randomUUID(),
     aggregateId,
     aggregateType,
@@ -254,5 +254,5 @@ export function createDomainEvent<T>(
     deviceId,
     yardId,
     payload,
-  };
+  });
 }

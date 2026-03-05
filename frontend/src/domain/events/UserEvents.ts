@@ -6,59 +6,59 @@ import type { UUID, ISODateTime, Matricula } from '../contracts';
 import type { YardCode } from '../aggregates/YardRegistry';
 
 interface BaseEvent {
-  eventId: UUID;
-  timestamp: ISODateTime;
-  source: 'frontend' | 'backend';
+  readonly eventId: UUID;
+  readonly timestamp: ISODateTime;
+  readonly source: 'frontend' | 'backend';
 }
 
 export interface UserCreated extends BaseEvent {
-  type: 'UserCreated';
-  payload: { matricula: Matricula; nome: string; funcao: string; primaryYard: YardCode; };
+  readonly type: 'UserCreated';
+  readonly payload: { readonly matricula: Matricula; readonly nome: string; readonly funcao: string; readonly primaryYard: YardCode; };
 }
 
 export interface UserApproved extends BaseEvent {
-  type: 'UserApproved';
-  payload: { matricula: Matricula; approvedBy: Matricula; };
+  readonly type: 'UserApproved';
+  readonly payload: { readonly matricula: Matricula; readonly approvedBy: Matricula; };
 }
 
 export interface UserSuspended extends BaseEvent {
-  type: 'UserSuspended';
-  payload: { matricula: Matricula; suspendedBy: Matricula; reason: string; };
+  readonly type: 'UserSuspended';
+  readonly payload: { readonly matricula: Matricula; readonly suspendedBy: Matricula; readonly reason: string; };
 }
 
 export interface UserTransferred extends BaseEvent {
-  type: 'UserTransferred';
-  payload: { matricula: Matricula; fromTeamId?: UUID; toTeamId: UUID; transferredBy: Matricula; };
+  readonly type: 'UserTransferred';
+  readonly payload: { readonly matricula: Matricula; readonly fromTeamId?: UUID; readonly toTeamId: UUID; readonly transferredBy: Matricula; };
 }
 
 export interface UserRoleChanged extends BaseEvent {
-  type: 'UserRoleChanged';
-  payload: { matricula: Matricula; fromRole: string; toRole: string; changedBy: Matricula; };
+  readonly type: 'UserRoleChanged';
+  readonly payload: { readonly matricula: Matricula; readonly fromRole: string; readonly toRole: string; readonly changedBy: Matricula; };
 }
 
 export interface UserPasswordResetRequested extends BaseEvent {
-  type: 'UserPasswordResetRequested';
-  payload: { matricula: Matricula; yardCode: YardCode; };
+  readonly type: 'UserPasswordResetRequested';
+  readonly payload: { readonly matricula: Matricula; readonly yardCode: YardCode; };
 }
 
 export interface UserPasswordResetApproved extends BaseEvent {
-  type: 'UserPasswordResetApproved';
-  payload: { matricula: Matricula; approvedBy: Matricula; };
+  readonly type: 'UserPasswordResetApproved';
+  readonly payload: { readonly matricula: Matricula; readonly approvedBy: Matricula; };
 }
 
 export interface UserRegistrationRequested extends BaseEvent {
-  type: 'UserRegistrationRequested';
-  payload: { matricula: Matricula; nome: string; funcao: string; requestedYard: YardCode; };
+  readonly type: 'UserRegistrationRequested';
+  readonly payload: { readonly matricula: Matricula; readonly nome: string; readonly funcao: string; readonly requestedYard: YardCode; };
 }
 
 export interface UserRegistrationApproved extends BaseEvent {
-  type: 'UserRegistrationApproved';
-  payload: { matricula: Matricula; approvedBy: Matricula; };
+  readonly type: 'UserRegistrationApproved';
+  readonly payload: { readonly matricula: Matricula; readonly approvedBy: Matricula; };
 }
 
 export interface UserRegistrationRejected extends BaseEvent {
-  type: 'UserRegistrationRejected';
-  payload: { matricula: Matricula; rejectedBy: Matricula; reason: string; };
+  readonly type: 'UserRegistrationRejected';
+  readonly payload: { readonly matricula: Matricula; readonly rejectedBy: Matricula; readonly reason: string; };
 }
 
 export type UserEvent =

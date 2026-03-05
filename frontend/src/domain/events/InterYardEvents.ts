@@ -13,12 +13,12 @@ export type InterYardEventType =
   | 'InterYardHandoverSealed';
 
 export interface InterYardEvent {
-  id: UUID;
-  type: InterYardEventType;
-  handoverId: UUID;
-  timestamp: ISODateTime;
-  actor: Matricula;
-  data: Record<string, unknown>;
+  readonly id: UUID;
+  readonly type: InterYardEventType;
+  readonly handoverId: UUID;
+  readonly timestamp: ISODateTime;
+  readonly actor: Matricula;
+  readonly data: Readonly<Record<string, unknown>>;
 }
 
 export function createInterYardEvent(
@@ -27,12 +27,12 @@ export function createInterYardEvent(
   actor: Matricula,
   data: Record<string, unknown> = {},
 ): InterYardEvent {
-  return {
+  return Object.freeze({
     id: crypto.randomUUID(),
     type,
     handoverId,
     timestamp: new Date().toISOString(),
     actor,
     data,
-  };
+  });
 }

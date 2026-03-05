@@ -25,6 +25,7 @@ import {
   getEventStore,
   getSnapshotStore,
 } from '../../infrastructure/persistence/IndexedDBEventStore';
+import { getIntegrityService } from '../../domain/services/IntegrityService';
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 
@@ -518,9 +519,20 @@ export async function signServicePass(
     await engine.enqueueEvent(event);
   }
 
+  // ── Integrity Seal (SHA-256 chain) ────────────────────────────────
+  const allEvents = [...existingEvents, ...events];
+  const integrityService = getIntegrityService();
+  await integrityService.seal(input.passId, allEvents, {
+    yardCode: ctx.yardCode,
+    turno: ctx.shiftId,
+    eventCount: allEvents.length,
+    sealedAt: new Date().toISOString(),
+    sealedBy: ctx.operatorMatricula,
+    deviceId: ctx.deviceId,
+  });
+
   // ── Snapshot após selamento ───────────────────────────────────────
   const snapshotStore = getSnapshotStore();
-  const allEvents = [...existingEvents, ...events];
   await snapshotStore.save(input.passId, 'ServicePass', input.version + 1, {
     status: 'sealed',
     eventCount: allEvents.length,

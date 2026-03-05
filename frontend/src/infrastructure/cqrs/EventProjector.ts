@@ -200,11 +200,20 @@ function openProjectionDB(): Promise<IDBDatabase> {
 
 export class EventProjector {
 
-  /** Projeta um único evento (modo incremental) */
+  /** Set of already-projected eventIds — idempotency guard */
+  private projectedEventIds: Set<string> = new Set();
+
+  /** Projeta um único evento (modo incremental) — idempotent by eventId */
   async project(event: DomainEvent): Promise<void> {
+    // Idempotency guard: skip if already projected
+    if (this.projectedEventIds.has(event.eventId)) {
+      return;
+    }
+
     const handler = EVENT_HANDLERS[event.eventType];
     if (handler) {
       await handler(event);
+      this.projectedEventIds.add(event.eventId);
       await this.updateMeta(event);
     }
   }
@@ -218,8 +227,10 @@ export class EventProjector {
     );
 
     for (const event of sorted) {
-      await this.project(event);
-      projected++;
+      if (!this.projectedEventIds.has(event.eventId)) {
+        await this.project(event);
+        projected++;
+      }
     }
     return projected;
   }
@@ -228,8 +239,9 @@ export class EventProjector {
   async rebuildAll(): Promise<{ eventsProcessed: number; duration: number }> {
     const startTime = Date.now();
 
-    // 1. Limpar todas as projeções
+    // 1. Limpar todas as projeções e reset idempotency set
     await this.clearAllProjections();
+    this.projectedEventIds.clear();
 
     // 2. Buscar TODOS os eventos do EventStore
     const eventStore = getEventStore();
