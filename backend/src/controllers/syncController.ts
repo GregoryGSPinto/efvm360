@@ -19,7 +19,7 @@
 
 import { Request, Response } from 'express';
 import { Passagem } from '../models';
-import { hashFormulario } from '../utils/crypto';
+import { hashFormulario, verifyHMAC } from '../utils/crypto';
 import { Op } from 'sequelize';
 import * as auditService from '../services/auditService';
 
@@ -116,15 +116,27 @@ async function processItem(
     return { id: item.id, status: 'error', error: `Tipo '${item.type}' não suportado neste endpoint` };
   }
 
+  // 0. Verify HMAC integrity — reject tampered payloads
+  if (!item.hmac) {
+    return { id: item.id, status: 'error', error: 'HMAC obrigatório para verificação de integridade' };
+  }
+  const payloadStr = JSON.stringify(item.payload);
+  try {
+    if (!verifyHMAC(payloadStr, item.hmac)) {
+      return { id: item.id, status: 'error', error: 'HMAC inválido — payload pode ter sido adulterado' };
+    }
+  } catch {
+    return { id: item.id, status: 'error', error: 'HMAC inválido — formato incorreto' };
+  }
+
   // 1. Idempotency check — if UUID already exists and is synced, return ok
   const existing = await Passagem.findOne({ where: { uuid: item.id } });
   if (existing) {
     return { id: item.id, status: 'ok', serverVersion: existing.toJSON() };
   }
 
-  // 2. Conflict detection — same turno + date + patio
-  const forceOverwrite = (item.payload as Record<string, unknown>).__forceOverwrite === true;
-  if (!forceOverwrite && item.turno && item.data) {
+  // 2. Conflict detection — same turno + date + patio (no bypass allowed)
+  if (item.turno && item.data) {
     const conflicting = await Passagem.findOne({
       where: {
         turno: item.turno,

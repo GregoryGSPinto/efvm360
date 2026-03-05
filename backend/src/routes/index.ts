@@ -173,7 +173,7 @@ router.get('/org/tree/:matricula', authenticate, authorize('supervisor'), orgCtr
 router.get('/org/superiors/:matricula', authenticate, orgCtrl.getSuperiors);
 router.post('/org/assign', authenticate, authorize('coordenador'), orgCtrl.assignSubordinate);
 router.delete('/org/assign/:id', authenticate, authorize('coordenador'), orgCtrl.removeRelationship);
-router.get('/org/coordinators', orgCtrl.getCoordinators);
+router.get('/org/coordinators', authenticate, orgCtrl.getCoordinators);
 router.post('/org/approve-registration', authenticate, authorize('supervisor'), orgCtrl.approveRegistration);
 router.get('/users/:matricula/yards', authenticate, orgCtrl.getUserYards);
 router.post('/users/:matricula/yards', authenticate, authorize('coordenador'), orgCtrl.assignYard);
@@ -181,8 +181,8 @@ router.delete('/users/:matricula/yards/:yard', authenticate, authorize('coordena
 
 // ── RAILWAYS (Multi-Tenancy) ────────────────────────────────────────────
 import * as railwayCtrl from '../controllers/railwayController';
-router.get('/railways', railwayCtrl.list);
-router.get('/railways/:id', railwayCtrl.getById);
+router.get('/railways', authenticate, railwayCtrl.list);
+router.get('/railways/:id', authenticate, railwayCtrl.getById);
 
 // ── APPROVAL WORKFLOWS ──────────────────────────────────────────────────
 import * as workflowCtrl from '../controllers/workflowController';
@@ -191,7 +191,7 @@ router.get('/workflows/:id', authenticate, authorize('supervisor'), workflowCtrl
 router.post('/workflows/:id/approve', authenticate, authorize('supervisor'), workflowCtrl.approve);
 router.post('/workflows/:id/reject', authenticate, authorize('supervisor'), workflowCtrl.reject);
 router.post('/workflows/:id/escalate', authenticate, authorize('supervisor'), workflowCtrl.escalate);
-router.post('/workflows/:id/comment', authenticate, workflowCtrl.comment);
+router.post('/workflows/:id/comment', authenticate, authorize('supervisor'), workflowCtrl.comment);
 router.post('/workflows/check-sla', authenticate, authorize('gestor'), workflowCtrl.checkSla);
 
 // ── ANALYTICS (Dashboards) ──────────────────────────────────────────────

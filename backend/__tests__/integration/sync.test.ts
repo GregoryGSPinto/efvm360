@@ -15,6 +15,7 @@ import {
 } from '../helpers/testDb';
 
 import { v4 as uuidv4 } from 'uuid';
+import { computeHMAC } from '../../src/utils/crypto';
 
 // ── Mock database + models BEFORE importing app code ────────────────────
 
@@ -65,22 +66,28 @@ const loginAndGetToken = async (matricula = 'VFZ1001', senha = 'Vale@2024') => {
   return res.body.accessToken;
 };
 
-// Helper: build a valid sync item
-const buildSyncItem = (overrides: Record<string, unknown> = {}) => ({
-  id: uuidv4(),
-  type: 'passagem',
-  payload: {
+// Helper: build a valid sync item with correct HMAC
+const buildSyncItem = (overrides: Record<string, unknown> = {}) => {
+  const payload = (overrides.payload as Record<string, unknown>) || {
     cabecalho: { dataPassagem: '2024-03-15', turno: 'A', horarioTurno: '07-19' },
     patioCima: [],
     patioBaixo: [],
-  },
-  hmac: 'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6',
-  createdAt: new Date().toISOString(),
-  turno: 'A',
-  data: '2024-03-15',
-  deviceId: 'test-device-001',
-  ...overrides,
-});
+  };
+  const hmac = (overrides.hmac as string) || computeHMAC(JSON.stringify(payload));
+  return {
+    id: uuidv4(),
+    type: 'passagem',
+    payload,
+    hmac,
+    createdAt: new Date().toISOString(),
+    turno: 'A',
+    data: '2024-03-15',
+    deviceId: 'test-device-001',
+    ...overrides,
+    // Re-apply hmac after overrides to ensure it's correct unless explicitly overridden
+    ...(overrides.hmac ? {} : { hmac }),
+  };
+};
 
 describe('Sync Routes — Integration', () => {
   beforeAll(async () => {

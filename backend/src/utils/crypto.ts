@@ -45,3 +45,22 @@ export const generateSecureToken = (bytes = 48): string => {
 export const hashToken = (token: string): string => {
   return sha256(token);
 };
+
+/**
+ * Verifica HMAC de integridade (mesma derivação do frontend)
+ * Usa timing-safe comparison para prevenir timing attacks
+ */
+const HMAC_DERIVATION = 'efvm360-hmac-v1-infra-critica';
+
+export const computeHMAC = (payload: string): string => {
+  return sha256(`${HMAC_DERIVATION}:${payload}`);
+};
+
+export const verifyHMAC = (payload: string, clientHmac: string): boolean => {
+  const expected = computeHMAC(payload);
+  if (expected.length !== clientHmac.length) return false;
+  return crypto.timingSafeEqual(
+    Buffer.from(expected, 'hex'),
+    Buffer.from(clientHmac, 'hex')
+  );
+};

@@ -409,7 +409,7 @@ class SyncEngine {
       const item = conflict.localItem;
       item.status = 'pending';
       item.retryCount = 0;
-      (item.payload as Record<string, unknown>).__forceOverwrite = true;
+      (item.payload as Record<string, unknown>).__conflictResolution = 'local_wins';
       await syncStore.enqueue(item);
     }
 
