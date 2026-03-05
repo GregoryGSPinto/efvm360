@@ -786,5 +786,11 @@
     "problem": "✗ Problema",
     "editRestricted": "Somente Líder/Gestor pode editar equipamentos. Visualização apenas.",
     "edited": "Editado: {{by}}"
+  },
+  "ws": {
+    "connected": "Ao vivo",
+    "connecting": "Conectando",
+    "disconnected": "Offline",
+    "error": "Erro de conexão"
   }
 }

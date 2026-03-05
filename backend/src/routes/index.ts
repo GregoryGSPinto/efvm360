@@ -28,6 +28,7 @@ import * as passagensCtrl from '../controllers/passagensController';
 import * as auditCtrl from '../controllers/auditController';
 import * as usersCtrl from '../controllers/usersController';
 import sequelize from '../config/database';
+import { getConnectionMetrics } from '../services/websocket';
 
 const router = Router();
 
@@ -88,6 +89,7 @@ router.get('/health', async (_req: Request, res: Response) => {
       service: 'vfz-backend',
       version: '1.0.0',
       database: 'connected',
+      websocket: getConnectionMetrics(),
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       environment: process.env.NODE_ENV || 'development',

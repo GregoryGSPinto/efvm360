@@ -15,6 +15,7 @@ if (process.env.APPLICATIONINSIGHTS_CONNECTION_STRING) {
 }
 
 import express from 'express';
+import { createServer } from 'http';
 import compression from 'compression';
 import morgan from 'morgan';
 import {
@@ -29,8 +30,10 @@ import { testConnection } from './config/database';
 import { initScheduler } from './jobs/scheduler';
 import { setupSwagger } from './config/swagger';
 import { telemetryMiddleware } from './middleware/telemetry';
+import { initializeWebSocket, getConnectionMetrics } from './services/websocket';
 
 const app = express();
+const httpServer = createServer(app);
 const PORT = parseInt(process.env.PORT || '3001', 10);
 const API_PREFIX = process.env.API_PREFIX || '/api/v1';
 
@@ -137,14 +140,18 @@ const startServer = async (): Promise<void> => {
     // Inicializa jobs agendados (após conexão com DB)
     initScheduler();
 
-    // Inicia servidor
-    app.listen(PORT, '0.0.0.0', () => {
+    // Inicializa WebSocket (Socket.IO)
+    const io = initializeWebSocket(httpServer);
+
+    // Inicia servidor HTTP (Express + WebSocket compartilham a mesma porta)
+    httpServer.listen(PORT, '0.0.0.0', () => {
       console.info('');
       console.info('══════════════════════════════════════════════════════════');
       console.info('  VFZ Backend — Gestão de Troca de Turno Ferroviária');
       console.info('══════════════════════════════════════════════════════════');
       console.info(`  🚀 Servidor:    http://localhost:${PORT}`);
       console.info(`  📡 API:         http://localhost:${PORT}${API_PREFIX}`);
+      console.info(`  🔌 WebSocket:   ws://localhost:${PORT}`);
       console.info(`  💊 Health:      http://localhost:${PORT}${API_PREFIX}/health`);
       console.info(`  🔐 Ambiente:    ${process.env.NODE_ENV || 'development'}`);
       console.info(`  🗄️  MySQL:      ${process.env.DB_HOST || 'localhost'}:${process.env.DB_PORT || '3306'}`);

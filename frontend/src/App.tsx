@@ -34,6 +34,7 @@ import { FUNCOES_USUARIO, STORAGE_KEYS } from './utils/constants';
 // ── Components ──────────────────────────────────────────────────────────
 import { SplashScreenPremium, LoginScreenPremium } from './components';
 import { AdamBotProvider, AdamBot } from './components/AdamBot';
+import { WebSocketProvider } from './contexts/WebSocketContext';
 import type { ContextoBot } from './components/AdamBot';
 import { adamPrecarregarVozes } from './components/AdamBot/AdamBotVoice';
 import { TopNavbar } from './components/layout/TopNavbar';
@@ -606,6 +607,7 @@ export default function App(): JSX.Element {
   // ==================================================================
 
   return (
+    <WebSocketProvider>
     <AdamBotProvider contexto={adamBotContexto} executors={adamBotExecutors}>
     <div
       className={isDark ? 'efvm360-dark' : ''}
@@ -941,5 +943,6 @@ export default function App(): JSX.Element {
       )}
     </div>
     </AdamBotProvider>
+    </WebSocketProvider>
   );
 }

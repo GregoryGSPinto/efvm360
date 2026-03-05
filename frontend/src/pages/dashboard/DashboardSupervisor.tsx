@@ -2,7 +2,7 @@
 // EFVM360 — Dashboard Supervisor (single yard)
 // ============================================================================
 
-import { useState, useEffect, type CSSProperties } from 'react';
+import { useState, useEffect, useCallback, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TemaComputed } from '../types';
 import type { Usuario } from '../../types';
@@ -16,6 +16,8 @@ import {
 } from '../../services/analyticsService';
 import type { DailyStats } from '../../services/analyticsService';
 import { apiClient } from '../../services/apiClient';
+import ConnectionStatus from '../../components/ui/ConnectionStatus';
+import { useWebSocketContext, WS_EVENTS } from '../../contexts/WebSocketContext';
 
 interface Props {
   tema: TemaComputed;
@@ -30,8 +32,9 @@ export default function DashboardSupervisor({ tema, usuarioLogado }: Props) {
   const [days] = useState(30);
   const [isLive, setIsLive] = useState(false);
   const [stats, setStats] = useState<DailyStats[]>(() => generateMockDailyStats(yard, days));
+  const { connected, on, subscribe } = useWebSocketContext();
 
-  useEffect(() => {
+  const fetchStats = useCallback(() => {
     const activeYard = sessionStorage.getItem('active_yard') || yard;
     apiClient.get<DailyStats[]>(`/analytics/dashboard/supervisor?yard=${activeYard}`).then(data => {
       if (data && Array.isArray(data) && data.length > 0) {
@@ -43,6 +46,26 @@ export default function DashboardSupervisor({ tema, usuarioLogado }: Props) {
       }
     });
   }, [yard, days]);
+
+  useEffect(() => { fetchStats(); }, [fetchStats]);
+
+  // Subscribe to active yard's WebSocket room and refresh on events
+  useEffect(() => {
+    const activeYard = sessionStorage.getItem('active_yard') || yard;
+    subscribe(activeYard);
+
+    const unsub1 = on(WS_EVENTS.NEW_HANDOVER, () => {
+      fetchStats();
+    });
+    const unsub2 = on(WS_EVENTS.HANDOVER_SIGNED, () => {
+      fetchStats();
+    });
+    const unsub3 = on(WS_EVENTS.YARD_STATUS_UPDATE, () => {
+      fetchStats();
+    });
+
+    return () => { unsub1(); unsub2(); unsub3(); };
+  }, [yard, on, subscribe, fetchStats]);
 
   const todayStats = stats[stats.length - 1];
   const avgCompliance = calculateAvgCompliance(stats);
@@ -69,7 +92,8 @@ export default function DashboardSupervisor({ tema, usuarioLogado }: Props) {
     <div style={{ padding: 20, maxWidth: 900, margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <h2 style={{ color: tema.texto, marginBottom: 4 }}>{t('dashboard.supervisor.title')}</h2>
-        {!isLive && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 8, background: 'rgba(249,115,22,0.1)', color: '#f97316', fontWeight: 600 }}>{t('dashboard.demoMode')}</span>}
+        {connected && <ConnectionStatus compact />}
+        {!isLive && !connected && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 8, background: 'rgba(249,115,22,0.1)', color: '#f97316', fontWeight: 600 }}>{t('dashboard.demoMode')}</span>}
       </div>
       <div style={{ color: tema.textoSecundario, fontSize: 14, marginBottom: 20 }}>{t('dashboard.supervisor.yard', { yard })}</div>
 

@@ -8,6 +8,7 @@ import { Passagem, Usuario } from '../models';
 import { hashFormulario } from '../utils/crypto';
 import * as auditService from '../services/auditService';
 import { metrics } from '../services/metricsService';
+import { emitNewHandover, emitHandoverSigned } from '../services/websocket';
 
 /**
  * POST /api/v1/passagens — Salvar passagem (nova ou atualizacao)
@@ -117,6 +118,15 @@ export const salvar = async (req: Request, res: Response): Promise<void> => {
       detalhes: `UUID: ${passagem.uuid} | Status: ${status} | Hash: ${hashIntegridade.substring(0, 12)}`,
       usuarioId: req.user.userId,
       ipAddress: req.ip,
+    });
+
+    // Emit WebSocket event for real-time dashboard updates
+    const yardId = req.user.primaryYard || 'VFZ';
+    emitNewHandover(yardId, {
+      uuid: passagem.uuid,
+      status: passagem.status,
+      turno: cabecalho.turno,
+      data: cabecalho.data,
     });
 
     res.status(passagemUuid ? 200 : 201).json({
@@ -263,6 +273,9 @@ export const assinar = async (req: Request, res: Response): Promise<void> => {
       usuarioId: req.user.userId,
       ipAddress: req.ip,
     });
+
+    // Emit WebSocket event for signed handover
+    emitHandoverSigned(req.user.primaryYard || 'VFZ', passagem.uuid);
 
     res.json({
       message: `Assinatura de ${tipo} registrada com sucesso`,
