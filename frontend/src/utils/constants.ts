@@ -222,7 +222,7 @@ export const TIPOS_RESTRICAO = [
 ] as const;
 
 // ============================================================================
-// TEMAS DO SISTEMA — PALETA OFICIAL VALE S.A. — SÓLIDO
+// TEMAS DO SISTEMA — PALETA OFICIAL VALE S.A. — GLASSMORPHISM PREMIUM
 // ============================================================================
 
 export const ALERTA_CRITICO_TOKENS = {
@@ -234,26 +234,26 @@ export const TEMAS: Temas = {
   claro: {
     nome:'Modo Claro',
     background:TOKENS.light.bg, backgroundSecundario:TOKENS.light.bgSec,
-    card:TOKENS.light.card, cardBorda:TOKENS.light.cardBorda, cardSombra:TOKENS.light.cardSombra,
+    card:'rgba(255, 255, 255, 0.82)', cardBorda:'rgba(0, 0, 0, 0.06)', cardSombra:'0 2px 12px rgba(0,0,0,0.06)',
     texto:TOKENS.light.texto, textoSecundario:TOKENS.light.textoSec,
     primaria:VALE.verdePetroleo, primariaHover:TOKENS.btnPrimarioHover,
     secundaria:VALE.amareloOuro, secundariaHover:'#d9a010', accent:VALE.verdeVibrante,
     perigo:TOKENS.perigo, aviso:VALE.amareloOuro, sucesso:VALE.verdeVibrante, info:VALE.azulCiano,
     sidebar:TOKENS.light.sidebar, sidebarTexto:TOKENS.light.sidebarTexto,
     input:TOKENS.light.input, inputBorda:TOKENS.light.inputBorda, inputFoco:TOKENS.light.inputFoco,
-    overlayGradient:TOKENS.light.overlay, blur:'0px', blurCard:'0px', buttonInativo:'#e5e5e5',
+    overlayGradient:TOKENS.light.overlay, blur:'20px', blurCard:'16px', buttonInativo:'#e5e5e5',
   },
   escuro: {
     nome:'Modo Escuro',
     background:TOKENS.dark.bg, backgroundSecundario:TOKENS.dark.bgSec,
-    card:TOKENS.dark.card, cardBorda:TOKENS.dark.cardBorda, cardSombra:TOKENS.dark.cardSombra,
+    card:'rgba(30, 30, 30, 0.78)', cardBorda:'rgba(255, 255, 255, 0.06)', cardSombra:'0 2px 12px rgba(0,0,0,0.25)',
     texto:TOKENS.dark.texto, textoSecundario:TOKENS.dark.textoSec,
     primaria:VALE.verdePetroleo, primariaHover:TOKENS.btnPrimarioHover,
     secundaria:VALE.amareloOuro, secundariaHover:'#d9a010', accent:VALE.verdeVibrante,
     perigo:'#ef4444', aviso:VALE.amareloOuro, sucesso:VALE.verdeVibrante, info:VALE.azulCiano,
     sidebar:TOKENS.dark.sidebar, sidebarTexto:TOKENS.dark.sidebarTexto,
     input:TOKENS.dark.input, inputBorda:TOKENS.dark.inputBorda, inputFoco:TOKENS.dark.inputFoco,
-    overlayGradient:TOKENS.dark.overlay, blur:'0px', blurCard:'0px', buttonInativo:'#333333',
+    overlayGradient:TOKENS.dark.overlay, blur:'20px', blurCard:'16px', buttonInativo:'#333333',
   },
 };
 

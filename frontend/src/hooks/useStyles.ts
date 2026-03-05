@@ -1,6 +1,6 @@
 // ============================================================================
-// EFVM360 – Hook de Estilos — Visual Corporativo Sólido Vale S.A.
-// ZERO glassmorphism, ZERO backdrop-filter, ZERO imagem de fundo
+// EFVM360 – Hook de Estilos — Visual Corporativo Premium Vale S.A.
+// Glassmorphism + smooth transitions + design tokens
 // ============================================================================
 import { useMemo } from 'react';
 import type { TemaEstilos, ConfiguracaoSistema } from '../types';
@@ -38,20 +38,23 @@ export function useStyles(
   const isDark = config.tema === 'escuro';
   return useMemo<StylesObject>(
     () => ({
-      // ── Container: fundo SÓLIDO, sem imagem ──
+      // ── Container: premium background ──
       container: {
         minHeight: '100vh', width: '100%',
         backgroundColor: tema.background,
-        fontFamily: "'Segoe UI', 'Inter', -apple-system, sans-serif",
+        fontFamily: "'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif",
         color: tema.texto,
         position: 'relative', overflow: 'hidden',
-        transition: 'background-color 0.3s ease, color 0.3s ease',
+        transition: 'background-color 400ms cubic-bezier(0.4, 0, 0.2, 1), color 250ms ease',
       },
 
-      // ── Overlay: não mais necessário, mas mantido para compatibilidade ──
+      // ── Overlay: subtle gradient for depth ──
       overlay: {
         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-        background: 'transparent', zIndex: 0, pointerEvents: 'none',
+        background: isDark
+          ? 'radial-gradient(ellipse at 20% 50%, rgba(0,126,122,0.04) 0%, transparent 60%)'
+          : 'radial-gradient(ellipse at 80% 20%, rgba(0,126,122,0.03) 0%, transparent 60%)',
+        zIndex: 0, pointerEvents: 'none',
       },
 
       content: {
@@ -59,16 +62,19 @@ export function useStyles(
         minHeight: '100vh', display: 'flex', flexDirection: 'column',
       },
 
-      // ── Header: sólido branco/escuro com borda sutil ──
+      // ── Header: glassmorphism with subtle border ──
       header: {
-        background: isDark ? '#1a1a1a' : '#ffffff',
+        background: isDark ? 'rgba(30, 30, 30, 0.82)' : 'rgba(255, 255, 255, 0.82)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
         padding: '12px 24px',
         margin: '12px 16px 0 16px',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        boxShadow: tema.cardSombra,
-        border: `1px solid ${tema.cardBorda}`,
+        boxShadow: isDark ? '0 2px 16px rgba(0,0,0,0.2)' : '0 2px 16px rgba(0,0,0,0.04)',
+        border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
         borderRadius: '12px',
         position: 'relative', zIndex: 10,
+        transition: 'background 250ms ease, box-shadow 250ms ease',
       },
 
       headerLogo: { display: 'flex', alignItems: 'center', gap: '12px' },
@@ -96,17 +102,20 @@ export function useStyles(
 
       sidebar: { display: 'none' },
 
-      // ── Barra inferior: sólida ──
+      // ── Barra inferior: glassmorphism floating pill ──
       bottomNav: {
         position: 'fixed', bottom: '12px', left: '50%', transform: 'translateX(-50%)',
         height: '64px',
-        background: isDark ? '#1a1a1a' : '#ffffff',
-        border: `1px solid ${tema.cardBorda}`,
+        background: isDark ? 'rgba(30, 30, 30, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+        border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
         borderRadius: '16px',
         display: 'flex', justifyContent: 'center', alignItems: 'center',
         gap: '4px', padding: '0 12px',
-        boxShadow: isDark ? '0 -2px 12px rgba(0,0,0,0.3)' : '0 -2px 12px rgba(0,0,0,0.08)',
+        boxShadow: isDark ? '0 -4px 24px rgba(0,0,0,0.3)' : '0 -4px 24px rgba(0,0,0,0.06)',
         zIndex: 100,
+        transition: 'background 250ms ease',
       },
 
       bottomNavItem: {
@@ -151,19 +160,22 @@ export function useStyles(
         maxWidth: '1400px', width: '100%', margin: '0 auto',
       },
 
-      // ── Card: SÓLIDO, borda sutil, sombra leve ──
+      // ── Card: glassmorphism with smooth hover ──
       card: {
         background: tema.card,
+        backdropFilter: 'blur(16px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(16px) saturate(180%)',
         borderRadius: '12px',
         border: `1px solid ${tema.cardBorda}`,
         boxShadow: tema.cardSombra,
         padding: '20px',
-        transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
+        transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)',
       },
 
       cardHover: {
-        boxShadow: isDark ? '0 4px 12px rgba(0,0,0,0.3)' : '0 4px 12px rgba(0,0,0,0.10)',
-        borderColor: '#007e7a',
+        transform: 'translateY(-2px)',
+        boxShadow: isDark ? '0 8px 24px rgba(0,0,0,0.3)' : '0 8px 24px rgba(0,126,122,0.08)',
+        borderColor: isDark ? 'rgba(0,126,122,0.3)' : 'rgba(0,126,122,0.2)',
       },
 
       cardTitle: {
@@ -283,10 +295,14 @@ export function useStyles(
       adambootPanel: {
         position: 'fixed', bottom: '170px', right: '20px',
         width: '360px', maxHeight: '400px',
-        background: tema.card, borderRadius: '16px',
+        background: isDark ? 'rgba(30, 30, 30, 0.88)' : 'rgba(255, 255, 255, 0.88)',
+        backdropFilter: 'blur(24px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+        borderRadius: '16px',
         boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.5)' : '0 8px 32px rgba(0,0,0,0.12)',
-        border: `1px solid ${tema.cardBorda}`,
+        border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}`,
         display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 1000,
+        transition: 'transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 200ms ease',
       },
       adambootButton: {
         position: 'fixed', bottom: '95px', right: '20px',

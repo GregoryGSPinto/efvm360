@@ -88,12 +88,32 @@ function getFuncaoLabel(funcao?: string): string {
   return map[funcao || ''] || funcao || 'Operador';
 }
 
-// ── Loading fallback ────────────────────────────────────────────────────
+// ── Loading fallback — Skeleton shimmer ─────────────────────────────────
 
-function RouteFallback({ tema }: { tema: { textoSecundario: string } }) {
+function RouteFallback({ tema }: { tema: { textoSecundario: string; card: string; cardBorda: string } }) {
   return (
-    <div style={{ padding: 40, textAlign: 'center', color: tema.textoSecundario }}>
-      Carregando...
+    <div className="efvm360-fade-in" style={{ padding: '24px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+        {[1, 2, 3, 4].map(i => (
+          <div key={i} style={{
+            background: tema.card, borderRadius: 12, border: `1px solid ${tema.cardBorda}`,
+            padding: 20, display: 'flex', flexDirection: 'column', gap: 12,
+          }}>
+            <div className="efvm360-skeleton" style={{ width: '40%', height: 18, borderRadius: 8 }} />
+            <div className="efvm360-skeleton" style={{ width: '100%', height: 12, borderRadius: 6 }} />
+            <div className="efvm360-skeleton" style={{ width: '70%', height: 12, borderRadius: 6 }} />
+          </div>
+        ))}
+      </div>
+      <div style={{
+        background: tema.card, borderRadius: 12, border: `1px solid ${tema.cardBorda}`,
+        padding: 20, display: 'flex', flexDirection: 'column', gap: 12,
+      }}>
+        <div className="efvm360-skeleton" style={{ width: '30%', height: 20, borderRadius: 8 }} />
+        {[1, 2, 3, 4, 5].map(i => (
+          <div className="efvm360-skeleton" key={i} style={{ width: i === 5 ? '50%' : '100%', height: 14, borderRadius: 6 }} />
+        ))}
+      </div>
     </div>
   );
 }
@@ -587,11 +607,15 @@ export default function App(): JSX.Element {
 
   return (
     <AdamBotProvider contexto={adamBotContexto} executors={adamBotExecutors}>
-    <div style={{
-      minHeight: '100vh', width: '100%',
-      backgroundColor: tema.background,
-      display: 'flex', flexDirection: 'column',
-    }}>
+    <div
+      className={isDark ? 'efvm360-dark' : ''}
+      style={{
+        minHeight: '100vh', width: '100%',
+        backgroundColor: tema.background,
+        display: 'flex', flexDirection: 'column',
+        transition: 'background-color 400ms cubic-bezier(0.4, 0, 0.2, 1)',
+      }}
+    >
 
       {/* Skip to content (a11y) */}
       <a href="#efvm360-main" className="efvm360-skip-link">Pular para conteúdo</a>

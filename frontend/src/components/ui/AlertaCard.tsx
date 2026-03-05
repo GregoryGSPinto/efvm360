@@ -42,7 +42,10 @@ function AlertaCardBase({ mensagem, severidade, timestamp, tema }: AlertaCardPro
       }}
     >
       <span
-        className={severidade === 'critico' ? 'efvm-pulse-dot' : undefined}
+        className={
+          severidade === 'critico' ? 'efvm-pulse-dot efvm360-status-danger' :
+          severidade === 'aviso' ? 'efvm360-status-warning' : undefined
+        }
         style={{
           width: 8,
           height: 8,

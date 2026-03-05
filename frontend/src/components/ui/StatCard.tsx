@@ -18,8 +18,11 @@ interface StatCardProps {
 function StatCardBase({ icon, label, valor, subtexto, destaque, tema, children }: StatCardProps): JSX.Element {
   return (
     <div
+      className="efvm360-glass-card"
       style={{
         background: tema.card,
+        backdropFilter: 'blur(16px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(16px) saturate(180%)',
         borderRadius: 12,
         padding: '20px 16px',
         border: destaque

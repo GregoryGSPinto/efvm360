@@ -36,6 +36,7 @@ function StatusIndicatorBase({ status, label, tema }: StatusIndicatorProps): JSX
       }}
     >
       <span
+        className={status === 'online' ? 'efvm360-status-live' : status === 'offline' ? 'efvm360-status-danger' : undefined}
         style={{
           width: 7,
           height: 7,
