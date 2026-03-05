@@ -2,7 +2,7 @@
 // EFVM360 — Dashboard Coordenador (multiple yards comparison)
 // ============================================================================
 
-import { useState, useEffect, type CSSProperties } from 'react';
+import { useState, useEffect, useCallback, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TemaComputed } from '../types';
 import type { Usuario } from '../../types';
@@ -12,6 +12,7 @@ import {
 } from '../../services/analyticsService';
 import type { YardSummary } from '../../services/analyticsService';
 import { apiClient } from '../../services/apiClient';
+import { PullToRefresh } from '../../components/ui';
 
 interface Props {
   tema: TemaComputed;
@@ -27,7 +28,7 @@ export default function DashboardCoordenador({ tema }: Props) {
   const [isLive, setIsLive] = useState(false);
   const [summaries, setSummaries] = useState<YardSummary[]>(() => generateMockYardSummaries());
 
-  useEffect(() => {
+  const fetchData = useCallback(() => {
     const yards = JSON.parse(sessionStorage.getItem('user_yards') || '["VFZ","VBR"]');
     apiClient.get<YardSummary[]>(`/analytics/dashboard/coordenador?yards=${yards.join(',')}`).then(data => {
       if (data && Array.isArray(data) && data.length > 0) {
@@ -37,6 +38,8 @@ export default function DashboardCoordenador({ tema }: Props) {
     });
   }, []);
 
+  useEffect(() => { fetchData(); }, [fetchData]);
+
   const card: CSSProperties = {
     background: tema.card,
     borderRadius: 12,
@@ -45,6 +48,7 @@ export default function DashboardCoordenador({ tema }: Props) {
   };
 
   return (
+    <PullToRefresh onRefresh={fetchData}>
     <div style={{ padding: 20, maxWidth: 1000, margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <h2 style={{ color: tema.texto, marginBottom: 4 }}>{t('dashboard.coordenador.title')}</h2>
@@ -140,5 +144,6 @@ export default function DashboardCoordenador({ tema }: Props) {
         </div>
       </div>
     </div>
+    </PullToRefresh>
   );
 }

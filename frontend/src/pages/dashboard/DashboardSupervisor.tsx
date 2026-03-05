@@ -17,6 +17,7 @@ import {
 import type { DailyStats } from '../../services/analyticsService';
 import { apiClient } from '../../services/apiClient';
 import ConnectionStatus from '../../components/ui/ConnectionStatus';
+import { PullToRefresh } from '../../components/ui';
 import { useWebSocketContext, WS_EVENTS } from '../../contexts/WebSocketContext';
 
 interface Props {
@@ -88,7 +89,12 @@ export default function DashboardSupervisor({ tema, usuarioLogado }: Props) {
     </div>
   );
 
+  const handleRefresh = useCallback(async () => {
+    fetchStats();
+  }, [fetchStats]);
+
   return (
+    <PullToRefresh onRefresh={handleRefresh}>
     <div style={{ padding: 20, maxWidth: 900, margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <h2 style={{ color: tema.texto, marginBottom: 4 }}>{t('dashboard.supervisor.title')}</h2>
@@ -158,5 +164,6 @@ export default function DashboardSupervisor({ tema, usuarioLogado }: Props) {
         </div>
       </div>
     </div>
+    </PullToRefresh>
   );
 }

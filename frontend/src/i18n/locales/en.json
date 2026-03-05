@@ -598,7 +598,11 @@
     "online": "Online",
     "offline": "Offline",
     "syncing": "Syncing",
-    "syncShort": "Sync..."
+    "syncShort": "Sync...",
+    "connectionRestored": "Connection restored",
+    "connectionLost": "No internet connection",
+    "cellular": "Cellular",
+    "offlineMode": "Offline mode active"
   },
   "splash": {
     "loadingSystem": "Loading Operating System...",

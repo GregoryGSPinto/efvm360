@@ -1,7 +1,8 @@
 // ============================================================================
-// EFVM360 — OnlineIndicator
+// EFVM360 — OnlineIndicator (enhanced with native-like toast banners)
 // Desktop: floating bottom-right badge (hidden on mobile)
 // Mobile: inline component rendered in TopNavbar
+// Toast: slide-down banner on connectivity changes
 // ============================================================================
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +11,12 @@ interface Props {
   status: 'online' | 'offline' | 'syncing';
   pendingCount: number;
   isDark: boolean;
+}
+
+interface ToastProps extends Props {
+  justReconnected: boolean;
+  justDisconnected: boolean;
+  connectionType?: string;
 }
 
 // ── Desktop Floating Badge (hidden on mobile) ──
@@ -84,5 +91,80 @@ export const OnlineStatusInline = memo<Props>(({ status }) => {
   );
 });
 OnlineStatusInline.displayName = 'OnlineStatusInline';
+
+// ── Native-like Toast Banner (slides down from top on connectivity change) ──
+export const NetworkToast = memo<ToastProps>(({
+  justReconnected,
+  justDisconnected,
+  connectionType,
+  isDark,
+}) => {
+  const { t } = useTranslation();
+  const visible = justReconnected || justDisconnected;
+  if (!visible) return null;
+
+  const isBack = justReconnected;
+  const bg = isBack ? '#0A7F5A' : '#dc2626';
+  const message = isBack
+    ? t('onlineIndicator.connectionRestored', 'Connection restored')
+    : t('onlineIndicator.connectionLost', 'No internet connection');
+  const subMessage = isBack && connectionType && connectionType !== 'unknown'
+    ? connectionType === 'wifi' ? 'Wi-Fi' : connectionType === 'cellular' ? t('onlineIndicator.cellular', 'Cellular') : ''
+    : !isBack ? t('onlineIndicator.offlineMode', 'Offline mode active') : '';
+
+  return (
+    <div
+      className="efvm360-network-toast"
+      role="status"
+      aria-live="polite"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 10000,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        padding: '10px 16px',
+        background: bg,
+        color: '#fff',
+        fontSize: 13,
+        fontWeight: 600,
+        letterSpacing: 0.2,
+        animation: 'efvm360ToastSlide 0.3s ease-out',
+        boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
+        // Safe area inset for notched phones
+        paddingTop: 'max(10px, env(safe-area-inset-top))',
+      }}
+    >
+      <span style={{
+        width: 8,
+        height: 8,
+        borderRadius: '50%',
+        background: '#fff',
+        opacity: 0.9,
+        flexShrink: 0,
+      }} />
+      <span>{message}</span>
+      {subMessage && (
+        <span style={{ opacity: 0.8, fontWeight: 400, fontSize: 11 }}>
+          ({subMessage})
+        </span>
+      )}
+      <style>{`
+        @keyframes efvm360ToastSlide {
+          from { transform: translateY(-100%); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        .efvm360-network-toast {
+          ${isDark ? '' : ''}
+        }
+      `}</style>
+    </div>
+  );
+});
+NetworkToast.displayName = 'NetworkToast';
 
 export default OnlineIndicator;

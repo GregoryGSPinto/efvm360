@@ -106,6 +106,37 @@ registerRoute(
   }),
 );
 
+// ── JS/CSS runtime chunks (dynamic imports not in precache) ─────────────
+
+registerRoute(
+  ({ request }) =>
+    request.destination === 'script' || request.destination === 'style',
+  new StaleWhileRevalidate({
+    cacheName: 'efvm360-static-resources',
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({
+        maxEntries: 60,
+        maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+      }),
+    ],
+  }),
+);
+
+// ── Manifest & other JSON: StaleWhileRevalidate ─────────────────────────
+
+registerRoute(
+  ({ url }) =>
+    url.pathname.endsWith('/manifest.json') ||
+    url.pathname.endsWith('/manifest.webmanifest'),
+  new StaleWhileRevalidate({
+    cacheName: 'efvm360-manifest',
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+    ],
+  }),
+);
+
 // ── Background Sync ─────────────────────────────────────────────────────
 
 self.addEventListener('sync', (event: ExtendableEvent & { tag?: string }) => {

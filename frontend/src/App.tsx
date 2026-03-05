@@ -24,6 +24,7 @@ import { useSession, formatarTempoRestante } from './hooks/useSession';
 import { useDSS } from './hooks/useDSS';
 import { useBlindagem } from './hooks/useBlindagem';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
+import { useNetworkStatus } from './hooks/useNetworkStatus';
 import { useTurnoTimer } from './hooks/useTurnoTimer';
 import { usePassagemHandlers } from './hooks/usePassagemHandlers';
 import { useTour } from './hooks/useTour';
@@ -40,7 +41,7 @@ import { adamPrecarregarVozes } from './components/AdamBot/AdamBotVoice';
 import { TopNavbar } from './components/layout/TopNavbar';
 import { MobileBottomNav } from './components/layout/MobileBottomNav';
 import { YardSelector } from './components/YardSelector';
-import { OnlineIndicator } from './components/layout/OnlineIndicator';
+import { OnlineIndicator, NetworkToast } from './components/layout/OnlineIndicator';
 import { GuidedTour, TOUR_STEPS } from './components/ui/GuidedTour';
 import { UpdateNotification } from './components/ui/UpdateNotification';
 import {
@@ -260,6 +261,7 @@ export default function App(): JSX.Element {
 
   // ── Online status ────────────────────────────────────────────────────
   const onlineStatus = useOnlineStatus();
+  const networkStatus = useNetworkStatus();
 
   // ── Styles ───────────────────────────────────────────────────────────
   const styles = useStyles(tema, config, false);
@@ -925,6 +927,14 @@ export default function App(): JSX.Element {
         status={onlineStatus.status}
         pendingCount={onlineStatus.pendingCount}
         isDark={isDark}
+      />
+      <NetworkToast
+        status={onlineStatus.status}
+        pendingCount={onlineStatus.pendingCount}
+        isDark={isDark}
+        justReconnected={networkStatus.justReconnected}
+        justDisconnected={networkStatus.justDisconnected}
+        connectionType={networkStatus.connectionType}
       />
 
       {/* AdamBot — Assistente IA Local */}

@@ -2,7 +2,7 @@
 // EFVM360 — Dashboard Gerente (all yards consolidated)
 // ============================================================================
 
-import { useState, useMemo, useEffect, type CSSProperties } from 'react';
+import { useState, useMemo, useEffect, useCallback, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TemaComputed } from '../types';
 import type { Usuario } from '../../types';
@@ -16,6 +16,7 @@ import {
 } from '../../services/analyticsService';
 import type { DailyStats, YardSummary } from '../../services/analyticsService';
 import { apiClient } from '../../services/apiClient';
+import { PullToRefresh } from '../../components/ui';
 
 interface GerenteData {
   summaries: YardSummary[];
@@ -42,7 +43,7 @@ export default function DashboardGerente({ tema }: Props) {
   const [isLive, setIsLive] = useState(false);
   const [data, setData] = useState<GerenteData>(() => generateMockGerenteData());
 
-  useEffect(() => {
+  const fetchData = useCallback(() => {
     apiClient.get<GerenteData>('/analytics/dashboard/gerente').then(resp => {
       if (resp && resp.summaries) {
         setData(resp);
@@ -50,6 +51,8 @@ export default function DashboardGerente({ tema }: Props) {
       }
     });
   }, []);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   const { summaries, allStats } = data;
 
@@ -80,6 +83,7 @@ export default function DashboardGerente({ tema }: Props) {
   );
 
   return (
+    <PullToRefresh onRefresh={fetchData}>
     <div style={{ padding: 20, maxWidth: 1000, margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <h2 style={{ color: tema.texto, marginBottom: 4 }}>{t('dashboard.gerente.title')}</h2>
@@ -187,5 +191,6 @@ export default function DashboardGerente({ tema }: Props) {
         </div>
       </div>
     </div>
+    </PullToRefresh>
   );
 }
