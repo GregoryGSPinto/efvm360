@@ -43,7 +43,7 @@ export function verificarNotificacoes(ctx: ContextoBot): AdamNotification[] {
   }
 
   // 3. Interdicted lines
-  const interditadas = ctx.linhasPatio.filter(l => l.status === 'interditada');
+  const interditadas = (ctx.linhasPatio || []).filter(l => l.status === 'interditada');
   if (interditadas.length > 0) {
     notifs.push({
       id: `notif-linhas-${now}`,

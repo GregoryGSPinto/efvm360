@@ -29,31 +29,35 @@ export function executarAcao(
   action: AdamAction,
   executors: ActionExecutors,
 ): ActionResult {
-  switch (action.tipo) {
-    case 'navegar':
-      if (action.destino) {
-        executors.navegar(action.destino);
-        return { sucesso: true, mensagem: `Navegando para ${action.destino}...` };
-      }
-      return { sucesso: false, mensagem: 'Destino nao especificado.' };
+  try {
+    switch (action.tipo) {
+      case 'navegar':
+        if (action.destino) {
+          executors.navegar(action.destino);
+          return { sucesso: true, mensagem: `Navegando para ${action.destino}...` };
+        }
+        return { sucesso: false, mensagem: 'Destino nao especificado.' };
 
-    case 'avancar':
-      executors.avancarEtapa();
-      return { sucesso: true, mensagem: 'Avancando para proxima etapa...' };
+      case 'avancar':
+        executors.avancarEtapa();
+        return { sucesso: true, mensagem: 'Avancando para proxima etapa...' };
 
-    case 'voltar':
-      executors.voltarEtapa();
-      return { sucesso: true, mensagem: 'Voltando para etapa anterior...' };
+      case 'voltar':
+        executors.voltarEtapa();
+        return { sucesso: true, mensagem: 'Voltando para etapa anterior...' };
 
-    case 'tour':
-      executors.abrirTour();
-      return { sucesso: true, mensagem: 'Iniciando tour guiado...' };
+      case 'tour':
+        executors.abrirTour();
+        return { sucesso: true, mensagem: 'Iniciando tour guiado...' };
 
-    case 'limpar':
-      executors.clearHistory();
-      return { sucesso: true, mensagem: 'Historico limpo!' };
+      case 'limpar':
+        executors.clearHistory();
+        return { sucesso: true, mensagem: 'Historico limpo!' };
 
-    default:
-      return { sucesso: false, mensagem: 'Acao nao reconhecida.' };
+      default:
+        return { sucesso: false, mensagem: 'Acao nao reconhecida.' };
+    }
+  } catch {
+    return { sucesso: false, mensagem: 'Erro ao executar acao.' };
   }
 }

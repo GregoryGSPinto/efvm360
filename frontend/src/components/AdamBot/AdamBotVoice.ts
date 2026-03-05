@@ -175,6 +175,10 @@ export function initSTT(
   onError: (err: string) => void,
   onListeningChange: (listening: boolean) => void,
 ): STTControls {
+  if (typeof window === 'undefined') {
+    return { start: () => {}, stop: () => {}, isSupported: false };
+  }
+
   const SpeechRecognitionCtor =
     window.SpeechRecognition || window.webkitSpeechRecognition;
 

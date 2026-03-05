@@ -45,7 +45,7 @@ interface KBEntry {
 
 function saudacao(ctx: ContextoBot): string {
   const hora = ctx.horaAtual;
-  const nome = ctx.nomeUsuario.split(' ')[0] || 'Operador';
+  const nome = (ctx.nomeUsuario || '').split(' ')[0] || 'Operador';
   return hora < 12 ? `Bom dia, ${nome}!` : hora < 18 ? `Boa tarde, ${nome}!` : `Boa noite, ${nome}!`;
 }
 
@@ -138,7 +138,7 @@ const KB: KBEntry[] = [
   {
     patterns: [/como\s+est[aá]\s*(o\s+)?(meu\s+)?p[aá]tio/i, /situa[cç][aã]o\s*(do\s+)?p[aá]tio/i, /status\s*(do\s+)?p[aá]tio/i],
     resposta: (ctx) => {
-      const linhas = ctx.linhasPatio;
+      const linhas = ctx.linhasPatio || [];
       if (linhas.length === 0) return `Nao encontrei dados de linhas para o patio **${ctx.patioSelecionado}**. Verifique no Layout do Patio.`;
       const livres = linhas.filter(l => l.status === 'livre').length;
       const ocupadas = linhas.filter(l => l.status === 'ocupada').length;
@@ -187,7 +187,7 @@ const KB: KBEntry[] = [
     patterns: [/algo\s+cr[ií]tico/i, /tem\s+algo\s+(de\s+)?errado/i, /preciso\s+me\s+preocupar/i],
     resposta: (ctx) => {
       const alertas: string[] = [];
-      const interditadas = ctx.linhasPatio.filter(l => l.status === 'interditada');
+      const interditadas = (ctx.linhasPatio || []).filter(l => l.status === 'interditada');
       if (interditadas.length > 0) alertas.push(`${interditadas.length} linhas interditadas`);
       if (ctx.scoreRisco != null && ctx.scoreRisco > 60) alertas.push(`Risco alto (${ctx.scoreRisco})`);
       if (ctx.ocorrenciasAbertas > 0) alertas.push(`${ctx.ocorrenciasAbertas} ocorrencias abertas`);
@@ -337,6 +337,7 @@ const KB: KBEntry[] = [
 // ── Main processing function ───────────────────────────────────────────
 
 export function processarMensagem(input: string, ctx: ContextoBot): { text: string; action?: AdamAction } {
+  if (!input) return { text: 'Como posso te ajudar?' };
   const trimmed = input.trim().toLowerCase();
 
   // Greeting patterns
@@ -424,7 +425,7 @@ export function getSugestoesContextuais(ctx: ContextoBot): string[] {
 // ── Welcome message ────────────────────────────────────────────────────
 
 export function gerarBoasVindas(ctx: ContextoBot, contadorInteracoes: number, insights: string[]): string {
-  const nome = ctx.nomeUsuario.split(' ')[0] || 'Operador';
+  const nome = (ctx.nomeUsuario || '').split(' ')[0] || 'Operador';
   const hora = new Date().getHours();
   const cumprimento = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
 
