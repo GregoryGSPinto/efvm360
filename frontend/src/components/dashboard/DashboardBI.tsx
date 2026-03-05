@@ -6,7 +6,7 @@
 // COM EXPORTAÇÃO E INTEGRAÇÃO ADAM BOOT + DSS
 // ============================================================================
 
-import { memo, useState, useMemo, useCallback } from 'react';
+import { memo, useState, useMemo, useCallback, useRef } from 'react';
 import type { TemaEstilos, RegistroHistorico } from '../../types';
 import type { StylesObject } from '../../hooks/useStyles';
 import type { FiltrosDashboard } from '../../types/dashboard';
@@ -33,12 +33,16 @@ import {
 import { CardKPI } from './Graficos';
 import AIInsightChart from './AIInsightChart';
 import { PermissionGuard } from '../ui/PermissionGuard';
+import TrendAnalysis from './TrendAnalysis';
+import IncidentHeatmap from './IncidentHeatmap';
+import ShiftComparison from './ShiftComparison';
+import PDFReportGenerator from './PDFReportGenerator';
 
 // ============================================================================
 // TIPOS
 // ============================================================================
 
-type AbaDashboard = 'visao-geral' | 'operacional' | 'seguranca' | 'tendencias' | 'exportacoes';
+type AbaDashboard = 'visao-geral' | 'operacional' | 'seguranca' | 'tendencias' | 'analytics' | 'exportacoes';
 
 interface DashboardAvancadoProps {
   historicoTurnos: RegistroHistorico[];
@@ -586,6 +590,7 @@ export const DashboardBI = memo<DashboardAvancadoProps>(({
   const [filtros, setFiltros] = useState<FiltrosDashboard>(filtrosIniciais);
   const [mostrarMenuExportar, setMostrarMenuExportar] = useState(false);
   const [exportando, setExportando] = useState(false);
+  const analyticsChartsRef = useRef<HTMLDivElement>(null);
   
   // Estados para exportação avançada
   const [mostrarExportacaoAvancada, setMostrarExportacaoAvancada] = useState(false);
@@ -866,6 +871,7 @@ export const DashboardBI = memo<DashboardAvancadoProps>(({
     { id: 'operacional', label: 'Operacional', icone: '🚂' },
     { id: 'seguranca', label: 'Segurança', icone: '🛡️' },
     { id: 'tendencias', label: 'Tendências', icone: '📈' },
+    { id: 'analytics', label: 'Analytics+', icone: '🔬' },
     { id: 'exportacoes', label: 'Documentos', icone: '📁' },
   ];
 
@@ -909,6 +915,14 @@ export const DashboardBI = memo<DashboardAvancadoProps>(({
               MODO VISUALIZAÇÃO
             </span>
           </div>
+
+          {/* Botão PDF Analytics */}
+          <PDFReportGenerator
+            registros={registrosFiltrados}
+            filtros={filtros}
+            tema={tema}
+            chartContainerRef={analyticsChartsRef}
+          />
 
           {/* Botão Exportar */}
           <div style={{ position: 'relative' }}>
@@ -1509,6 +1523,24 @@ export const DashboardBI = memo<DashboardAvancadoProps>(({
         </>
       )}
 
+      {/* ANALYTICS+ — Advanced Analytics (Phase 3E) */}
+      {abaAtiva === 'analytics' && (
+        <div ref={analyticsChartsRef} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {/* Trend Analysis — Recharts area chart with trendline */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(400px, 100%), 1fr))', gap: '24px' }}>
+            <TrendAnalysis registros={registrosFiltrados} tema={tema} metric="occupancy" />
+            <TrendAnalysis registros={registrosFiltrados} tema={tema} metric="incidents" />
+          </div>
+          <TrendAnalysis registros={registrosFiltrados} tema={tema} metric="risk" />
+
+          {/* Heatmap — D3.js incidents by track x time */}
+          <IncidentHeatmap registros={registrosFiltrados} tema={tema} />
+
+          {/* Shift Comparison — Grouped bar chart */}
+          <ShiftComparison registros={registrosFiltrados} tema={tema} />
+        </div>
+      )}
+
       {/* DOCUMENTOS EXPORTADOS - HISTÓRICO */}
       {abaAtiva === 'exportacoes' && (
         <PermissionGuard
@@ -1923,8 +1955,8 @@ export const DashboardBI = memo<DashboardAvancadoProps>(({
           color: tema.textoSecundario,
         }}
       >
-        📊 Dashboard BI+ v2.0 • Apache ECharts • {registrosFiltrados.length} registros analisados •
-        Última atualização: {new Date().toLocaleString('pt-BR')} • 🤖 Integrado ao AdamBoot IA
+        📊 Dashboard BI+ v3.0 • ECharts + Recharts + D3.js • {registrosFiltrados.length} registros analisados •
+        Última atualização: {new Date().toLocaleString('pt-BR')} • 🤖 AdamBoot IA • 📄 PDF Analytics
       </div>
     </div>
   );
