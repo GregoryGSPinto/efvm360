@@ -514,8 +514,8 @@ export default function LandingPage() {
       }}>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 16 }}>
           <a href="/help" style={{ color: COLORS.textMuted, textDecoration: 'none' }}>Help Center</a>
-          <a href="/docs/TERMS_OF_SERVICE.md" style={{ color: COLORS.textMuted, textDecoration: 'none' }}>Terms of Service</a>
-          <a href="/docs/PRIVACY_POLICY.md" style={{ color: COLORS.textMuted, textDecoration: 'none' }}>Privacy Policy</a>
+          <a href="/help#termos" style={{ color: COLORS.textMuted, textDecoration: 'none' }}>Terms of Service</a>
+          <a href="/help#privacidade" style={{ color: COLORS.textMuted, textDecoration: 'none' }}>Privacy Policy</a>
         </div>
         <p style={{ margin: 0 }}>
           &copy; {new Date().getFullYear()} EFVM360. All rights reserved.

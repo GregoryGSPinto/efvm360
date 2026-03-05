@@ -8,9 +8,6 @@ export { Card, StatusBadge, SectionHeader } from './layout';
 // Tables
 export { TabelaPatio, TabelaEquipamentos } from './tables';
 
-// Dashboard
-export { DashboardBI } from './dashboard/DashboardBI';
-
 // Componentes Operacionais
 export { ChecklistSeguranca } from './operacional';
 export { AIRiskScore } from './operacional';
