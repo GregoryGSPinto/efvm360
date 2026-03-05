@@ -24,6 +24,15 @@ export default function DashboardRouter({ tema, usuarioLogado }: Props) {
     return getHierarchyLevelForRole(usuarioLogado.funcao);
   }, [usuarioLogado]);
 
+  // ── Loading guard ──
+  if (!usuarioLogado) {
+    return (
+      <div style={{ padding: 40, textAlign: 'center', color: tema.textoSecundario }}>
+        Carregando dashboard...
+      </div>
+    );
+  }
+
   if (level >= HierarchyLevel.MANAGEMENT) {
     return <DashboardGerente tema={tema} usuarioLogado={usuarioLogado} />;
   }

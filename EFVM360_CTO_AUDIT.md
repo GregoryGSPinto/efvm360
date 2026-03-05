@@ -373,45 +373,72 @@ for page in frontend/src/pages/*/index.tsx; do
 done
 ```
 
-**11 Páginas esperadas:**
+**15 Páginas verificadas (superou as 11 esperadas):**
 
 | Página | Path | Lazy | Loading | Error |
 |--------|------|------|---------|-------|
-| Dashboard | /dashboard | ⏳ | ⏳ | ⏳ |
-| Passagem de Serviço | /passagem | ⏳ | ⏳ | ⏳ |
-| Analytics (BI+) | /analytics | ⏳ | ⏳ | ⏳ |
-| Layout de Pátio | /layout-patio | ⏳ | ⏳ | ⏳ |
-| Graus de Risco | /graus-risco | ⏳ | ⏳ | ⏳ |
-| Equipamentos | /equipamentos | ⏳ | ⏳ | ⏳ |
-| Gestão | /gestao | ⏳ | ⏳ | ⏳ |
-| Histórico | /historico | ⏳ | ⏳ | ⏳ |
-| Perfil | /perfil | ⏳ | ⏳ | ⏳ |
-| Configurações | /configuracoes | ⏳ | ⏳ | ⏳ |
-| Suporte | /suporte | ⏳ | ⏳ | ⏳ |
+| Inicial (Home) | / | ✅ | ✅ | ✅ ModuleErrorBoundary |
+| Passagem de Serviço | /passagem | ✅ | ✅ | ✅ PassagemBoundary (isCritical) |
+| DSS | /dss | ✅ | ✅ | ✅ DSSBoundary |
+| Analytics (BI+) | /analytics | ✅ | ✅ | ✅ DashboardBoundary |
+| Layout de Pátio | /layout | ✅ | ✅ | ✅ ModuleErrorBoundary |
+| Graus de Risco | /graus-risco | ✅ | ✅ | ✅ ModuleErrorBoundary |
+| Gestão | /gestao | ✅ | ✅ | ✅ ModuleErrorBoundary |
+| Histórico | /historico | ✅ | ✅ | ✅ HistoricoBoundary |
+| Perfil | /perfil | ✅ | ✅ | ✅ ModuleErrorBoundary |
+| Configurações | /configuracoes | ✅ | ✅ | ✅ ConfiguracoesBoundary |
+| Suporte | /suporte | ✅ | ✅ | ✅ ModuleErrorBoundary |
+| Dashboard (multi-level) | /dashboard/* | ✅ | ✅ | ✅ ModuleErrorBoundary |
+| Composições | /composicoes | ✅ | ✅ | ✅ ModuleErrorBoundary |
+| Passagem Interpátio | /passagem-interpatio | ✅ | ✅ | ✅ ModuleErrorBoundary |
+| Aprovações | /aprovacoes | ✅ | ✅ | ✅ ModuleErrorBoundary |
 
-### 6.2 Componentes Reutilizáveis
+**Nota:** Lazy loading via `React.lazy()` + global `<Suspense fallback={<RouteFallback />}>`.
+Loading guards adicionados em inicial, dashboard, graus-risco e historico (phase 1.6).
+Todas as 15 rotas possuem `ModuleErrorBoundary` wrapper.
 
-```bash
-# Contar componentes
-find frontend/src/components/ -name "*.tsx" -type f | grep -v __tests__ | wc -l
+### 6.2 Componentes Reutilizáveis — Verificado ✅
 
-# Componentes >500 linhas (SRP violation candidates)
-find frontend/src/components/ -name "*.tsx" -type f -exec wc -l {} + | sort -rn | head -20
+**Total:** 30 componentes .tsx (excluindo testes)
+**TypeScript coverage:** 100% — todos com `interface XxxProps` tipadas
 
-# Componentes sem PropTypes/interface
-grep -rL "interface.*Props\|type.*Props" frontend/src/components/*.tsx 2>/dev/null | head -10
-```
+**Componentes >500 linhas (SRP refactor candidates):**
 
-### 6.3 Router Configuration
+| Arquivo | Linhas | Recomendação |
+|---------|--------|-------------|
+| pages/passagem/index.tsx | 3438 | **CRÍTICO** — extrair seções em subcomponentes |
+| components/dashboard/DashboardBI.tsx | 1935 | Extrair tabs/charts em módulos |
+| components/dashboard/AdamBootChat.tsx | 1457 | Extrair message list, input, handlers |
+| pages/configuracoes/index.tsx | 1304 | Extrair seções (tema, notif, acessib, pátios) |
+| pages/dss/index.tsx | 1016 | Extrair formulário, lista, filtros |
+| App.tsx | 919 | Extrair route definitions, hook wiring |
+| components/dashboard/EChartsComponents.tsx | 893 | OK — coleção de chart wrappers, coeso |
+| pages/graus-risco/index.tsx | 890 | Extrair modal, matriz, filtros |
+| pages/historico/index.tsx | 866 | Extrair tabs de seção |
+| pages/gestao/index.tsx | 809 | Extrair CRUD, audit trail |
+| pages/perfil/index.tsx | 731 | Extrair seções de perfil |
+| pages/layout-patio/index.tsx | 696 | Extrair editor visual |
+| pages/inicial/index.tsx | 677 | Extrair cards, briefing, gauge |
+| components/dashboard/Graficos.tsx | 630 | OK — coleção de chart primitives |
+| components/operacional/BoaJornadaInspection.tsx | 515 | Extrair checklist steps |
 
-```bash
-# Verificar React Router v6
-cat frontend/src/router/*.tsx
-grep -n "Route\|Routes\|BrowserRouter\|createBrowserRouter" frontend/src/router/*.tsx | head -20
+**Total >500 linhas:** 15 arquivos (13 candidatos reais — 2 coleções coesas)
 
-# Verificar guards de autenticação
-grep -n "ProtectedRoute\|AuthGuard\|RequireAuth\|isAuthenticated" frontend/src/router/*.tsx | head -10
-```
+### 6.3 Router Configuration — Verificado ✅
+
+**React Router v6:** `react-router-dom` com `Routes`, `Route`, `Navigate`, `useNavigate`, `useLocation`
+**Route constants:** `frontend/src/router/routes.ts` — single source of truth (ROUTES, NAV_ID_TO_PATH, PATH_TO_NAV_ID)
+
+**Auth Guards (App.tsx:500-522):**
+- `!isAuthenticated && !isPublicPath` → redirect to `/login`
+- Authenticated on public path → redirect to HOME (ou /suporte para role Suporte)
+- Role Suporte restrito a `/suporte` + `/perfil` apenas
+- **PUBLIC_PATHS:** `/login`, `/cadastro`
+- **Catch-all:** `<Route path="*">` → redirect to HOME
+
+**Two-layer security model:**
+1. **Route-level:** Auth guards (quem acessa qual página)
+2. **Component-level:** `usePermissions` + `PermissionGuard` (features visíveis por role)
 
 ---
 

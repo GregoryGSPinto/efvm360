@@ -92,6 +92,15 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
 
   const navigate = useNavigate();
 
+  // ── Loading guard ──
+  if (!usuarioLogado) {
+    return (
+      <div style={{ padding: 40, textAlign: 'center', color: tema.textoSecundario }}>
+        Carregando dados do operador...
+      </div>
+    );
+  }
+
   // ── Memoized values ───────────────────────────────────────────────────
 
   const saudacao = useMemo(() => getSaudacao(), []);

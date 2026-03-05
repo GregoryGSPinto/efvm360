@@ -237,6 +237,15 @@ export default function PaginaGrausRisco(props: PaginaGrausRiscoProps): JSX.Elem
     background: tema.card, color: tema.texto, fontSize: 12, cursor: 'pointer',
   };
 
+  // ── Loading guard ──
+  if (!usuarioLogado) {
+    return (
+      <div style={{ padding: 40, textAlign: 'center', color: tema.textoSecundario }}>
+        Carregando graus de risco...
+      </div>
+    );
+  }
+
   return (
     <>
       <SectionHeader title="Gestão de Graus de Risco Operacional" tema={tema} />

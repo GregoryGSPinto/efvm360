@@ -796,6 +796,15 @@ export default function PaginaHistorico(props: PaginaHistoricoProps): JSX.Elemen
       </>
     );
 
+    // ── Loading guard ──
+    if (!usuarioLogado) {
+      return (
+        <div style={{ padding: 40, textAlign: 'center', color: tema.textoSecundario }}>
+          Carregando histórico...
+        </div>
+      );
+    }
+
     // ========== RENDER PRINCIPAL ==========
     return (
       <>
