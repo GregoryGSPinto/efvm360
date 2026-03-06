@@ -1,10 +1,10 @@
 # ============================================================================
-# VFZ — Configuração Azure App Service
+# EFVM360 — Configuração Azure App Service
 # Arquivo usado pelo Azure DevOps / GitHub Actions para deploy
 # ============================================================================
 
 # Azure App Service configuração
-name: vfz-backend
+name: efvm360-backend
 runtime: NODE|20-lts
 startup_file: "node dist/server.js"
 
@@ -14,15 +14,15 @@ startup_file: "node dist/server.js"
 #
 # PASSO 1: Criar recursos no Azure Portal
 # ─────────────────────────────────────────
-#   1. Resource Group: rg-vfz-production
+#   1. Resource Group: rg-efvm360-production
 #   2. Azure Database for MySQL Flexible Server:
-#      - Nome: vfz-mysql-prod
+#      - Nome: efvm360-mysql-prod
 #      - Versão: MySQL 8.0
 #      - Região: Brazil South (brazilsouth)
 #      - SKU: Standard_B1ms (ou maior conforme carga)
 #      - Habilitar SSL enforcement
 #   3. Azure App Service:
-#      - Nome: vfz-api-prod
+#      - Nome: efvm360-api-prod
 #      - Runtime: Node.js 20 LTS
 #      - Região: Brazil South
 #      - SKU: B1 (ou maior)
@@ -35,17 +35,17 @@ startup_file: "node dist/server.js"
 #
 #   NODE_ENV=production
 #   PORT=8080
-#   DB_HOST=vfz-mysql-prod.mysql.database.azure.com
+#   DB_HOST=efvm360-mysql-prod.mysql.database.azure.com
 #   DB_PORT=3306
-#   DB_NAME=vfz_railway
-#   DB_USER=vfz_admin
+#   DB_NAME=efvm360_railway
+#   DB_USER=efvm360_admin
 #   DB_PASSWORD=(senha segura gerada)
 #   DB_SSL=true
 #   JWT_SECRET=(gerar com: openssl rand -base64 64)
 #   JWT_REFRESH_SECRET=(gerar com: openssl rand -base64 64)
 #   JWT_EXPIRES_IN=8h
 #   BCRYPT_ROUNDS=12
-#   CORS_ORIGIN=https://vfz.vale.com,https://vfz-app.azurewebsites.net
+#   CORS_ORIGIN=https://efvm360.vale.com,https://efvm360-app.azurewebsites.net
 #   APPLICATIONINSIGHTS_CONNECTION_STRING=(copiar do App Insights)
 #
 # PASSO 3: Deploy via Azure CLI
@@ -53,13 +53,13 @@ startup_file: "node dist/server.js"
 #   cd backend
 #   npm run build
 #   az webapp deployment source config-zip \
-#     --resource-group rg-vfz-production \
-#     --name vfz-api-prod \
+#     --resource-group rg-efvm360-production \
+#     --name efvm360-api-prod \
 #     --src dist.zip
 #
 # PASSO 4: Executar migração
 # ──────────────────────────
-#   az webapp ssh --resource-group rg-vfz-production --name vfz-api-prod
+#   az webapp ssh --resource-group rg-efvm360-production --name efvm360-api-prod
 #   cd /home/site/wwwroot
 #   node dist/migrations/run.js
 #   node dist/migrations/seed.js

@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Swagger / OpenAPI 3.0.3 Configuration
+// EFVM360 Backend — Swagger / OpenAPI 3.0.3 Configuration
 // ============================================================================
 
 import swaggerJsdoc from 'swagger-jsdoc';
@@ -240,8 +240,8 @@ export function setupSwagger(app: Express): void {
     },
   }));
 
-  console.info('[VFZ] Swagger UI:   http://localhost:3001/api/docs');
-  console.info('[VFZ] Swagger JSON:  http://localhost:3001/api/docs/json');
+  console.info('[EFVM360] Swagger UI:   http://localhost:3001/api/docs');
+  console.info('[EFVM360] Swagger JSON:  http://localhost:3001/api/docs/json');
 }
 
 export { swaggerSpec };

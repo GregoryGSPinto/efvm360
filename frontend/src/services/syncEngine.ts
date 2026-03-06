@@ -126,7 +126,7 @@ class HttpSyncAdapter implements SyncApiAdapter {
       error?: string;
     }>;
   }> {
-    const token = localStorage.getItem('vfz_access_token');
+    const token = localStorage.getItem('efvm360_access_token');
     const resp = await fetch(`${this.baseUrl}/sync/passagens`, {
       method: 'POST',
       headers: {

@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ — Login Burst Test
+// EFVM360 — Login Burst Test
 // Simula rajada de logins na troca de turno (20 operadores em 2 minutos)
 // Threshold: p95 < 500ms, error rate < 1%
 // ============================================================================
@@ -7,8 +7,8 @@ import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { Counter, Trend } from 'k6/metrics';
 
-const loginDuration = new Trend('vfz_login_duration', true);
-const loginFailures = new Counter('vfz_login_failures');
+const loginDuration = new Trend('efvm360_login_duration', true);
+const loginFailures = new Counter('efvm360_login_failures');
 
 const BASE = __ENV.BASE_URL || 'http://localhost:3001';
 
@@ -27,7 +27,7 @@ export const options = {
   thresholds: {
     http_req_duration: ['p(95)<500'],
     http_req_failed: ['rate<0.01'],
-    vfz_login_failures: ['count<5'],
+    efvm360_login_failures: ['count<5'],
   },
 };
 

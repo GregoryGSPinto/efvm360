@@ -1,4 +1,4 @@
-# VFZ v3.2 — Infrastructure as Code (Azure Bicep)
+# EFVM360 v3.2 — Infrastructure as Code (Azure Bicep)
 
 ## Visão Geral
 
@@ -49,8 +49,8 @@ az deployment sub create \
 | Resource | Staging | Production |
 |----------|---------|------------|
 | App Service Plan | B1 | P1v3 |
-| App Service | vfz-api-staging | vfz-api-production |
-| Staging Slot | — | vfz-api-production/staging |
+| App Service | efvm360-api-staging | efvm360-api-production |
+| Staging Slot | — | efvm360-api-production/staging |
 | MySQL | Standard_B1ms (Burstable) | Standard_D2ds_v4 (GP) |
 | MySQL HA | Disabled | ZoneRedundant |
 | MySQL Backup | 7 days | 14 days + geo-redundant |

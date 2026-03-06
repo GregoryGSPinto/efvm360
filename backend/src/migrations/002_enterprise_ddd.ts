@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Migration 002: Enterprise DDD Tables
+// EFVM360 Backend — Migration 002: Enterprise DDD Tables
 // EFVM Pátio 360 — Event Sourcing, Yard Configuration, Inspections
 // ============================================================================
 
@@ -8,7 +8,7 @@ import sequelize from '../config/database';
 
 export async function runMigration002(): Promise<void> {
   const qi: QueryInterface = sequelize.getQueryInterface();
-  console.log('[VFZ-MIGRATE-002] Iniciando migração Enterprise DDD...');
+  console.log('[EFVM360-MIGRATE-002] Iniciando migração Enterprise DDD...');
 
   // ── 1. EVENT STORE (Source of Truth) ──────────────────────────────────
   await qi.createTable('event_store', {
@@ -86,7 +86,7 @@ export async function runMigration002(): Promise<void> {
     END
   `);
 
-  console.log('[VFZ-MIGRATE-002] ✅ event_store (append-only com triggers)');
+  console.log('[EFVM360-MIGRATE-002] ✅ event_store (append-only com triggers)');
 
   // ── 2. SNAPSHOT STORE ─────────────────────────────────────────────────
   await qi.createTable('snapshot_store', {
@@ -124,7 +124,7 @@ export async function runMigration002(): Promise<void> {
     name: 'uk_ss_aggregate',
   });
 
-  console.log('[VFZ-MIGRATE-002] ✅ snapshot_store');
+  console.log('[EFVM360-MIGRATE-002] ✅ snapshot_store');
 
   // ── 3. YARD CONFIGURATIONS (Parametrização por Pátio) ─────────────────
   await qi.createTable('yard_configurations', {
@@ -203,7 +203,7 @@ export async function runMigration002(): Promise<void> {
     name: 'uk_yc_code_version',
   });
 
-  console.log('[VFZ-MIGRATE-002] ✅ yard_configurations');
+  console.log('[EFVM360-MIGRATE-002] ✅ yard_configurations');
 
   // ── 4. ANOMALY HISTORY ────────────────────────────────────────────────
   await qi.createTable('anomaly_history', {
@@ -265,7 +265,7 @@ export async function runMigration002(): Promise<void> {
   await qi.addIndex('anomaly_history', ['severity'], { name: 'idx_ah_severity' });
   await qi.addIndex('anomaly_history', ['created_at'], { name: 'idx_ah_date' });
 
-  console.log('[VFZ-MIGRATE-002] ✅ anomaly_history');
+  console.log('[EFVM360-MIGRATE-002] ✅ anomaly_history');
 
   // ── 5. WEIGHING RECORDS ───────────────────────────────────────────────
   await qi.createTable('weighing_records', {
@@ -337,7 +337,7 @@ export async function runMigration002(): Promise<void> {
   await qi.addIndex('weighing_records', ['excess_detected'], { name: 'idx_wr_excess' });
   await qi.addIndex('weighing_records', ['created_at'], { name: 'idx_wr_date' });
 
-  console.log('[VFZ-MIGRATE-002] ✅ weighing_records');
+  console.log('[EFVM360-MIGRATE-002] ✅ weighing_records');
 
   // ── 6. LOCOMOTIVE INSPECTIONS ─────────────────────────────────────────
   await qi.createTable('locomotive_inspections', {
@@ -419,7 +419,7 @@ export async function runMigration002(): Promise<void> {
   await qi.addIndex('locomotive_inspections', ['overall_result'], { name: 'idx_li_result' });
   await qi.addIndex('locomotive_inspections', ['started_at'], { name: 'idx_li_date' });
 
-  console.log('[VFZ-MIGRATE-002] ✅ locomotive_inspections');
+  console.log('[EFVM360-MIGRATE-002] ✅ locomotive_inspections');
 
   // ── 7. BI PROJECTIONS (CQRS Read Models) ──────────────────────────────
   await qi.createTable('bi_daily_yard_summary', {
@@ -497,7 +497,7 @@ export async function runMigration002(): Promise<void> {
     name: 'uk_bi_dys_yard_date',
   });
 
-  console.log('[VFZ-MIGRATE-002] ✅ bi_daily_yard_summary (CQRS projection)');
+  console.log('[EFVM360-MIGRATE-002] ✅ bi_daily_yard_summary (CQRS projection)');
 
   // ── 8. ALTER passagens — Add yard_id ──────────────────────────────────
   await qi.addColumn('passagens', 'yard_id', {
@@ -526,9 +526,9 @@ export async function runMigration002(): Promise<void> {
 
   await qi.addIndex('passagens', ['yard_id'], { name: 'idx_pass_yard' });
 
-  console.log('[VFZ-MIGRATE-002] ✅ passagens (colunas adicionadas: yard_id, train_status, weighing_record_id, inspection_id)');
+  console.log('[EFVM360-MIGRATE-002] ✅ passagens (colunas adicionadas: yard_id, train_status, weighing_record_id, inspection_id)');
 
-  console.log('[VFZ-MIGRATE-002] ══════════════════════════════════════════');
-  console.log('[VFZ-MIGRATE-002] ✅ MIGRAÇÃO 002 COMPLETA — 8 tabelas criadas/alteradas');
-  console.log('[VFZ-MIGRATE-002] ══════════════════════════════════════════');
+  console.log('[EFVM360-MIGRATE-002] ══════════════════════════════════════════');
+  console.log('[EFVM360-MIGRATE-002] ✅ MIGRAÇÃO 002 COMPLETA — 8 tabelas criadas/alteradas');
+  console.log('[EFVM360-MIGRATE-002] ══════════════════════════════════════════');
 }

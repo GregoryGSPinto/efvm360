@@ -1,9 +1,9 @@
-# VFZ Backend — Documentação da API v1
+# EFVM360 Backend — Documentação da API v1
 
 ## Base URL
 
 - **Local:** `http://localhost:3001/api/v1`
-- **Azure:** `https://vfz-api-prod.azurewebsites.net/api/v1`
+- **Azure:** `https://efvm360-api-prod.azurewebsites.net/api/v1`
 
 ## Autenticação
 
@@ -227,7 +227,7 @@ Verifica saúde da API e conexão com MySQL. **Sem autenticação.**
 // Response 200
 {
   "status": "healthy",
-  "service": "vfz-backend",
+  "service": "efvm360-backend",
   "version": "1.0.0",
   "database": "connected",
   "timestamp": "2026-02-21T14:30:00.000Z",

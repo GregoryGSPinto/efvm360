@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ v3.2 — Azure Key Vault Integration
+// EFVM360 v3.2 — Azure Key Vault Integration
 // Secrets management for production environment
 // Uses @azure/identity + @azure/keyvault-secrets
 // ============================================================================
@@ -9,7 +9,7 @@ import { SecretClient } from '@azure/keyvault-secrets';
 
 // ── Types ───────────────────────────────────────────────────────────────
 
-interface VFZSecrets {
+interface EFVM360Secrets {
   JWT_SECRET: string;
   JWT_REFRESH_SECRET: string;
   DB_PASSWORD: string;
@@ -21,7 +21,7 @@ interface VFZSecrets {
 
 // ── Key Vault Client ────────────────────────────────────────────────────
 
-let cachedSecrets: VFZSecrets | null = null;
+let cachedSecrets: EFVM360Secrets | null = null;
 
 const getKeyVaultClient = (): SecretClient | null => {
   const vaultUrl = process.env.AZURE_KEYVAULT_URL;
@@ -33,7 +33,7 @@ const getKeyVaultClient = (): SecretClient | null => {
 
 // ── Load Secrets ────────────────────────────────────────────────────────
 
-export async function loadSecrets(): Promise<VFZSecrets> {
+export async function loadSecrets(): Promise<EFVM360Secrets> {
   // Return cached if available
   if (cachedSecrets) return cachedSecrets;
 
@@ -53,8 +53,8 @@ export async function loadSecrets(): Promise<VFZSecrets> {
       JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
       DB_PASSWORD: process.env.DB_PASSWORD,
       DB_HOST: process.env.DB_HOST || 'localhost',
-      DB_USER: process.env.DB_USER || 'vfz_app',
-      DB_NAME: process.env.DB_NAME || 'vfz_railway',
+      DB_USER: process.env.DB_USER || 'efvm360_app',
+      DB_NAME: process.env.DB_NAME || 'efvm360_railway',
       APPINSIGHTS_KEY: process.env.APPINSIGHTS_INSTRUMENTATIONKEY || '',
     };
     return cachedSecrets;
@@ -64,13 +64,13 @@ export async function loadSecrets(): Promise<VFZSecrets> {
   console.info('[KeyVault] Loading secrets from Azure Key Vault...');
   try {
     const [jwt, jwtRefresh, dbPass, dbHost, dbUser, dbName, aiKey] = await Promise.all([
-      client.getSecret('vfz-jwt-secret'),
-      client.getSecret('vfz-jwt-refresh-secret'),
-      client.getSecret('vfz-db-password'),
-      client.getSecret('vfz-db-host'),
-      client.getSecret('vfz-db-user'),
-      client.getSecret('vfz-db-name'),
-      client.getSecret('vfz-appinsights-key').catch(() => ({ value: '' })),
+      client.getSecret('efvm360-jwt-secret'),
+      client.getSecret('efvm360-jwt-refresh-secret'),
+      client.getSecret('efvm360-db-password'),
+      client.getSecret('efvm360-db-host'),
+      client.getSecret('efvm360-db-user'),
+      client.getSecret('efvm360-db-name'),
+      client.getSecret('efvm360-appinsights-key').catch(() => ({ value: '' })),
     ]);
 
     cachedSecrets = {
@@ -93,7 +93,7 @@ export async function loadSecrets(): Promise<VFZSecrets> {
 
 // ── Get Individual Secret ───────────────────────────────────────────────
 
-export function getSecret(key: keyof VFZSecrets): string {
+export function getSecret(key: keyof EFVM360Secrets): string {
   if (!cachedSecrets) {
     throw new Error('Secrets not loaded. Call loadSecrets() first.');
   }

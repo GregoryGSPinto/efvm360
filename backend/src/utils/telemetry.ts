@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Telemetry Helper (Azure Application Insights)
+// EFVM360 Backend — Telemetry Helper (Azure Application Insights)
 // No-op em dev local se App Insights não configurado
 // ============================================================================
 

@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Rotas da API v1
+// EFVM360 Backend — Rotas da API v1
 // ============================================================================
 
 import { Router, Request, Response } from 'express';
@@ -53,7 +53,7 @@ const router = Router();
  *                   example: healthy
  *                 service:
  *                   type: string
- *                   example: vfz-backend
+ *                   example: efvm360-backend
  *                 version:
  *                   type: string
  *                   example: '1.0.0'
@@ -86,7 +86,7 @@ router.get('/health', async (_req: Request, res: Response) => {
     await sequelize.authenticate();
     res.json({
       status: 'healthy',
-      service: 'vfz-backend',
+      service: 'efvm360-backend',
       version: '1.0.0',
       database: 'connected',
       websocket: getConnectionMetrics(),
@@ -97,7 +97,7 @@ router.get('/health', async (_req: Request, res: Response) => {
   } catch {
     res.status(503).json({
       status: 'unhealthy',
-      service: 'vfz-backend',
+      service: 'efvm360-backend',
       database: 'disconnected',
       timestamp: new Date().toISOString(),
     });

@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Modelos Sequelize (MySQL)
+// EFVM360 Backend — Modelos Sequelize (MySQL)
 // ============================================================================
 
 import { DataTypes, Model, Optional } from 'sequelize';

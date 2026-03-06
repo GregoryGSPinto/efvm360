@@ -1,4 +1,4 @@
-// Augment Express Request with VFZ-specific properties set by auth middleware
+// Augment Express Request with EFVM360-specific properties set by auth middleware
 import type { Model } from 'sequelize';
 
 interface AzureADUserInfo {

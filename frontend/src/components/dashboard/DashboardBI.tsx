@@ -372,7 +372,7 @@ const exportarPDF = async (
   const blob = new Blob([html], { type: 'text/html;charset=utf-8;' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = `dashboard_vfz_${new Date().toISOString().split('T')[0]}.html`;
+  link.download = `dashboard_efvm360_${new Date().toISOString().split('T')[0]}.html`;
   link.click();
   
   // Abrir para impressão como PDF (seguro, sem document.write direto)
@@ -415,7 +415,7 @@ ${kpis.map(kpi => `<li><strong>${kpi.titulo}:</strong> ${kpi.valor}</li>`).join(
   const blob = new Blob([html], { type: 'application/msword' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = `dashboard_vfz_${new Date().toISOString().split('T')[0]}.doc`;
+  link.download = `dashboard_efvm360_${new Date().toISOString().split('T')[0]}.doc`;
   link.click();
 };
 
@@ -502,7 +502,7 @@ const exportarPowerPoint = (
   const blob = new Blob([html], { type: 'text/html;charset=utf-8;' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = `dashboard_vfz_apresentacao_${new Date().toISOString().split('T')[0]}.html`;
+  link.download = `dashboard_efvm360_apresentacao_${new Date().toISOString().split('T')[0]}.html`;
   link.click();
   
   // Impressão segura via iframe sandbox (sem document.write direto)
@@ -549,7 +549,7 @@ const exportarBIPlus = (
   const blob = new Blob([json], { type: 'application/json' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = `dashboard_vfz_bi_plus_${new Date().toISOString().split('T')[0]}.json`;
+  link.download = `dashboard_efvm360_bi_plus_${new Date().toISOString().split('T')[0]}.json`;
   link.click();
 };
 

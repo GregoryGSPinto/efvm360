@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Migration 013: Operational Tables
+// EFVM360 Backend — Migration 013: Operational Tables
 // Equipment, Risk Grades, Shift Crews, Five-S Inspections
 // ============================================================================
 
@@ -8,7 +8,7 @@ import sequelize from '../config/database';
 
 export async function runMigration013(): Promise<void> {
   const qi: QueryInterface = sequelize.getQueryInterface();
-  console.log('[VFZ-MIGRATE-013] Iniciando migração de tabelas operacionais...');
+  console.log('[EFVM360-MIGRATE-013] Iniciando migração de tabelas operacionais...');
 
   // ── 1. EQUIPMENT ────────────────────────────────────────────────────────
   await qi.createTable('equipment', {
@@ -72,7 +72,7 @@ export async function runMigration013(): Promise<void> {
   await qi.addIndex('equipment', ['status'], { name: 'idx_equip_status' });
   await qi.addIndex('equipment', ['yard_code'], { name: 'idx_equip_yard' });
 
-  console.log('[VFZ-MIGRATE-013] ✅ Tabela: equipment');
+  console.log('[EFVM360-MIGRATE-013] ✅ Tabela: equipment');
 
   // ── 2. RISK GRADES ─────────────────────────────────────────────────────
   await qi.createTable('risk_grades', {
@@ -134,7 +134,7 @@ export async function runMigration013(): Promise<void> {
   await qi.addIndex('risk_grades', ['grade'], { name: 'idx_rg_grade' });
   await qi.addIndex('risk_grades', ['active'], { name: 'idx_rg_active' });
 
-  console.log('[VFZ-MIGRATE-013] ✅ Tabela: risk_grades');
+  console.log('[EFVM360-MIGRATE-013] ✅ Tabela: risk_grades');
 
   // ── 3. SHIFT CREWS ─────────────────────────────────────────────────────
   await qi.createTable('shift_crews', {
@@ -193,7 +193,7 @@ export async function runMigration013(): Promise<void> {
   });
   await qi.addIndex('shift_crews', ['yard_code'], { name: 'idx_sc_yard' });
 
-  console.log('[VFZ-MIGRATE-013] ✅ Tabela: shift_crews');
+  console.log('[EFVM360-MIGRATE-013] ✅ Tabela: shift_crews');
 
   // ── 4. FIVE-S INSPECTIONS ─────────────────────────────────────────────
   await qi.createTable('five_s_inspections', {
@@ -289,9 +289,9 @@ export async function runMigration013(): Promise<void> {
   await qi.addIndex('five_s_inspections', ['yard_code'], { name: 'idx_5s_yard' });
   await qi.addIndex('five_s_inspections', ['status'], { name: 'idx_5s_status' });
 
-  console.log('[VFZ-MIGRATE-013] ✅ Tabela: five_s_inspections');
+  console.log('[EFVM360-MIGRATE-013] ✅ Tabela: five_s_inspections');
 
-  console.log('[VFZ-MIGRATE-013] ══════════════════════════════════════════');
-  console.log('[VFZ-MIGRATE-013] ✅ MIGRAÇÃO 013 COMPLETA — 4 tabelas operacionais');
-  console.log('[VFZ-MIGRATE-013] ══════════════════════════════════════════');
+  console.log('[EFVM360-MIGRATE-013] ══════════════════════════════════════════');
+  console.log('[EFVM360-MIGRATE-013] ✅ MIGRAÇÃO 013 COMPLETA — 4 tabelas operacionais');
+  console.log('[EFVM360-MIGRATE-013] ══════════════════════════════════════════');
 }

@@ -1,4 +1,4 @@
-# VFZ — Architectural Decision Records (ADRs)
+# EFVM360 — Architectural Decision Records (ADRs)
 
 ## Sync Engine & Offline-First Architecture
 
@@ -8,7 +8,7 @@
 
 **Status:** Accepted  
 **Date:** 2026-02-21  
-**Context:** VFZ precisa de fila persistente para trocas de turno não sincronizadas. Dados devem sobreviver a refresh, crash, e fechamento do navegador.
+**Context:** EFVM360 precisa de fila persistente para trocas de turno não sincronizadas. Dados devem sobreviver a refresh, crash, e fechamento do navegador.
 
 **Decision:** Usar IndexedDB como storage para a sync queue.
 

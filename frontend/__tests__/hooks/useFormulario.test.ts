@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Frontend — Tests: useFormulario Hook (Logic Only)
+// EFVM360 Frontend — Tests: useFormulario Hook (Logic Only)
 // ============================================================================
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
@@ -31,15 +31,15 @@ describe('useFormulario — Lógica do Formulário', () => {
   describe('Persistência no localStorage', () => {
     it('deve salvar passagem no localStorage', () => {
       const passagem = { cabecalho: { data: '2024-03-15', turno: 'A' }, patioCima: [] };
-      localStorage.setItem('vfz-passagem-atual', JSON.stringify(passagem));
-      const recovered = JSON.parse(localStorage.getItem('vfz-passagem-atual') || '{}');
+      localStorage.setItem('efvm360-passagem-atual', JSON.stringify(passagem));
+      const recovered = JSON.parse(localStorage.getItem('efvm360-passagem-atual') || '{}');
       expect(recovered.cabecalho.data).toBe('2024-03-15');
     });
 
     it('deve recuperar dados persistidos entre sessões', () => {
       const dados = { turno: 'B', linhas: [{ id: 1, status: 'ocupada' }] };
-      localStorage.setItem('vfz-formulario', JSON.stringify(dados));
-      const result = JSON.parse(localStorage.getItem('vfz-formulario') || '{}');
+      localStorage.setItem('efvm360-formulario', JSON.stringify(dados));
+      const result = JSON.parse(localStorage.getItem('efvm360-formulario') || '{}');
       expect(result.turno).toBe('B');
       expect(result.linhas[0].status).toBe('ocupada');
     });
@@ -72,8 +72,8 @@ describe('useFormulario — Lógica do Formulário', () => {
 
     it('deve persistir pontos de atenção como observações', () => {
       const pontos = [{ id: 1, texto: 'Atenção na linha 3', prioridade: 'alta' }];
-      localStorage.setItem('vfz-pontos-atencao', JSON.stringify(pontos));
-      const result = JSON.parse(localStorage.getItem('vfz-pontos-atencao') || '[]');
+      localStorage.setItem('efvm360-pontos-atencao', JSON.stringify(pontos));
+      const result = JSON.parse(localStorage.getItem('efvm360-pontos-atencao') || '[]');
       expect(result).toHaveLength(1);
       expect(result[0].prioridade).toBe('alta');
     });
@@ -85,16 +85,16 @@ describe('useFormulario — Lógica do Formulário', () => {
         { id: '1', data: '2024-03-14', turno: 'A', status: 'assinado_completo' },
         { id: '2', data: '2024-03-15', turno: 'B', status: 'rascunho' },
       ];
-      localStorage.setItem('vfz-historico', JSON.stringify(historico));
-      const result = JSON.parse(localStorage.getItem('vfz-historico') || '[]');
+      localStorage.setItem('efvm360-historico', JSON.stringify(historico));
+      const result = JSON.parse(localStorage.getItem('efvm360-historico') || '[]');
       expect(result).toHaveLength(2);
       expect(result[0].status).toBe('assinado_completo');
     });
 
     it('deve carregar turno anterior corretamente', () => {
       const turnoAnterior = { cabecalho: { turno: 'A', data: '2024-03-14' }, pontosAtencao: ['Linha 3 interditada'] };
-      localStorage.setItem('vfz-turno-anterior', JSON.stringify(turnoAnterior));
-      const result = JSON.parse(localStorage.getItem('vfz-turno-anterior') || '{}');
+      localStorage.setItem('efvm360-turno-anterior', JSON.stringify(turnoAnterior));
+      const result = JSON.parse(localStorage.getItem('efvm360-turno-anterior') || '{}');
       expect(result.pontosAtencao).toContain('Linha 3 interditada');
     });
   });

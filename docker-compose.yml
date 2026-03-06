@@ -13,8 +13,8 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-changeme_root}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-vfz_railway}
-      MYSQL_USER: ${MYSQL_USER:-vfz_app}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-efvm360_railway}
+      MYSQL_USER: ${MYSQL_USER:-efvm360_app}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-changeme_app}
     ports:
       - "3306:3306"
@@ -49,8 +49,8 @@ services:
       PORT: 3001
       DB_HOST: mysql
       DB_PORT: 3306
-      DB_NAME: vfz_railway
-      DB_USER: vfz_app
+      DB_NAME: efvm360_railway
+      DB_USER: efvm360_app
       DB_PASSWORD: ${MYSQL_PASSWORD:-changeme_app}
       JWT_SECRET: ${JWT_SECRET:-changeme_jwt_secret_min_64_chars}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-changeme_jwt_refresh_min_64_chars}

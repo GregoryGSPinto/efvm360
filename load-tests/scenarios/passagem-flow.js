@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ — Passagem Flow Test
+// EFVM360 — Passagem Flow Test
 // Simula fluxo completo: login → criar passagem → listar → assinar
 // 10 operadores simultâneos por 5 minutos
 // Threshold: p95 < 1000ms para operações de passagem
@@ -9,8 +9,8 @@ import { check, sleep, group } from 'k6';
 import { Trend, Counter } from 'k6/metrics';
 import { loginHelper, authHeaders } from '../helpers/auth.js';
 
-const passagemDuration = new Trend('vfz_passagem_create_duration', true);
-const passagemErrors = new Counter('vfz_passagem_errors');
+const passagemDuration = new Trend('efvm360_passagem_create_duration', true);
+const passagemErrors = new Counter('efvm360_passagem_errors');
 
 const BASE = __ENV.BASE_URL || 'http://localhost:3001';
 
@@ -25,7 +25,7 @@ export const options = {
   thresholds: {
     http_req_duration: ['p(95)<1000'],
     http_req_failed: ['rate<0.05'],
-    vfz_passagem_errors: ['count<10'],
+    efvm360_passagem_errors: ['count<10'],
   },
 };
 

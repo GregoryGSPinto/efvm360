@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ v3.2 — LGPD Routes (Lei 13.709/2018)
+// EFVM360 v3.2 — LGPD Routes (Lei 13.709/2018)
 // Data subject rights: access, portability, erasure, correction
 // ============================================================================
 
@@ -71,7 +71,7 @@ router.post('/exportar', async (req: Request, res: Response) => {
     };
 
     res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Disposition', `attachment; filename="vfz-dados-${user.matricula}-${Date.now()}.json"`);
+    res.setHeader('Content-Disposition', `attachment; filename="efvm360-dados-${user.matricula}-${Date.now()}.json"`);
     res.json(exportData);
   } catch (error) {
     res.status(500).json({ erro: 'Erro ao exportar dados' });
@@ -108,7 +108,7 @@ router.post('/anonimizar', async (req: Request, res: Response) => {
 // Aviso de Privacidade público
 router.get('/politica', (_req: Request, res: Response) => {
   res.json({
-    sistema: 'VFZ — Gestão de Troca de Turno Ferroviária',
+    sistema: 'EFVM360 — Gestão de Troca de Turno Ferroviária',
     controlador: 'Vale S.A.',
     dpo: 'dpo@vale.com',
     finalidade: 'Registro e controle de trocas de turno ferroviário para segurança operacional',

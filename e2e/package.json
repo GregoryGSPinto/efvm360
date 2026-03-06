@@ -1,7 +1,7 @@
 {
-  "name": "vfz-e2e",
+  "name": "efvm360-e2e",
   "version": "1.0.0",
-  "description": "VFZ — Testes E2E (Playwright)",
+  "description": "EFVM360 — Testes E2E (Playwright)",
   "scripts": {
     "test": "npx playwright test",
     "test:headed": "npx playwright test --headed",

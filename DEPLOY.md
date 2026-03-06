@@ -131,7 +131,7 @@ O frontend pode ser deployado no Vercel apontando para o repositório. Configura
 |----------|-----------|-------------|---------|
 | `DB_HOST` | Host do MySQL | Sim | localhost |
 | `DB_PORT` | Porta do MySQL | Não | 3306 |
-| `DB_NAME` | Nome do banco | Sim | vfz_railway |
+| `DB_NAME` | Nome do banco | Sim | efvm360_railway |
 | `DB_USER` | Usuário do banco | Sim | — |
 | `DB_PASSWORD` | Senha do banco | Sim | — |
 | `DB_SSL` | Usar SSL na conexão | Não | false |

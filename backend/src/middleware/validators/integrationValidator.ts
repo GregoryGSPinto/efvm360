@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Validators: Integration APIs (Webhooks + Export)
+// EFVM360 Backend — Validators: Integration APIs (Webhooks + Export)
 // ============================================================================
 
 import { body, query } from 'express-validator';

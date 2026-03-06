@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Controller de Usuarios
+// EFVM360 Backend — Controller de Usuarios
 // ============================================================================
 
 import { Request, Response } from 'express';

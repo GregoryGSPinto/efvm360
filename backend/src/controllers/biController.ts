@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — BI Controller (Dashboard KPIs)
+// EFVM360 Backend — BI Controller (Dashboard KPIs)
 // ============================================================================
 
 import { Request, Response } from 'express';

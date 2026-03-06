@@ -1,13 +1,13 @@
 -- ============================================================================
--- VFZ — Inicialização do MySQL
+-- EFVM360 — Inicialização do MySQL
 -- Executado automaticamente pelo Docker na primeira execução
 -- ============================================================================
 
 -- Garante charset correto
-ALTER DATABASE vfz_railway CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+ALTER DATABASE efvm360_railway CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- Permissões completas para o app
-GRANT ALL PRIVILEGES ON vfz_railway.* TO 'vfz_app'@'%';
+GRANT ALL PRIVILEGES ON efvm360_railway.* TO 'efvm360_app'@'%';
 FLUSH PRIVILEGES;
 
 -- Variáveis de sessão para timezone Brasil

@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Model: Patio (Sequelize/MySQL)
+// EFVM360 Backend — Model: Patio (Sequelize/MySQL)
 // ============================================================================
 
 import { DataTypes, Model, Optional } from 'sequelize';

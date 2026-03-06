@@ -51,7 +51,7 @@ async function registerServiceWorker() {
         window.dispatchEvent(new CustomEvent('efvm360-sync-trigger'));
       }
       if (type === 'SYNC_COMPLETE') {
-        window.dispatchEvent(new CustomEvent('vfz-sync-complete', { detail: data }));
+        window.dispatchEvent(new CustomEvent('efvm360-sync-complete', { detail: data }));
       }
     });
   } catch (err) {

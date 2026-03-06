@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Frontend — Tests: Logging & Auditoria (services/logging.ts)
+// EFVM360 Frontend — Tests: Logging & Auditoria (services/logging.ts)
 // Cobertura de audit trail e rastreabilidade de ações
 // ============================================================================
 

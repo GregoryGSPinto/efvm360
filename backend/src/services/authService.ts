@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Serviço de Autenticação
+// EFVM360 Backend — Serviço de Autenticação
 // bcrypt + JWT + Refresh Token rotation
 // ============================================================================
 

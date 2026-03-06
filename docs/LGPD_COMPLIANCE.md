@@ -1,4 +1,4 @@
-# VFZ v3.2 — Conformidade LGPD (Lei 13.709/2018)
+# EFVM360 v3.2 — Conformidade LGPD (Lei 13.709/2018)
 
 ## 1. Inventário de Dados Pessoais
 
@@ -73,4 +73,4 @@ WHERE ultimo_acesso < DATE_SUB(NOW(), INTERVAL 5 YEAR) AND ativo = FALSE;
 |-------|---------|
 | DPO Vale | dpo@vale.com |
 | Canal LGPD | https://vale.com/privacidade |
-| Responsável técnico | Equipe VFZ |
+| Responsável técnico | Equipe EFVM360 |

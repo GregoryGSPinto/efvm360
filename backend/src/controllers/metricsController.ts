@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Metrics Controller
+// EFVM360 Backend — Metrics Controller
 // Exposes business metrics and request telemetry via REST endpoints
 // ============================================================================
 

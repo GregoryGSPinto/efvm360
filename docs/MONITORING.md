@@ -1,4 +1,4 @@
-# VFZ v3.2 — Monitoramento (Azure Application Insights)
+# EFVM360 v3.2 — Monitoramento (Azure Application Insights)
 
 ## Arquitetura
 
@@ -72,13 +72,13 @@ Custom events disponíveis: `trackLogin()`, `trackLogout()`, `trackPassagemCriad
 
 ```bash
 az monitor metrics alert create \
-  --name "vfz-high-latency" \
-  --resource-group rg-vfz-prod \
-  --scopes "/subscriptions/<SUB>/resourceGroups/rg-vfz-prod/providers/Microsoft.Insights/components/vfz-appinsights" \
+  --name "efvm360-high-latency" \
+  --resource-group rg-efvm360-prod \
+  --scopes "/subscriptions/<SUB>/resourceGroups/rg-efvm360-prod/providers/Microsoft.Insights/components/efvm360-appinsights" \
   --condition "avg requests/duration > 2000" \
   --window-size 5m \
   --evaluation-frequency 1m \
-  --action vfz-ops-action-group \
+  --action efvm360-ops-action-group \
   --severity 2
 ```
 
@@ -86,7 +86,7 @@ az monitor metrics alert create \
 
 ```bash
 # Variável de ambiente no App Service
-az webapp config appsettings set --name vfz-api-production -g rg-vfz-prod \
+az webapp config appsettings set --name efvm360-api-production -g rg-efvm360-prod \
   --settings APPLICATIONINSIGHTS_CONNECTION_STRING="InstrumentationKey=xxx;IngestionEndpoint=..."
 ```
 

@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ — Shift Change Simulation
+// EFVM360 — Shift Change Simulation
 // Simulates the critical moment when 2 shifts overlap:
 //   - Outgoing shift: finishing/signing passagens
 //   - Incoming shift: logging in, reviewing

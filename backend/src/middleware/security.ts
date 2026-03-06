@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Middleware de Segurança
+// EFVM360 Backend — Middleware de Segurança
 // Rate Limiting, CORS, Helmet, CSP Headers
 // ============================================================================
 
@@ -87,7 +87,7 @@ export const securityHeaders = helmet({
 // ── Request ID (rastreabilidade) ─────────────────────────────────────────
 export const requestId = (req: Request, res: Response, next: NextFunction): void => {
   const id = req.headers['x-request-id'] as string || 
-    `vfz-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    `efvm360-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   req.headers['x-request-id'] = id;
   res.setHeader('X-Request-ID', id);
   next();

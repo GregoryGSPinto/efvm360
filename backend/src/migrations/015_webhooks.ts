@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Migration 015: Webhooks & Webhook Deliveries
+// EFVM360 Backend — Migration 015: Webhooks & Webhook Deliveries
 // Integration APIs — Phase 3D
 // ============================================================================
 
@@ -8,7 +8,7 @@ import sequelize from '../config/database';
 
 export async function runMigration015(): Promise<void> {
   const qi: QueryInterface = sequelize.getQueryInterface();
-  console.log('[VFZ-MIGRATE-015] Iniciando migração de webhooks...');
+  console.log('[EFVM360-MIGRATE-015] Iniciando migração de webhooks...');
 
   // ── 1. WEBHOOKS ──────────────────────────────────────────────────────────
   await qi.createTable('webhooks', {
@@ -76,7 +76,7 @@ export async function runMigration015(): Promise<void> {
   await qi.addIndex('webhooks', ['active'], { name: 'idx_wh_active' });
   await qi.addIndex('webhooks', ['created_by'], { name: 'idx_wh_created_by' });
 
-  console.log('[VFZ-MIGRATE-015] Tabela: webhooks');
+  console.log('[EFVM360-MIGRATE-015] Tabela: webhooks');
 
   // ── 2. WEBHOOK DELIVERIES ────────────────────────────────────────────────
   await qi.createTable('webhook_deliveries', {
@@ -126,9 +126,9 @@ export async function runMigration015(): Promise<void> {
   await qi.addIndex('webhook_deliveries', ['event'], { name: 'idx_whd_event' });
   await qi.addIndex('webhook_deliveries', ['status'], { name: 'idx_whd_status' });
 
-  console.log('[VFZ-MIGRATE-015] Tabela: webhook_deliveries');
+  console.log('[EFVM360-MIGRATE-015] Tabela: webhook_deliveries');
 
-  console.log('[VFZ-MIGRATE-015] ══════════════════════════════════════════');
-  console.log('[VFZ-MIGRATE-015] MIGRACAO 015 COMPLETA — webhooks + deliveries');
-  console.log('[VFZ-MIGRATE-015] ══════════════════════════════════════════');
+  console.log('[EFVM360-MIGRATE-015] ══════════════════════════════════════════');
+  console.log('[EFVM360-MIGRATE-015] MIGRACAO 015 COMPLETA — webhooks + deliveries');
+  console.log('[EFVM360-MIGRATE-015] ══════════════════════════════════════════');
 }

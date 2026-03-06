@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Risk Grades Controller
+// EFVM360 Backend — Risk Grades Controller
 // CRUD for operational risk matrix (5x5 probability x impact)
 // ============================================================================
 

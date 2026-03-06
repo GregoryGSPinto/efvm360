@@ -1,4 +1,4 @@
-# Changelog — VFZ Gestão de Troca de Turno
+# Changelog — EFVM360 Gestão de Troca de Turno
 
 Todas as mudanças notáveis no projeto estão documentadas neste arquivo.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).

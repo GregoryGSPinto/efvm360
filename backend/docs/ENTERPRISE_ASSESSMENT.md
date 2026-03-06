@@ -1,8 +1,8 @@
-# VFZ — Avaliação de Maturidade Enterprise (Atualizada)
+# EFVM360 — Avaliação de Maturidade Enterprise (Atualizada)
 
 ## Parecer: Solutions Architect Senior / CTO
 
-**Sistema:** VFZ v3.2 Ultra — Gestão de Troca de Turno Ferroviária
+**Sistema:** EFVM360 v3.2 Ultra — Gestão de Troca de Turno Ferroviária
 **Cliente:** Vale S.A. — Estrada de Ferro Vitória a Minas  
 **Avaliação:** 2026-02-21 (Atualização pós-roadmap enterprise)  
 **Codebase:** ~28.000 linhas | 140+ arquivos | Frontend React + Backend Express/MySQL  

@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Azure AD / Entra ID Middleware
+// EFVM360 Backend — Azure AD / Entra ID Middleware
 // Valida token Azure AD e provisiona usuário local
 // ============================================================================
 import { Request, Response, NextFunction } from 'express';
@@ -21,11 +21,11 @@ function getKey(header: jwt.JwtHeader, callback: jwt.SigningKeyCallback) {
 }
 
 const GROUP_TO_PROFILE: Record<string, string> = {
-  'VFZ-Operadores': 'operador',
-  'VFZ-Oficiais': 'oficial',
-  'VFZ-Inspetores': 'inspetor',
-  'VFZ-Gestores': 'gestor',
-  'VFZ-Admins': 'administrador',
+  'EFVM360-Operadores': 'operador',
+  'EFVM360-Oficiais': 'oficial',
+  'EFVM360-Inspetores': 'inspetor',
+  'EFVM360-Gestores': 'gestor',
+  'EFVM360-Admins': 'administrador',
 };
 
 export const validateAzureToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {

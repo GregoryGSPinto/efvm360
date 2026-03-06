@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Frontend — Tests: useAuth Hook
+// EFVM360 Frontend — Tests: useAuth Hook
 // ============================================================================
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
@@ -32,7 +32,7 @@ vi.mock('../../src/services/logging', () => ({
 }));
 
 vi.mock('../../src/utils/constants', () => ({
-  STORAGE_KEYS: { USUARIOS: 'vfz-usuarios', USUARIO: 'vfz-usuario-logado' },
+  STORAGE_KEYS: { USUARIOS: 'efvm360-usuarios', USUARIO: 'efvm360-usuario-logado' },
 }));
 
 describe('useAuth — Lógica de Autenticação', () => {
@@ -44,12 +44,12 @@ describe('useAuth — Lógica de Autenticação', () => {
 
   describe('Seed / Inicialização', () => {
     it('deve criar usuário padrão se lista estiver vazia', async () => {
-      localStorage.setItem('vfz-usuarios', '[]');
+      localStorage.setItem('efvm360-usuarios', '[]');
       // Import dynamically to trigger seed
       await import('../../src/hooks/useAuth');
       // Seed runs on mount effect — verify via localStorage
       // (In actual React test we'd use renderHook, here we test the seed logic)
-      const users = JSON.parse(localStorage.getItem('vfz-usuarios') || '[]');
+      const users = JSON.parse(localStorage.getItem('efvm360-usuarios') || '[]');
       // After seed, at least the default user should exist
       expect(Array.isArray(users)).toBe(true);
     });
@@ -120,12 +120,12 @@ describe('useAuth — Lógica de Autenticação', () => {
 
   describe('Logout', () => {
     it('deve limpar sessionStorage e localStorage ao fazer logout', () => {
-      sessionStorage.setItem('vfz-session-auth', 'session-data');
-      localStorage.setItem('vfz-usuario-logado', '{"nome":"Test"}');
-      sessionStorage.removeItem('vfz-session-auth');
-      localStorage.removeItem('vfz-usuario-logado');
-      expect(sessionStorage.getItem('vfz-session-auth')).toBeNull();
-      expect(localStorage.getItem('vfz-usuario-logado')).toBeNull();
+      sessionStorage.setItem('efvm360-session-auth', 'session-data');
+      localStorage.setItem('efvm360-usuario-logado', '{"nome":"Test"}');
+      sessionStorage.removeItem('efvm360-session-auth');
+      localStorage.removeItem('efvm360-usuario-logado');
+      expect(sessionStorage.getItem('efvm360-session-auth')).toBeNull();
+      expect(localStorage.getItem('efvm360-usuario-logado')).toBeNull();
     });
   });
 });

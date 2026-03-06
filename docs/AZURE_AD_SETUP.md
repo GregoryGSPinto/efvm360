@@ -2,15 +2,15 @@
 
 ## Visão Geral
 
-VFZ suporta dual-auth: Azure AD (SSO corporativo) + auth local (fallback). Azure AD tokens são validados via JWKS, e grupos são mapeados para roles VFZ automaticamente.
+EFVM360 suporta dual-auth: Azure AD (SSO corporativo) + auth local (fallback). Azure AD tokens são validados via JWKS, e grupos são mapeados para roles EFVM360 automaticamente.
 
 ## 1. Registrar App no Entra ID
 
 1. Portal Azure → **Microsoft Entra ID** → App registrations → **New registration**
-2. Name: `VFZ - Gestão de Troca de Turno`
+2. Name: `EFVM360 - Gestão de Troca de Turno`
 3. Supported accounts: **Single tenant** (apenas Vale)
 4. Redirect URIs:
-   - SPA: `https://vfz.vale.com`
+   - SPA: `https://efvm360.vale.com`
    - SPA: `http://localhost:5173` (dev only)
 
 ## 2. API Permissions (delegated)
@@ -31,15 +31,15 @@ Admin consent required: **Yes** (grant for organization)
 - Groups: **Security groups**
 - Customize: Emit as `sAMAccountName` or group IDs
 
-## 4. Grupo Azure AD → Role VFZ
+## 4. Grupo Azure AD → Role EFVM360
 
-| Grupo Azure AD | Role VFZ | Nível |
+| Grupo Azure AD | Role EFVM360 | Nível |
 |----------------|----------|-------|
-| `VFZ-Admins` | administrador | 5 |
-| `VFZ-Gestores` | gestor | 4 |
-| `VFZ-Inspetores` | inspetor | 3 |
-| `VFZ-Oficiais` | oficial | 2 |
-| `VFZ-Operadores` | operador | 1 |
+| `EFVM360-Admins` | administrador | 5 |
+| `EFVM360-Gestores` | gestor | 4 |
+| `EFVM360-Inspetores` | inspetor | 3 |
+| `EFVM360-Oficiais` | oficial | 2 |
+| `EFVM360-Operadores` | operador | 1 |
 
 Hierarquia: cada nível herda permissões dos inferiores.
 
@@ -51,7 +51,7 @@ AZURE_AD_TENANT_ID=<tenant-id>
 AZURE_AD_CLIENT_ID=<client-id>
 ```
 
-Middleware: `src/middleware/azureADAuth.ts` — valida tokens JWKS, mapeia grupos → roles VFZ. Se Azure AD não configurado, faz fallback transparente para auth local.
+Middleware: `src/middleware/azureADAuth.ts` — valida tokens JWKS, mapeia grupos → roles EFVM360. Se Azure AD não configurado, faz fallback transparente para auth local.
 
 ```typescript
 // server.ts
@@ -62,10 +62,10 @@ app.use(azureADAuth()); // Before local auth middleware
 ## 6. Frontend Configuration
 
 ```env
-# vfz/.env
+# frontend/.env
 VITE_AZURE_CLIENT_ID=<client-id>
 VITE_AZURE_TENANT_ID=<tenant-id>
-VITE_AZURE_REDIRECT_URI=https://vfz.vale.com
+VITE_AZURE_REDIRECT_URI=https://efvm360.vale.com
 ```
 
 Usar `@azure/msal-browser` para login flow:

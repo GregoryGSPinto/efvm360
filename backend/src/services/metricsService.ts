@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Metrics Service (Business Observability)
+// EFVM360 Backend — Metrics Service (Business Observability)
 // Tracks business KPIs with optional Azure Application Insights integration
 // ============================================================================
 
@@ -88,7 +88,7 @@ export class MetricsService {
         },
       });
       this.client.trackMetric({
-        name: `vfz.${metrica}`,
+        name: `efvm360.${metrica}`,
         value: valor,
         properties: labels,
       });

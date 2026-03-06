@@ -1,7 +1,7 @@
-# 🚂 VFZ - Gestão de Troca de Turno
+# 🚂 EFVM360 - Gestão de Troca de Turno
 
 > **Sistema Digital de Gestão de Troca de Turno para Operação Ferroviária**  
-> Vale Ferrosos Zone • Pátio do Fazendão • EFVM
+> EFVM360 • Pátio do Fazendão • EFVM
 
 [![Status](https://img.shields.io/badge/status-demonstration-orange)]()
 [![React](https://img.shields.io/badge/React-18.x-blue?logo=react)]()
@@ -19,7 +19,7 @@
 
 ## 📋 Sobre o Projeto
 
-O **VFZ (Vale Ferrosos Zone)** é um sistema digital que moderniza o processo de troca de turno em operações ferroviárias, substituindo formulários físicos por uma solução digital completa.
+O **EFVM360** é um sistema digital que moderniza o processo de troca de turno em operações ferroviárias, substituindo formulários físicos por uma solução digital completa.
 
 ### Principais Funcionalidades
 
@@ -64,8 +64,8 @@ O **VFZ (Vale Ferrosos Zone)** é um sistema digital que moderniza o processo de
 
 ```bash
 # Clonar repositório
-git clone https://github.com/seu-usuario/vfz.git
-cd vfz
+git clone https://github.com/seu-usuario/efvm360.git
+cd efvm360
 
 # Instalar dependências
 npm install
@@ -94,7 +94,7 @@ Após iniciar, acesse `http://localhost:5173` e utilize as credenciais de demons
 ## 📁 Estrutura do Projeto
 
 ```
-vfz/
+efvm360/
 ├── public/                 # Assets públicos e PWA
 │   ├── manifest.json      # Manifesto PWA
 │   └── sw.js              # Service Worker
@@ -208,7 +208,7 @@ Os dados apresentados são fictícios e não representam operações reais.
 
 <div align="center">
 
-**VFZ - Gestão de Troca de Turno**
+**EFVM360 - Gestão de Troca de Turno**
 *Sistema Digital para Operação Ferroviária Segura*
 
 🚂 EFVM • Vale S.A. • Pátio do Fazendão 🚂

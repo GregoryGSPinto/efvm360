@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Controller: Pátios
+// EFVM360 Backend — Controller: Pátios
 // ============================================================================
 
 import { Request, Response } from 'express';

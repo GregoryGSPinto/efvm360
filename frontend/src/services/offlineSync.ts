@@ -3,8 +3,8 @@
 // Queues form submissions when offline, syncs when connection returns
 // ============================================================================
 
-const SYNC_QUEUE_KEY = 'vfz_sync_queue';
-const SYNC_STATUS_KEY = 'vfz_sync_status';
+const SYNC_QUEUE_KEY = 'efvm360_sync_queue';
+const SYNC_STATUS_KEY = 'efvm360_sync_status';
 
 export interface SyncItem {
   id: string;
@@ -102,7 +102,7 @@ export async function processQueue(): Promise<number> {
 
   if (pending.length === 0) return 0;
 
-  const token = localStorage.getItem('vfz_token');
+  const token = localStorage.getItem('efvm360_token');
   if (!token) return 0;
 
   let synced = 0;

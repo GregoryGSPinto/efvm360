@@ -1,10 +1,10 @@
 # ============================================================================
-# VFZ v3.2 — Deploy Staging
+# EFVM360 v3.2 — Deploy Staging
 # Trigger: push to staging branch
 # Pipeline: CI → deploy backend (Azure App Service) → deploy frontend (SWA)
 # ============================================================================
 
-name: "🚀 VFZ — Deploy Staging"
+name: "🚀 EFVM360 — Deploy Staging"
 
 on:
   push:
@@ -12,9 +12,9 @@ on:
 
 env:
   NODE_VERSION: "20"
-  AZURE_RG: rg-vfz-staging
-  BACKEND_APP: vfz-api-staging
-  FRONTEND_APP: vfz-frontend-staging
+  AZURE_RG: rg-efvm360-staging
+  BACKEND_APP: efvm360-api-staging
+  FRONTEND_APP: efvm360-frontend-staging
 
 jobs:
   # ── Run full CI first ──────────────────────────────────────────────────
@@ -81,17 +81,17 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-          cache-dependency-path: vfz/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install & Build
-        run: cd vfz && npm ci && npm run build
+        run: cd frontend && npm ci && npm run build
 
       - name: Deploy to Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_SWA_TOKEN_STAGING }}
           action: upload
-          app_location: vfz/dist
+          app_location: frontend/dist
           skip_app_build: true
 
   # ── Deploy Summary ────────────────────────────────────────────────────

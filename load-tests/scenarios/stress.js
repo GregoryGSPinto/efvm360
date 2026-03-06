@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ — Stress Test
+// EFVM360 — Stress Test
 // Ramps from 10 to 200 VUs to find breaking point
 // Monitors error rate and latency degradation
 // ============================================================================

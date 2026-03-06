@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Validators: Passagens de Serviço
+// EFVM360 Backend — Validators: Passagens de Serviço
 // ============================================================================
 
 import { body, param, query } from 'express-validator';

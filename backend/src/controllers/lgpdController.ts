@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Controller LGPD (Direitos do Titular)
+// EFVM360 Backend — Controller LGPD (Direitos do Titular)
 // ============================================================================
 import { Request, Response } from 'express';
 import { Usuario, Passagem, AuditTrail } from '../models';

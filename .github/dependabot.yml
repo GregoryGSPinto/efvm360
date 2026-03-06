@@ -1,5 +1,5 @@
 # ============================================================================
-# VFZ v3.2 — Dependabot Configuration
+# EFVM360 v3.2 — Dependabot Configuration
 # Automated dependency updates for security patches
 # ============================================================================
 
@@ -8,7 +8,7 @@ version: 2
 updates:
   # Frontend dependencies
   - package-ecosystem: npm
-    directory: /vfz
+    directory: /frontend
     schedule:
       interval: weekly
       day: monday
@@ -19,7 +19,7 @@ updates:
       - "dependencies"
       - "frontend"
     reviewers:
-      - "vfz-team/frontend"
+      - "efvm360-team/frontend"
     commit-message:
       prefix: "chore(deps-frontend):"
 
@@ -36,7 +36,7 @@ updates:
       - "dependencies"
       - "backend"
     reviewers:
-      - "vfz-team/backend"
+      - "efvm360-team/backend"
     commit-message:
       prefix: "chore(deps-backend):"
 

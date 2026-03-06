@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Frontend — Tests: Permissions Service
+// EFVM360 Frontend — Tests: Permissions Service
 // ============================================================================
 import { describe, it, expect } from 'vitest';
 import {

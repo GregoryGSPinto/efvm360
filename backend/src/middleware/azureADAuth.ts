@@ -1,6 +1,6 @@
 // ============================================================================
-// VFZ v3.2 — Azure AD / Entra ID Authentication Middleware
-// Validates Azure AD JWT tokens and maps group claims to VFZ roles
+// EFVM360 v3.2 — Azure AD / Entra ID Authentication Middleware
+// Validates Azure AD JWT tokens and maps group claims to EFVM360 roles
 // ============================================================================
 
 import { Request, Response, NextFunction } from 'express';
@@ -28,14 +28,14 @@ interface AzureADTokenPayload {
   iat: number;
 }
 
-// ── Azure AD Group → VFZ Role Mapping ──────────────────────────────────
+// ── Azure AD Group → EFVM360 Role Mapping ──────────────────────────────────
 
 const GROUP_ROLE_MAP: Record<string, string> = {
-  'VFZ-Admins': 'administrador',
-  'VFZ-Gestores': 'gestor',
-  'VFZ-Inspetores': 'inspetor',
-  'VFZ-Oficiais': 'oficial',
-  'VFZ-Operadores': 'operador',
+  'EFVM360-Admins': 'administrador',
+  'EFVM360-Gestores': 'gestor',
+  'EFVM360-Inspetores': 'inspetor',
+  'EFVM360-Oficiais': 'oficial',
+  'EFVM360-Operadores': 'operador',
 };
 
 // ── JWKS Client (caches signing keys) ──────────────────────────────────
@@ -75,7 +75,7 @@ function getAzureADConfig(): AzureADConfig | null {
   };
 }
 
-// ── Map Azure AD groups to VFZ role ────────────────────────────────────
+// ── Map Azure AD groups to EFVM360 role ────────────────────────────────────
 
 export function mapGroupsToRole(groups: string[]): string {
   // Return highest-privilege role found
@@ -133,7 +133,7 @@ export function azureADAuth() {
         algorithms: ['RS256'],
       }) as AzureADTokenPayload;
 
-      // Map to VFZ user
+      // Map to EFVM360 user
       const role = mapGroupsToRole(verified.groups || []);
 
       req.azureAdUser = {

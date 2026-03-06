@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Service: Pátios
+// EFVM360 Backend — Service: Pátios
 // Regras de negócio para gerenciamento de pátios
 // ============================================================================
 

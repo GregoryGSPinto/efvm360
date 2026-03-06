@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Controller de Autenticacao
+// EFVM360 Backend — Controller de Autenticacao
 // ============================================================================
 
 import { Request, Response } from 'express';

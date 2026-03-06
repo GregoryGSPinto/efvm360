@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ v3.2 — Monitoring Service (Azure Application Insights)
+// EFVM360 v3.2 — Monitoring Service (Azure Application Insights)
 // Structured telemetry for railway operations
 // ============================================================================
 
@@ -28,7 +28,7 @@ export function initMonitoring(): void {
     .start();
 
   client = appInsights.defaultClient;
-  client.context.tags[client.context.keys.cloudRole] = 'vfz-backend';
+  client.context.tags[client.context.keys.cloudRole] = 'efvm360-backend';
 
   console.info('[Monitoring] ✅ Application Insights initialized');
 }

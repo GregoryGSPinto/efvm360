@@ -1,4 +1,4 @@
-# Manual do Usuário — VFZ Gestão de Troca de Turno
+# Manual do Usuário — EFVM360 Gestão de Troca de Turno
 ## Estrada de Ferro Vitória a Minas — Pátio do Fazendão
 ### Versão 3.2
 

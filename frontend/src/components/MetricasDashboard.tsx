@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Frontend — MetricasDashboard
+// EFVM360 Frontend — MetricasDashboard
 // Operational KPIs dashboard for inspetor+ roles
 // Glassmorphism + Vale corporate colors (#00A651 green, #FFD100 yellow)
 // ============================================================================

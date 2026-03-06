@@ -1,4 +1,4 @@
-# VFZ — Guia de Decomposição do App.tsx
+# EFVM360 — Guia de Decomposição do App.tsx
 
 ## Contexto
 O App.tsx original tem 6.662 linhas — um componente monolítico que concentra toda a lógica de renderização. Este documento descreve a estratégia de decomposição progressiva para tornar o código auditável e testável.

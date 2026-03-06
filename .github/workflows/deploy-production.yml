@@ -1,11 +1,11 @@
 # ============================================================================
-# VFZ v3.2 — Deploy Production
+# EFVM360 v3.2 — Deploy Production
 # Trigger: push to main (after merge)
 # Pipeline: CI → deploy staging slot → smoke test → swap → verify → rollback
 # Requires: "production" environment with manual approval
 # ============================================================================
 
-name: "🏭 VFZ — Deploy Production"
+name: "🏭 EFVM360 — Deploy Production"
 
 on:
   push:
@@ -13,9 +13,9 @@ on:
 
 env:
   NODE_VERSION: "20"
-  AZURE_RG: rg-vfz-prod
-  BACKEND_APP: vfz-api-production
-  FRONTEND_APP: vfz-frontend-production
+  AZURE_RG: rg-efvm360-prod
+  BACKEND_APP: efvm360-api-production
+  FRONTEND_APP: efvm360-frontend-production
 
 jobs:
   # ── Run full CI first ──────────────────────────────────────────────────
@@ -45,7 +45,7 @@ jobs:
         run: cd backend && npm ci && npm run build
 
       - name: Build Frontend
-        run: cd vfz && npm ci && npm run build
+        run: cd frontend && npm ci && npm run build
 
       # ── Azure Login ────────────────────────────────────────────────────
       - name: Login to Azure
@@ -90,7 +90,7 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_SWA_TOKEN_PRODUCTION }}
           action: upload
-          app_location: vfz/dist
+          app_location: frontend/dist
           skip_app_build: true
 
       # ── Post-Deploy Verification ───────────────────────────────────────

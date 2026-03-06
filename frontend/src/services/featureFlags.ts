@@ -49,7 +49,7 @@ const ENV_FLAGS: FeatureFlags = {
 
 // ── Local Overrides (for testing/admin) ─────────────────────────────────
 
-const OVERRIDE_KEY = 'vfz_feature_overrides';
+const OVERRIDE_KEY = 'efvm360_feature_overrides';
 
 function getOverrides(): Partial<FeatureFlags> {
   try {
@@ -108,7 +108,7 @@ export function getFlagSource(flag: keyof FeatureFlags): 'env' | 'override' {
 // ── Debug (accessible via browser console) ──────────────────────────────
 
 if (import.meta.env.DEV) {
-  (window as unknown as Record<string, unknown>).vfzFlags = {
+  (window as unknown as Record<string, unknown>).efvm360Flags = {
     getAll: getAllFlags,
     isEnabled: isFeatureEnabled,
     set: setFlagOverride,

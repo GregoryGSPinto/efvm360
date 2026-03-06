@@ -537,10 +537,10 @@
     <script>
       // Connection status events (kept here for pre-React availability)
       window.addEventListener('online', () => {
-        window.dispatchEvent(new CustomEvent('vfz-connection-change', { detail: { online: true } }));
+        window.dispatchEvent(new CustomEvent('efvm360-connection-change', { detail: { online: true } }));
       });
       window.addEventListener('offline', () => {
-        window.dispatchEvent(new CustomEvent('vfz-connection-change', { detail: { online: false } }));
+        window.dispatchEvent(new CustomEvent('efvm360-connection-change', { detail: { online: false } }));
       });
       // Prevent pinch zoom on iOS
       document.addEventListener('touchstart', (e) => {

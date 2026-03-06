@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — DSS Controller (Diálogo de Segurança)
+// EFVM360 Backend — DSS Controller (Diálogo de Segurança)
 // ============================================================================
 
 import { Request, Response } from 'express';

@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Middleware de Autenticação JWT
+// EFVM360 Backend — Middleware de Autenticação JWT
 // ============================================================================
 
 import { Request, Response, NextFunction } from 'express';

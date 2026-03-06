@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Migration 017: Seed Multi-Site & Compliance Data
+// EFVM360 Backend — Migration 017: Seed Multi-Site & Compliance Data
 // Seeds: Sites (Tubarão, Costa Lacerda), compliance checks, training records
 // ============================================================================
 
@@ -7,7 +7,7 @@ import sequelize from '../config/database';
 
 export async function runMigration017(): Promise<void> {
   const qi = sequelize.getQueryInterface();
-  console.log('[VFZ-MIGRATE-017] Iniciando seed multi-site + compliance...');
+  console.log('[EFVM360-MIGRATE-017] Iniciando seed multi-site + compliance...');
 
   const now = new Date();
 
@@ -82,7 +82,7 @@ export async function runMigration017(): Promise<void> {
     }
   }
 
-  console.log('[VFZ-MIGRATE-017] Seed: 5 sites EFVM (TUB, CLR, ITB, GVD, FBN)');
+  console.log('[EFVM360-MIGRATE-017] Seed: 5 sites EFVM (TUB, CLR, ITB, GVD, FBN)');
 
   // ── 2. COMPLIANCE CHECKS SEED (Tubarão + Costa Lacerda) ────────────────
   const complianceChecks = [
@@ -136,7 +136,7 @@ export async function runMigration017(): Promise<void> {
     }
   }
 
-  console.log('[VFZ-MIGRATE-017] Seed: compliance checks para TUB + CLR');
+  console.log('[EFVM360-MIGRATE-017] Seed: compliance checks para TUB + CLR');
 
   // ── 3. TRAINING RECORDS SEED ────────────────────────────────────────────
   const trainings = [
@@ -187,7 +187,7 @@ export async function runMigration017(): Promise<void> {
     }
   }
 
-  console.log('[VFZ-MIGRATE-017] Seed: training records para TUB + CLR');
+  console.log('[EFVM360-MIGRATE-017] Seed: training records para TUB + CLR');
 
   // ── 4. ASSIGN EXISTING USERS TO SITES ──────────────────────────────────
   const userSiteAssignments = [
@@ -236,9 +236,9 @@ export async function runMigration017(): Promise<void> {
     }
   }
 
-  console.log('[VFZ-MIGRATE-017] Seed: user-site assignments');
+  console.log('[EFVM360-MIGRATE-017] Seed: user-site assignments');
 
-  console.log('[VFZ-MIGRATE-017] ══════════════════════════════════════════');
-  console.log('[VFZ-MIGRATE-017] MIGRACAO 017 COMPLETA — Seed multi-site');
-  console.log('[VFZ-MIGRATE-017] ══════════════════════════════════════════');
+  console.log('[EFVM360-MIGRATE-017] ══════════════════════════════════════════');
+  console.log('[EFVM360-MIGRATE-017] MIGRACAO 017 COMPLETA — Seed multi-site');
+  console.log('[EFVM360-MIGRATE-017] ══════════════════════════════════════════');
 }

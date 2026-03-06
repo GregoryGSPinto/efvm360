@@ -1,4 +1,4 @@
-# 🔒 VFZ — Branch Protection Rules
+# 🔒 EFVM360 — Branch Protection Rules
 
 ## Setup Guide
 

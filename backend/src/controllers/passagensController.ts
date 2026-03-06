@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Controller de Passagens de Servico
+// EFVM360 Backend — Controller de Passagens de Servico
 // ============================================================================
 
 import { Request, Response } from 'express';

@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Frontend — Test Fixtures Factory
+// EFVM360 Frontend — Test Fixtures Factory
 // Gera dados de teste consistentes para todos os módulos
 // ============================================================================
 

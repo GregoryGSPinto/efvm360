@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Serviço de Auditoria (Append-Only + Chain Integrity)
+// EFVM360 Backend — Serviço de Auditoria (Append-Only + Chain Integrity)
 // ============================================================================
 
 import { v4 as uuidv4 } from 'uuid';
@@ -55,7 +55,7 @@ export const registrar = async (entry: AuditEntry): Promise<void> => {
       hash_registro: hashRegistro,
     });
   } catch (error) {
-    console.error('[VFZ-AUDIT] Erro ao registrar:', error);
+    console.error('[EFVM360-AUDIT] Erro ao registrar:', error);
     // Auditoria nunca deve bloquear a operação
   }
 };

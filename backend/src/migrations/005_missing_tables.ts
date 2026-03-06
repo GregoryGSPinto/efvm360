@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Migration 005: Tabelas faltantes para alinhamento completo
+// EFVM360 Backend — Migration 005: Tabelas faltantes para alinhamento completo
 // DSS, Cadastros Pendentes, Senha Resets, Config Usuário, AdamBoot,
 // Notificações, Error Reports, Seed de Usuários Demo
 // ============================================================================
@@ -12,7 +12,7 @@ const BCRYPT_ROUNDS = parseInt(process.env.BCRYPT_ROUNDS || '12', 10);
 
 export async function runMigration005(): Promise<void> {
   const qi: QueryInterface = sequelize.getQueryInterface();
-  console.log('[VFZ-MIGRATE-005] Iniciando migração de tabelas faltantes...');
+  console.log('[EFVM360-MIGRATE-005] Iniciando migração de tabelas faltantes...');
 
   // ── 1. DSS (Diálogo de Segurança) ──────────────────────────────────────
   await qi.createTable('dss', {
@@ -41,7 +41,7 @@ export async function runMigration005(): Promise<void> {
   await qi.addIndex('dss', ['status'], { name: 'idx_dss_status' });
   await qi.addIndex('dss', ['data', 'turno'], { name: 'idx_dss_data_turno' });
 
-  console.log('[VFZ-MIGRATE-005] ✅ Tabela: dss');
+  console.log('[EFVM360-MIGRATE-005] ✅ Tabela: dss');
 
   // ── 2. CADASTROS PENDENTES ─────────────────────────────────────────────
   await qi.createTable('cadastros_pendentes', {
@@ -65,7 +65,7 @@ export async function runMigration005(): Promise<void> {
   await qi.addIndex('cadastros_pendentes', ['matricula'], { name: 'idx_cad_pend_mat' });
   await qi.addIndex('cadastros_pendentes', ['patio_codigo'], { name: 'idx_cad_pend_patio' });
 
-  console.log('[VFZ-MIGRATE-005] ✅ Tabela: cadastros_pendentes');
+  console.log('[EFVM360-MIGRATE-005] ✅ Tabela: cadastros_pendentes');
 
   // ── 3. SENHA RESETS ────────────────────────────────────────────────────
   await qi.createTable('senha_resets', {
@@ -83,7 +83,7 @@ export async function runMigration005(): Promise<void> {
   await qi.addIndex('senha_resets', ['status'], { name: 'idx_sr_status' });
   await qi.addIndex('senha_resets', ['matricula'], { name: 'idx_sr_mat' });
 
-  console.log('[VFZ-MIGRATE-005] ✅ Tabela: senha_resets');
+  console.log('[EFVM360-MIGRATE-005] ✅ Tabela: senha_resets');
 
   // ── 4. CONFIGURAÇÕES DO USUÁRIO ────────────────────────────────────────
   await qi.createTable('usuario_config', {
@@ -99,7 +99,7 @@ export async function runMigration005(): Promise<void> {
     updated_at: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
   });
 
-  console.log('[VFZ-MIGRATE-005] ✅ Tabela: usuario_config');
+  console.log('[EFVM360-MIGRATE-005] ✅ Tabela: usuario_config');
 
   // ── 5. ADAMBOOT PERFIS ─────────────────────────────────────────────────
   await qi.createTable('adamboot_perfis', {
@@ -117,7 +117,7 @@ export async function runMigration005(): Promise<void> {
 
   await qi.addIndex('adamboot_perfis', ['matricula'], { unique: true, name: 'uk_adamboot_mat' });
 
-  console.log('[VFZ-MIGRATE-005] ✅ Tabela: adamboot_perfis');
+  console.log('[EFVM360-MIGRATE-005] ✅ Tabela: adamboot_perfis');
 
   // ── 6. ADAMBOOT CONVERSAS ──────────────────────────────────────────────
   await qi.createTable('adamboot_conversas', {
@@ -132,7 +132,7 @@ export async function runMigration005(): Promise<void> {
   await qi.addIndex('adamboot_conversas', ['usuario_id'], { name: 'idx_adam_conv_user' });
   await qi.addIndex('adamboot_conversas', ['created_at'], { name: 'idx_adam_conv_date' });
 
-  console.log('[VFZ-MIGRATE-005] ✅ Tabela: adamboot_conversas');
+  console.log('[EFVM360-MIGRATE-005] ✅ Tabela: adamboot_conversas');
 
   // ── 7. NOTIFICAÇÕES ────────────────────────────────────────────────────
   await qi.createTable('notificacoes', {
@@ -150,7 +150,7 @@ export async function runMigration005(): Promise<void> {
   await qi.addIndex('notificacoes', ['usuario_id', 'lida'], { name: 'idx_notif_user_lida' });
   await qi.addIndex('notificacoes', ['created_at'], { name: 'idx_notif_data' });
 
-  console.log('[VFZ-MIGRATE-005] ✅ Tabela: notificacoes');
+  console.log('[EFVM360-MIGRATE-005] ✅ Tabela: notificacoes');
 
   // ── 8. ERROR REPORTS ───────────────────────────────────────────────────
   await qi.createTable('error_reports', {
@@ -170,17 +170,17 @@ export async function runMigration005(): Promise<void> {
   await qi.addIndex('error_reports', ['status'], { name: 'idx_err_status' });
   await qi.addIndex('error_reports', ['created_at'], { name: 'idx_err_data' });
 
-  console.log('[VFZ-MIGRATE-005] ✅ Tabela: error_reports');
+  console.log('[EFVM360-MIGRATE-005] ✅ Tabela: error_reports');
 
   // ── 9. SEED: Usuários Demo (36 operadores + admin + suporte) ───────────
-  console.log('[VFZ-MIGRATE-005] Gerando hashes bcrypt para seed (pode levar alguns segundos)...');
+  console.log('[EFVM360-MIGRATE-005] Gerando hashes bcrypt para seed (pode levar alguns segundos)...');
 
   const defaultHash = await bcrypt.hash('123456', BCRYPT_ROUNDS);
   const suporteHash = await bcrypt.hash('suporte360', BCRYPT_ROUNDS);
   const now = new Date();
 
   const seedUsers = [
-    // VFZ — Pátio de Fazendão
+    // EFVM360 — Pátio de Fazendão
     { nome: 'Carlos Eduardo Silva',      matricula: 'VFZ1001', funcao: 'maquinista', turno: 'A', horario_turno: '07-19', senha_hash: defaultHash },
     { nome: 'Roberto Almeida Santos',     matricula: 'VFZ1002', funcao: 'maquinista', turno: 'A', horario_turno: '07-19', senha_hash: defaultHash },
     { nome: 'Marcos Vinicius Souza',      matricula: 'VFZ1003', funcao: 'maquinista', turno: 'B', horario_turno: '19-07', senha_hash: defaultHash },
@@ -247,9 +247,9 @@ export async function runMigration005(): Promise<void> {
     }
   }
 
-  console.log('[VFZ-MIGRATE-005] ✅ Seed: 37 usuários demo (idempotente)');
+  console.log('[EFVM360-MIGRATE-005] ✅ Seed: 37 usuários demo (idempotente)');
 
-  console.log('[VFZ-MIGRATE-005] ══════════════════════════════════════════');
-  console.log('[VFZ-MIGRATE-005] ✅ MIGRAÇÃO 005 COMPLETA — 8 tabelas + seed');
-  console.log('[VFZ-MIGRATE-005] ══════════════════════════════════════════');
+  console.log('[EFVM360-MIGRATE-005] ══════════════════════════════════════════');
+  console.log('[EFVM360-MIGRATE-005] ✅ MIGRAÇÃO 005 COMPLETA — 8 tabelas + seed');
+  console.log('[EFVM360-MIGRATE-005] ══════════════════════════════════════════');
 }

@@ -29,7 +29,7 @@ interface SeedUser {
 // ── Credenciais Multi-Pátio ────────────────────────────────────────────
 
 const EFVM360_USERS: SeedUser[] = [
-  // ═══ VFZ — Pátio de Fazendão (Flexal) ═══
+  // ═══ EFVM360 — Pátio de Fazendão (Flexal) ═══
   { nome: 'Carlos Eduardo Silva',      matricula: 'VFZ1001', funcao: 'maquinista', turno: 'A', horarioTurno: '07-19', primaryYard: 'VFZ' },
   { nome: 'Roberto Almeida Santos',     matricula: 'VFZ1002', funcao: 'maquinista', turno: 'A', horarioTurno: '07-19', primaryYard: 'VFZ' },
   { nome: 'Marcos Vinícius Souza',      matricula: 'VFZ1003', funcao: 'maquinista', turno: 'B', horarioTurno: '19-07', primaryYard: 'VFZ' },

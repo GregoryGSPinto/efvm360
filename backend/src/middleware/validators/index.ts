@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Validators: Barrel Export
+// EFVM360 Backend — Validators: Barrel Export
 // ============================================================================
 
 export { handleValidationErrors } from './handleValidationErrors';

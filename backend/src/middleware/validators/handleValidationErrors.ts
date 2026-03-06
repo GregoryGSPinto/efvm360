@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Middleware: Captura erros de validação (express-validator)
+// EFVM360 Backend — Middleware: Captura erros de validação (express-validator)
 // Retorna 422 com array de { campo, mensagem }
 // Loga tentativas de input malicioso no audit trail
 // ============================================================================

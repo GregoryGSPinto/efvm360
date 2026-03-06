@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Config Controller (User Preferences)
+// EFVM360 Backend — Config Controller (User Preferences)
 // ============================================================================
 
 import { Request, Response } from 'express';

@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Migration 006: Add primary_yard to usuarios
+// EFVM360 Backend — Migration 006: Add primary_yard to usuarios
 // P0 Auth migration — frontend needs primaryYard in JWT payload + user profile
 // ============================================================================
 
@@ -8,7 +8,7 @@ import sequelize from '../config/database';
 
 export async function runMigration006(): Promise<void> {
   const qi: QueryInterface = sequelize.getQueryInterface();
-  console.log('[VFZ-MIGRATE-006] Adicionando primary_yard à tabela usuarios...');
+  console.log('[EFVM360-MIGRATE-006] Adicionando primary_yard à tabela usuarios...');
 
   // ── 1. Add primary_yard column ──────────────────────────────────────────
   try {
@@ -18,11 +18,11 @@ export async function runMigration006(): Promise<void> {
       defaultValue: 'VFZ',
       comment: 'Código do pátio principal do usuário',
     });
-    console.log('[VFZ-MIGRATE-006] ✅ Coluna primary_yard adicionada');
+    console.log('[EFVM360-MIGRATE-006] ✅ Coluna primary_yard adicionada');
   } catch (error) {
     // Column may already exist (idempotent)
     if ((error as Error).message?.includes('Duplicate column')) {
-      console.log('[VFZ-MIGRATE-006] ⏭️  Coluna primary_yard já existe');
+      console.log('[EFVM360-MIGRATE-006] ⏭️  Coluna primary_yard já existe');
     } else {
       throw error;
     }
@@ -31,9 +31,9 @@ export async function runMigration006(): Promise<void> {
   // ── 2. Add index ────────────────────────────────────────────────────────
   try {
     await qi.addIndex('usuarios', ['primary_yard'], { name: 'idx_usuarios_yard' });
-    console.log('[VFZ-MIGRATE-006] ✅ Index idx_usuarios_yard criado');
+    console.log('[EFVM360-MIGRATE-006] ✅ Index idx_usuarios_yard criado');
   } catch {
-    console.log('[VFZ-MIGRATE-006] ⏭️  Index idx_usuarios_yard já existe');
+    console.log('[EFVM360-MIGRATE-006] ⏭️  Index idx_usuarios_yard já existe');
   }
 
   // ── 3. Update primary_yard based on matricula prefix ────────────────────
@@ -54,19 +54,19 @@ export async function runMigration006(): Promise<void> {
     );
   }
 
-  console.log('[VFZ-MIGRATE-006] ✅ primary_yard atualizado baseado em prefixo da matrícula');
+  console.log('[EFVM360-MIGRATE-006] ✅ primary_yard atualizado baseado em prefixo da matrícula');
 
   // ── 4. Add 'suporte' to funcao if it's ENUM (may fail if already STRING) ──
   try {
     await sequelize.query(
       `ALTER TABLE usuarios MODIFY COLUMN funcao VARCHAR(30) NOT NULL DEFAULT 'operador'`
     );
-    console.log('[VFZ-MIGRATE-006] ✅ funcao alterado para VARCHAR(30)');
+    console.log('[EFVM360-MIGRATE-006] ✅ funcao alterado para VARCHAR(30)');
   } catch {
-    console.log('[VFZ-MIGRATE-006] ⏭️  funcao já é VARCHAR ou erro ao alterar');
+    console.log('[EFVM360-MIGRATE-006] ⏭️  funcao já é VARCHAR ou erro ao alterar');
   }
 
-  console.log('[VFZ-MIGRATE-006] ══════════════════════════════════════════');
-  console.log('[VFZ-MIGRATE-006] ✅ MIGRAÇÃO 006 COMPLETA');
-  console.log('[VFZ-MIGRATE-006] ══════════════════════════════════════════');
+  console.log('[EFVM360-MIGRATE-006] ══════════════════════════════════════════');
+  console.log('[EFVM360-MIGRATE-006] ✅ MIGRAÇÃO 006 COMPLETA');
+  console.log('[EFVM360-MIGRATE-006] ══════════════════════════════════════════');
 }

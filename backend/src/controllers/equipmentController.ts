@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Equipment Controller
+// EFVM360 Backend — Equipment Controller
 // CRUD for operational equipment inventory
 // ============================================================================
 

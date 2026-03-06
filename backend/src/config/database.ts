@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Configuração do Banco de Dados (MySQL / Azure SQL for MySQL)
+// EFVM360 Backend — Configuração do Banco de Dados (MySQL / Azure SQL for MySQL)
 // ============================================================================
 
 import { Sequelize } from 'sequelize';
@@ -11,8 +11,8 @@ const isProduction = process.env.NODE_ENV === 'production';
 const useSSL = process.env.DB_SSL === 'true' || isProduction;
 
 export const sequelize = new Sequelize(
-  process.env.DB_NAME || 'vfz_railway',
-  process.env.DB_USER || 'vfz_app',
+  process.env.DB_NAME || 'efvm360_railway',
+  process.env.DB_USER || 'efvm360_app',
   process.env.DB_PASSWORD || '',
   {
     host: process.env.DB_HOST || 'localhost',
@@ -47,9 +47,9 @@ export const sequelize = new Sequelize(
 export const testConnection = async (): Promise<void> => {
   try {
     await sequelize.authenticate();
-    console.info('[VFZ-DB] Conexão MySQL estabelecida com sucesso');
+    console.info('[EFVM360-DB] Conexão MySQL estabelecida com sucesso');
   } catch (error) {
-    console.error('[VFZ-DB] Falha na conexão MySQL:', error);
+    console.error('[EFVM360-DB] Falha na conexão MySQL:', error);
     throw error;
   }
 };

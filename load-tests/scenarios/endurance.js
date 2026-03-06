@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ — Endurance Test (Soak Test)
+// EFVM360 — Endurance Test (Soak Test)
 // 20 VUs for 30 minutes — detects memory leaks and connection pool exhaustion
 // ============================================================================
 import http from 'k6/http';

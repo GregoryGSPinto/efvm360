@@ -1,4 +1,4 @@
-# VFZ — Documentação de Arquitetura (Modelo C4)
+# EFVM360 — Documentação de Arquitetura (Modelo C4)
 
 ## Diagrama 1: Context
 
@@ -9,17 +9,17 @@ graph TB
     SUP[Supervisor]
     ADM[Administrador]
   end
-  VFZ[VFZ - Gestão de Troca de Turno]
+  EFVM360[EFVM360 - Gestão de Troca de Turno]
   AAD[Azure AD / Entra ID]
   ERP[Vale ERP/SAP - futuro]
   AI[Azure App Insights]
 
-  OP -->|Registra trocas de turno| VFZ
-  SUP -->|Consulta BI + histórico| VFZ
-  ADM -->|Gestão de usuários| VFZ
-  VFZ -->|SSO| AAD
-  VFZ -.->|Integração futura| ERP
-  VFZ -->|Telemetria| AI
+  OP -->|Registra trocas de turno| EFVM360
+  SUP -->|Consulta BI + histórico| EFVM360
+  ADM -->|Gestão de usuários| EFVM360
+  EFVM360 -->|SSO| AAD
+  EFVM360 -.->|Integração futura| ERP
+  EFVM360 -->|Telemetria| AI
 ```
 
 ## Diagrama 2: Container
@@ -133,13 +133,13 @@ graph TB
 ```mermaid
 graph TB
   subgraph "Azure — Brazil South"
-    subgraph "Resource Group: rg-vfz-prod"
-      SWA[Azure Static Web Apps<br>vfz-frontend-production<br>React build dist/]
-      ASP[Azure App Service<br>vfz-api-production<br>Node.js 20 LTS]
-      ASP_STG[Staging Slot<br>vfz-api-production/staging]
-      MySQL[(Azure MySQL Flexible Server<br>vfz-mysql-prod<br>MySQL 8.0)]
-      KV[Azure Key Vault<br>kv-vfz-prod<br>JWT + DB secrets]
-      AI[Application Insights<br>vfz-appinsights]
+    subgraph "Resource Group: rg-efvm360-prod"
+      SWA[Azure Static Web Apps<br>efvm360-frontend-production<br>React build dist/]
+      ASP[Azure App Service<br>efvm360-api-production<br>Node.js 20 LTS]
+      ASP_STG[Staging Slot<br>efvm360-api-production/staging]
+      MySQL[(Azure MySQL Flexible Server<br>efvm360-mysql-prod<br>MySQL 8.0)]
+      KV[Azure Key Vault<br>kv-efvm360-prod<br>JWT + DB secrets]
+      AI[Application Insights<br>efvm360-appinsights]
     end
   end
   subgraph "Azure Entra ID"
@@ -193,7 +193,7 @@ sequenceDiagram
 
 | # | Decisão | Motivo |
 |---|---------|--------|
-| ADR-001 | Monorepo (vfz + backend) | Equipe pequena, deploy coordenado |
+| ADR-001 | Monorepo (efvm360 + backend) | Equipe pequena, deploy coordenado |
 | ADR-002 | MySQL (não PostgreSQL) | Compatibilidade com stack Vale |
 | ADR-003 | JWT + Refresh Token rotation | Sessões 8h sem reautenticação |
 | ADR-004 | Dual Auth (Azure AD + local) | SSO corporativo + fallback offline |

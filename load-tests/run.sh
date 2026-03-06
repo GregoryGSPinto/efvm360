@@ -1,13 +1,13 @@
 #!/bin/bash
 # ============================================================================
-# VFZ v3.2 — Load Test Runner
+# EFVM360 v3.2 — Load Test Runner
 # Usage: ./run.sh [BASE_URL] [SCENARIO]
 # ============================================================================
 
 BASE_URL=${1:-"http://localhost:3001"}
 SCENARIO=${2:-"all"}
 
-echo "🚂 VFZ Load Tests"
+echo "🚂 EFVM360 Load Tests"
 echo "   Target: $BASE_URL"
 echo "   Scenario: $SCENARIO"
 echo ""

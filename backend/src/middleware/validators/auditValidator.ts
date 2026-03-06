@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Validators: Auditoria
+// EFVM360 Backend — Validators: Auditoria
 // ============================================================================
 
 import { body, query } from 'express-validator';

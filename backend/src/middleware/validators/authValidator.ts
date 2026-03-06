@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Validators: Autenticação
+// EFVM360 Backend — Validators: Autenticação
 // ============================================================================
 
 import { body } from 'express-validator';

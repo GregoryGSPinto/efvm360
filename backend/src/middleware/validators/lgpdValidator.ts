@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Validators: LGPD (Direitos do Titular)
+// EFVM360 Backend — Validators: LGPD (Direitos do Titular)
 // Rate limit específico para /lgpd/exportar: 3 req/hora por usuário
 // ============================================================================
 

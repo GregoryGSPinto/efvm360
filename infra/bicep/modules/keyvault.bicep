@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ — Azure Key Vault (Secrets Management)
+// EFVM360 — Azure Key Vault (Secrets Management)
 // ============================================================================
 
 param prefix string

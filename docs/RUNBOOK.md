@@ -1,4 +1,4 @@
-# VFZ v3.2 — Runbook Operacional
+# EFVM360 v3.2 — Runbook Operacional
 ## Para equipe de operações TI Vale
 
 ---
@@ -21,21 +21,21 @@
 
 ```bash
 # Health check backend
-curl -sf https://vfz-api-production.azurewebsites.net/api/v1/health | jq .
+curl -sf https://efvm360-api-production.azurewebsites.net/api/v1/health | jq .
 
 # Verificar passagens das últimas 24h (deve haver pelo menos 2 por turno)
 curl -sf -H "Authorization: Bearer $TOKEN" \
-  https://vfz-api-production.azurewebsites.net/api/v1/passagens?periodo=24h | jq '.total'
+  https://efvm360-api-production.azurewebsites.net/api/v1/passagens?periodo=24h | jq '.total'
 
 # Audit trail — integridade
 curl -sf -H "Authorization: Bearer $TOKEN" \
-  https://vfz-api-production.azurewebsites.net/api/v1/audit/integridade | jq .
+  https://efvm360-api-production.azurewebsites.net/api/v1/audit/integridade | jq .
 
 # MySQL backup status
-az mysql flexible-server backup list -g rg-vfz-prod -n vfz-mysql-prod -o table
+az mysql flexible-server backup list -g rg-efvm360-prod -n efvm360-mysql-prod -o table
 
 # App Service status
-az webapp show -g rg-vfz-prod -n vfz-api-production --query "state" -o tsv
+az webapp show -g rg-efvm360-prod -n efvm360-api-production --query "state" -o tsv
 ```
 
 ---
@@ -45,15 +45,15 @@ az webapp show -g rg-vfz-prod -n vfz-api-production --query "state" -o tsv
 ### 3.1 Sistema Indisponível (500/timeout)
 
 ```
-1. Verificar health endpoint: curl https://vfz-api-production.../health
+1. Verificar health endpoint: curl https://efvm360-api-production.../health
 2. Se timeout → Reiniciar App Service:
-   az webapp restart -g rg-vfz-prod -n vfz-api-production
+   az webapp restart -g rg-efvm360-prod -n efvm360-api-production
 3. Se persistir → Verificar MySQL:
-   az mysql flexible-server show -g rg-vfz-prod -n vfz-mysql-prod --query "state"
+   az mysql flexible-server show -g rg-efvm360-prod -n efvm360-mysql-prod --query "state"
 4. Se MySQL down → Failover:
-   az mysql flexible-server failover -g rg-vfz-prod -n vfz-mysql-prod
+   az mysql flexible-server failover -g rg-efvm360-prod -n efvm360-mysql-prod
 5. Se persistir → Verificar logs:
-   az webapp log tail -g rg-vfz-prod -n vfz-api-production
+   az webapp log tail -g rg-efvm360-prod -n efvm360-api-production
 ```
 
 ### 3.2 Login Não Funciona
@@ -82,7 +82,7 @@ az webapp show -g rg-vfz-prod -n vfz-api-production --query "state" -o tsv
 1. App Insights → Performance → identify slow operations
 2. Se MySQL lento → verificar slow query log
 3. Se CPU alta → scale up temporário:
-   az webapp config set -g rg-vfz-prod -n vfz-api-production --plan P1v3
+   az webapp config set -g rg-efvm360-prod -n efvm360-api-production --plan P1v3
 4. Se connection pool exausto → reiniciar App Service
 ```
 
@@ -92,7 +92,7 @@ az webapp show -g rg-vfz-prod -n vfz-api-production --query "state" -o tsv
 1. App Insights → customEvents → LOGIN_FALHA | where count > 10/min
 2. Identificar IP(s) de origem
 3. Bloquear IP temporariamente:
-   az webapp config restriction add -g rg-vfz-prod -n vfz-api-production \
+   az webapp config restriction add -g rg-efvm360-prod -n efvm360-api-production \
      --priority 100 --rule-name block-attacker --action Deny --ip-address <IP>/32
 4. Notificar equipe de segurança (L3)
 ```
@@ -110,9 +110,9 @@ az webapp show -g rg-vfz-prod -n vfz-api-production --query "state" -o tsv
 ```bash
 # Point-in-time restore (MySQL)
 az mysql flexible-server restore \
-  -g rg-vfz-prod \
-  --name vfz-mysql-prod-restore \
-  --source-server vfz-mysql-prod \
+  -g rg-efvm360-prod \
+  --name efvm360-mysql-prod-restore \
+  --source-server efvm360-mysql-prod \
   --restore-time "2024-03-15T10:00:00Z"
 ```
 
@@ -123,7 +123,7 @@ az mysql flexible-server restore \
 # O CI/CD faz rollback automático se health check falhar.
 # Para rollback manual:
 az webapp deployment slot swap \
-  -g rg-vfz-prod -n vfz-api-production \
+  -g rg-efvm360-prod -n efvm360-api-production \
   --slot staging --target-slot production
 ```
 
@@ -168,20 +168,20 @@ az webapp deployment slot swap \
 
 ```bash
 # Logs em tempo real
-az webapp log tail -g rg-vfz-prod -n vfz-api-production
+az webapp log tail -g rg-efvm360-prod -n efvm360-api-production
 
 # Restart
-az webapp restart -g rg-vfz-prod -n vfz-api-production
+az webapp restart -g rg-efvm360-prod -n efvm360-api-production
 
 # Scale up (emergência)
-az appservice plan update -g rg-vfz-prod -n asp-vfz-prod --sku P1v3
+az appservice plan update -g rg-efvm360-prod -n asp-efvm360-prod --sku P1v3
 
 # Scale down (pós-emergência)
-az appservice plan update -g rg-vfz-prod -n asp-vfz-prod --sku B1
+az appservice plan update -g rg-efvm360-prod -n asp-efvm360-prod --sku B1
 
 # SSH no container
-az webapp ssh -g rg-vfz-prod -n vfz-api-production
+az webapp ssh -g rg-efvm360-prod -n efvm360-api-production
 
 # Variáveis de ambiente
-az webapp config appsettings list -g rg-vfz-prod -n vfz-api-production -o table
+az webapp config appsettings list -g rg-efvm360-prod -n efvm360-api-production -o table
 ```

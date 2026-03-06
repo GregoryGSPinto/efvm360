@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Servidor Express
+// EFVM360 Backend — Servidor Express
 // MySQL + JWT + Azure-Ready
 // ============================================================================
 
@@ -11,7 +11,7 @@ if (process.env.APPLICATIONINSIGHTS_CONNECTION_STRING) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const appInsights = require('applicationinsights');
   appInsights.setup().setSendLiveMetrics(true).start();
-  console.info('[VFZ] Azure Application Insights ativo');
+  console.info('[EFVM360] Azure Application Insights ativo');
 }
 
 import express from 'express';
@@ -80,7 +80,7 @@ setupSwagger(app);
 
 app.get('/', (_req, res) => {
   res.json({
-    service: 'VFZ — Gestão de Troca de Turno Ferroviária API',
+    service: 'EFVM360 — Gestão de Troca de Turno Ferroviária API',
     version: '1.0.0',
     documentation: `${API_PREFIX}/docs`,
     health: `${API_PREFIX}/health`,
@@ -115,7 +115,7 @@ app.get('/', (_req, res) => {
 // ── ERROR HANDLER GLOBAL ─────────────────────────────────────────────────
 
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error('[VFZ-ERROR]', err.message);
+  console.error('[EFVM360-ERROR]', err.message);
   
   if (err.message.includes('CORS')) {
     res.status(403).json({ error: 'Origem não permitida pelo CORS', code: 'CORS_ERROR' });
@@ -147,7 +147,7 @@ const startServer = async (): Promise<void> => {
     httpServer.listen(PORT, '0.0.0.0', () => {
       console.info('');
       console.info('══════════════════════════════════════════════════════════');
-      console.info('  VFZ Backend — Gestão de Troca de Turno Ferroviária');
+      console.info('  EFVM360 Backend — Gestão de Troca de Turno Ferroviária');
       console.info('══════════════════════════════════════════════════════════');
       console.info(`  🚀 Servidor:    http://localhost:${PORT}`);
       console.info(`  📡 API:         http://localhost:${PORT}${API_PREFIX}`);
@@ -159,7 +159,7 @@ const startServer = async (): Promise<void> => {
       console.info('');
     });
   } catch (error) {
-    console.error('[VFZ] Falha na inicialização:', error);
+    console.error('[EFVM360] Falha na inicialização:', error);
     process.exit(1);
   }
 };

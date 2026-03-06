@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Telemetry Middleware
+// EFVM360 Backend — Telemetry Middleware
 // Tracks request duration, status codes, and endpoint hit counts
 // Rolling window of last 1000 requests
 // ============================================================================

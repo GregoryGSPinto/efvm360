@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — WebSocket Service (Socket.IO)
+// EFVM360 Backend — WebSocket Service (Socket.IO)
 // Real-time dashboard updates with JWT authentication & room-based routing
 // ============================================================================
 

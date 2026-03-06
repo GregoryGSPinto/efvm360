@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Validators: Pátios
+// EFVM360 Backend — Validators: Pátios
 // ============================================================================
 
 import { body, param } from 'express-validator';

@@ -1,28 +1,28 @@
 # ============================================================================
-# VFZ v3.2 — CODEOWNERS
+# EFVM360 v3.2 — CODEOWNERS
 # Defines required reviewers for code changes
 # ============================================================================
 
 # Default: all changes require team lead review
-* @vfz-team/leads
+* @efvm360-team/leads
 
 # Backend changes require backend specialist
-/backend/ @vfz-team/backend
+/backend/ @efvm360-team/backend
 
 # Frontend changes require frontend specialist
-/vfz/ @vfz-team/frontend
+/frontend/ @efvm360-team/frontend
 
 # Security-critical files require security review
-/backend/src/middleware/auth*.ts @vfz-team/security
-/backend/src/services/authService.ts @vfz-team/security
-/vfz/src/services/security.ts @vfz-team/security
-/vfz/src/services/permissions.ts @vfz-team/security
+/backend/src/middleware/auth*.ts @efvm360-team/security
+/backend/src/services/authService.ts @efvm360-team/security
+/frontend/src/services/security.ts @efvm360-team/security
+/frontend/src/services/permissions.ts @efvm360-team/security
 
 # CI/CD changes require DevOps review
-/.github/ @vfz-team/devops
-/docker-compose.yml @vfz-team/devops
-/backend/Dockerfile @vfz-team/devops
+/.github/ @efvm360-team/devops
+/docker-compose.yml @efvm360-team/devops
+/backend/Dockerfile @efvm360-team/devops
 
 # Database migrations require DBA review
-/backend/src/migrations/ @vfz-team/dba
-/backend/docs/init.sql @vfz-team/dba
+/backend/src/migrations/ @efvm360-team/dba
+/backend/docs/init.sql @efvm360-team/dba

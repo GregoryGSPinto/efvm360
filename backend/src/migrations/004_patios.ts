@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Migration 004: Tabela de Pátios
+// EFVM360 Backend — Migration 004: Tabela de Pátios
 // Gerenciamento dinâmico de pátios com seed dos padrão
 // ============================================================================
 
@@ -8,7 +8,7 @@ import sequelize from '../config/database';
 
 export async function runMigration004(): Promise<void> {
   const qi: QueryInterface = sequelize.getQueryInterface();
-  console.log('[VFZ-MIGRATE-004] Iniciando migração de Pátios...');
+  console.log('[EFVM360-MIGRATE-004] Iniciando migração de Pátios...');
 
   // ── Tabela patios ─────────────────────────────────────────────────────
   await qi.createTable('patios', {
@@ -65,7 +65,7 @@ export async function runMigration004(): Promise<void> {
   await qi.addIndex('patios', ['codigo'], { unique: true, name: 'uk_patios_codigo' });
   await qi.addIndex('patios', ['ativo'], { name: 'idx_patios_ativo' });
 
-  console.log('[VFZ-MIGRATE-004] ✅ Tabela patios criada');
+  console.log('[EFVM360-MIGRATE-004] ✅ Tabela patios criada');
 
   // ── Seed: Pátios padrão ───────────────────────────────────────────────
   const now = new Date();
@@ -77,8 +77,8 @@ export async function runMigration004(): Promise<void> {
     { uuid: crypto.randomUUID(), codigo: 'VTO', nome: 'Tubarão Outbound', ativo: true, padrao: true, criado_por: null, created_at: now, updated_at: now },
   ]);
 
-  console.log('[VFZ-MIGRATE-004] ✅ Seed de 5 pátios padrão (VCS inativo)');
-  console.log('[VFZ-MIGRATE-004] ══════════════════════════════════════════');
-  console.log('[VFZ-MIGRATE-004] ✅ MIGRAÇÃO 004 COMPLETA');
-  console.log('[VFZ-MIGRATE-004] ══════════════════════════════════════════');
+  console.log('[EFVM360-MIGRATE-004] ✅ Seed de 5 pátios padrão (VCS inativo)');
+  console.log('[EFVM360-MIGRATE-004] ══════════════════════════════════════════');
+  console.log('[EFVM360-MIGRATE-004] ✅ MIGRAÇÃO 004 COMPLETA');
+  console.log('[EFVM360-MIGRATE-004] ══════════════════════════════════════════');
 }

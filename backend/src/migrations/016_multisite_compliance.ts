@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Migration 016: Multi-Site Support & Compliance Automation
+// EFVM360 Backend — Migration 016: Multi-Site Support & Compliance Automation
 // Phase 3F (Multi-Site) + Phase 3G (Compliance)
 // ============================================================================
 
@@ -8,7 +8,7 @@ import sequelize from '../config/database';
 
 export async function runMigration016(): Promise<void> {
   const qi: QueryInterface = sequelize.getQueryInterface();
-  console.log('[VFZ-MIGRATE-016] Iniciando migração multi-site + compliance...');
+  console.log('[EFVM360-MIGRATE-016] Iniciando migração multi-site + compliance...');
 
   // ── 1. SITES TABLE ──────────────────────────────────────────────────────
   await qi.createTable('sites', {
@@ -77,7 +77,7 @@ export async function runMigration016(): Promise<void> {
   await qi.addIndex('sites', ['railway'], { name: 'idx_sites_railway' });
   await qi.addIndex('sites', ['active'], { name: 'idx_sites_active' });
 
-  console.log('[VFZ-MIGRATE-016] Tabela: sites');
+  console.log('[EFVM360-MIGRATE-016] Tabela: sites');
 
   // ── 2. USER-SITE ASSIGNMENTS ────────────────────────────────────────────
   await qi.createTable('user_sites', {
@@ -112,7 +112,7 @@ export async function runMigration016(): Promise<void> {
   });
   await qi.addIndex('user_sites', ['site_code'], { name: 'idx_us_site' });
 
-  console.log('[VFZ-MIGRATE-016] Tabela: user_sites');
+  console.log('[EFVM360-MIGRATE-016] Tabela: user_sites');
 
   // ── 3. ADD site_id TO CORE TABLES ───────────────────────────────────────
   const tablesForSiteId = [
@@ -140,11 +140,11 @@ export async function runMigration016(): Promise<void> {
         await qi.addIndex(table, ['site_id'], { name: `idx_${table}_site_id` });
       }
     } catch (e) {
-      console.log(`[VFZ-MIGRATE-016] Skipping site_id on ${table}: ${(e as Error).message}`);
+      console.log(`[EFVM360-MIGRATE-016] Skipping site_id on ${table}: ${(e as Error).message}`);
     }
   }
 
-  console.log('[VFZ-MIGRATE-016] site_id adicionado a tabelas core');
+  console.log('[EFVM360-MIGRATE-016] site_id adicionado a tabelas core');
 
   // ── 4. COMPLIANCE CHECKS TABLE ──────────────────────────────────────────
   await qi.createTable('compliance_checks', {
@@ -223,7 +223,7 @@ export async function runMigration016(): Promise<void> {
   await qi.addIndex('compliance_checks', ['status'], { name: 'idx_cc_status' });
   await qi.addIndex('compliance_checks', ['next_due'], { name: 'idx_cc_next_due' });
 
-  console.log('[VFZ-MIGRATE-016] Tabela: compliance_checks');
+  console.log('[EFVM360-MIGRATE-016] Tabela: compliance_checks');
 
   // ── 5. COMPLIANCE ALERTS TABLE ──────────────────────────────────────────
   await qi.createTable('compliance_alerts', {
@@ -299,7 +299,7 @@ export async function runMigration016(): Promise<void> {
   await qi.addIndex('compliance_alerts', ['severity'], { name: 'idx_ca_severity' });
   await qi.addIndex('compliance_alerts', ['acknowledged'], { name: 'idx_ca_ack' });
 
-  console.log('[VFZ-MIGRATE-016] Tabela: compliance_alerts');
+  console.log('[EFVM360-MIGRATE-016] Tabela: compliance_alerts');
 
   // ── 6. TRAINING RECORDS TABLE ───────────────────────────────────────────
   await qi.createTable('training_records', {
@@ -365,9 +365,9 @@ export async function runMigration016(): Promise<void> {
   await qi.addIndex('training_records', ['expires_at'], { name: 'idx_tr_expires' });
   await qi.addIndex('training_records', ['status'], { name: 'idx_tr_status' });
 
-  console.log('[VFZ-MIGRATE-016] Tabela: training_records');
+  console.log('[EFVM360-MIGRATE-016] Tabela: training_records');
 
-  console.log('[VFZ-MIGRATE-016] ══════════════════════════════════════════');
-  console.log('[VFZ-MIGRATE-016] MIGRACAO 016 COMPLETA — multi-site + compliance');
-  console.log('[VFZ-MIGRATE-016] ══════════════════════════════════════════');
+  console.log('[EFVM360-MIGRATE-016] ══════════════════════════════════════════');
+  console.log('[EFVM360-MIGRATE-016] MIGRACAO 016 COMPLETA — multi-site + compliance');
+  console.log('[EFVM360-MIGRATE-016] ══════════════════════════════════════════');
 }

@@ -1,14 +1,14 @@
-# VFZ — Roadmap Arquiteto de Soluções
+# EFVM360 — Roadmap Arquiteto de Soluções
 
 ## Objetivo
 
-Posicionar o projeto VFZ como peça de portfólio que demonstra **pensamento de Arquiteto de Soluções** — não apenas código limpo, mas decisões arquiteturais justificadas, visão sistêmica, e solução de um problema real de infraestrutura crítica.
+Posicionar o projeto EFVM360 como peça de portfólio que demonstra **pensamento de Arquiteto de Soluções** — não apenas código limpo, mas decisões arquiteturais justificadas, visão sistêmica, e solução de um problema real de infraestrutura crítica.
 
 ---
 
 ## O que um Arquiteto de Soluções demonstra
 
-| Competência | O que avaliadores procuram | VFZ Atual | Meta |
+| Competência | O que avaliadores procuram | EFVM360 Atual | Meta |
 |-------------|---------------------------|-----------|------|
 | System Design | Trade-offs documentados, não só "fiz assim" | ⚠️ ADRs básicos | Decisões com alternativas analisadas |
 | Domain Expertise | Entende o problema real, não só a tech | ✅ Terminologia ferroviária | Manter |
@@ -123,7 +123,7 @@ Documento único que conta a "história arquitetural":
 
 3. Visão de Integração Futura
    ┌─────────┐     ┌─────────┐     ┌──────────┐
-   │ VFZ PWA │────▶│ VFZ API │────▶│ MySQL    │
+   │ EFVM360 PWA │────▶│ EFVM360 API │────▶│ MySQL    │
    └─────────┘     └────┬────┘     └──────────┘
                         │
                    ┌────┴────────────────────┐

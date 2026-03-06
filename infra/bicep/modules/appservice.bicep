@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ — App Service (Backend API) + Staging Slot
+// EFVM360 — App Service (Backend API) + Staging Slot
 // ============================================================================
 
 param prefix string
@@ -33,7 +33,7 @@ resource app 'Microsoft.Web/sites@2023-01-01' = {
       appSettings: [
         { name: 'NODE_ENV', value: environment }
         { name: 'DB_HOST', value: dbHost }
-        { name: 'DB_NAME', value: 'vfz_railway' }
+        { name: 'DB_NAME', value: 'efvm360_railway' }
         { name: 'JWT_SECRET', value: jwtSecret }
         { name: 'WEBSITE_RUN_FROM_PACKAGE', value: '1' }
       ]

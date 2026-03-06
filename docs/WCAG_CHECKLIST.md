@@ -1,8 +1,8 @@
-# VFZ v3.2 — WCAG 2.1 AA Compliance
+# EFVM360 v3.2 — WCAG 2.1 AA Compliance
 
 ## Resumo
 
-O VFZ visa conformidade WCAG 2.1 nível AA para garantir acessibilidade em ambiente operacional ferroviário, onde legibilidade e clareza são requisitos de segurança.
+O EFVM360 visa conformidade WCAG 2.1 nível AA para garantir acessibilidade em ambiente operacional ferroviário, onde legibilidade e clareza são requisitos de segurança.
 
 ## Princípio 1: Perceptível
 

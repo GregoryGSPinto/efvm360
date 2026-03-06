@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Utilitários de Criptografia
+// EFVM360 Backend — Utilitários de Criptografia
 // ============================================================================
 
 import crypto from 'crypto';

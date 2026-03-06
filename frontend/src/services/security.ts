@@ -66,7 +66,7 @@ const sha256 = async (input: string): Promise<string> => {
  */
 export const hashSenha = async (senha: string, matricula: string): Promise<string> => {
   // NOTA: salt prefix mantido como legacy por compatibilidade de hashes existentes
-  const salt = `vfz-salt-${matricula.toLowerCase()}`;
+  const salt = `efvm360-salt-${matricula.toLowerCase()}`;
   return sha256(`${salt}:${senha}`);
 };
 
@@ -307,7 +307,7 @@ export const verificarIntegridadeRuntime = (): { integro: boolean; alertas: stri
 
   // Verifica se localStorage está acessível
   try {
-    const tk = '__vfz_integrity_test__';
+    const tk = '__efvm360_integrity_test__';
     localStorage.setItem(tk, 'ok');
     if (localStorage.getItem(tk) !== 'ok') alertas.push('localStorage comprometido');
     localStorage.removeItem(tk);
@@ -581,7 +581,7 @@ export const gerarDeviceFingerprint = async (): Promise<string> => {
     Intl.DateTimeFormat().resolvedOptions().timeZone || '?',
   ].join('|');
   // NOTA: prefix mantido como legacy por compatibilidade de fingerprints
-  return sha256(`vfz-device:${props}`);
+  return sha256(`efvm360-device:${props}`);
 };
 
 /**

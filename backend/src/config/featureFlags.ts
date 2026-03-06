@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Feature Flags
+// EFVM360 Backend — Feature Flags
 // ============================================================================
 export const FEATURES = {
   SSO_AZURE_AD: process.env.FEATURE_SSO_AZURE_AD === 'true',

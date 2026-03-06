@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Validators: Sync (Offline-First)
+// EFVM360 Backend — Validators: Sync (Offline-First)
 // ============================================================================
 
 import { body } from 'express-validator';

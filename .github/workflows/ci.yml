@@ -1,12 +1,12 @@
 # ============================================================================
-# VFZ v3.2 — CI Pipeline (Continuous Integration)
+# EFVM360 v3.2 — CI Pipeline (Continuous Integration)
 # Sistema de Gestao de Troca de Turno Ferroviaria — Vale S.A.
 # ============================================================================
 # Trigger: push (main/staging/develop), PRs para essas branches
 # Pipeline: lint -> test (with coverage enforcement) -> build -> docker validate -> summary
 # ============================================================================
 
-name: "VFZ — CI Pipeline"
+name: "EFVM360 — CI Pipeline"
 
 on:
   push:
@@ -264,7 +264,7 @@ jobs:
         run: docker compose config --quiet
 
       - name: Build Backend Docker Image
-        run: docker build -t vfz-backend:ci-${{ github.sha }} ./backend
+        run: docker build -t efvm360-backend:ci-${{ github.sha }} ./backend
 
   # ── 8. CI Summary ────────────────────────────────────────────────────
   ci-complete:
@@ -275,7 +275,7 @@ jobs:
     steps:
       - name: Pipeline Summary
         run: |
-          echo "## VFZ CI Pipeline — Results" >> $GITHUB_STEP_SUMMARY
+          echo "## EFVM360 CI Pipeline — Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Stage | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY

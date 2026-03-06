@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Migração MySQL Completa
+// EFVM360 Backend — Migração MySQL Completa
 // Cria todas as tabelas do sistema de gestão de troca de turno ferroviário
 // Compatível com MySQL 8.0+ e Azure Database for MySQL
 // ============================================================================
@@ -9,7 +9,7 @@ import sequelize from '../config/database';
 
 export async function runMigrations(): Promise<void> {
   const qi: QueryInterface = sequelize.getQueryInterface();
-  console.log('[VFZ-MIGRATE] Iniciando migração...');
+  console.log('[EFVM360-MIGRATE] Iniciando migração...');
 
   // ── 1. USUÁRIOS ────────────────────────────────────────────────────────
   await qi.createTable('usuarios', {
@@ -96,7 +96,7 @@ export async function runMigrations(): Promise<void> {
   await qi.addIndex('usuarios', ['funcao'], { name: 'idx_usuarios_funcao' });
   await qi.addIndex('usuarios', ['ativo'], { name: 'idx_usuarios_ativo' });
 
-  console.log('[VFZ-MIGRATE] ✅ Tabela: usuarios');
+  console.log('[EFVM360-MIGRATE] ✅ Tabela: usuarios');
 
   // ── 2. REFRESH TOKENS ──────────────────────────────────────────────────
   await qi.createTable('refresh_tokens', {
@@ -143,7 +143,7 @@ export async function runMigrations(): Promise<void> {
   await qi.addIndex('refresh_tokens', ['token_hash'], { name: 'idx_rt_hash' });
   await qi.addIndex('refresh_tokens', ['expires_at'], { name: 'idx_rt_expires' });
 
-  console.log('[VFZ-MIGRATE] ✅ Tabela: refresh_tokens');
+  console.log('[EFVM360-MIGRATE] ✅ Tabela: refresh_tokens');
 
   // ── 3. PASSAGENS DE SERVIÇO ────────────────────────────────────────────
   await qi.createTable('passagens', {
@@ -279,7 +279,7 @@ export async function runMigrations(): Promise<void> {
   await qi.addIndex('passagens', ['operador_entra_id'], { name: 'idx_pass_op_entra' });
   await qi.addIndex('passagens', ['data_passagem', 'turno'], { name: 'idx_pass_data_turno' });
 
-  console.log('[VFZ-MIGRATE] ✅ Tabela: passagens');
+  console.log('[EFVM360-MIGRATE] ✅ Tabela: passagens');
 
   // ── 4. AUDIT TRAIL (append-only) ──────────────────────────────────────
   await qi.createTable('audit_trail', {
@@ -375,7 +375,7 @@ export async function runMigrations(): Promise<void> {
     END
   `);
 
-  console.log('[VFZ-MIGRATE] ✅ Tabela: audit_trail (append-only com triggers)');
+  console.log('[EFVM360-MIGRATE] ✅ Tabela: audit_trail (append-only com triggers)');
 
   // ── 5. ALERTAS OPERACIONAIS ────────────────────────────────────────────
   await qi.createTable('alertas_operacionais', {
@@ -446,7 +446,7 @@ export async function runMigrations(): Promise<void> {
   await qi.addIndex('alertas_operacionais', ['tipo'], { name: 'idx_alertas_tipo' });
   await qi.addIndex('alertas_operacionais', ['passagem_id'], { name: 'idx_alertas_passagem' });
 
-  console.log('[VFZ-MIGRATE] ✅ Tabela: alertas_operacionais');
+  console.log('[EFVM360-MIGRATE] ✅ Tabela: alertas_operacionais');
 
   // ── 6. HISTÓRICO 5S ───────────────────────────────────────────────────
   await qi.createTable('avaliacoes_5s', {
@@ -486,9 +486,9 @@ export async function runMigrations(): Promise<void> {
   await qi.addIndex('avaliacoes_5s', ['passagem_id'], { name: 'idx_5s_passagem' });
   await qi.addIndex('avaliacoes_5s', ['avaliador_id'], { name: 'idx_5s_avaliador' });
 
-  console.log('[VFZ-MIGRATE] ✅ Tabela: avaliacoes_5s');
+  console.log('[EFVM360-MIGRATE] ✅ Tabela: avaliacoes_5s');
 
-  console.log('[VFZ-MIGRATE] ══════════════════════════════════════════');
-  console.log('[VFZ-MIGRATE] ✅ MIGRAÇÃO COMPLETA — 6 tabelas criadas');
-  console.log('[VFZ-MIGRATE] ══════════════════════════════════════════');
+  console.log('[EFVM360-MIGRATE] ══════════════════════════════════════════');
+  console.log('[EFVM360-MIGRATE] ✅ MIGRAÇÃO COMPLETA — 6 tabelas criadas');
+  console.log('[EFVM360-MIGRATE] ══════════════════════════════════════════');
 }

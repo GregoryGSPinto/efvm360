@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Webhook Engine
+// EFVM360 Backend — Webhook Engine
 // Dispatches events to registered webhook endpoints with HMAC signing & retry
 // ============================================================================
 

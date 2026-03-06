@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ — Infrastructure as Code (Azure Bicep)
+// EFVM360 — Infrastructure as Code (Azure Bicep)
 // ============================================================================
 
 targetScope = 'subscription'
@@ -19,7 +19,7 @@ param dbAdminPassword string
 @secure()
 param jwtSecret string
 
-var prefix = 'vfz'
+var prefix = 'efvm360'
 var rgName = 'rg-${prefix}-${environment}'
 
 // Resource Group

@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Frontend — Tests: services/security.ts (~20 tests)
+// EFVM360 Frontend — Tests: services/security.ts (~20 tests)
 // ============================================================================
 
 import { describe, it, expect } from 'vitest';
@@ -178,7 +178,7 @@ describe('validarEstruturaSessao()', () => {
 
 describe('AuditTrail', () => {
   it('registrar() deve adicionar entrada', async () => {
-    const trail = new AuditTrail('vfz-test-audit');
+    const trail = new AuditTrail('efvm360-test-audit');
     const entry = await trail.registrar('V001', 'LOGIN', 'autenticacao', 'Teste');
     expect(entry.matricula).toBe('V001');
     expect(entry.acao).toBe('LOGIN');
@@ -186,7 +186,7 @@ describe('AuditTrail', () => {
   });
 
   it('deve manter chain integrity (hash encadeado)', async () => {
-    const trail = new AuditTrail('vfz-test-audit-chain');
+    const trail = new AuditTrail('efvm360-test-audit-chain');
     await trail.registrar('V001', 'LOGIN', 'auth');
     await trail.registrar('V001', 'LOGOUT', 'auth');
     const entries = trail.getEntries();

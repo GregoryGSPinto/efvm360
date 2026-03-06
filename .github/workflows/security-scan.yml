@@ -1,10 +1,10 @@
 # ============================================================================
-# VFZ v3.2 — Security Scan
+# EFVM360 v3.2 — Security Scan
 # Schedule: Mondays 06:00 UTC + every PR to main
 # Scans: npm audit, Trivy FS scan, license compliance
 # ============================================================================
 
-name: "🛡️ VFZ — Security Scan"
+name: "🛡️ EFVM360 — Security Scan"
 
 on:
   schedule:
@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        project: [vfz, backend]
+        project: [frontend, backend]
     steps:
       - uses: actions/checkout@v4
 
@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        project: [vfz, backend]
+        project: [frontend, backend]
     steps:
       - uses: actions/checkout@v4
 
@@ -111,12 +111,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build Image
-        run: docker build -t vfz-backend:scan ./backend
+        run: docker build -t efvm360-backend:scan ./backend
 
       - name: Trivy Image Scan
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: vfz-backend:scan
+          image-ref: efvm360-backend:scan
           severity: CRITICAL,HIGH
           format: table
           exit-code: 0

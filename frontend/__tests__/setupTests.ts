@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Frontend — Test Setup (Vitest + jsdom)
+// EFVM360 Frontend — Test Setup (Vitest + jsdom)
 // Mocks: localStorage, sessionStorage, crypto.subtle, navigator
 // ============================================================================
 

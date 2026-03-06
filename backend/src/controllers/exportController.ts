@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Export Controller
+// EFVM360 Backend — Export Controller
 // Data export endpoints: handovers, equipment, risk-matrix, KPIs
 // Supports JSON and CSV formats
 // ============================================================================

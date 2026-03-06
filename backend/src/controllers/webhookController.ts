@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Webhook Controller
+// EFVM360 Backend — Webhook Controller
 // CRUD endpoints for webhook registration
 // ============================================================================
 

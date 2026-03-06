@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Azure Key Vault Integration
+// EFVM360 Backend — Azure Key Vault Integration
 // Fallback para process.env em dev local
 // ============================================================================
 
@@ -19,9 +19,9 @@ async function initKeyVault(): Promise<void> {
     const { DefaultAzureCredential } = await import('@azure/identity');
     const { SecretClient } = await import('@azure/keyvault-secrets');
     kvClient = new SecretClient(vaultUrl, new DefaultAzureCredential());
-    console.info('[VFZ-KV] Azure Key Vault conectado:', vaultUrl);
+    console.info('[EFVM360-KV] Azure Key Vault conectado:', vaultUrl);
   } catch (err) {
-    console.warn('[VFZ-KV] Key Vault indisponível, usando fallback .env:', (err as Error).message);
+    console.warn('[EFVM360-KV] Key Vault indisponível, usando fallback .env:', (err as Error).message);
   }
 }
 
@@ -39,7 +39,7 @@ export async function getSecret(name: string, fallbackEnvVar?: string): Promise<
       cache.set(name, { value, expiresAt: Date.now() + CACHE_TTL_MS });
       return value;
     } catch (err) {
-      console.warn(`[VFZ-KV] Falha ao obter secret "${name}":`, (err as Error).message);
+      console.warn(`[EFVM360-KV] Falha ao obter secret "${name}":`, (err as Error).message);
     }
   }
 

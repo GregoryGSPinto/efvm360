@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ — Azure MySQL Flexible Server
+// EFVM360 — Azure MySQL Flexible Server
 // ============================================================================
 
 param prefix string
@@ -32,7 +32,7 @@ resource mysqlServer 'Microsoft.DBforMySQL/flexibleServers@2023-06-30' = {
 
 resource database 'Microsoft.DBforMySQL/flexibleServers/databases@2023-06-30' = {
   parent: mysqlServer
-  name: 'vfz_railway'
+  name: 'efvm360_railway'
   properties: { charset: 'utf8mb4', collation: 'utf8mb4_unicode_ci' }
 }
 

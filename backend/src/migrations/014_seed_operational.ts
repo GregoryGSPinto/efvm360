@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Migration 014: Seed Operational Data
+// EFVM360 Backend — Migration 014: Seed Operational Data
 // Equipment, Risk Grades, Yard Layouts (comprehensive seed)
 // ============================================================================
 
@@ -7,7 +7,7 @@ import sequelize from '../config/database';
 
 export async function runMigration014(): Promise<void> {
   const qi = sequelize.getQueryInterface();
-  console.log('[VFZ-MIGRATE-014] Iniciando seed de dados operacionais...');
+  console.log('[EFVM360-MIGRATE-014] Iniciando seed de dados operacionais...');
 
   const now = new Date();
 
@@ -63,7 +63,7 @@ export async function runMigration014(): Promise<void> {
     }
   }
 
-  console.log('[VFZ-MIGRATE-014] ✅ Seed: 21 equipamentos operacionais');
+  console.log('[EFVM360-MIGRATE-014] ✅ Seed: 21 equipamentos operacionais');
 
   // ── 2. RISK GRADES SEED ────────────────────────────────────────────────
   const riskGrades = [
@@ -100,7 +100,7 @@ export async function runMigration014(): Promise<void> {
     }
   }
 
-  console.log('[VFZ-MIGRATE-014] ✅ Seed: 10 graus de risco (matriz 5×5)');
+  console.log('[EFVM360-MIGRATE-014] ✅ Seed: 10 graus de risco (matriz 5×5)');
 
   // ── 3. PÁTIOS SEED (se não existirem) ──────────────────────────────────
   const patios = [
@@ -130,9 +130,9 @@ export async function runMigration014(): Promise<void> {
     }
   }
 
-  console.log('[VFZ-MIGRATE-014] ✅ Seed: 5 pátios EFVM');
+  console.log('[EFVM360-MIGRATE-014] ✅ Seed: 5 pátios EFVM');
 
-  console.log('[VFZ-MIGRATE-014] ══════════════════════════════════════════');
-  console.log('[VFZ-MIGRATE-014] ✅ MIGRAÇÃO 014 COMPLETA — Seed operacional');
-  console.log('[VFZ-MIGRATE-014] ══════════════════════════════════════════');
+  console.log('[EFVM360-MIGRATE-014] ══════════════════════════════════════════');
+  console.log('[EFVM360-MIGRATE-014] ✅ MIGRAÇÃO 014 COMPLETA — Seed operacional');
+  console.log('[EFVM360-MIGRATE-014] ══════════════════════════════════════════');
 }

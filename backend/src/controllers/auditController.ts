@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Controller de Auditoria
+// EFVM360 Backend — Controller de Auditoria
 // ============================================================================
 
 import { Request, Response } from 'express';

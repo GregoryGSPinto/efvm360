@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Frontend — Tests: Validação Operacional (services/validacao.ts)
+// EFVM360 Frontend — Tests: Validação Operacional (services/validacao.ts)
 // Testes de segurança operacional ferroviária — MÓDULO CRÍTICO
 // ============================================================================
 

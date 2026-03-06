@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Frontend — Tests: TabCoordinator Service
+// EFVM360 Frontend — Tests: TabCoordinator Service
 // Multi-tab coordination with BroadcastChannel + localStorage fallback
 // ============================================================================
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';

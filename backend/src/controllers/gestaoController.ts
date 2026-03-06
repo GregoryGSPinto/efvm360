@@ -1,5 +1,5 @@
 // ============================================================================
-// VFZ Backend — Gestão Controller (Aprovações + Pendências)
+// EFVM360 Backend — Gestão Controller (Aprovações + Pendências)
 // ============================================================================
 
 import { Request, Response } from 'express';
