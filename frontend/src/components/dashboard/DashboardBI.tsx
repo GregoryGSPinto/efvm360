@@ -208,7 +208,7 @@ const exportarExcel = (
   let csv = BOM;
   // Cover sheet header
   csv += `"EFVM360 — Dashboard BI+ — Relatório de Troca de Turno"\n`;
-  csv += `"EFVM — Estrada de Ferro Vitória a Minas — Vale S.A."\n`;
+  csv += `"Independent portfolio case study — railway shift handover analytics"\n`;
   csv += `"Gerado em:"${SEP}"${new Date().toLocaleString('pt-BR')}"\n`;
   csv += `"Período:"${SEP}"${registros.length > 0 ? registros[registros.length - 1]?.cabecalho.data || '-' : '-'} a ${registros[0]?.cabecalho.data || '-'}"\n`;
   csv += `"Total de Registros:"${SEP}"${registros.length}"\n`;
@@ -234,7 +234,7 @@ const exportarExcel = (
     csv += `"${r.cabecalho.data}"${SEP}"${r.cabecalho.turno}"${SEP}"${r.cabecalho.horario || '-'}"${SEP}"${r.segurancaManobras.houveManobras ? 'Sim' : 'Não'}"${SEP}"${r.segurancaManobras.restricaoAtiva ? 'Sim' : 'Não'}"${SEP}"${r.pontuacaoRisco || 0}"${SEP}"${(r.cabecalho as unknown as Record<string, string>).patio || 'VFZ'}"\n`;
   });
   csv += '\n';
-  csv += `"© ${new Date().getFullYear()} EFVM360 Enterprise — Todos os direitos reservados"\n`;
+  csv += `"© ${new Date().getFullYear()} EFVM360 — independent portfolio case study"\n`;
 
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
@@ -308,7 +308,7 @@ const exportarPDF = async (
   <div class="header">
     <div>
       <div class="header-title">EFVM<span style="color:#69be28">360</span> — BI+ Dashboard</div>
-      <div class="header-subtitle">Estrada de Ferro Vitória a Minas — Vale S.A. · Relatório Analítico</div>
+      <div class="header-subtitle">Independent portfolio case study · analytical export</div>
     </div>
     <div style="text-align: right;">
       <div style="font-size: 10px; color: #666;">Gerado em:</div>
@@ -353,16 +353,14 @@ const exportarPDF = async (
   <div class="footer">
     <div class="footer-main">
       <strong>Documento exportado do sistema Gestão de Troca de Turno EFVM360</strong><br>
-      EFVM - Estrada de Ferro Vitória a Minas • Vale S.A.
+      EFVM360 • independent portfolio case study
     </div>
     <div class="footer-legal">
-      <strong>Política de Privacidade:</strong> Este documento contém informações operacionais da Vale S.A. 
-      O uso e compartilhamento destas informações está sujeito às políticas internas de segurança da informação. 
-      Os dados aqui presentes são de uso exclusivo para fins operacionais e de gestão. 
-      A reprodução ou distribuição não autorizada é proibida. 
-      Em caso de dúvidas, consulte a área de Compliance ou o gestor responsável.
+      <strong>Nota:</strong> Este documento foi gerado a partir de um repositório de portfólio.
+      Os dados podem ser fictícios ou locais ao ambiente de demonstração.
+      Não trate este arquivo como evidência de operação institucional real.
       <br><br>
-      <em>Sistema EFVM360 v3.2 Enterprise • © ${new Date().getFullYear()} Vale S.A. - Todos os direitos reservados</em>
+      <em>EFVM360 • © ${new Date().getFullYear()} Gregory G. S. Pinto • MIT licensed repository</em>
     </div>
   </div>
 </body>

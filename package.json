@@ -1,19 +1,30 @@
 {
   "name": "efvm360",
   "private": true,
-  "packageManager": "pnpm@9.15.4",
+  "license": "MIT",
+  "packageManager": "pnpm@10.30.1",
   "scripts": {
-    "dev": "pnpm -r --parallel run dev",
-    "build": "pnpm -r run build",
-    "test": "pnpm -r run test",
-    "test:frontend": "pnpm --filter frontend test",
-    "test:backend": "pnpm --filter backend test",
-    "lint": "pnpm -r run lint",
-    "type-check": "pnpm -r run type-check",
+    "dev": "pnpm --parallel --filter @efvm360/frontend --filter @efvm360/backend run dev",
+    "build": "pnpm --filter @efvm360/frontend build && pnpm --filter @efvm360/backend build",
+    "test": "pnpm --filter @efvm360/frontend test && pnpm --filter @efvm360/backend test",
+    "test:frontend": "pnpm --filter @efvm360/frontend test",
+    "test:backend": "pnpm --filter @efvm360/backend test",
+    "lint": "pnpm --filter @efvm360/frontend lint && pnpm --filter @efvm360/backend lint",
+    "typecheck": "pnpm --filter @efvm360/frontend typecheck && pnpm --filter @efvm360/backend typecheck",
+    "type-check": "pnpm typecheck",
+    "e2e": "pnpm --filter @efvm360/e2e test",
+    "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm docs:validate",
+    "facts": "node scripts/repo-facts.mjs --write",
+    "docs:validate": "node scripts/repo-facts.mjs --check",
     "docker:dev": "docker compose up -d",
     "docker:prod": "docker compose -f docker-compose.prod.yml up -d"
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }

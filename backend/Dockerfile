@@ -1,49 +1,39 @@
-# ============================================================================
-# EFVM360 Backend — Multi-Stage Production Dockerfile
-# ============================================================================
-
-# ── Stage 1: Builder ────────────────────────────────────────────────────────
 FROM node:20-alpine AS builder
 
+RUN corepack enable && corepack prepare pnpm@10.30.1 --activate
+
 WORKDIR /app
 
-# Copy package manifests and install ALL dependencies (including devDeps for build)
-COPY package*.json ./
-RUN npm ci
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY backend/package.json backend/package.json
 
-# Copy source code and build
-COPY tsconfig.json ./
-COPY src/ ./src/
+RUN pnpm install --filter @efvm360/backend... --frozen-lockfile
 
-RUN npm run build
+COPY backend backend
 
-# ── Stage 2: Production ────────────────────────────────────────────────────
+WORKDIR /app/backend
+RUN pnpm build
+
 FROM node:20-alpine AS production
 
-# Metadata labels
-LABEL maintainer="EFVM360 Team <devops@efvm360.com.br>"
-LABEL version="1.0.0"
-LABEL description="EFVM360 Backend API - Gestao de Troca de Turno Ferroviaria"
-
-# Install curl for healthcheck
 RUN apk add --no-cache curl
+RUN corepack enable && corepack prepare pnpm@10.30.1 --activate
 
 WORKDIR /app
 
-# Copy package manifests and install production-only dependencies
-COPY package*.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY backend/package.json backend/package.json
 
-# Copy compiled output from builder stage
-COPY --from=builder /app/dist ./dist
+RUN pnpm install --filter @efvm360/backend --prod --frozen-lockfile
 
-# Use non-root user for security
+COPY --from=builder /app/backend/dist /app/backend/dist
+
+WORKDIR /app/backend
 USER node
 
 EXPOSE 3001
 
-# Health check against the API health endpoint
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD curl -f http://localhost:3001/api/v1/health || exit 1
 
-CMD ["node", "dist/server.js"]
+CMD ["pnpm", "start"]

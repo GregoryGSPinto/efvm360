@@ -1,7 +1,8 @@
 {
-  "name": "efvm360-backend",
+  "name": "@efvm360/backend",
+  "packageManager": "pnpm@10.30.1",
   "version": "1.0.0",
-  "description": "EFVM360 — Backend API para Gestão de Troca de Turno Ferroviária (MySQL + Azure)",
+  "description": "Backend Express/Sequelize do case study independente EFVM360.",
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
@@ -17,7 +18,8 @@
     "test:watch": "jest --watch",
     "test:unit": "jest --testPathPattern=unit",
     "test:integration": "jest --testPathPattern=integration",
-    "type-check": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "type-check": "pnpm typecheck"
   },
   "dependencies": {
     "@azure/identity": "^4.13.0",
@@ -68,5 +70,7 @@
   },
   "engines": {
     "node": ">=18.0.0"
-  }
+  },
+  "author": "Gregory G. S. Pinto",
+  "license": "MIT"
 }

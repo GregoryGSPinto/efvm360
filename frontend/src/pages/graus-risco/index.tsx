@@ -1,6 +1,6 @@
 // ============================================================================
 // EFVM360 v3.2 — Página Gestão de Graus de Risco Operacional
-// VPS — A Vida em Primeiro Lugar
+// Referência de segurança operacional
 // Matriz 5×5, CRUD com mitigações, KPIs, filtros
 // ============================================================================
 
@@ -252,7 +252,7 @@ export default function PaginaGrausRisco(props: PaginaGrausRiscoProps): JSX.Elem
     <>
       <SectionHeader title={t('risk.title')} tema={tema} />
       <div style={{ fontSize: 12, color: tema.textoSecundario, marginTop: -12, marginBottom: 16 }}>
-        VPS — A Vida em Primeiro Lugar | Ref: NR-01 / Diretriz Vale Life First
+        Segurança operacional | Ref: NR-01 e diretrizes internas do operador
       </div>
 
       {/* ── SEÇÃO 1: KPIs ── */}

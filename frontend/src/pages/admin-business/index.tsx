@@ -69,7 +69,7 @@ const CUSTOMER_PIPELINE = [
 
 const RECENT_EVENTS = [
   { event: 'New trial signup', customer: 'Metro Rio', time: '2h ago' },
-  { event: 'Upgraded to Professional', customer: 'Vale Logistica', time: '1d ago' },
+  { event: 'Upgraded to Professional', customer: 'Demo Logistics', time: '1d ago' },
   { event: 'Handover milestone (1000th)', customer: 'EFVM Operations', time: '2d ago' },
   { event: 'New trial signup', customer: 'MRS Logistica', time: '3d ago' },
   { event: 'Feature request', customer: 'Rumo S.A.', time: '5d ago' },

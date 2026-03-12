@@ -846,7 +846,7 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
             </h2>
             <div style={{ fontSize: '18px', color: tema.texto, fontWeight: 600, marginBottom: '4px' }}>EFVM360</div>
             <div style={{ fontSize: '13px', color: tema.textoSecundario, marginBottom: '24px' }}>
-              Vale Ferrosos Zone - EFVM
+              Independent portfolio case study for railway handover operations
             </div>
             <div style={{ display: 'inline-block', padding: '8px 20px', background: `${tema.primaria}20`, borderRadius: '20px', border: `1px solid ${tema.primaria}40` }}>
               <span style={{ color: tema.primaria, fontWeight: 600 }}>Versão {config.versao}</span>
@@ -894,7 +894,7 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
           </div>
         </Card>
 
-        <Card title="🏢 Informações Institucionais" styles={styles}>
+        <Card title="🏢 Contexto do Projeto" styles={styles}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: '16px' }}>
             <div style={{ padding: '16px', background: tema.backgroundSecundario, borderRadius: '10px', border: `1px solid ${tema.cardBorda}`, textAlign: 'center' }}>
               <div style={{ fontSize: '24px', marginBottom: '8px' }}>🏭</div>
@@ -908,8 +908,8 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
             </div>
             <div style={{ padding: '16px', background: tema.backgroundSecundario, borderRadius: '10px', border: `1px solid ${tema.cardBorda}`, textAlign: 'center' }}>
               <div style={{ fontSize: '24px', marginBottom: '8px' }}>💎</div>
-              <div style={{ fontSize: '11px', color: tema.textoSecundario, marginBottom: '4px' }}>Empresa</div>
-              <div style={{ fontWeight: 600, color: tema.texto, fontSize: '13px' }}>Vale S.A.</div>
+              <div style={{ fontSize: '11px', color: tema.textoSecundario, marginBottom: '4px' }}>Posicionamento</div>
+              <div style={{ fontWeight: 600, color: tema.texto, fontSize: '13px' }}>Case study independente</div>
             </div>
             <div style={{ padding: '16px', background: tema.backgroundSecundario, borderRadius: '10px', border: `1px solid ${tema.cardBorda}`, textAlign: 'center' }}>
               <div style={{ fontSize: '24px', marginBottom: '8px' }}>📅</div>
@@ -970,49 +970,41 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
           </div>
         </Card>
 
-        {/* Privacy Policy */}
-        <Card title="🔒 Política de Privacidade" styles={styles}>
+        <Card title="🔒 Posicionamento de Privacidade" styles={styles}>
           <div style={{ fontSize: 13, color: tema.texto, lineHeight: 1.7 }}>
-            <p><strong>EFVM360 — Política de Privacidade e Proteção de Dados</strong></p>
-            <p style={{ marginTop: 8 }}>Em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei 13.709/2018), informamos:</p>
+            <p><strong>EFVM360 — Nota de privacidade para demonstração local</strong></p>
+            <p style={{ marginTop: 8 }}>Este repositório não representa um serviço hospedado por uma empresa específica. O tratamento de dados depende do ambiente em que o avaliador executar a aplicação.</p>
             <ul style={{ paddingLeft: 20, margin: '8px 0' }}>
-              <li><strong>Dados coletados:</strong> Nome, matrícula, função, turno e ações operacionais no sistema.</li>
-              <li><strong>Finalidade:</strong> Segurança ferroviária, auditoria operacional e melhoria contínua de processos.</li>
-              <li><strong>Base legal:</strong> Execução de contrato de trabalho e cumprimento de obrigação legal/regulatória.</li>
-              <li><strong>Armazenamento:</strong> Dados armazenados localmente (offline-first) e sincronizados quando online. Dados sensíveis protegidos por SHA-256.</li>
-              <li><strong>Compartilhamento:</strong> Dados não são compartilhados com terceiros. Acesso restrito por hierarquia RBAC.</li>
-              <li><strong>Seus direitos:</strong> Acesso, correção, portabilidade, anonimização e exclusão. Contato: dpo@vale.com</li>
+              <li><strong>Dados em demo:</strong> nomes, matrículas, funções, turnos e registros operacionais usados para demonstração.</li>
+              <li><strong>Armazenamento:</strong> browser storage local e, se configurado, banco MySQL do ambiente do avaliador.</li>
+              <li><strong>Compartilhamento:</strong> nenhum compartilhamento institucional é presumido por este repositório.</li>
+              <li><strong>Direitos e governança:</strong> qualquer política real deve ser escrita pelo operador que for hospedar a solução.</li>
             </ul>
-            <p style={{ marginTop: 8, fontSize: 11, color: tema.textoSecundario }}>Última atualização: Dezembro 2025 | Versão 1.0</p>
+            <p style={{ marginTop: 8, fontSize: 11, color: tema.textoSecundario }}>Consulte `docs/PRIVACY_POLICY.md` para o posicionamento público do repositório.</p>
           </div>
         </Card>
 
-        {/* Terms of Use */}
-        <Card title="📜 Termos de Uso" styles={styles}>
+        <Card title="📜 Termos de Uso do Repositório" styles={styles}>
           <div style={{ fontSize: 13, color: tema.texto, lineHeight: 1.7 }}>
-            <p><strong>Termos e Condições de Uso — EFVM360</strong></p>
+            <p><strong>Termos aplicáveis a este código-fonte</strong></p>
             <ol style={{ paddingLeft: 20, margin: '8px 0' }}>
-              <li style={{ marginBottom: 6 }}><strong>Aceitação:</strong> Ao acessar o EFVM360, o usuário concorda com estes termos e com a Política de Privacidade.</li>
-              <li style={{ marginBottom: 6 }}><strong>Uso autorizado:</strong> O sistema é de uso exclusivo de colaboradores Vale S.A. autorizados, para fins operacionais ferroviários.</li>
-              <li style={{ marginBottom: 6 }}><strong>Responsabilidades:</strong> O usuário é responsável pela veracidade das informações registradas e pela segurança de suas credenciais.</li>
-              <li style={{ marginBottom: 6 }}><strong>Auditoria:</strong> Todas as ações são registradas em audit trail para fins de segurança e conformidade.</li>
-              <li style={{ marginBottom: 6 }}><strong>Propriedade intelectual:</strong> O software é propriedade da Vale S.A. Uso, cópia ou distribuição não autorizada é proibida.</li>
-              <li><strong>Alterações:</strong> Os termos podem ser atualizados. Alterações entram em vigor imediatamente após publicação.</li>
+              <li style={{ marginBottom: 6 }}><strong>Licença:</strong> o repositório usa licença MIT.</li>
+              <li style={{ marginBottom: 6 }}><strong>Escopo:</strong> o projeto é um case study técnico, não um serviço gerenciado.</li>
+              <li style={{ marginBottom: 6 }}><strong>Responsabilidade:</strong> quem executar ou adaptar o código deve validar segurança, governança e implantação no próprio ambiente.</li>
+              <li><strong>Documentação:</strong> README e `docs/` descrevem o estado atual do código sem prometer operação em produção.</li>
             </ol>
-            <p style={{ marginTop: 8, fontSize: 11, color: tema.textoSecundario }}>Versão dos Termos: 1.0.0 | Vigência: Junho 2025</p>
+            <p style={{ marginTop: 8, fontSize: 11, color: tema.textoSecundario }}>Consulte `docs/TERMS_OF_SERVICE.md` para a nota pública correspondente.</p>
           </div>
         </Card>
 
-        {/* License */}
         <Card title="📄 Licença" styles={styles}>
           <div style={{ fontSize: 13, color: tema.texto, lineHeight: 1.7 }}>
-            <p><strong>Licença de Uso Interno — Vale S.A.</strong></p>
-            <p style={{ marginTop: 8 }}>Este software é licenciado exclusivamente para uso interno da Vale S.A. e suas subsidiárias. Todos os direitos reservados.</p>
+            <p><strong>MIT License</strong></p>
+            <p style={{ marginTop: 8 }}>O código-fonte deste repositório é distribuído sob licença MIT para fins de avaliação, estudo e adaptação.</p>
             <div style={{ marginTop: 12, padding: 12, background: tema.backgroundSecundario, borderRadius: 8, border: `1px solid ${tema.cardBorda}`, fontFamily: 'monospace', fontSize: 11, color: tema.textoSecundario }}>
-              Copyright (c) 2025 Vale S.A.<br />
-              Todos os direitos reservados.<br />
-              Uso restrito a colaboradores autorizados.<br />
-              Proibida distribuição, cópia ou modificação sem autorização expressa.
+              Copyright (c) 2026 Gregory G. S. Pinto<br />
+              Permission is hereby granted, free of charge, to use, copy, modify and distribute.<br />
+              The software is provided "as is", without warranty of any kind.
             </div>
           </div>
         </Card>
@@ -1020,7 +1012,7 @@ export default function PaginaConfiguracoes(props: PaginaConfiguracoesProps): JS
         <div style={{ padding: '16px', background: `${tema.primaria}10`, borderRadius: '10px', border: `1px solid ${tema.primaria}30`, textAlign: 'center' }}>
           <div style={{ fontSize: '20px', marginBottom: '8px' }}>💚💛</div>
           <span style={{ color: tema.texto, fontSize: '13px' }}>
-            <strong>"A Vida em Primeiro Lugar"</strong> - Valor Vale
+            <strong>Prioridade operacional e segurança</strong> - caso de portfólio independente
           </span>
         </div>
       </>

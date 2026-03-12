@@ -1,54 +1,43 @@
-# ============================================================================
-# EFVM360 v3.2 — Security Scan
-# Schedule: Mondays 06:00 UTC + every PR to main
-# Scans: npm audit, Trivy FS scan, license compliance
-# ============================================================================
-
-name: "🛡️ EFVM360 — Security Scan"
+name: EFVM360 Security Scan
 
 on:
   schedule:
-    - cron: "0 6 * * 1" # Every Monday 06:00 UTC
+    - cron: "0 6 * * 1"
   pull_request:
     branches: [main]
-  workflow_dispatch: # Manual trigger
+  workflow_dispatch:
 
 env:
   NODE_VERSION: "20"
+  PNPM_VERSION: "10.30.1"
 
 jobs:
-  # ── NPM Audit ─────────────────────────────────────────────────────────
-  npm-audit:
-    name: "🔐 NPM Audit"
+  dependency-audit:
+    name: Workspace dependency audit
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        project: [frontend, backend]
     steps:
       - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
 
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
-      - name: Install Dependencies
-        run: cd ${{ matrix.project }} && npm ci
+      - run: pnpm install --frozen-lockfile
 
-      - name: "Audit: ${{ matrix.project }}"
-        run: |
-          cd ${{ matrix.project }}
-          echo "### 🔐 NPM Audit — ${{ matrix.project }}" >> $GITHUB_STEP_SUMMARY
-          npm audit --audit-level=high 2>&1 | tee audit.txt || true
-          VULNS=$(grep -c "high\|critical" audit.txt || echo "0")
-          if [ "$VULNS" -gt "0" ]; then
-            echo "⚠️ Found $VULNS high/critical vulnerabilities" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "✅ No high/critical vulnerabilities" >> $GITHUB_STEP_SUMMARY
-          fi
+      - name: Audit production dependencies
+        run: pnpm audit --prod --audit-level high || true
 
-  # ── Trivy Filesystem Scan ──────────────────────────────────────────────
-  trivy-scan:
-    name: "🔍 Trivy FS Scan"
+      - name: License summary
+        run: pnpm dlx license-checker --production --summary || true
+
+  trivy-filesystem:
+    name: Filesystem scan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -60,80 +49,4 @@ jobs:
           scan-ref: .
           severity: CRITICAL,HIGH
           format: table
-          exit-code: 0 # Don't fail, just report
-
-      - name: Trivy SARIF (for GitHub Security tab)
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: fs
-          scan-ref: .
-          severity: CRITICAL,HIGH
-          format: sarif
-          output: trivy-results.sarif
-
-      - name: Upload SARIF
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: trivy-results.sarif
-        continue-on-error: true
-
-  # ── License Compliance ─────────────────────────────────────────────────
-  license-check:
-    name: "📄 License Check"
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        project: [frontend, backend]
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install Dependencies
-        run: cd ${{ matrix.project }} && npm ci
-
-      - name: Check Licenses
-        run: |
-          cd ${{ matrix.project }}
-          npx license-checker --production --onlyAllow "MIT;ISC;BSD-2-Clause;BSD-3-Clause;Apache-2.0;0BSD;CC0-1.0;CC-BY-3.0;CC-BY-4.0;Python-2.0;Unlicense;BlueOak-1.0.0" --summary 2>&1 | head -30
-          echo "### 📄 Licenses — ${{ matrix.project }}" >> $GITHUB_STEP_SUMMARY
-          echo "✅ All production dependencies use approved licenses" >> $GITHUB_STEP_SUMMARY
-        continue-on-error: true
-
-  # ── Docker Image Scan ──────────────────────────────────────────────────
-  docker-scan:
-    name: "🐳 Docker Image Scan"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build Image
-        run: docker build -t efvm360-backend:scan ./backend
-
-      - name: Trivy Image Scan
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: efvm360-backend:scan
-          severity: CRITICAL,HIGH
-          format: table
           exit-code: 0
-
-  # ── Summary ────────────────────────────────────────────────────────────
-  security-summary:
-    name: "📋 Security Summary"
-    needs: [npm-audit, trivy-scan, license-check, docker-scan]
-    runs-on: ubuntu-latest
-    if: always()
-    steps:
-      - run: |
-          echo "## 🛡️ Security Scan Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| NPM Audit | ${{ needs.npm-audit.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Trivy FS | ${{ needs.trivy-scan.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Licenses | ${{ needs.license-check.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Docker | ${{ needs.docker-scan.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY

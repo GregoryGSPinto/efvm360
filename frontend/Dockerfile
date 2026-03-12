@@ -1,15 +1,18 @@
 FROM node:20-alpine
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@10.30.1 --activate
 
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY frontend/package.json frontend/package.json
 
-COPY . .
+RUN pnpm install --filter @efvm360/frontend... --frozen-lockfile
+
+COPY frontend frontend
+
+WORKDIR /app/frontend
 
 EXPOSE 5173
 
-# Vite dev server accessible from Docker host
-CMD ["pnpm", "exec", "vite", "--host", "0.0.0.0"]
+CMD ["pnpm", "dev", "--", "--host", "0.0.0.0"]

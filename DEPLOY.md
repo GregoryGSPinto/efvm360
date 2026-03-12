@@ -1,195 +1,149 @@
-# EFVM360 — Guia de Deploy
+# Deployment Guide
 
-Instruções para a equipe da Vale configurar o EFVM360 em ambiente de produção.
+This repository contains deploy configuration, not a verified hosted environment. Use this file as an operator reference for reproducing the repository's intended deployment paths.
 
----
+## Supported Paths
 
-## Backend
+- Local development stack: `docker-compose.yml`
+- Backend production-style container stack: `docker-compose.prod.yml`
+- Frontend static deploy: `vercel.json`
+- Azure CI/CD templates: `.github/workflows/deploy-staging.yml` and `.github/workflows/deploy-production.yml`
 
-### Requisitos
+## Canonical Package Manager
 
-- Node.js 18+
-- MySQL 8.0+
-- 512MB RAM mínimo
+All install and build commands in this repository use `pnpm`.
 
-### Configuração
+## Local Development
 
-1. Copiar `.env.example` para `.env` e configurar:
+```bash
+pnpm install
+docker compose up -d
+pnpm dev
+```
+
+Services exposed by default:
+
+- Frontend: `http://localhost:5173`
+- Backend API: `http://localhost:3001/api/v1`
+- MySQL: `localhost:3306`
+
+## Environment Variables
+
+### Backend
+
+Required for backend startup outside pure demo mode:
 
 ```env
-# Database (MySQL)
-DB_HOST=<mysql-host>
-DB_PORT=3306
-DB_NAME=efvm360
-DB_USER=<db-user>
-DB_PASSWORD=<db-password>
-DB_SSL=true
-
-# JWT (gerar secrets aleatórios de 64+ chars)
-JWT_SECRET=<random-64-char-string>
-JWT_REFRESH_SECRET=<random-64-char-string>
-
-# Server
+NODE_ENV=development
 PORT=3001
-NODE_ENV=production
 API_PREFIX=/api/v1
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=efvm360_railway
+DB_USER=efvm360_app
+DB_PASSWORD=change-me
+JWT_SECRET=change-me
+JWT_REFRESH_SECRET=change-me
+CORS_ORIGIN=http://localhost:5173
+```
 
-# CORS (URL do frontend)
-CORS_ORIGIN=https://efvm360.vale.com
+Optional code paths:
 
-# Security
+```env
+DB_SSL=false
+JWT_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=7d
 BCRYPT_ROUNDS=12
 RATE_LIMIT_WINDOW_MS=900000
 RATE_LIMIT_MAX=100
 LOGIN_MAX_ATTEMPTS=5
 LOGIN_LOCKOUT_MINUTES=15
-
-# Feature Flags
+APPLICATIONINSIGHTS_CONNECTION_STRING=
+APPINSIGHTS_INSTRUMENTATIONKEY=
+AZURE_KEYVAULT_URL=
+AZURE_AD_TENANT_ID=
+AZURE_AD_CLIENT_ID=
 FEATURE_SSO_AZURE_AD=false
 FEATURE_OFFLINE_MODE=true
 FEATURE_DASHBOARD_BI=true
-
-# Azure (opcional)
-# APPLICATIONINSIGHTS_CONNECTION_STRING=<connection-string>
-# AZURE_AD_TENANT_ID=<tenant-id>
-# AZURE_AD_CLIENT_ID=<client-id>
+FEATURE_AUDIT_SYNC=false
+FRONTEND_URL=http://localhost:5173
 ```
-
-### Instalação
-
-```bash
-cd backend
-npm install
-npm run seed:production   # Primeira vez: cria tabelas + usuários iniciais
-npm start                 # Inicia o servidor
-```
-
-### Credenciais Iniciais
-
-| Matrícula | Senha            | Função        | Ação Necessária          |
-|-----------|------------------|---------------|--------------------------|
-| ADM9001   | EFVM360@Admin!   | Administrador | Trocar senha no 1º login |
-| SUP1001   | EFVM360@Sup!     | Supervisor    | Trocar senha no 1º login |
-
----
-
-## Frontend
-
-### Configuração
-
-1. Criar `.env.production`:
-
-```env
-VITE_API_URL=https://<backend-url>/api/v1
-VITE_SHOW_DEMO_CREDENTIALS=false
-```
-
-### Build
-
-```bash
-cd frontend
-npm install
-npm run build
-```
-
-Os arquivos de produção ficam em `frontend/dist/`.
-
-### Servir
-
-**Opção A: Nginx**
-
-```nginx
-server {
-    listen 80;
-    server_name efvm360.vale.com;
-    root /var/www/efvm360/dist;
-    index index.html;
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    location /api/ {
-        proxy_pass http://localhost:3001;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-```
-
-**Opção B: Vercel**
-
-O frontend pode ser deployado no Vercel apontando para o repositório. Configurar `VITE_API_URL` nas variáveis de ambiente do Vercel.
-
----
-
-## Variáveis de Ambiente
-
-### Backend
-
-| Variável | Descrição | Obrigatório | Default |
-|----------|-----------|-------------|---------|
-| `DB_HOST` | Host do MySQL | Sim | localhost |
-| `DB_PORT` | Porta do MySQL | Não | 3306 |
-| `DB_NAME` | Nome do banco | Sim | efvm360_railway |
-| `DB_USER` | Usuário do banco | Sim | — |
-| `DB_PASSWORD` | Senha do banco | Sim | — |
-| `DB_SSL` | Usar SSL na conexão | Não | false |
-| `JWT_SECRET` | Secret para access tokens | Sim | — |
-| `JWT_REFRESH_SECRET` | Secret para refresh tokens | Sim | — |
-| `PORT` | Porta do servidor | Não | 3001 |
-| `NODE_ENV` | Ambiente (production) | Sim | development |
-| `CORS_ORIGIN` | URLs permitidas (comma-separated) | Sim | localhost |
-| `BCRYPT_ROUNDS` | Rounds de hash bcrypt | Não | 12 |
-| `RATE_LIMIT_MAX` | Max requests por janela | Não | 100 |
 
 ### Frontend
 
-| Variável | Descrição | Obrigatório | Default |
-|----------|-----------|-------------|---------|
-| `VITE_API_URL` | URL da API backend | Sim | /api/v1 |
-| `VITE_SHOW_DEMO_CREDENTIALS` | Mostrar painel de demo no login | Não | false |
-
----
-
-## Arquitetura
-
-```
-                    ┌─────────────┐
-                    │   Browser   │
-                    │  (PWA/SPA)  │
-                    └──────┬──────┘
-                           │ HTTPS
-                    ┌──────▼──────┐
-                    │   Nginx /   │
-                    │   Vercel    │
-                    └──────┬──────┘
-                           │
-              ┌────────────┼────────────┐
-              │                         │
-       ┌──────▼──────┐          ┌──────▼──────┐
-       │  Frontend   │          │   Backend   │
-       │  (static)   │          │  (Express)  │
-       │  dist/      │          │  port 3001  │
-       └─────────────┘          └──────┬──────┘
-                                       │
-                                ┌──────▼──────┐
-                                │   MySQL     │
-                                │   8.0+      │
-                                └─────────────┘
+```env
+VITE_API_URL=http://localhost:3001/api/v1
+VITE_ENV=development
+VITE_SHOW_DEMO_CREDENTIALS=false
+VITE_WS_URL=http://localhost:3001
+VITE_SENTRY_DSN=
+VITE_AZURE_CLIENT_ID=
+VITE_AZURE_TENANT_ID=
+VITE_AZURE_REDIRECT_URI=
 ```
 
-O frontend funciona em dois modos:
-- **Com backend:** dados reais do MySQL
-- **Sem backend:** dados mock locais (demonstração/offline)
+Feature flags are read from `VITE_FEATURE_*` variables when present.
 
----
+## Build Commands
 
-## Verificação
+```bash
+pnpm build
+pnpm --filter @efvm360/frontend build
+pnpm --filter @efvm360/backend build
+```
 
-Após o deploy, verificar:
+Build outputs:
 
-1. `GET /api/v1/health` retorna `{ "status": "healthy" }`
-2. Login com ADM9001 funciona
-3. Dashboard carrega dados (sem badge "Modo Demo")
-4. PWA instala corretamente no mobile
+- Frontend: `frontend/dist`
+- Backend: `backend/dist`
+
+## Vercel
+
+`vercel.json` is configured to:
+
+- install with `pnpm install --frozen-lockfile`
+- build the frontend with `pnpm --filter @efvm360/frontend build`
+- publish `frontend/dist`
+
+This only covers the static frontend. It does not provision the backend API or the database.
+
+## Azure Workflows
+
+The repository includes Azure deployment workflows that assume:
+
+- existing App Service and Static Web Apps resources
+- repository secrets for Azure credentials
+- a reachable backend runtime environment
+
+These workflows are configuration templates until those external prerequisites exist.
+
+## Docker
+
+### Development
+
+```bash
+docker compose up -d
+```
+
+### Production-style backend stack
+
+```bash
+docker compose -f docker-compose.prod.yml up -d
+```
+
+Notes:
+
+- The production-style compose file covers MySQL and backend only.
+- Frontend static hosting is expected to be handled separately.
+
+## Verification Checklist
+
+- `pnpm install`
+- `pnpm lint`
+- `pnpm typecheck`
+- `pnpm test`
+- `pnpm build`
+- `pnpm docs:validate`
+
+If you need deploy evidence beyond configuration, capture it separately in an environment-specific runbook.

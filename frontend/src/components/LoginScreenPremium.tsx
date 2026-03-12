@@ -264,7 +264,7 @@ export const LoginScreenPremium = memo<Props>(({
             </div>
 
             <div style={{ fontSize:10, color:txt2, textAlign:'center', padding:16 }}>
-              © 2026 Gregory Guimaraes — Todos os direitos reservados
+              © 2026 Gregory G. S. Pinto — MIT licensed repository
             </div>
           </>) : (<>
             <div style={{marginBottom:16}}>

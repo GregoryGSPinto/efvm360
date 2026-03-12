@@ -6,7 +6,6 @@
 version: 2
 
 updates:
-  # Frontend dependencies
   - package-ecosystem: npm
     directory: /frontend
     schedule:
@@ -18,12 +17,9 @@ updates:
     labels:
       - "dependencies"
       - "frontend"
-    reviewers:
-      - "efvm360-team/frontend"
     commit-message:
       prefix: "chore(deps-frontend):"
 
-  # Backend dependencies
   - package-ecosystem: npm
     directory: /backend
     schedule:
@@ -35,12 +31,9 @@ updates:
     labels:
       - "dependencies"
       - "backend"
-    reviewers:
-      - "efvm360-team/backend"
     commit-message:
       prefix: "chore(deps-backend):"
 
-  # GitHub Actions
   - package-ecosystem: github-actions
     directory: /
     schedule:

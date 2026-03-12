@@ -597,7 +597,7 @@ export default function App(): JSX.Element {
           <div style={{ maxHeight: '300px', overflow: 'auto', color: tema.textoSecundario, fontSize: '13px', lineHeight: '1.6', marginBottom: '20px', padding: '16px', background: tema.input, borderRadius: '12px' }}>
             <p><strong>EFVM360 — Passagem de Servico Ferroviaria</strong></p>
             <p>Ao utilizar este sistema, voce concorda que seus dados operacionais (nome, matricula, funcao, acoes no sistema) serao registrados para fins de seguranca ferroviaria e auditoria, conforme LGPD (Lei 13.709/2018).</p>
-            <p>Seus direitos: acesso, correcao, portabilidade e anonimizacao dos dados. Contato: dpo@vale.com</p>
+            <p>Seus direitos dependem da politica adotada pelo operador do ambiente. Defina um contato de privacidade no deploy real.</p>
           </div>
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', cursor: 'pointer', color: tema.texto }}>
             <input type="checkbox" checked={mostrarTermos} onChange={(e) => setMostrarTermos(e.target.checked)} style={{ width: '18px', height: '18px' }} />

@@ -3,10 +3,7 @@
 # Uso: docker-compose up -d
 # ============================================================================
 
-version: '3.8'
-
 services:
-  # ── MySQL 8.0 ──────────────────────────────────────────────────────────
   mysql:
     image: mysql:8.0
     container_name: efvm360-mysql
@@ -32,16 +29,14 @@ services:
       timeout: 5s
       retries: 5
 
-  # ── Backend API ────────────────────────────────────────────────────────
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
       target: builder
     container_name: efvm360-backend
     restart: unless-stopped
-    # Override production CMD with dev server (hot reload)
-    command: ["npx", "ts-node-dev", "--respawn", "--transpile-only", "src/server.ts"]
+    command: ["pnpm", "dev"]
     ports:
       - "3001:3001"
     environment:
@@ -65,23 +60,21 @@ services:
       start_period: 40s
       retries: 3
     volumes:
-      - ./backend/src:/app/src
-      - ./backend/tsconfig.json:/app/tsconfig.json
+      - ./backend:/app/backend
 
-  # ── Frontend (Vite dev) ────────────────────────────────────────────────
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: frontend/Dockerfile
     container_name: efvm360-frontend
     restart: unless-stopped
     ports:
-      - "5173:3000"
+      - "5173:5173"
     environment:
       VITE_API_URL: http://localhost:3001/api/v1
       VITE_ENV: development
     volumes:
-      - ./frontend/src:/app/src
+      - ./frontend:/app/frontend
     depends_on:
       - backend
 

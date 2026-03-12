@@ -36,7 +36,7 @@ router.get('/meus-dados', async (req: Request, res: Response) => {
       },
       baseLegal: 'Execução contratual e obrigação legal/regulatória',
       retencao: 'Dados de perfil: ativo + 5 anos. Registros operacionais: 5 anos.',
-      dpo: 'dpo@vale.com',
+      dpo: 'configure-your-privacy-contact@example.com',
     };
 
     res.json({
@@ -97,7 +97,7 @@ router.post('/anonimizar', async (req: Request, res: Response) => {
       mensagem: 'Sua solicitação de anonimização foi registrada. Dados de identificação serão anonimizados em até 15 dias. Registros operacionais serão preservados conforme obrigação legal (regulamentação ferroviária).',
       protocolo: `LGPD-${Date.now()}`,
       prazo: '15 dias úteis',
-      contato: 'dpo@vale.com',
+      contato: 'configure-your-privacy-contact@example.com',
     });
   } catch (error) {
     res.status(500).json({ erro: 'Erro ao processar solicitação' });
@@ -109,8 +109,8 @@ router.post('/anonimizar', async (req: Request, res: Response) => {
 router.get('/politica', (_req: Request, res: Response) => {
   res.json({
     sistema: 'EFVM360 — Gestão de Troca de Turno Ferroviária',
-    controlador: 'Vale S.A.',
-    dpo: 'dpo@vale.com',
+    controlador: 'Operador do ambiente onde o sistema foi implantado',
+    dpo: 'configure-your-privacy-contact@example.com',
     finalidade: 'Registro e controle de trocas de turno ferroviário para segurança operacional',
     baseLegal: [
       'Execução de contrato de trabalho (Art. 7, V)',
@@ -129,7 +129,7 @@ router.get('/politica', (_req: Request, res: Response) => {
       registrosOperacionais: '5 anos (regulamentação ferroviária)',
       logsAcesso: '90 dias',
     },
-    direitos: 'Acesso, correção, portabilidade e anonimização via menu Configurações ou dpo@vale.com',
+    direitos: 'Acesso, correção, portabilidade e anonimização via os canais definidos pelo operador do ambiente',
   });
 });
 

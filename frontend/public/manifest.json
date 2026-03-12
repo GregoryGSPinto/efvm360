@@ -1,7 +1,7 @@
 {
   "name": "EFVM360 — Gestão de Troca de Turno Ferroviária",
   "short_name": "EFVM360",
-  "description": "Sistema digital de gestão de troca de turno — Estrada de Ferro Vitória a Minas — Vale S.A.",
+  "description": "Case study independente para gestão digital de troca de turno ferroviária.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#121212",

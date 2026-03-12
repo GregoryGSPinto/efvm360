@@ -75,7 +75,7 @@ async function generatePDFReport(
   doc.text('Advanced Analytics Report', margin, 26);
 
   doc.setFontSize(9);
-  doc.text(`Estrada de Ferro Vitoria a Minas — Vale S.A.`, margin, 34);
+  doc.text('Independent portfolio case study', margin, 34);
 
   // Date range
   doc.setFontSize(9);

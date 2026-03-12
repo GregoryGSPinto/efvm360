@@ -6,7 +6,6 @@
 # ============================================================================
 
 services:
-  # ── MySQL 8.0 ──────────────────────────────────────────────────────────
   mysql:
     image: mysql:8.0
     container_name: efvm360-mysql-prod
@@ -44,11 +43,10 @@ services:
         limits:
           memory: 1G
 
-  # ── Backend API ────────────────────────────────────────────────────────
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
       target: production
     container_name: efvm360-backend-prod
     restart: unless-stopped

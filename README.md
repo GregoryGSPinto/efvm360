@@ -1,295 +1,194 @@
-# EFVM360 — Enterprise Railway Operations Management
+# EFVM360
 
-> **Portfolio Project** — This is an independent case study demonstrating enterprise architecture for railway operations. Built as a technical portfolio piece targeting the EFVM railway corridor. Not commissioned by or affiliated with Vale S.A.
+Independent portfolio case study for digital shift handover and yard operations. The repository contains a React/Vite frontend, an Express/Sequelize backend, Playwright end-to-end tests, and supporting docs for audit, demo, and deployment review. It is not an official system, not a production service, and not affiliated with any railway operator.
 
-<div align="center">
+## Executive Summary
 
-**Enterprise Railway Operations Platform** · Portfolio Case Study
+EFVM360 addresses a real operational problem: shift handover data is often fragmented, delayed, or lost when teams rely on paper or disconnected spreadsheets. This repository demonstrates a technical approach for replacing that flow with a web application that can run in local/offline mode, optionally connect to an API, and expose enough engineering surface to evaluate architecture, testing, and release discipline.
 
-Digital platform for railway shift handover, yard management, operational safety, and real-time decision support.
+## Why This Project Matters
 
-[![Build](https://github.com/GregoryGSPinto/efvm360/actions/workflows/ci.yml/badge.svg)](https://github.com/GregoryGSPinto/efvm360/actions)
-[![Tests](https://img.shields.io/badge/tests-451%20passing-brightgreen)]()
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)]()
-[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)]()
-[![License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+- It shows a non-trivial frontend with domain-oriented modules, offline persistence, and role-aware workflows.
+- It shows a backend with authentication, RBAC, validation, observability hooks, and an expanding route surface.
+- It exposes the gap between architecture intent and current integration status instead of hiding it.
 
-</div>
+## Business Problem
 
----
+Shift handover in industrial operations needs structured records, traceability, and predictable access to the latest operating context. The failure mode is usually not a missing dashboard; it is inconsistent operational context at the moment of a handoff.
 
-## The Problem
+## Solution Scope
 
-Railway shift handovers at the main railway yard relied on paper forms — creating data loss, delayed communication, and safety blind spots across 24/7 operations. Inspectors, operators, and managers had no unified view of yard status, equipment condition, or risk posture during critical transitions.
+Implemented in code today:
+- Browser UI for login, registration, handover entry, DSS, dashboards, risk grades, inter-yard flow, approvals, settings, support, history, and admin/business views.
+- Express API for auth, passagens, audit, patios, LGPD, workflows, analytics, inter-yard operations, compositions, equipment, risk grades, metrics, and webhooks.
+- Offline-capable frontend state using local storage and IndexedDB-backed sync components.
 
-## The Solution
+Documented architecture intent:
+- Full online/offline convergence between frontend CRUD flows and backend persistence.
+- Azure-based production deployment with App Service, Static Web Apps, Key Vault, and optional Entra ID.
 
-EFVM360 replaces physical handover forms with an integrated digital platform covering the entire operational lifecycle: shift transitions, yard layout management, equipment tracking, risk assessment, BI dashboards, and an AI assistant for real-time operational guidance — all designed for field use on mobile devices with unreliable connectivity.
+## Current Maturity Snapshot
 
----
+- Package manager: `pnpm`
+- Workspace packages: `frontend`, `backend`, `e2e`
+- Local development: implemented
+- CI workflow: implemented
+- Frontend-only deploy config: implemented in `vercel.json`
+- Azure deploy workflows: configured, not verified from this repository alone
+- Frontend/backend feature parity: partial
 
-## Architecture
+## What Is Working Today
 
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│                        EFVM360 Platform                              │
-├──────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│  ┌─ Frontend (React + TypeScript + Vite) ─────────────────────────┐  │
-│  │                                                                 │  │
-│  │  11 Pages (lazy) · 22 Hooks · 20+ Components · DDD Domain      │  │
-│  │                                                                 │  │
-│  │  ┌─────────┐ ┌──────────┐ ┌───────────┐ ┌──────────────────┐   │  │
-│  │  │ Domain  │ │ App Layer│ │  Infra    │ │   UI / Pages     │   │  │
-│  │  │         │ │          │ │           │ │                  │   │  │
-│  │  │ 5 Aggr. │ │ UseCases │ │ IndexedDB │ │ Passagem · BI+   │   │  │
-│  │  │ Events  │ │ Services │ │ API Client│ │ Layout · Riscos  │   │  │
-│  │  │ Contracts│ │ Handlers│ │ Security  │ │ Equip. · Gestão  │   │  │
-│  │  └─────────┘ └──────────┘ └───────────┘ └──────────────────┘   │  │
-│  │                                                                 │  │
-│  │  AdamBot AI Assistant (10 modules · voice · STT · memory)       │  │
-│  └─────────────────────────────────────────────────────────────────┘  │
-│                                                                      │
-│  ┌─ Backend (Express + TypeScript + Sequelize) ───────────────────┐  │
-│  │  12 Controllers · 8 Models · Auth + RBAC + Audit               │  │
-│  │  JWT · bcrypt · HMAC SHA-256 · Rate Limiting · LGPD            │  │
-│  └─────────────────────────────────────────────────────────────────┘  │
-│                                                                      │
-│  ┌─ Data ─────────────────────────────────────────────────────────┐  │
-│  │  MySQL 8.0 (Azure Flexible Server)                             │  │
-│  │  8 tables · Event Sourcing · SHA-256 Hash Chain Audit Trail    │  │
-│  └─────────────────────────────────────────────────────────────────┘  │
-│                                                                      │
-│  ┌─ Infrastructure ───────────────────────────────────────────────┐  │
-│  │  Azure Bicep IaC · GitHub Actions CI/CD · Docker Compose       │  │
-│  │  App Insights Monitoring · Key Vault · Blue/Green Deploy       │  │
-│  └─────────────────────────────────────────────────────────────────┘  │
-└──────────────────────────────────────────────────────────────────────┘
-```
+- Frontend can run locally in demo/offline mode without backend connectivity.
+- Backend builds and exposes a broad `/api/v1` route surface with middleware, validators, and tests.
+- Unit/integration test suites exist for frontend and backend, plus Playwright specs and k6 scenarios.
+- Docker Compose files exist for local development and a backend-focused production-style stack.
 
-### Domain-Driven Design
+## Current Implementation Status
 
-The frontend implements a pure domain layer following DDD, CQRS, and Event Sourcing patterns:
+- Frontend: substantial UI surface implemented.
+- Backend: substantial API surface implemented.
+- Frontend-to-backend integration: partial. Several frontend flows still use local persistence even when equivalent backend endpoints exist.
+- Enterprise controls: partial. Security middleware and optional Azure integrations exist, but production readiness depends on environment-specific setup outside the repo.
 
-| Layer | Contents |
-|-------|----------|
-| **Domain** | 5 Aggregates (ServicePass, YardCondition, OperationalEvent, SafetyProtocol, ShiftCrew) · Domain Events · Value Objects · Contracts |
-| **Application** | Use Cases · Event Handlers · Command/Query separation |
-| **Infrastructure** | IndexedDB persistence · API client · Security services · Offline sync |
-| **UI** | 11 page modules · 22 custom hooks · Reusable component library |
+## Architecture Overview
 
----
+The repo is a `pnpm` workspace with three packages:
 
-## Features
+- `frontend`: React 18, TypeScript, Vite, Vitest, PWA plugin, local/offline persistence helpers.
+- `backend`: Express, TypeScript, Sequelize, MySQL driver, Jest, Swagger setup, Socket.IO.
+- `e2e`: Playwright specs targeting the frontend.
 
-### Shift Handover (Passagem de Serviço)
-Digital form replacing paper-based handover with 12 sections: header, upper/lower yard status, layout/switches, attention points, VP interventions, equipment, 5S inspection, safety protocols, previous shift notes, audit trail, and signatures.
+Supporting assets:
 
-### Yard Layout Management
-Multi-patio support with configurable yard locations, full CRUD for track lines, categories, and AMV (Automated Switch) positions. Auto-provisioning with realistic seed data for the primary yard.
+- `docs/`: audit, implementation, evidence, readiness, and setup references.
+- `load-tests/`: k6 scenarios.
+- `.github/workflows/`: CI, deployment, and security scan workflows.
+- `docker-compose*.yml`: local and production-style container orchestration.
 
-### Operational Risk Assessment
-5×5 probability × impact risk matrix aligned with NR-01 standards and industry safety-first principles. Full CRUD for risk grades with mitigation measures, severity classification, and KPI dashboard.
+## Frontend
 
-### Equipment Management
-Categorized equipment inventory (Communication, Signaling, Safety, Measurement, Tools, PPE) with criticality levels, minimum quantities per shift, and inline management within handover forms.
+Implemented in code:
+- Route constants and lazy-loaded page modules for login, cadastro, dashboard views, passagem, DSS, composicoes, inter-yard, approvals, profile, settings, support, landing, help, and admin/business.
+- Domain-oriented code under `frontend/src/domain`, application use cases, and persistence/observability helpers.
+- PWA build configuration through `vite-plugin-pwa` with a custom service worker source file.
 
-### BI+ Dashboard
-Operational intelligence with KPIs answering questions like "Which track gives me the most trouble?" and "What's our yard occupancy trend?" — designed as support, not surveillance.
+Partial or conditional:
+- Online mode depends on `VITE_API_URL`.
+- Azure/Entra login code exists behind environment configuration and feature flags.
+- Some "AI" and analytics UI components are present, but they are not evidence of a production AI service.
 
-### AdamBot AI Assistant
-10-module AI system with voice input/output, speech-to-text, conversation memory, audit trail, and proactive notifications. Draggable floating interface with offline capability.
+## Backend
 
-### 5S Workplace Organization
-Digital 5S inspection aligned with industry standards for railway yard operations.
+Implemented in code:
+- API routes under `backend/src/routes/index.ts`.
+- Controllers, migrations, models, middleware, WebSocket initialization, Swagger setup, and seed scripts.
+- JWT-based auth, RBAC middleware, request validation, telemetry hooks, and LGPD endpoints.
 
----
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 18 · TypeScript 5 · Vite · pnpm |
-| State | Custom hooks · IndexedDB (offline-first) · localStorage |
-| Backend | Express · TypeScript · Sequelize ORM |
-| Database | MySQL 8.0 (Azure Flexible Server) |
-| Auth | JWT + Refresh Token · bcrypt · Azure AD SSO (PKCE) |
-| Security | HMAC SHA-256 integrity chain · RBAC (4 roles) · Rate limiting · LGPD compliance |
-| Infrastructure | Azure App Service · Static Web Apps · Key Vault · Bicep IaC |
-| CI/CD | GitHub Actions (4 workflows) · Blue/green deploy · Dependabot |
-| Monitoring | Azure Application Insights · KQL dashboards |
-| Testing | Vitest (unit) · Playwright (E2E) · k6 (load) |
-| Design | Glassmorphism · Corporate green/yellow · Dark/light theme · Mobile-first |
-
----
-
-## Project Structure
-
-```
-efvm360/
-├── frontend/                          # React + TypeScript + Vite
-│   ├── src/
-│   │   ├── domain/                    # Pure DDD domain layer
-│   │   │   ├── aggregates/            # 5 aggregate roots
-│   │   │   ├── events/                # Domain events (CQRS)
-│   │   │   ├── value-objects/         # Immutable value types
-│   │   │   └── contracts/             # Interface contracts
-│   │   ├── application/               # Use cases + event handlers
-│   │   ├── infrastructure/            # IndexedDB, API, security
-│   │   ├── pages/                     # 11 lazy-loaded pages
-│   │   │   ├── dashboard/             # Main operational dashboard
-│   │   │   ├── passagem/              # Shift handover form (12 sections)
-│   │   │   ├── analytics/             # BI+ dashboard
-│   │   │   ├── layout-patio/          # Yard layout management
-│   │   │   ├── graus-risco/           # Risk assessment (5×5 matrix)
-│   │   │   ├── equipamentos/          # Equipment management
-│   │   │   ├── gestao/                # Team management
-│   │   │   ├── historico/             # Shift history
-│   │   │   ├── perfil/                # User profile
-│   │   │   ├── configuracoes/         # Settings
-│   │   │   └── suporte/               # Support
-│   │   ├── hooks/                     # 22 custom hooks
-│   │   ├── components/                # Reusable UI + AdamBot (10 modules)
-│   │   ├── services/                  # Security, validation, logging
-│   │   ├── api/                       # API client + DTOs
-│   │   ├── router/                    # Route definitions
-│   │   ├── styles/                    # Theme system (glassmorphism)
-│   │   ├── utils/                     # Constants, helpers
-│   │   └── types/                     # TypeScript interfaces
-│   ├── __tests__/                     # 277 unit tests (Vitest)
-│   └── public/                        # PWA assets (sw.js, manifest.json)
-│
-├── backend/                           # Express + TypeScript + Sequelize
-│   ├── src/
-│   │   ├── controllers/               # 12 controllers
-│   │   ├── models/                    # 8 Sequelize models
-│   │   ├── middleware/                # Auth, Azure AD, security, rate limiting
-│   │   ├── services/                  # Monitoring, Key Vault
-│   │   ├── routes/                    # API routes
-│   │   └── migrations/                # Schema + seed data
-│   ├── __tests__/                     # Unit + integration tests (Jest)
-│   └── Dockerfile
-│
-├── e2e/                               # End-to-end tests (Playwright)
-├── load-tests/                        # Performance scenarios (k6)
-├── infra/                             # Azure Bicep IaC modules
-├── docs/                              # Enterprise documentation
-│   ├── ARCHITECTURE.md                # C4 diagrams + ADRs + NFRs
-│   ├── MANUAL_USUARIO.md              # User manual
-│   ├── RUNBOOK.md                     # Operational runbook
-│   ├── MONITORING.md                  # App Insights + KQL
-│   ├── LGPD_COMPLIANCE.md             # Data protection compliance
-│   └── WCAG_CHECKLIST.md              # Accessibility (WCAG 2.1 AA)
-├── .github/workflows/                 # CI/CD pipelines
-└── docker-compose.yml                 # Full stack local environment
-```
-
----
-
-## Quick Start
-
-```bash
-# Prerequisites: Node.js 18+, pnpm, Docker
-
-# Full stack (recommended)
-docker-compose up -d
-# → Frontend: http://localhost:5173
-# → Backend:  http://localhost:3001
-
-# Frontend only
-cd frontend && pnpm install && pnpm dev
-
-# Backend only
-cd backend && npm install && npm run dev
-
-# Database seed
-cd backend && npm run migrate && npm run migrate:seed
-```
-
-### Default Users
-
-| Role | Matrícula | Credentials |
-|------|-----------|-------------|
-| Gestor (Manager) | demo-admin | System admin |
-| Inspetor (Inspector) | demo-inspector | Yard inspector |
-| Maquinista (Operator) | demo-operator | Train operator |
-| Oficial (Officer) | demo-officer | Operations officer |
-
----
-
-## Testing
-
-| Layer | Framework | Count | Command |
-|-------|-----------|-------|---------|
-| Frontend Unit | Vitest + jsdom | 277 | `cd frontend && pnpm test` |
-| Backend Unit | Jest + SQLite | 74+ | `cd backend && npm test` |
-| E2E | Playwright | 25 | `cd e2e && npx playwright test` |
-| Load | k6 | 5 scenarios | `cd load-tests && ./run.sh` |
-
----
+Partial or conditional:
+- Real deployment depends on MySQL and secrets that are not available from the repository alone.
+- Some routes are broader than the current frontend integration layer actually uses.
 
 ## Security
 
-- **Authentication:** JWT + refresh token rotation + Azure AD SSO (PKCE)
-- **Authorization:** RBAC with 4 hierarchical roles (gestor → inspetor → maquinista → oficial)
-- **Integrity:** SHA-256 hash chain on audit trail (event sourcing)
-- **Anti-tampering:** HMAC session verification + device fingerprint
-- **Data protection:** LGPD-compliant with data subject rights API
-- **Infrastructure:** Azure Key Vault for secrets, rate limiting, CORS/Helmet
+Implemented in code:
+- JWT auth and refresh flow support.
+- RBAC middleware and route-level authorization.
+- `helmet`, CORS controls, rate limiting, request IDs, body sanitization, and validation middleware.
+- Optional Azure Key Vault and Application Insights integration points.
 
----
+Not claimed:
+- No verified compliance certification.
+- No evidence in this repo alone of live production hardening, managed secrets rotation, or audited uptime.
 
-## Offline-First Architecture
+## Reliability / Offline / Performance
 
-Designed for railway environments with unreliable connectivity:
+Implemented in code:
+- IndexedDB/local storage persistence helpers.
+- Custom service worker source and PWA configuration.
+- WebSocket client/server code paths.
+- k6 scenario files for load experiments.
 
-- **IndexedDB** for local persistence and queue management
-- **Service Worker** for offline page caching (PWA)
-- **Exponential backoff with jitter** for retry logic
-- **Conflict detection and resolution** for concurrent operations
-- **Automatic sync** when connectivity is restored
+Partial:
+- The offline-to-server reconciliation story is not fully wired through all frontend CRUD modules.
+- Performance budgets are not enforced uniformly outside CI.
 
----
+## Testing Strategy
 
-## Deploy
+- Frontend: Vitest suites under `frontend/__tests__`.
+- Backend: Jest suites under `backend/__tests__`.
+- E2E: Playwright specs under `e2e/specs`.
+- Load: k6 scenarios under `load-tests/scenarios`.
+
+Current evidence is documented in [TECHNICAL_EVIDENCE.md](./docs/TECHNICAL_EVIDENCE.md) and [REPOSITORY_FACTS.md](./docs/REPOSITORY_FACTS.md).
+
+## Technical Highlights Backed By Code
+
+- Offline persistence helpers in `frontend/src/infrastructure/persistence` and `frontend/src/services`.
+- Route and middleware surface in `backend/src/routes` and `backend/src/middleware`.
+- Swagger bootstrap in `backend/src/config/swagger.ts`.
+- WebSocket support in `backend/src/services/websocket.ts`.
+- CI workflow and generated repository facts validation in `.github/workflows/ci.yml` and `scripts/repo-facts.mjs`.
+
+## Developer Experience
+
+Canonical commands:
 
 ```bash
-# Azure (Infrastructure as Code)
-az deployment sub create \
-  --template-file infra/bicep/main.bicep \
-  --parameters @infra/bicep/parameters/production.json \
-  dbAdminPassword=<SECRET> jwtSecret=$(openssl rand -base64 64)
-
-# CI/CD: push to main → staging auto-deploy → smoke test → blue/green swap to production
+pnpm install
+pnpm dev
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm e2e
+pnpm verify
 ```
 
----
+## Deployment
+
+Configured in repository:
+- `vercel.json` for frontend static output.
+- Azure GitHub Actions workflows for staging and production.
+- Dockerfiles for frontend and backend.
+- `docker-compose.yml` for local stack orchestration.
+
+Important limitation:
+- These deployment assets are configuration templates until the required secrets, cloud resources, and runtime infrastructure are provisioned externally.
 
 ## Documentation
 
-| Document | Description |
-|----------|------------|
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | C4 diagrams, ADRs, NFRs |
-| [MANUAL_USUARIO.md](docs/MANUAL_USUARIO.md) | End-user manual (PT-BR) |
-| [RUNBOOK.md](docs/RUNBOOK.md) | Incident response, backup, maintenance |
-| [MONITORING.md](docs/MONITORING.md) | App Insights + KQL dashboards |
-| [LGPD_COMPLIANCE.md](docs/LGPD_COMPLIANCE.md) | Data protection compliance |
-| [WCAG_CHECKLIST.md](docs/WCAG_CHECKLIST.md) | Accessibility audit (WCAG 2.1 AA) |
+- [Implementation status](./docs/IMPLEMENTATION_STATUS.md)
+- [Technical evidence](./docs/TECHNICAL_EVIDENCE.md)
+- [Enterprise readiness](./docs/ENTERPRISE_READINESS.md)
+- [Demo script](./docs/DEMO_SCRIPT.md)
+- [Truth matrix](./docs/TRUTH_MATRIX.md)
+- [Repository facts](./docs/REPOSITORY_FACTS.md)
+- [Architecture](./docs/ARCHITECTURE.md)
+- [Deployment guide](./DEPLOY.md)
+- [Contribution guide](./CONTRIBUTING.md)
 
----
+## Limitations and Known Gaps
 
-## Author
+- Frontend online mode is incomplete relative to backend capability.
+- `pnpm lint` currently fails because the frontend has pre-existing ESLint violations in source and tests.
+- `pnpm test` currently fails in the backend under this execution environment because several Jest/Supertest suites attempt to bind to `0.0.0.0`, which returns `EPERM` here.
+- Several historical docs in the repository were written as planning or audit notes and have been reduced to non-canonical references to avoid unsupported claims.
+- Azure-specific features are optional and not verifiable without external tenant and secret configuration.
+- No live production environment is proven by the repository alone.
 
-**Gregory G. S. Pinto** — UX/UI & AI Specialist · Solution Architect
+## Roadmap With Priority Order
 
-Architecture, design, and implementation of enterprise railway operations management platform for Brazilian railway operations.
+1. Connect frontend CRUD flows to the existing backend where endpoints already exist.
+2. Consolidate duplicate sync implementations into one documented path.
+3. Expand automated validation to cover E2E startup orchestration and deployment smoke tests.
+4. Reduce historical/deprecated documentation and keep generated facts as the numeric source of truth.
+5. Add evidence for observability and release rollback in a real environment if this evolves beyond portfolio scope.
 
----
+## Commercial & Legal Positioning
 
-<div align="center">
+This repository is published as an independent technical case study. The code is MIT-licensed, but the repository does not represent a commercial service offering, customer deployment, support agreement, or institutional partnership.
 
-*Built for safety-critical railway operations — "Life First" (A Vida em Primeiro Lugar)*
+## Disclaimer / Portfolio Positioning
 
-Portfolio project demonstrating enterprise railway operations architecture
-
-</div>
+Use this repository as engineering evidence, not as proof of a production rollout. Where the docs say "implemented", the feature exists in code. Where the docs say "partial", some code exists but the end-to-end workflow is incomplete. Where the docs say "roadmap" or "intent", it is architectural direction only.

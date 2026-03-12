@@ -958,7 +958,7 @@ export const PaginaDSS: React.FC<PaginaDSSProps> = ({ tema, styles, onVoltar, su
         marginBottom: '16px',
       }}>
         <div style={{ fontSize: '10px', color: tema.textoSecundario, fontStyle: 'italic' }}>
-          ℹ️ Este registro serve como apoio operacional. Não substitui o registro oficial no ValeForms.
+          ℹ️ Este registro serve como apoio operacional. Não substitui eventuais registros oficiais exigidos pelo operador do ambiente.
         </div>
       </div>
 

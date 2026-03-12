@@ -1,9 +1,10 @@
 {
-  "installCommand": "cd frontend && npm install --legacy-peer-deps",
-  "buildCommand": "cd frontend && VITE_SHOW_DEMO_CREDENTIALS=true VITE_ENV=production npm run build",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm --filter @efvm360/frontend build",
   "outputDirectory": "frontend/dist",
   "framework": "vite",
   "env": {
+    "VITE_ENV": "production",
     "VITE_SHOW_DEMO_CREDENTIALS": "true"
   },
   "rewrites": [
