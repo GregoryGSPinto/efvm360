@@ -12,12 +12,16 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import './i18n';
 import { migrateStorageKeys } from './utils/constants';
 import { inicializarCaptura } from './services/ErrorReportService';
+import { syncEngine } from './services/syncEngine';
 
 // Migracao de storage ANTES do React renderizar (vfz-* → efvm360-*)
 migrateStorageKeys();
 
 // Inicializar captura global de erros
 inicializarCaptura();
+
+// Inicializar sync engine para offline-first
+syncEngine.start();
 
 // ── Service Worker Registration ──────────────────────────────────────────
 

@@ -88,7 +88,7 @@ export interface PaginaPassagemProps {
   atualizarIntervencao: (campo: string, valor: unknown) => void;
   atualizarEquipamento: (index: number, campo: string, valor: unknown) => void;
   atualizarPontosAtencao: (valor: string) => void;
-  salvarPassagem: () => boolean;
+  salvarPassagem: () => Promise<boolean> | boolean;
   setDadosFormulario: React.Dispatch<React.SetStateAction<DadosFormulario>>;
   // DSS
   temaDSSAnterior?: string;

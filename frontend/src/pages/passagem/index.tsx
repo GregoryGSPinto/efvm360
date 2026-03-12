@@ -3034,16 +3034,18 @@ SEGURANÇA EM MANOBRAS
               cursor: podeAssinar ? 'pointer' : 'not-allowed',
               boxShadow: podeAssinar ? `0 6px 20px ${tema.sucesso}40` : 'none',
             }}
-            onClick={() => {
+            onClick={async () => {
               if (podeAssinar) {
-                // Salvar passagem
-                salvarPassagem();
+                // Salvar passagem (agora async)
+                const sucesso = await salvarPassagem();
                 
-                // Mostrar confirmação e fazer logout
-                setTimeout(() => {
+                if (sucesso) {
+                  // Mostrar confirmação e fazer logout
                   alert('✅ Troca de Turno salva com sucesso!\n\nVocê será redirecionado para a tela de login.');
                   realizarLogout();
-                }, 300);
+                } else {
+                  alert('⚠️ Erro ao salvar passagem. Tente novamente.');
+                }
               } else {
                 alert('⚠️ Resolva os campos pendentes antes de finalizar:\n\n• ' + errosAssinatura.join('\n• '));
               }

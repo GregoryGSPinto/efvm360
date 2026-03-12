@@ -1,9 +1,9 @@
 // ============================================================================
-// GESTÃO DE TROCA DE TURNO – EFVM360
-// Hook do Formulário de Troca de Turno
+// GESTÃO DE TROCA DE TURNO – EFVM360 v3.3
+// Hook do Formulário de Troca de Turno — AGORA COM INTEGRAÇÃO BACKEND
 // ============================================================================
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import type {
   DadosFormulario,
   LinhaPatio,
@@ -19,11 +19,15 @@ import {
   EQUIPAMENTOS_PADRAO,
   STATUS_LINHA,
 } from '../utils/constants';
+import { api } from '../api/client';
+import { syncEngine } from '../services/syncEngine';
+import type { PassagemCreateDTO } from '../api/contracts';
 
 // Chaves de storage
 const STORAGE_KEYS = {
   HISTORICO: 'efvm360-historico-turnos',
   RASCUNHO: 'efvm360-rascunho-atual',
+  PASSAGEM_UUID: 'efvm360-passagem-uuid',
 } as const;
 
 // Estado inicial do formulário
@@ -121,8 +125,8 @@ const criarEstadoInicial = (): DadosFormulario => ({
   },
 });
 
-// Carrega histórico do localStorage
-const carregarHistorico = (): RegistroHistorico[] => {
+// Carrega histórico do localStorage (fallback offline)
+const carregarHistoricoLocal = (): RegistroHistorico[] => {
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.HISTORICO);
     return saved ? JSON.parse(saved) : [];
@@ -141,12 +145,67 @@ const carregarRascunho = (): DadosFormulario | null => {
   }
 };
 
+// Converte dados do formulário para formato da API
+const converterParaAPIDTO = (dados: DadosFormulario, uuid?: string): PassagemCreateDTO & { uuid?: string } => {
+  // Mapeia linhas do pátio para o formato da API
+  const mapLinhaPatio = (linha: LinhaPatio, index: number) => ({
+    numero: index + 1,
+    status: linha.status as 'livre' | 'ocupada' | 'interditada',
+    trem: linha.prefixo || undefined,
+    observacao: linha.descricao || undefined,
+    motivo: linha.vagoes || undefined,
+  });
+
+  // Mapeia equipamentos para o formato da API
+  const mapEquipamento = (eq: { nome: string; quantidade: number; emCondicoes: boolean; observacao: string }) => ({
+    nome: eq.nome,
+    condicao: eq.emCondicoes ? 'operacional' as const : eq.quantidade > 0 ? 'parcial' as const : 'inoperante' as const,
+    observacao: eq.observacao || undefined,
+  });
+
+  return {
+    ...(uuid ? { uuid } : {}),
+    cabecalho: {
+      data: dados.cabecalho.data,
+      turno: dados.cabecalho.turno,
+      horario: dados.cabecalho.horario,
+      matriculaEntra: dados.assinaturas.entra.matricula,
+      matriculaSai: dados.assinaturas.sai.matricula,
+      dssAbordado: dados.cabecalho.dss,
+      observacaoGeral: dados.pontosAtencao.join('\n') || undefined,
+    },
+    patioCima: dados.patioCima.map(mapLinhaPatio),
+    patioBaixo: dados.patioBaixo.map(mapLinhaPatio),
+    seguranca: {
+      houveManobras: dados.segurancaManobras.houveManobras.resposta === true,
+      tipoManobra: dados.segurancaManobras.tipoManobra || undefined,
+      freiOk: dados.segurancaManobras.freiosVerificados.resposta === true,
+      restricaoAtiva: dados.segurancaManobras.restricaoAtiva.resposta === true,
+      tipoRestricao: dados.segurancaManobras.restricaoTipo || undefined,
+      comunicacaoCCO: dados.segurancaManobras.comunicacao.ccoCpt,
+      comunicacaoOOF: dados.segurancaManobras.comunicacao.oof,
+    },
+    equipamentos: dados.equipamentos.map(mapEquipamento),
+    pontosAtencao: dados.pontosAtencao,
+    assinaturaHMAC: `${dados.assinaturas.sai.hashIntegridade || ''}:${dados.assinaturas.entra.hashIntegridade || ''}`,
+  };
+};
+
+
+
 interface UseFormularioReturn {
   dadosFormulario: DadosFormulario;
   historicoTurnos: RegistroHistorico[];
   turnoAnterior: RegistroHistorico | null;
   modoEdicao: boolean;
   setModoEdicao: (modo: boolean) => void;
+  // Estados de UI
+  isLoading: boolean;
+  isSaving: boolean;
+  saveError: string | null;
+  isOnline: boolean;
+  pendingSync: number;
+  // Ações
   atualizarCabecalho: (campo: keyof DadosFormulario['cabecalho'], valor: string) => void;
   atualizarLinhaPatio: (
     patio: string,
@@ -177,10 +236,13 @@ interface UseFormularioReturn {
     campo: string,
     valor: boolean | null | string | Record<string, boolean>
   ) => void;
-  salvarPassagem: () => boolean;
+  salvarPassagem: () => Promise<boolean>;
   limparFormulario: () => void;
   carregarTurno: (registro: RegistroHistorico) => void;
   setDadosFormulario: React.Dispatch<React.SetStateAction<DadosFormulario>>;
+  // Novos métodos
+  recarregarHistorico: () => Promise<void>;
+  sincronizarPendentes: () => Promise<void>;
 }
 
 export function useFormulario(): UseFormularioReturn {
@@ -190,15 +252,57 @@ export function useFormulario(): UseFormularioReturn {
     return rascunho || criarEstadoInicial();
   });
   
-  const [historicoTurnos, setHistoricoTurnos] = useState<RegistroHistorico[]>(carregarHistorico);
+  const [historicoTurnos, setHistoricoTurnos] = useState<RegistroHistorico[]>(carregarHistoricoLocal);
   const [modoEdicao, setModoEdicao] = useState(false);
+  
+  // Estados de UI
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [pendingSync, setPendingSync] = useState(0);
+
+  // Ref para controlar se já carregou do backend
+  const loadedFromBackend = useRef(false);
+
+  // Atualiza status online
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // Carrega histórico do backend quando online
+  useEffect(() => {
+    if (isOnline && !loadedFromBackend.current) {
+      recarregarHistorico();
+    }
+  }, [isOnline]);
+
+  // Atualiza contador de pending sync
+  useEffect(() => {
+    const updatePending = async () => {
+      const status = await syncEngine.getState();
+      setPendingSync(status.pendingCount);
+    };
+    updatePending();
+    const interval = setInterval(updatePending, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Salva rascunho automaticamente
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.RASCUNHO, JSON.stringify(dadosFormulario));
   }, [dadosFormulario]);
 
-  // Persiste histórico no localStorage
+  // Persiste histórico no localStorage (fallback)
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.HISTORICO, JSON.stringify(historicoTurnos));
   }, [historicoTurnos]);
@@ -207,6 +311,39 @@ export function useFormulario(): UseFormularioReturn {
   const turnoAnterior = useMemo<RegistroHistorico | null>(() => {
     return historicoTurnos.length > 0 ? historicoTurnos[0] : null;
   }, [historicoTurnos]);
+
+  // Carrega histórico do backend
+  const recarregarHistorico = useCallback(async () => {
+    if (!isOnline) return;
+    
+    setIsLoading(true);
+    try {
+      const response = await api.listarPassagens({ limit: 50 });
+      // Nota: A API retorna { passagens, total }, precisamos adaptar
+      if (response && 'passagens' in response) {
+        // Converter formato da API para formato interno se necessário
+        // Por ora, mantemos o histórico local como fallback
+        loadedFromBackend.current = true;
+      }
+    } catch (err) {
+      console.warn('Erro ao carregar histórico do backend:', err);
+      // Fallback: mantém histórico local
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isOnline]);
+
+  // Sincroniza itens pendentes
+  const sincronizarPendentes = useCallback(async () => {
+    if (!isOnline) return;
+    
+    try {
+      await syncEngine.processQueue();
+      await recarregarHistorico();
+    } catch (err) {
+      console.warn('Erro ao sincronizar:', err);
+    }
+  }, [isOnline, recarregarHistorico]);
 
   // Atualiza campos do cabeçalho
   const atualizarCabecalho = useCallback(
@@ -219,7 +356,7 @@ export function useFormulario(): UseFormularioReturn {
     []
   );
 
-  // Atualiza linha do pátio (cima, baixo, ou categoria dinâmica por ID)
+  // Atualiza linha do pátio
   const atualizarLinhaPatio = useCallback(
     (
       patio: string,
@@ -305,12 +442,12 @@ export function useFormulario(): UseFormularioReturn {
     setDadosFormulario((prev) => ({ ...prev, sala5s: valor }));
   }, []);
 
-  // Atualiza maturidade 5S (nível 1-5)
+  // Atualiza maturidade 5S
   const atualizarMaturidade5S = useCallback((valor: number | null) => {
     setDadosFormulario((prev) => ({ ...prev, maturidade5S: valor }));
   }, []);
 
-  // Atualiza confirmação de conferência de pátio
+  // Atualiza confirmação de conferência
   const atualizarConfirmacaoConferencia = useCallback(
     (patio: 'patioCima' | 'patioBaixo', valor: boolean) => {
       setDadosFormulario((prev) => ({
@@ -346,41 +483,95 @@ export function useFormulario(): UseFormularioReturn {
     []
   );
 
-  // Salva passagem no histórico
-  const salvarPassagem = useCallback((): boolean => {
+  // Salva passagem — AGORA COM INTEGRAÇÃO BACKEND
+  const salvarPassagem = useCallback(async (): Promise<boolean> => {
+    setSaveError(null);
+    
     // Validações básicas
     if (!dadosFormulario.assinaturas.sai.confirmado || 
         !dadosFormulario.assinaturas.entra.confirmado) {
-      alert('⚠️ Ambas as assinaturas devem ser confirmadas antes de salvar.');
+      setSaveError('Ambas as assinaturas devem ser confirmadas antes de salvar.');
       return false;
     }
 
-    const novoRegistro: RegistroHistorico = {
-      ...dadosFormulario,
-      timestamp: new Date().toISOString(),
-      id: Date.now(),
-    };
+    setIsSaving(true);
 
-    setHistoricoTurnos((hist) => [novoRegistro, ...hist.slice(0, 49)]); // Mantém últimos 50
+    try {
+      // Verifica se tem UUID salvo (modo edição)
+      const savedUuid = localStorage.getItem(STORAGE_KEYS.PASSAGEM_UUID);
+      
+      // Converte dados para formato da API
+      const dto = converterParaAPIDTO(dadosFormulario, savedUuid || undefined);
 
-    // Limpa rascunho
-    localStorage.removeItem(STORAGE_KEYS.RASCUNHO);
+      // Tenta salvar no backend se estiver online
+      if (isOnline) {
+        try {
+          const response = await api.criarPassagem(dto);
+          
+          if (response && response.uuid) {
+            // Salva UUID para possível edição
+            localStorage.setItem(STORAGE_KEYS.PASSAGEM_UUID, response.uuid);
+            
+            // Nota: Hash de integridade pode ser retornado pelo backend
+            // mas o DTO atual não inclui. Futura melhoria.
+          }
+        } catch (apiErr) {
+          // Se falhar, adiciona à fila de sync para retry posterior
+          console.warn('Falha ao salvar no backend, adicionando à fila de sync:', apiErr);
+          
+          await syncEngine.enqueue(
+            'passagem',
+            dto,
+            { turno: dto.cabecalho.turno, data: dto.cabecalho.data }
+          );
+          
+          // Continua com salvamento local (não falha para o usuário)
+        }
+      } else {
+        // Modo offline: adiciona à fila de sync
+        await syncEngine.enqueue(
+          'passagem',
+          dto,
+          { turno: dto.cabecalho.turno, data: dto.cabecalho.data }
+        );
+      }
 
-    // Reseta formulário
-    setDadosFormulario(criarEstadoInicial());
-    setModoEdicao(false);
+      // Sempre salva localmente também (fallback/referência rápida)
+      const novoRegistro: RegistroHistorico = {
+        ...dadosFormulario,
+        timestamp: new Date().toISOString(),
+        id: Date.now(),
+      };
 
-    alert('✅ Troca de turno registrada com sucesso!');
-    return true;
-  }, [dadosFormulario]);
+      setHistoricoTurnos((hist) => [novoRegistro, ...hist.slice(0, 49)]);
+
+      // Limpa rascunho e UUID
+      localStorage.removeItem(STORAGE_KEYS.RASCUNHO);
+      localStorage.removeItem(STORAGE_KEYS.PASSAGEM_UUID);
+
+      // Reseta formulário
+      setDadosFormulario(criarEstadoInicial());
+      setModoEdicao(false);
+
+      return true;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao salvar passagem';
+      setSaveError(errorMessage);
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  }, [dadosFormulario, isOnline]);
 
   // Limpa formulário
   const limparFormulario = useCallback(() => {
     setDadosFormulario(criarEstadoInicial());
     localStorage.removeItem(STORAGE_KEYS.RASCUNHO);
+    localStorage.removeItem(STORAGE_KEYS.PASSAGEM_UUID);
+    setSaveError(null);
   }, []);
 
-  // Carrega um turno do histórico para visualização
+  // Carrega um turno do histórico
   const carregarTurno = useCallback((registro: RegistroHistorico) => {
     setDadosFormulario({
       cabecalho: registro.cabecalho,
@@ -400,6 +591,7 @@ export function useFormulario(): UseFormularioReturn {
       assinaturas: registro.assinaturas,
     });
     setModoEdicao(false);
+    setSaveError(null);
   }, []);
 
   return {
@@ -408,6 +600,13 @@ export function useFormulario(): UseFormularioReturn {
     turnoAnterior,
     modoEdicao,
     setModoEdicao,
+    // Estados de UI
+    isLoading,
+    isSaving,
+    saveError,
+    isOnline,
+    pendingSync,
+    // Ações
     atualizarCabecalho,
     atualizarLinhaPatio,
     atualizarAMV,
@@ -423,5 +622,8 @@ export function useFormulario(): UseFormularioReturn {
     limparFormulario,
     carregarTurno,
     setDadosFormulario,
+    // Novos métodos
+    recarregarHistorico,
+    sincronizarPendentes,
   };
 }
