@@ -139,7 +139,7 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
   const [mostrarConfirmacaoEntendimento, setMostrarConfirmacaoEntendimento] = useState(false);
   const [mostrarFeedbackEntendimento, setMostrarFeedbackEntendimento] = useState(false);
   const [respostaUsuario, setRespostaUsuario] = useState('');
-  const [perguntaEntendimento, _setPerguntaEntendimento] = useState<{
+  const [perguntaEntendimento] = useState<{
     tema: string;
     pergunta: string;
     opcoes: string[];
@@ -248,21 +248,21 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
     criticidade: CriticidadeEquipamento; quantidadeMinima: number;
     unidade: string; patiosAfetados: string[]; todosPatio: boolean;
   }
-  const FORM_VAZIO: FormEquip = {
+  const formVazio = useMemo<FormEquip>(() => ({
     nome: '', descricao: '', categoria: 'comunicacao', criticidade: 'importante',
     quantidadeMinima: 1, unidade: 'unidade', patiosAfetados: [], todosPatio: true,
-  };
+  }), []);
   const [showEquipModal, setShowEquipModal] = useState(false);
   const [equipEditingId, setEquipEditingId] = useState<string | null>(null);
-  const [equipForm, setEquipForm] = useState<FormEquip>(FORM_VAZIO);
+  const [equipForm, setEquipForm] = useState<FormEquip>(formVazio);
   const [equipFormErro, setEquipFormErro] = useState('');
 
   const openEquipCreate = useCallback(() => {
-    setEquipForm(FORM_VAZIO);
+    setEquipForm(formVazio);
     setEquipEditingId(null);
     setEquipFormErro('');
     setShowEquipModal(true);
-  }, []);
+  }, [formVazio]);
 
   const openEquipEdit = useCallback((eq: EquipamentoConfig) => {
     setEquipForm({
@@ -386,7 +386,7 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
   const handleConfirmarSenhaEntrada = useCallback(() => {
     setMostrarModalSenha(false);
     setSenhaConfirmacao('');
-  }, []);
+  }, [setMostrarModalSenha, setSenhaConfirmacao]);
 
   // Stub - erroSenhaConfirmacao is read-only prop, setter not passed
   const setErroSenhaConfirmacao = useCallback((_v: string) => {}, []);
@@ -1212,7 +1212,7 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
         );
       }
 
-      case '5s':
+      case '5s': {
         const naoConformes5S = Object.values(avaliacoes5S).filter(v => v === 'nao-conforme').length;
         const status5S = naoConformes5S >= 3 ? 'critico' : naoConformes5S >= 1 ? 'atencao' : 'conforme';
         
@@ -1414,6 +1414,7 @@ export default function PaginaPassagem(props: PaginaPassagemProps): JSX.Element 
             </Card>
           </>
         );
+      }
 
       case 'seguranca':
         return renderSecaoSeguranca();

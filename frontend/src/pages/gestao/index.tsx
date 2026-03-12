@@ -101,6 +101,7 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
 
   interface AuditEntry { timestamp: string; tipo: string; area: string; detalhe: string; usuario?: string; }
   const auditTrail = useMemo<AuditEntry[]>(() => {
+    void refreshKey;
     try {
       const raw: AuditEntry[] = JSON.parse(localStorage.getItem('efvm360-equip-audit') || '[]');
       const session: AuditEntry[] = JSON.parse(sessionStorage.getItem('efvm360_audit') || '[]');
@@ -126,9 +127,16 @@ export default function PaginaGestao({ tema, styles, usuarioLogado }: PaginaGest
   }, [auditFiltrado]);
 
   // ── Data ──
-  const pendingRegistrations = useMemo(() => getPendingRegistrations(isGestor ? undefined : yardCode), [yardCode, refreshKey, isGestor]);
-  const pendingPasswords = useMemo(() => getPendingPasswordResets(isGestor ? undefined : yardCode), [yardCode, refreshKey, isGestor]);
+  const pendingRegistrations = useMemo(() => {
+    void refreshKey;
+    return getPendingRegistrations(isGestor ? undefined : yardCode);
+  }, [yardCode, refreshKey, isGestor]);
+  const pendingPasswords = useMemo(() => {
+    void refreshKey;
+    return getPendingPasswordResets(isGestor ? undefined : yardCode);
+  }, [yardCode, refreshKey, isGestor]);
   const usuarios = useMemo(() => {
+    void refreshKey;
     try {
       const all: Usuario[] = JSON.parse(localStorage.getItem('efvm360-usuarios') || '[]');
       if (isGestor) return all;

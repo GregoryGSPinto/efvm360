@@ -90,7 +90,7 @@ export function AdamBotProvider({ children, contexto, executors }: AdamBotProvid
   useEffect(() => {
     const notifs = verificarNotificacoes(contexto);
     if (notifs.length > 0) setNotifications(prev => [...prev.filter(n => !n.lida), ...notifs].slice(-10));
-  }, [contexto.paginaAtual, contexto.scoreRisco, contexto.passagemEmAndamento]);
+  }, [contexto]);
 
   // Init STT
   useEffect(() => {
@@ -221,6 +221,7 @@ export function AdamBotProvider({ children, contexto, executors }: AdamBotProvid
 
 // ── Hook ───────────────────────────────────────────────────────────────
 
+// eslint-disable-next-line react-refresh/only-export-components -- hook export shares provider state in the same module by design
 export function useAdamBotContext(): AdamBotContextValue {
   const ctx = useContext(AdamBotCtx);
   if (!ctx) throw new Error('useAdamBotContext must be used within <AdamBotProvider>');

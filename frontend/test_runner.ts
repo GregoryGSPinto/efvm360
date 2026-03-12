@@ -9,8 +9,9 @@ import assert from 'node:assert/strict';
 
 // ── Shim crypto.subtle for Node ─────────────────────────────────────────
 import { webcrypto } from 'node:crypto';
-if (!(globalThis as any).crypto?.subtle) {
-  (globalThis as any).crypto = webcrypto;
+type GlobalWithCrypto = typeof globalThis & { crypto?: Crypto };
+if (!(globalThis as GlobalWithCrypto).crypto?.subtle) {
+  (globalThis as GlobalWithCrypto).crypto = webcrypto as Crypto;
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -301,9 +302,9 @@ describe('🚂 YardConfiguration — Fase 1', () => {
 
   it('NÃO contém CS-C, CS-N, CS-CE', () => {
     const codes = YARD_CONFIGS_PHASE1.map(y => y.yardCode);
-    assert.ok(!codes.includes('CS-C' as any));
-    assert.ok(!codes.includes('CS-N' as any));
-    assert.ok(!codes.includes('CS-CE' as any));
+    assert.ok(!codes.includes('CS-C'));
+    assert.ok(!codes.includes('CS-N'));
+    assert.ok(!codes.includes('CS-CE'));
   });
 
   it('yardCodes únicos', () => {

@@ -333,5 +333,6 @@ const PDFReportGenerator = memo(function PDFReportGenerator({
 PDFReportGenerator.displayName = 'PDFReportGenerator';
 
 export default PDFReportGenerator;
+// eslint-disable-next-line react-refresh/only-export-components -- report generator is a non-React helper co-located with the UI wrapper
 export { generatePDFReport };
 export type { PDFReportGeneratorProps };

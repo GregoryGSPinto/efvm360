@@ -14,7 +14,7 @@ function setMockHour(hour: number, minute = 0) {
   const fakeMs = new RealDate(2026, 2, 1, hour, minute, 0).getTime();
   const MockDate = function (this: Date, ...args: unknown[]) {
     if (args.length === 0) return new RealDate(fakeMs);
-    return new (RealDate as any)(...args);
+    return Reflect.construct(RealDate, args);
   } as unknown as DateConstructor;
   Object.defineProperty(MockDate, 'prototype', { value: RealDate.prototype });
   MockDate.now = () => fakeMs;

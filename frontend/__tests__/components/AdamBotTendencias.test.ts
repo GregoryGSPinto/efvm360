@@ -6,9 +6,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { analisarTendencias, carregarHistorico } from '../../src/components/AdamBot/AdamBotTendencias';
 
+type HistoricoPassagem = ReturnType<typeof criarPassagem>;
+type StorageMock = Pick<Storage, 'clear' | 'getItem'>;
+
 // ── Helper: create a passagem entry ─────────────────────────────────────
 
-function criarPassagem(overrides: Record<string, any> = {}) {
+function criarPassagem(overrides: Record<string, unknown> = {}) {
   return {
     cabecalho: { data: '2026-03-01', turno: 'Turno A', horario: '07:00', dss: 'DSS-001' },
     patioCima: [],
@@ -21,7 +24,7 @@ function criarPassagem(overrides: Record<string, any> = {}) {
   };
 }
 
-function mockHistorico(passagens: any[], key = 'efvm360-historico-turnos') {
+function mockHistorico(passagens: HistoricoPassagem[], key = 'efvm360-historico-turnos') {
   // The setup file creates localStorage as a custom mock object with vi.fn getItem.
   // Use the mock's mockImplementation to control what getItem returns.
   (localStorage.getItem as ReturnType<typeof vi.fn>).mockImplementation((k: string) => {
@@ -33,7 +36,7 @@ function mockHistorico(passagens: any[], key = 'efvm360-historico-turnos') {
 // ── Tests ───────────────────────────────────────────────────────────────
 
 beforeEach(() => {
-  (localStorage as any).clear();
+  (localStorage as StorageMock).clear();
   // mockReset clears call history AND resets mockImplementation (so getItem returns undefined by default)
   (localStorage.getItem as ReturnType<typeof vi.fn>).mockReset();
   vi.clearAllMocks();

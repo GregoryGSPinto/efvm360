@@ -18,7 +18,7 @@ export const sequelize = new Sequelize(
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '3306', 10),
     dialect: 'mysql',
-    logging: isProduction ? false : console.log,
+    logging: isProduction ? false : (sql) => console.info(sql),
     timezone: '-03:00', // Horário de Brasília (BRT)
     pool: {
       max: 20,

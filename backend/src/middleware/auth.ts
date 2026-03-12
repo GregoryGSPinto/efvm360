@@ -14,15 +14,6 @@ export interface JWTPayload {
   type: 'access' | 'refresh';
 }
 
-// Estende Request do Express com dados do usuário autenticado
-declare global {
-  namespace Express {
-    interface Request {
-      user?: JWTPayload;
-    }
-  }
-}
-
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
   throw new Error('FATAL: JWT_SECRET environment variable is required');

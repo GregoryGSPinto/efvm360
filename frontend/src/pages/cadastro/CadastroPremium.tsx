@@ -56,7 +56,9 @@ const CadastroPremium: React.FC<CadastroPremiumProps> = ({
         u.status !== 'inactive' &&
         (u.primaryYard === selectedYard || (u.allowedYards || []).includes(selectedYard))
       ).map(u => ({ matricula: u.matricula, nome: u.nome, funcao: u.funcao }));
-    } catch { return []; }
+    } catch {
+      return [];
+    }
   }, [selectedYard]);
 
   // Clear multi-patio selection when function changes away from gestor/inspetor
@@ -86,7 +88,9 @@ const CadastroPremium: React.FC<CadastroPremiumProps> = ({
   try {
     const t = config?.tema;
     dk = t === 'escuro' || (t === 'automatico' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
-  } catch { dk = false; }
+  } catch {
+    dk = false;
+  }
 
   // Password strength
   let forcaPct = 0;
@@ -104,7 +108,9 @@ const CadastroPremium: React.FC<CadastroPremiumProps> = ({
     if (pts > 4) { forcaPct = 100; forcaCor = '#16a34a'; forcaLabel = 'forte'; }
     else if (pts > 2) { forcaPct = 66; forcaCor = '#d9a010'; forcaLabel = 'média'; }
     else { forcaPct = 33; }
-  } catch {}
+  } catch {
+    forcaPct = 0;
+  }
 
   const bg    = dk ? '#121212' : '#f5f5f5';
   const cardBg = dk ? '#1e1e1e' : '#ffffff';
@@ -115,7 +121,11 @@ const CadastroPremium: React.FC<CadastroPremiumProps> = ({
   const inBd  = dk ? '#404040' : '#d4d4d4';
 
   const update = useCallback((field: string, value: string) => {
-    try { onFormChange((p: Record<string, string>) => ({ ...p, [field]: value })); } catch {}
+    try {
+      onFormChange((p: Record<string, string>) => ({ ...p, [field]: value }));
+    } catch {
+      return;
+    }
   }, [onFormChange]);
 
   const doSubmit = useCallback(() => {
@@ -133,12 +143,20 @@ const CadastroPremium: React.FC<CadastroPremiumProps> = ({
       // Small delay to let state propagate before submit
       setTimeout(() => {
         setSubmitting(true);
-        try { onCadastro(); } catch {}
+        try {
+          onCadastro();
+        } catch {
+          setSubmitting(false);
+        }
         setTimeout(() => setSubmitting(false), 600);
       }, 50);
     } else {
       setSubmitting(true);
-      try { onCadastro(); } catch {}
+      try {
+        onCadastro();
+      } catch {
+        setSubmitting(false);
+      }
       setTimeout(() => setSubmitting(false), 600);
     }
   }, [onCadastro, cadastroForm?.funcao, patiosCadastro, onFormChange]);

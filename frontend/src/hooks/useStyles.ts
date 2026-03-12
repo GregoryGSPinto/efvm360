@@ -33,7 +33,7 @@ export interface StylesObject {
 export function useStyles(
   tema: TemaEstilos,
   config: ConfiguracaoSistema,
-  menuMobileAberto: boolean
+  _menuMobileAberto: boolean
 ): StylesObject {
   const isDark = config.tema === 'escuro';
   return useMemo<StylesObject>(
@@ -335,6 +335,6 @@ export function useStyles(
       statusOcupada: { background: 'rgba(237,177,17,0.12)', color: '#edb111' },
       statusInterditada: { background: 'rgba(220,38,38,0.12)', color: '#dc2626' },
     }),
-    [tema, config, menuMobileAberto]
+    [tema, isDark]
   );
 }

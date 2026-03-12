@@ -116,7 +116,7 @@ export function initializeWebSocket(httpServer: Server): SocketIOServer {
     const user = (socket as Socket & { data: SocketData }).data.user;
     const yard = user.primaryYard || 'tubarao';
 
-    console.log(`[WS] Connected: ${user.matricula} (${user.funcao}) — yard: ${yard}`);
+    console.info(`[WS] Connected: ${user.matricula} (${user.funcao}) — yard: ${yard}`);
 
     // Join patio-based room
     socket.join(`patio:${yard}`);
@@ -132,7 +132,7 @@ export function initializeWebSocket(httpServer: Server): SocketIOServer {
     socket.on('yard:subscribe', (yardId: string) => {
       if (typeof yardId === 'string' && yardId.length <= 20) {
         socket.join(`patio:${yardId}`);
-        console.log(`[WS] ${user.matricula} subscribed to patio:${yardId}`);
+        console.info(`[WS] ${user.matricula} subscribed to patio:${yardId}`);
       }
     });
 
@@ -145,7 +145,7 @@ export function initializeWebSocket(httpServer: Server): SocketIOServer {
     // ── Disconnect ───────────────────────────────────────────────────
 
     socket.on('disconnect', (reason) => {
-      console.log(`[WS] Disconnected: ${user.matricula} — reason: ${reason}`);
+      console.info(`[WS] Disconnected: ${user.matricula} — reason: ${reason}`);
     });
   });
 

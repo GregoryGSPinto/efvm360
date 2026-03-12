@@ -2,6 +2,7 @@
 // EFVM360 Backend — Controller LGPD (Direitos do Titular)
 // ============================================================================
 import { Request, Response } from 'express';
+import { createHash } from 'node:crypto';
 import { Usuario, Passagem, AuditTrail } from '../models';
 
 export const meusDados = async (req: Request, res: Response): Promise<void> => {
@@ -51,8 +52,7 @@ export const anonimizar = async (req: Request, res: Response): Promise<void> => 
     const usuario = await Usuario.findOne({ where: { matricula: matriculaAlvo } });
     if (!usuario) { res.status(404).json({ error: 'Usuário não encontrado' }); return; }
 
-    const crypto = require('crypto');
-    const hashMatricula = crypto.createHash('sha256').update(matriculaAlvo).digest('hex').substring(0, 12);
+    const hashMatricula = createHash('sha256').update(matriculaAlvo).digest('hex').substring(0, 12);
 
     await usuario.update({ nome: 'Usuário Anonimizado', matricula: `ANON_${hashMatricula}`, ativo: false, azure_ad_oid: null });
     await AuditTrail.update({ matricula: `ANON_${hashMatricula}` } as Partial<AuditTrail>, { where: { matricula: matriculaAlvo } });

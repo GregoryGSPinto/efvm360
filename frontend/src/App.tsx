@@ -221,7 +221,7 @@ export default function App(): JSX.Element {
   const {
     telaAtual, usuarioLogado, loginForm, cadastroForm,
     loginErro, cadastroErro, cadastroSucesso,
-    setTelaAtual: _setTelaAtual, setLoginForm, setCadastroForm, setLoginErro, setCadastroErro,
+    setLoginForm, setCadastroForm, setLoginErro, setCadastroErro,
     realizarLogin, realizarCadastro, realizarLogout, realizarTrocaSenha,
   } = useAuth();
 
@@ -387,7 +387,7 @@ export default function App(): JSX.Element {
     if (usuarioLogado?.matricula) {
       registrarAcesso(usuarioLogado.matricula, currentPageId);
     }
-  }, [currentPageId, adamBoot.setPaginaAtual, usuarioLogado?.matricula]);
+  }, [adamBoot, currentPageId, usuarioLogado?.matricula]);
 
   // Navigate by legacy nav ID (used by TopNavbar, MobileBottomNav)
   const handleNavigate = useCallback((id: string) => {
@@ -426,14 +426,14 @@ export default function App(): JSX.Element {
       trackUserLogin('password', navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop');
       showToast(`Boa jornada, ${usuarioLogado.nome.split(' ')[0]}! 🚂`);
     }
-  }, [telaAtual === 'sistema' && !!usuarioLogado]);
+  }, [registrarAuditoria, showToast, telaAtual, usuarioLogado]);
 
   // ── Organizational seed (teams + performance) ─────────────────────
   useEffect(() => {
     if (usuarioLogado && telaAtual === 'sistema') {
       seedTeams();
     }
-  }, [telaAtual === 'sistema' && !!usuarioLogado]);
+  }, [telaAtual, usuarioLogado]);
 
   // ── Pending approvals count (for Gestao badge) ────────────────────
   const pendingCount = useMemo(() => {
@@ -447,7 +447,7 @@ export default function App(): JSX.Element {
       const pwds = getPendingPasswordResets(isGestor ? yard as YardCode | undefined : undefined).length;
       return regs + pwds;
     } catch { return 0; }
-  }, [usuarioLogado, currentPageId]); // currentPageId dep to refresh on nav
+  }, [usuarioLogado]);
 
   // ── AdamBot Context ─────────────────────────────────────────────────
   const adamBotContexto = useMemo<ContextoBot>(() => {

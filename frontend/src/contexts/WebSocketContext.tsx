@@ -131,6 +131,7 @@ export function WebSocketProvider({ children, enabled = true }: WebSocketProvide
 
 // ── Hook ─────────────────────────────────────────────────────────────────
 
+// eslint-disable-next-line react-refresh/only-export-components -- context hook is intentionally colocated with its provider
 export function useWebSocketContext(): WebSocketContextValue {
   return useContext(WebSocketContext);
 }

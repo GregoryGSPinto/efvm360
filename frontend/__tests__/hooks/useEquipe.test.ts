@@ -5,6 +5,9 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { _carregarUsuarios, _montarEquipe, isAdminGlobal, type MembroEquipe } from '../../src/hooks/useEquipe';
+import type { FuncaoUsuario } from '../../src/types';
+
+type StorageMock = Pick<Storage, 'clear' | 'getItem'>;
 
 // ── Mock users matching seed structure ──────────────────────────────────
 
@@ -36,7 +39,7 @@ const SEED_VBR = [
 ];
 
 const ADMIN = criarUsuario({ matricula: 'ADM9001', nome: 'Gregory Administrador', funcao: 'gestor', primaryYard: 'VFZ' });
-const SUPORTE = criarUsuario({ matricula: 'SUP0001', nome: 'Suporte Tecnico', funcao: 'suporte' as any, primaryYard: 'VFZ' });
+const SUPORTE = criarUsuario({ matricula: 'SUP0001', nome: 'Suporte Tecnico', funcao: 'suporte' as FuncaoUsuario, primaryYard: 'VFZ' });
 
 function mockUsuarios(usuarios: MembroEquipe[]) {
   (localStorage.getItem as ReturnType<typeof vi.fn>).mockImplementation((key: string) => {
@@ -48,7 +51,7 @@ function mockUsuarios(usuarios: MembroEquipe[]) {
 // ── Tests ───────────────────────────────────────────────────────────────
 
 beforeEach(() => {
-  (localStorage as any).clear();
+  (localStorage as StorageMock).clear();
   (localStorage.getItem as ReturnType<typeof vi.fn>).mockReset();
   vi.clearAllMocks();
 });

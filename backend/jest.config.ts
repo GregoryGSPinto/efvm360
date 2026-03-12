@@ -28,6 +28,9 @@ const config: Config = {
     },
   },
   setupFilesAfterEnv: ['<rootDir>/__tests__/setup.ts'],
+  moduleNameMapper: {
+    '^supertest$': '<rootDir>/__tests__/helpers/supertestNoListen.ts',
+  },
   verbose: true,
   // Longer timeout for integration tests (bcrypt is slow)
   testTimeout: 15000,

@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { v4 as uuidv4 } from 'uuid';
+import { Op } from 'sequelize';
 import { AuditTrail } from '../models';
 import { hashAuditEntry } from '../utils/crypto';
 import sequelize from '../config/database';
@@ -142,10 +143,9 @@ export const buscar = async (filtros: {
   if (filtros.recurso) where.recurso = filtros.recurso;
 
   if (filtros.dataInicio || filtros.dataFim) {
-    const { Op } = require('sequelize');
     const range: Record<string, Date> = {};
-    if (filtros.dataInicio) range[Op.gte] = new Date(filtros.dataInicio);
-    if (filtros.dataFim) range[Op.lte] = new Date(filtros.dataFim);
+    if (filtros.dataInicio) range[Op.gte as unknown as string] = new Date(filtros.dataInicio);
+    if (filtros.dataFim) range[Op.lte as unknown as string] = new Date(filtros.dataFim);
     where.created_at = range;
   }
 

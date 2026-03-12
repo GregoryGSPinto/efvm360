@@ -219,5 +219,6 @@ const ShiftComparison = memo(function ShiftComparison({
 ShiftComparison.displayName = 'ShiftComparison';
 
 export default ShiftComparison;
+// eslint-disable-next-line react-refresh/only-export-components -- analytical helpers are consumed outside the component tree
 export { computeShiftData, classifyShift };
 export type { ShiftMetrics, ShiftComparisonProps };

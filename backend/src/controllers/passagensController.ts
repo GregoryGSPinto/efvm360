@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { Request, Response } from 'express';
+import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { Passagem, Usuario } from '../models';
 import { hashFormulario } from '../utils/crypto';
@@ -224,7 +225,6 @@ export const assinar = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Verifica senha do usuario logado
-    const bcrypt = require('bcryptjs');
     const usuario = await Usuario.findByPk(req.user.userId);
     if (!usuario) { res.status(404).json({ error: 'Usuário não encontrado' }); return; }
 

@@ -86,7 +86,7 @@ export function useBlindagem(usuario: Usuario | null, onTamperingForceLogout?: (
     } else {
       secureLog.info('✅ Integridade de runtime verificada');
     }
-  }, []);
+  }, [onTamperingForceLogout]);
 
   // ========== 2. INTEGRITY MONITOR (storage fingerprint) ==========
   useEffect(() => {
@@ -111,7 +111,7 @@ export function useBlindagem(usuario: Usuario | null, onTamperingForceLogout?: (
     return () => {
       monitor.parar();
     };
-  }, []);
+  }, [onTamperingForceLogout]);
 
   // ========== 3. DEVTOOLS DETECTION ==========
   useEffect(() => {

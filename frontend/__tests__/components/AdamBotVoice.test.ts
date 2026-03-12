@@ -5,6 +5,37 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+type GlobalSpeechApi = typeof globalThis & {
+  SpeechRecognition?: new () => SpeechRecognition;
+  webkitSpeechRecognition?: new () => SpeechRecognition;
+};
+
+class MockSpeechRecognition implements SpeechRecognition {
+  grammars!: SpeechGrammarList;
+  lang = '';
+  continuous = false;
+  interimResults = false;
+  maxAlternatives = 1;
+  onaudiostart = null;
+  onaudioend = null;
+  onend = null;
+  onerror = null;
+  onnomatch = null;
+  onresult = null;
+  onsoundstart = null;
+  onsoundend = null;
+  onspeechstart = null;
+  onspeechend = null;
+  onstart = null;
+  serviceURI = '';
+  abort = vi.fn();
+  start = vi.fn();
+  stop = vi.fn();
+  addEventListener = vi.fn();
+  dispatchEvent = vi.fn(() => true);
+  removeEventListener = vi.fn();
+}
+
 // ── Mock SpeechSynthesisUtterance (not available in jsdom) ──────────────
 
 class MockUtterance {
@@ -133,31 +164,31 @@ describe('adamFalando', () => {
 describe('STT — sttDisponivel', () => {
   it('retorna false sem SpeechRecognition', async () => {
     // Ensure neither SpeechRecognition nor webkitSpeechRecognition exist
-    delete (globalThis as any).SpeechRecognition;
-    delete (globalThis as any).webkitSpeechRecognition;
+    delete (globalThis as GlobalSpeechApi).SpeechRecognition;
+    delete (globalThis as GlobalSpeechApi).webkitSpeechRecognition;
     const { sttDisponivel } = await getModule();
     expect(sttDisponivel()).toBe(false);
   });
 
   it('retorna true com webkitSpeechRecognition', async () => {
-    (globalThis as any).webkitSpeechRecognition = class {};
+    (globalThis as GlobalSpeechApi).webkitSpeechRecognition = MockSpeechRecognition;
     const { sttDisponivel } = await getModule();
     expect(sttDisponivel()).toBe(true);
-    delete (globalThis as any).webkitSpeechRecognition;
+    delete (globalThis as GlobalSpeechApi).webkitSpeechRecognition;
   });
 
   it('retorna true com SpeechRecognition', async () => {
-    (globalThis as any).SpeechRecognition = class {};
+    (globalThis as GlobalSpeechApi).SpeechRecognition = MockSpeechRecognition;
     const { sttDisponivel } = await getModule();
     expect(sttDisponivel()).toBe(true);
-    delete (globalThis as any).SpeechRecognition;
+    delete (globalThis as GlobalSpeechApi).SpeechRecognition;
   });
 });
 
 describe('STT — iniciarReconhecimento', () => {
   it('chama onErro quando STT indisponível', async () => {
-    delete (globalThis as any).SpeechRecognition;
-    delete (globalThis as any).webkitSpeechRecognition;
+    delete (globalThis as GlobalSpeechApi).SpeechRecognition;
+    delete (globalThis as GlobalSpeechApi).webkitSpeechRecognition;
     const { iniciarReconhecimento } = await getModule();
     const onResultado = vi.fn();
     const onErro = vi.fn();
@@ -170,24 +201,18 @@ describe('STT — iniciarReconhecimento', () => {
   it('cria reconhecimento e chama start quando disponível', async () => {
     const mockStart = vi.fn();
     const mockStop = vi.fn();
-    (globalThis as any).SpeechRecognition = class {
-      lang = '';
-      continuous = false;
-      interimResults = false;
-      maxAlternatives = 1;
-      onresult: any = null;
-      onerror: any = null;
-      onend: any = null;
-      start = mockStart;
-      stop = mockStop;
-    };
+    class TestSpeechRecognition extends MockSpeechRecognition {
+      override start = mockStart;
+      override stop = mockStop;
+    }
+    (globalThis as GlobalSpeechApi).SpeechRecognition = TestSpeechRecognition;
     const { iniciarReconhecimento } = await getModule();
     const onResultado = vi.fn();
     const onErro = vi.fn();
     const onFim = vi.fn();
     iniciarReconhecimento(onResultado, onErro, onFim);
     expect(mockStart).toHaveBeenCalled();
-    delete (globalThis as any).SpeechRecognition;
+    delete (globalThis as GlobalSpeechApi).SpeechRecognition;
   });
 });
 

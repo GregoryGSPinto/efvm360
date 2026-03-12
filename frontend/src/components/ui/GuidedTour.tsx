@@ -28,6 +28,7 @@ interface GuidedTourProps {
 
 // ── Tour Steps (strategic, 9 steps) ───────────────────────────────────────
 
+// eslint-disable-next-line react-refresh/only-export-components -- tour config is intentionally shared with onboarding flow tests
 export function getTourSteps(t: (key: string) => string): TourStep[] {
   return [
     {
@@ -97,6 +98,7 @@ export function getTourSteps(t: (key: string) => string): TourStep[] {
 }
 
 /** @deprecated Use getTourSteps(t) instead */
+// eslint-disable-next-line react-refresh/only-export-components -- legacy static config remains exported for backward compatibility
 export const TOUR_STEPS: TourStep[] = [
   { id: 'welcome', title: 'Bem-vindo ao EFVM360!', content: 'Este e o sistema digital de Passagem de Servico da EFVM.' },
   { id: 'nav', target: '[data-tour="nav-principal"]', title: 'Navegacao Principal', content: 'Use o menu superior para acessar os modulos.', placement: 'bottom' },

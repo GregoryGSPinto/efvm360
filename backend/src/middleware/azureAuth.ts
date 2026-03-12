@@ -3,8 +3,10 @@
 // Valida token Azure AD e provisiona usuário local
 // ============================================================================
 import { Request, Response, NextFunction } from 'express';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
+import { v4 as uuidv4 } from 'uuid';
 import { Usuario } from '../models';
 import { generateSecureToken } from '../utils/crypto';
 
@@ -53,8 +55,6 @@ export const validateAzureToken = async (req: Request, res: Response, next: Next
     // Provision user if not exists
     let usuario = await Usuario.findOne({ where: { azure_ad_oid: oid } });
     if (!usuario) {
-      const { v4: uuidv4 } = require('uuid');
-      const bcrypt = require('bcryptjs');
       usuario = await Usuario.create({
         uuid: uuidv4(), nome: name, matricula: email.split('@')[0].toUpperCase(),
         funcao, senha_hash: await bcrypt.hash(generateSecureToken(32), 4),

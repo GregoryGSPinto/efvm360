@@ -23,7 +23,7 @@ const HTML_ESCAPE_RE = /[&<>"'/`]/g;
  * Sanitiza string contra XSS — escapa caracteres perigosos
  * Uso: em qualquer input antes de renderização ou persistência
  */
-export const sanitizar = (input: string): string => {
+export const sanitizar = (input: unknown): string => {
   if (typeof input !== 'string') return '';
   return input.replace(HTML_ESCAPE_RE, (char) => HTML_ESCAPE_MAP[char] || char);
 };
@@ -32,15 +32,15 @@ export const sanitizar = (input: string): string => {
  * Sanitiza string mantendo apenas alfanuméricos, espaços e acentos
  * Uso: campos de nome, matrícula
  */
-export const sanitizarIdentificador = (input: string): string => {
+export const sanitizarIdentificador = (input: unknown): string => {
   if (typeof input !== 'string') return '';
-  return input.replace(/[^\p{L}\p{N}\s.\-]/gu, '').trim();
+  return input.replace(/[^\p{L}\p{N}\s.-]/gu, '').trim();
 };
 
 /**
  * Sanitiza matrícula — apenas alfanuméricos
  */
-export const sanitizarMatricula = (input: string): string => {
+export const sanitizarMatricula = (input: unknown): string => {
   if (typeof input !== 'string') return '';
   return input.replace(/[^a-zA-Z0-9]/g, '').trim();
 };

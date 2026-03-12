@@ -7,6 +7,7 @@ import { useEffect, useRef, useCallback } from 'react';
 
 // ── Focus Trap (for modals) ────────────────────────────────────────────
 
+// eslint-disable-next-line react-refresh/only-export-components -- hook utilities are intentionally colocated with accessibility UI helpers
 export function useFocusTrap(isActive: boolean) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -50,6 +51,7 @@ export function useFocusTrap(isActive: boolean) {
 
 // ── Escape Key Handler ─────────────────────────────────────────────────
 
+// eslint-disable-next-line react-refresh/only-export-components -- hook utilities are intentionally colocated with accessibility UI helpers
 export function useEscapeKey(callback: () => void, isActive: boolean) {
   useEffect(() => {
     if (!isActive) return;
@@ -65,6 +67,7 @@ export function useEscapeKey(callback: () => void, isActive: boolean) {
 
 // ── Live Region Announcer ──────────────────────────────────────────────
 
+// eslint-disable-next-line react-refresh/only-export-components -- hook utilities are intentionally colocated with accessibility UI helpers
 export function useAnnouncer() {
   const announce = useCallback((message: string, priority: 'polite' | 'assertive' = 'polite') => {
     const el = document.getElementById(`sr-announcer-${priority}`);
@@ -138,6 +141,7 @@ export function LiveRegions() {
 
 // ── ARIA Helpers ───────────────────────────────────────────────────────
 
+// eslint-disable-next-line react-refresh/only-export-components -- plain ARIA helpers are reused across component modules
 export const ariaProps = {
   expandable: (expanded: boolean, controls: string) => ({
     'aria-expanded': expanded,

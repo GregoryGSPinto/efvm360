@@ -170,6 +170,7 @@ const ROLE_HIERARCHY: Record<string, number> = {
   suporte: 9,
 };
 
+// eslint-disable-next-line react-refresh/only-export-components -- utility is imported by tests while the component stays in the same module
 export function hasMinimumRole(role: string | undefined, minRole: string): boolean {
   if (!role) return false;
   const userLevel = ROLE_HIERARCHY[role] ?? 0;
@@ -224,7 +225,7 @@ export function MetricasDashboard({ apiBaseUrl, token, role }: MetricasDashboard
         err instanceof Error ? err.message : t('metricas.errorLoading')
       );
     }
-  }, [apiBaseUrl, token]);
+  }, [apiBaseUrl, t, token]);
 
   useEffect(() => {
     if (hasMinimumRole(role, 'inspetor')) {

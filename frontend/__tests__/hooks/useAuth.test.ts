@@ -11,7 +11,7 @@ vi.mock('../../src/services/security', async () => {
     hashSenha: vi.fn(async (senha: string, matricula: string) => `hash_${senha}_${matricula.toLowerCase()}`),
     verificarSenhaHash: vi.fn(async (senha: string, matricula: string, hash: string) => hash === `hash_${senha}_${matricula.toLowerCase()}`),
     sanitizarMatricula: vi.fn((input: string) => input.replace(/[^a-zA-Z0-9]/g, '').trim()),
-    sanitizarIdentificador: vi.fn((input: string) => input.replace(/[^\p{L}\p{N}\s.\-]/gu, '').trim()),
+    sanitizarIdentificador: vi.fn((input: string) => input.replace(/[^\p{L}\p{N}\s.-]/gu, '').trim()),
     validarEstruturaSessao: vi.fn((data: unknown) => {
       if (!data || typeof data !== 'object') return false;
       const obj = data as Record<string, unknown>;

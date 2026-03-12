@@ -6,5 +6,19 @@
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
     "no-console": ["warn", { "allow": ["error", "warn", "info"] }]
-  }
+  },
+  "overrides": [
+    {
+      "files": [
+        "src/migrations/**/*.ts",
+        "src/scripts/**/*.ts",
+        "src/database/seed.ts",
+        "src/migrations/run.ts",
+        "src/migrations/seed.ts"
+      ],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ]
 }

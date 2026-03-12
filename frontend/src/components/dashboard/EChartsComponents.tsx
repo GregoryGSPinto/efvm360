@@ -142,9 +142,18 @@ export const GraficoBarrasECharts = memo<GraficoBarrasEChartsProps>(({
   const temDados = dados.length > 0 && dados.some(d => d.valor > 0);
   
   // Extrair categorias e valores dos dados
-  const categorias = dados.length > 0 ? dados.map(d => d.nome) : ['Sem dados'];
-  const valores = dados.length > 0 ? dados.map(d => d.valor) : [0];
-  const cores = dados.map((d, idx) => d.cor || paleta.series[idx % paleta.series.length]);
+  const categorias = useMemo(
+    () => (dados.length > 0 ? dados.map(d => d.nome) : ['Sem dados']),
+    [dados],
+  );
+  const valores = useMemo(
+    () => (dados.length > 0 ? dados.map(d => d.valor) : [0]),
+    [dados],
+  );
+  const cores = useMemo(
+    () => dados.map((d, idx) => d.cor || paleta.series[idx % paleta.series.length]),
+    [dados, paleta.series],
+  );
 
   const option = useMemo<EChartsOption>(() => ({
     backgroundColor: 'transparent',
@@ -214,7 +223,7 @@ export const GraficoBarrasECharts = memo<GraficoBarrasEChartsProps>(({
         fontWeight: 500,
       },
     }] : undefined,
-  }), [titulo, categorias, valores, cores, tema, horizontal, paleta, temDados]);
+  }), [titulo, categorias, valores, cores, horizontal, paleta, temDados, tema.cardBorda]);
 
   useECharts(containerRef, option, tema);
 
@@ -359,7 +368,7 @@ export const GraficoLinhaECharts = memo<GraficoLinhaEChartsProps>(({
         fontWeight: 500,
       },
     }] : undefined,
-  }), [titulo, categorias, series, tema, suave, paleta, temDados]);
+  }), [titulo, categorias, series, suave, paleta, temDados]);
 
   useECharts(containerRef, option, tema);
 
@@ -480,7 +489,7 @@ export const GraficoPizzaECharts = memo<GraficoPizzaEChartsProps>(({
         fontWeight: 500,
       },
     }] : undefined,
-  }), [titulo, dados, tema, donut, paleta, temDados]);
+  }), [titulo, dados, donut, paleta, temDados]);
 
   useECharts(containerRef, option, tema);
 
@@ -527,12 +536,14 @@ export const GraficoGaugeECharts = memo<GraficoGaugeEChartsProps>(({
   const containerRef = useRef<HTMLDivElement>(null);
   const paleta = getPaletaBIPlus(tema);
 
-  const defaultFaixas = faixas || [
-    { min: 0, max: 25, cor: tema.sucesso },
-    { min: 25, max: 50, cor: tema.aviso },
-    { min: 50, max: 75, cor: '#f97316' },
-    { min: 75, max: 100, cor: tema.perigo },
-  ];
+  const defaultFaixas = useMemo(() => (
+    faixas || [
+      { min: 0, max: 25, cor: tema.sucesso },
+      { min: 25, max: 50, cor: tema.aviso },
+      { min: 50, max: 75, cor: '#f97316' },
+      { min: 75, max: 100, cor: tema.perigo },
+    ]
+  ), [faixas, tema.aviso, tema.perigo, tema.sucesso]);
 
   const option = useMemo<EChartsOption>(() => ({
     backgroundColor: 'transparent',
@@ -652,12 +663,14 @@ export const GraficoRadarECharts = memo<GraficoRadarEChartsProps>(({
   const temDados = indicadores.length > 0 && series.length > 0 && series.some(s => s.dados.length > 0);
   
   // Indicadores padrão quando não há dados
-  const indicadoresPadrao = indicadores.length > 0 ? indicadores : [
-    { nome: 'Indicador 1', max: 100 },
-    { nome: 'Indicador 2', max: 100 },
-    { nome: 'Indicador 3', max: 100 },
-    { nome: 'Indicador 4', max: 100 },
-  ];
+  const indicadoresPadrao = useMemo(() => (
+    indicadores.length > 0 ? indicadores : [
+      { nome: 'Indicador 1', max: 100 },
+      { nome: 'Indicador 2', max: 100 },
+      { nome: 'Indicador 3', max: 100 },
+      { nome: 'Indicador 4', max: 100 },
+    ]
+  ), [indicadores]);
 
   const option = useMemo<EChartsOption>(() => ({
     backgroundColor: 'transparent',
@@ -747,7 +760,7 @@ export const GraficoRadarECharts = memo<GraficoRadarEChartsProps>(({
         fontWeight: 500,
       },
     }] : undefined,
-  }), [titulo, indicadores, indicadoresPadrao, series, tema, paleta, temDados]);
+  }), [titulo, indicadoresPadrao, series, paleta, temDados]);
 
   useECharts(containerRef, option, tema);
 

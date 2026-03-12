@@ -12,27 +12,54 @@ interface TelemetryClient {
 
 let client: TelemetryClient | null = null;
 
+async function resolveClientModule(): Promise<TelemetryClient | null> {
+  const importAppInsights = new Function('return import("applicationinsights")') as () => Promise<{ defaultClient: TelemetryClient }>;
+  const appInsights = await importAppInsights();
+  return appInsights.defaultClient;
+}
+
 function getClient() {
   if (client) return client;
-  try {
-    if (process.env.APPLICATIONINSIGHTS_CONNECTION_STRING) {
-      const appInsights = require('applicationinsights');
-      client = appInsights.defaultClient;
-    }
-  } catch { /* no-op */ }
   return client;
 }
 
+const withClient = async (callback: (currentClient: TelemetryClient) => void): Promise<void> => {
+  const currentClient = getClient();
+  if (currentClient) {
+    callback(currentClient);
+    return;
+  }
+
+  if (!process.env.APPLICATIONINSIGHTS_CONNECTION_STRING) {
+    return;
+  }
+
+  try {
+    client = await resolveClientModule();
+    if (client) {
+      callback(client);
+    }
+  } catch {
+    client = null;
+  }
+};
+
 export const trackEvent = (name: string, properties?: Record<string, string>) => {
-  getClient()?.trackEvent({ name, properties });
+  void withClient((currentClient) => {
+    currentClient.trackEvent({ name, properties });
+  });
 };
 
 export const trackMetric = (name: string, value: number) => {
-  getClient()?.trackMetric({ name, value });
+  void withClient((currentClient) => {
+    currentClient.trackMetric({ name, value });
+  });
 };
 
 export const trackException = (error: Error, properties?: Record<string, string>) => {
-  getClient()?.trackException({ exception: error, properties });
+  void withClient((currentClient) => {
+    currentClient.trackException({ exception: error, properties });
+  });
 };
 
 export const trackDependency = (name: string, duration: number, success: boolean) => {

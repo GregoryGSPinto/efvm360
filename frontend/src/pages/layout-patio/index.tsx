@@ -101,7 +101,7 @@ export default function PaginaLayoutPatio(props: PaginaLayoutPatioProps): JSX.El
     } else {
       setEditErro(result.erro || 'Erro ao salvar.');
     }
-  }, [editingYard, categoriasEditadas, amvsEditados, editarCategoriasPatio, editarAmvsPatio, usuarioLogado]);
+  }, [editingYard, categoriasEditadas, amvsEditados, editarCategoriasPatio, editarAmvsPatio]);
 
   // ── Category CRUD ──
   const updateNomeCategoria = useCallback((catIdx: number, nome: string) => {

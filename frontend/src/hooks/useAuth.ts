@@ -236,11 +236,17 @@ export function useAuth(): AuthReturn {
     try {
       const raw = sessionStorage.getItem(RATE_LIMIT_KEY);
       if (raw) return JSON.parse(raw);
-    } catch { /* ignore */ }
+    } catch {
+      return { count: 0, lockUntil: 0 };
+    }
     return { count: 0, lockUntil: 0 };
   };
   const setLoginAttempts = (data: { count: number; lockUntil: number }) => {
-    try { sessionStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(data)); } catch { /* ignore */ }
+    try {
+      sessionStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(data));
+    } catch {
+      secureLog.warn('Falha ao persistir rate limit local');
+    }
   };
 
   // ========== LOGIN — Dual Mode: Backend JWT (online) / localStorage (offline) ==========
@@ -286,7 +292,9 @@ export function useAuth(): AuthReturn {
           };
 
           // Sessão HMAC
-          try { await setSessaoSegura(dadosUsuario); } catch {
+          try {
+            await setSessaoSegura(dadosUsuario);
+          } catch {
             sessionStorage.setItem(SESSION_KEY, JSON.stringify(dadosUsuario));
           }
 
@@ -294,7 +302,11 @@ export function useAuth(): AuthReturn {
           setUsuarioLogado(dadosUsuario);
           setTelaAtual('sistema');
           setLoginForm({ matricula: '', senha: '' });
-          try { LogService.login(dadosUsuario.matricula, dadosUsuario.nome); } catch {}
+          try {
+            LogService.login(dadosUsuario.matricula, dadosUsuario.nome);
+          } catch {
+            secureLog.warn('Falha ao registrar login em log local');
+          }
           return;
         } catch (err) {
           // Erro de rede → fallback para offline
@@ -335,7 +347,9 @@ export function useAuth(): AuthReturn {
       let usuarios: UsuarioCadastro[] = [];
       try {
         usuarios = JSON.parse(localStorage.getItem(STORAGE_KEYS.USUARIOS) || '[]');
-      } catch { usuarios = []; }
+      } catch {
+        usuarios = [];
+      }
 
       if (usuarios.length === 0) {
         setLoginErro('Sistema inicializando. Tente novamente em instantes.');
@@ -420,13 +434,17 @@ export function useAuth(): AuthReturn {
 
       // Limpa formulário de login (zera senha da memória)
       setLoginForm({ matricula: '', senha: '' });
-      try { LogService.login(dadosUsuario.matricula, dadosUsuario.nome); } catch {}
+      try {
+        LogService.login(dadosUsuario.matricula, dadosUsuario.nome);
+      } catch {
+        secureLog.warn('Falha ao registrar login offline em log local');
+      }
 
     } catch (err) {
       secureLog.error('Erro no login:', err);
       setLoginErro('Erro interno. Tente novamente.');
     }
-  }, [loginForm]);
+  }, [LOCKOUT_MS, loginForm]);
 
   // ========== CADASTRO — Com hash de senha ==========
   const realizarCadastro = useCallback(async () => {

@@ -6,6 +6,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { validationResult } from 'express-validator';
+import * as auditService from '../../services/auditService';
 
 // Padrões que indicam tentativa de ataque
 const MALICIOUS_PATTERNS = [
@@ -57,7 +58,6 @@ export const handleValidationErrors = (
     if (threats.length > 0) {
       // Log assíncrono — nunca bloqueia a resposta
       try {
-        const auditService = require('../../services/auditService');
         auditService.registrar({
           matricula: req.user?.matricula || 'anonimo',
           acao: 'INPUT_MALICIOSO',

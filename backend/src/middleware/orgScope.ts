@@ -6,18 +6,6 @@
 import { Request, Response, NextFunction } from 'express';
 import * as orgService from '../services/orgService';
 
-// Extends Express Request
-declare global {
-  namespace Express {
-    interface Request {
-      orgScope?: {
-        yards: string[];
-        level: string;
-      };
-    }
-  }
-}
-
 /**
  * Middleware that resolves organizational scope for the current user.
  * Sets req.orgScope.yards with the list of yard codes the user can access.

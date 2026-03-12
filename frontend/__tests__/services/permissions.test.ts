@@ -9,6 +9,7 @@ import {
   obterPermissoesPerfil,
   verificarNivelHierarquico,
   PERFIS_PERMISSAO,
+  type PerfilUsuario,
 } from '../../src/services/permissions';
 
 describe('permissions.ts', () => {
@@ -79,7 +80,7 @@ describe('permissions.ts', () => {
     });
 
     it('deve retornar null para perfil inválido', () => {
-      expect(obterPermissoesPerfil('invalido' as any)).toBeNull();
+      expect(obterPermissoesPerfil('invalido' as PerfilUsuario)).toBeNull();
     });
   });
 

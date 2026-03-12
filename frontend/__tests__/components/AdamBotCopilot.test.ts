@@ -233,7 +233,7 @@ describe('validarSecao — seguranca', () => {
   it('retorna aviso se manobra indicada sem tipo', () => {
     const dados = criarDadosCompletos();
     dados.segurancaManobras.houveManobras = { resposta: true, observacao: '' };
-    dados.segurancaManobras.tipoManobra = '' as any;
+    dados.segurancaManobras.tipoManobra = '';
     const alertas = validarSecao('seguranca', dados);
     expect(alertas.some(a => a.nivel === 'aviso' && a.campo === 'tipoManobra')).toBe(true);
   });

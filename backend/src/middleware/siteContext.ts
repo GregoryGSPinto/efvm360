@@ -6,15 +6,6 @@
 import { Request, Response, NextFunction } from 'express';
 import sequelize from '../config/database';
 
-declare global {
-  namespace Express {
-    interface Request {
-      siteId?: string;
-      userSites?: string[];
-    }
-  }
-}
-
 /**
  * Resolves the site context for the current request.
  * Priority: X-Site-Id header > user's default site > 'TUB' fallback

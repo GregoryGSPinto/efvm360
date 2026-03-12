@@ -309,7 +309,7 @@ class SyncEngine {
             this.emit('item-synced', { id: r.id });
             break;
 
-          case 'conflict':
+          case 'conflict': {
             await syncStore.updateStatus(r.id, 'conflict');
             result.conflicts.push(r.id);
 
@@ -326,8 +326,9 @@ class SyncEngine {
               this.emit('conflict-detected', { conflictId: conflict.id, itemId: r.id });
             }
             break;
+          }
 
-          case 'error':
+          case 'error': {
             if (batch.find((i) => i.id === r.id)!.retryCount >= CONFIG.MAX_RETRIES) {
               await syncStore.updateStatus(r.id, 'failed', r.error);
             } else {
@@ -336,6 +337,7 @@ class SyncEngine {
             result.failed.push(r.id);
             result.errors[r.id] = r.error || 'Unknown error';
             break;
+          }
         }
       }
 

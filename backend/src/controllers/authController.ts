@@ -6,6 +6,7 @@ import { Request, Response } from 'express';
 import * as authService from '../services/authService';
 import * as auditService from '../services/auditService';
 import { metrics } from '../services/metricsService';
+import { Usuario } from '../models';
 
 /**
  * @openapi
@@ -347,7 +348,6 @@ export const me = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const { Usuario } = require('../models');
     const usuario = await Usuario.findByPk(req.user.userId);
     if (!usuario) {
       res.status(404).json({ error: 'Usuario nao encontrado' });

@@ -4,136 +4,41 @@
 // ============================================================================
 
 import dotenv from 'dotenv';
-dotenv.config();
-
-// Azure Application Insights (inicializar ANTES de tudo)
-if (process.env.APPLICATIONINSIGHTS_CONNECTION_STRING) {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const appInsights = require('applicationinsights');
-  appInsights.setup().setSendLiveMetrics(true).start();
-  console.info('[EFVM360] Azure Application Insights ativo');
-}
-
-import express from 'express';
 import { createServer } from 'http';
-import compression from 'compression';
-import morgan from 'morgan';
-import {
-  corsConfig,
-  securityHeaders,
-  globalRateLimit,
-  requestId,
-  sanitizeBody,
-} from './middleware/security';
-import routes from './routes';
+import { createApp, DEFAULT_API_PREFIX } from './app';
 import { testConnection } from './config/database';
 import { initScheduler } from './jobs/scheduler';
-import { setupSwagger } from './config/swagger';
-import { telemetryMiddleware } from './middleware/telemetry';
-import { initializeWebSocket, getConnectionMetrics } from './services/websocket';
+import { initializeWebSocket } from './services/websocket';
 
-const app = express();
+dotenv.config();
+
+const app = createApp();
 const httpServer = createServer(app);
 const PORT = parseInt(process.env.PORT || '3001', 10);
-const API_PREFIX = process.env.API_PREFIX || '/api/v1';
+const API_PREFIX = DEFAULT_API_PREFIX;
 
-// ── MIDDLEWARE GLOBAL ────────────────────────────────────────────────────
-
-// 1. Security headers (Helmet)
-app.use(securityHeaders);
-
-// 2. CORS
-app.use(corsConfig);
-
-// 3. Rate limiting global
-app.use(globalRateLimit);
-
-// 4. Request ID (rastreabilidade)
-app.use(requestId);
-
-// 5. Compression (gzip)
-app.use(compression());
-
-// 6. Body parsing
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ extended: true, limit: '5mb' }));
-
-// 7. Sanitização de body
-app.use(sanitizeBody);
-
-// 8. Logging (Morgan)
-if (process.env.NODE_ENV !== 'test') {
-  app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
-}
-
-// 9. Telemetry (request metrics)
-app.use(telemetryMiddleware);
-
-// ── ROTAS ────────────────────────────────────────────────────────────────
-
-app.use(API_PREFIX, routes);
-
-// ── SWAGGER / OPENAPI DOCS ──────────────────────────────────────────────
-setupSwagger(app);
-
-// ── ROTA ROOT (informacoes da API) ──────────────────────────────────────
-
-app.get('/', (_req, res) => {
-  res.json({
-    service: 'EFVM360 — Gestão de Troca de Turno Ferroviária API',
-    version: '1.0.0',
-    documentation: `${API_PREFIX}/docs`,
-    health: `${API_PREFIX}/health`,
-    endpoints: {
-      auth: {
-        login: `POST ${API_PREFIX}/auth/login`,
-        refresh: `POST ${API_PREFIX}/auth/refresh`,
-        logout: `POST ${API_PREFIX}/auth/logout`,
-        me: `GET ${API_PREFIX}/auth/me`,
-        alterarSenha: `POST ${API_PREFIX}/auth/alterar-senha`,
-      },
-      passagens: {
-        listar: `GET ${API_PREFIX}/passagens`,
-        obter: `GET ${API_PREFIX}/passagens/:uuid`,
-        salvar: `POST ${API_PREFIX}/passagens`,
-        assinar: `POST ${API_PREFIX}/passagens/:uuid/assinar`,
-      },
-      audit: {
-        listar: `GET ${API_PREFIX}/audit`,
-        integridade: `GET ${API_PREFIX}/audit/integridade`,
-        sincronizar: `POST ${API_PREFIX}/audit/sync`,
-      },
-      usuarios: {
-        listar: `GET ${API_PREFIX}/usuarios`,
-        criar: `POST ${API_PREFIX}/usuarios`,
-        atualizar: `PATCH ${API_PREFIX}/usuarios/:uuid`,
-      },
-    },
-  });
-});
-
-// ── ERROR HANDLER GLOBAL ─────────────────────────────────────────────────
-
-app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error('[EFVM360-ERROR]', err.message);
-  
-  if (err.message.includes('CORS')) {
-    res.status(403).json({ error: 'Origem não permitida pelo CORS', code: 'CORS_ERROR' });
+const initializeApplicationInsights = async (): Promise<void> => {
+  if (!process.env.APPLICATIONINSIGHTS_CONNECTION_STRING) {
     return;
   }
 
-  res.status(500).json({
-    error: process.env.NODE_ENV === 'production'
-      ? 'Erro interno do servidor'
-      : err.message,
-    code: 'INTERNAL_ERROR',
-  });
-});
+  try {
+    const importAppInsights = new Function('return import("applicationinsights")') as () => Promise<{
+      setup(): { setSendLiveMetrics(enabled: boolean): { start(): void } };
+    }>;
+    const appInsights = await importAppInsights();
+    appInsights.setup().setSendLiveMetrics(true).start();
+    console.info('[EFVM360] Azure Application Insights ativo');
+  } catch (error) {
+    console.warn('[EFVM360] Falha ao inicializar Application Insights:', error);
+  }
+};
 
 // ── STARTUP ──────────────────────────────────────────────────────────────
 
-const startServer = async (): Promise<void> => {
+export const startServer = async (): Promise<void> => {
   try {
+    await initializeApplicationInsights();
     // Testa conexão com MySQL
     await testConnection();
 
@@ -141,7 +46,7 @@ const startServer = async (): Promise<void> => {
     initScheduler();
 
     // Inicializa WebSocket (Socket.IO)
-    const io = initializeWebSocket(httpServer);
+    initializeWebSocket(httpServer);
 
     // Inicia servidor HTTP (Express + WebSocket compartilham a mesma porta)
     httpServer.listen(PORT, '0.0.0.0', () => {
@@ -164,6 +69,13 @@ const startServer = async (): Promise<void> => {
   }
 };
 
-startServer();
+const isDirectExecution = (() => {
+  const entry = process.argv[1] || '';
+  return entry.endsWith('/src/server.ts') || entry.endsWith('/dist/server.js');
+})();
+
+if (isDirectExecution) {
+  void startServer();
+}
 
 export default app;

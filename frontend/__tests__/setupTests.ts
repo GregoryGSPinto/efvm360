@@ -5,6 +5,17 @@
 
 import { vi, beforeEach } from 'vitest';
 
+type StorageMock = Pick<Storage, 'clear' | 'getItem' | 'setItem' | 'removeItem' | 'key' | 'length'>;
+type ImportMetaWithEnv = ImportMeta & {
+  env?: {
+    BASE_URL: string;
+    DEV: boolean;
+    MODE: string;
+    PROD: boolean;
+    SSR: boolean;
+  };
+};
+
 // ── Mock localStorage & sessionStorage ──────────────────────────────────
 const createStorageMock = () => {
   let store: Record<string, string> = {};
@@ -42,10 +53,15 @@ if (!globalThis.crypto) {
 }
 
 // ── Mock import.meta.env ──────────────────────────────────────────────
-// @ts-ignore
-if (!import.meta.env) {
-  // @ts-ignore
-  import.meta.env = { DEV: true, PROD: false, MODE: 'test' };
+const importMetaWithEnv = import.meta as ImportMetaWithEnv;
+if (!importMetaWithEnv.env) {
+  importMetaWithEnv.env = {
+    BASE_URL: '/',
+    DEV: true,
+    MODE: 'test',
+    PROD: false,
+    SSR: false,
+  };
 }
 
 // ── Mock navigator ──────────────────────────────────────────────────────
@@ -75,7 +91,7 @@ Object.defineProperty(globalThis, 'Intl', {
 
 // ── Reset storage between tests ─────────────────────────────────────────
 beforeEach(() => {
-  (localStorage as any).clear();
-  (sessionStorage as any).clear();
+  (localStorage as StorageMock).clear();
+  (sessionStorage as StorageMock).clear();
   vi.clearAllMocks();
 });

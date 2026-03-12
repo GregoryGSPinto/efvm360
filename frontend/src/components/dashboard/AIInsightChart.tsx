@@ -57,7 +57,7 @@ export default function AIInsightChart({ tema, tipoGrafico, patio, dadosGrafico,
     if (autoLoad && ai.status === 'idle') {
       gerarInsight();
     }
-  }, [autoLoad]);
+  }, [autoLoad, ai.status, gerarInsight]);
 
   const isDark = tema.card === '#1e1e1e';
   const tendConfig = ai.data?.tendencia ? TENDENCIA_CONFIG[ai.data.tendencia] : null;

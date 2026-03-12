@@ -282,5 +282,6 @@ const IncidentHeatmap = memo(function IncidentHeatmap({
 IncidentHeatmap.displayName = 'IncidentHeatmap';
 
 export default IncidentHeatmap;
+// eslint-disable-next-line react-refresh/only-export-components -- pure data helper used by tests and reports
 export { computeHeatmapData };
 export type { HeatmapCell, IncidentHeatmapProps };

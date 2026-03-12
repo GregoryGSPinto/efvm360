@@ -252,5 +252,6 @@ const TrendAnalysis = memo(function TrendAnalysis({
 TrendAnalysis.displayName = 'TrendAnalysis';
 
 export default TrendAnalysis;
+// eslint-disable-next-line react-refresh/only-export-components -- analytical helpers are consumed outside the component tree
 export { computeTrendData, linearRegression };
 export type { TrendDataPoint, TrendAnalysisProps };

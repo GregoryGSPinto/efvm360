@@ -98,7 +98,7 @@ describe('calcularResumoSeguranca()', () => {
         restricaoAtiva: false,
         linhaLimpa: 'sim',
         comunicacao: { ccoCpt: true, oof: true, operadorSilo: true },
-      }) as any,
+      }),
     });
     const resumo = calcularResumoSeguranca(dados);
     expect(resumo.pontuacaoRisco).toBe(0);
@@ -117,7 +117,7 @@ describe('calcularResumoSeguranca()', () => {
         restricaoAtiva: true,    // +30
         linhaLimpa: 'nao',       // +25
         comunicacao: { ccoCpt: false, oof: false, operadorSilo: false }, // +15
-      }) as any,
+      }),
     });
     const resumo = calcularResumoSeguranca(dados);
     expect(resumo.pontuacaoRisco).toBe(90); // 20+30+25+15
@@ -140,7 +140,7 @@ describe('calcularResumoSeguranca()', () => {
         linhaLimpa: 'nao',     // +25
         comunicacao: { ccoCpt: false, oof: false, operadorSilo: false }, // +15
         // Interditadas: 3 × 10 = +30 → Total 120, capped at 100
-      }) as any,
+      }),
     });
     const resumo = calcularResumoSeguranca(dados);
     expect(resumo.pontuacaoRisco).toBe(100);
@@ -153,7 +153,7 @@ describe('calcularResumoSeguranca()', () => {
       segurancaManobras: criarSegurancaFlat({
         linhaLimpa: 'parcial',
         comunicacao: { ccoCpt: true, oof: true, operadorSilo: true },
-      }) as any,
+      }),
     });
     const resumo = calcularResumoSeguranca(dados);
     expect(resumo.pontuacaoRisco).toBe(15);
@@ -167,7 +167,7 @@ describe('calcularResumoSeguranca()', () => {
       segurancaManobras: criarSegurancaFlat({
         linhaLimpa: 'sim',
         comunicacao: { ccoCpt: true, oof: true, operadorSilo: true },
-      }) as any,
+      }),
     });
     const resumo = calcularResumoSeguranca(dados);
     expect(resumo.pontuacaoRisco).toBe(20); // 2 × 10
@@ -203,7 +203,7 @@ describe('validarCamposObrigatorios()', () => {
         linhaLimpa: 'sim',
         restricaoAtiva: false,
         pontoCriticoProximoTurno: 'Nenhum ponto crítico',
-      }) as any,
+      }),
       intervencoes: { temIntervencao: false, descricao: '', local: '' },
     });
     const erros = validarCamposObrigatorios(dados);
@@ -218,7 +218,7 @@ describe('validarCamposObrigatorios()', () => {
         houveManobras: null,
         linhaLimpa: 'sim',
         restricaoAtiva: false,
-      }) as any,
+      }),
     });
     const erros = validarCamposObrigatorios(dados);
     const manobraErro = erros.find(e => e.campo === 'houveManobras');
@@ -248,7 +248,7 @@ describe('validarDadosCruzados()', () => {
         houveManobras: true,
         tipoManobra: '',
         localManobra: '',
-      }) as any,
+      }),
     });
     const erros = validarDadosCruzados(dados);
     const campos = erros.map(e => e.campo);
@@ -262,7 +262,7 @@ describe('validarDadosCruzados()', () => {
         restricaoAtiva: true,
         restricaoTipo: '',
         restricaoLocal: '',
-      }) as any,
+      }),
     });
     const erros = validarDadosCruzados(dados);
     const campos = erros.map(e => e.campo);
@@ -319,7 +319,7 @@ describe('validarDadosCruzados()', () => {
         tipoManobra: 'engate',
         localManobra: 'L1C',
         freios: { automatico: false, independente: false, manuaisCalcos: false, naoAplicavel: false },
-      }) as any,
+      }),
     });
     const erros = validarDadosCruzados(dados);
     const freioErro = erros.find(e => e.campo === 'freios');
@@ -334,7 +334,7 @@ describe('validarDadosCruzados()', () => {
         tipoManobra: 'recuo',
         localManobra: 'L2B',
         freios: { automatico: false, independente: false, manuaisCalcos: false, naoAplicavel: true },
-      }) as any,
+      }),
     });
     const erros = validarDadosCruzados(dados);
     const freioErro = erros.find(e => e.campo === 'freios');
@@ -351,7 +351,7 @@ describe('validarDadosCruzados()', () => {
         houveManobras: false,
         restricaoAtiva: false,
         linhaLimpa: 'sim',
-      }) as any,
+      }),
     });
     const erros = validarDadosCruzados(dados);
     expect(erros).toHaveLength(0);
@@ -444,7 +444,7 @@ describe('gerarAlertasOperacionais()', () => {
         restricaoLocal: 'L3C',
         comunicacao: { ccoCpt: true, oof: true, operadorSilo: true },
         pontoCriticoProximoTurno: 'OK',
-      }) as any,
+      }),
     });
     const alertas = gerarAlertasOperacionais(dados, null);
     const critico = alertas.find(a => a.campo === 'restricaoAtiva');
@@ -460,7 +460,7 @@ describe('gerarAlertasOperacionais()', () => {
         linhaLimpa: 'nao',
         comunicacao: { ccoCpt: true, oof: true, operadorSilo: true },
         pontoCriticoProximoTurno: 'OK',
-      }) as any,
+      }),
     });
     const alertas = gerarAlertasOperacionais(dados, null);
     const linhaAlerta = alertas.find(a => a.campo === 'linhaLimpa' && a.tipo === 'critico');
@@ -474,7 +474,7 @@ describe('gerarAlertasOperacionais()', () => {
       segurancaManobras: criarSegurancaFlat({
         comunicacao: { ccoCpt: false, oof: false, operadorSilo: true },
         pontoCriticoProximoTurno: 'OK',
-      }) as any,
+      }),
     });
     const alertas = gerarAlertasOperacionais(dados, null);
     const ccoCpt = alertas.find(a => a.campo === 'comunicacao.ccoCpt');
@@ -491,7 +491,7 @@ describe('gerarAlertasOperacionais()', () => {
       segurancaManobras: criarSegurancaFlat({
         comunicacao: { ccoCpt: true, oof: true, operadorSilo: true },
         pontoCriticoProximoTurno: 'OK',
-      }) as any,
+      }),
     });
     const alertas = gerarAlertasOperacionais(dados, null);
     const eqAlerta = alertas.find(a => a.campo === 'equipamento_Lanterna');
@@ -511,7 +511,7 @@ describe('gerarAlertasOperacionais()', () => {
       segurancaManobras: criarSegurancaFlat({
         comunicacao: { ccoCpt: true, oof: true, operadorSilo: true },
         pontoCriticoProximoTurno: 'OK',
-      }) as any,
+      }),
     });
     const alertas = gerarAlertasOperacionais(dados, anterior);
     const comp = alertas.find(a => a.secao === 'comparacao');
@@ -526,7 +526,7 @@ describe('gerarAlertasOperacionais()', () => {
       segurancaManobras: criarSegurancaFlat({
         comunicacao: { ccoCpt: true, oof: true, operadorSilo: true },
         pontoCriticoProximoTurno: 'OK',
-      }) as any,
+      }),
     });
     const alertas = gerarAlertasOperacionais(dados, null);
     const turnoAlerta = alertas.find(a => a.campo === 'turno');
@@ -563,7 +563,7 @@ describe('realizarAnaliseOperacional()', () => {
       patioCima: [], patioBaixo: [],
       segurancaManobras: criarSegurancaFlat({
         comunicacao: { ccoCpt: false, oof: false, operadorSilo: true },
-      }) as any,
+      }),
     });
     const analise = realizarAnaliseOperacional(dados, null);
     const comRec = analise.recomendacoes.find(r => r.includes('Confirmar comunicação'));
@@ -585,7 +585,7 @@ describe('validarParaAssinaturas()', () => {
         houveManobras: false,
         linhaLimpa: 'sim',
         restricaoAtiva: false,
-      }) as any,
+      }),
     });
     const result = validarParaAssinaturas(dados);
     expect(result.podeAssinar).toBe(true);
@@ -599,7 +599,7 @@ describe('validarParaAssinaturas()', () => {
         houveManobras: false,
         linhaLimpa: 'sim',
         restricaoAtiva: false,
-      }) as any,
+      }),
     });
     const result = validarParaAssinaturas(dados);
     expect(result.podeAssinar).toBe(false);
@@ -614,7 +614,7 @@ describe('validarParaAssinaturas()', () => {
         houveManobras: false,
         linhaLimpa: 'sim',
         restricaoAtiva: false,
-      }) as any,
+      }),
     });
     const result = validarParaAssinaturas(dados);
     expect(result.podeAssinar).toBe(false);
@@ -628,7 +628,7 @@ describe('validarParaAssinaturas()', () => {
         houveManobras: false,
         linhaLimpa: 'sim',
         restricaoAtiva: false,
-      }) as any,
+      }),
     });
     const result = validarParaAssinaturas(dados);
     expect(result.podeAssinar).toBe(false);

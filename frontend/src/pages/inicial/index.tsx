@@ -94,15 +94,6 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  // ── Loading guard ──
-  if (!usuarioLogado) {
-    return (
-      <div style={{ padding: 40, textAlign: 'center', color: tema.textoSecundario }}>
-        {t('inicial.loadingOperator')}
-      </div>
-    );
-  }
-
   // ── Memoized values ───────────────────────────────────────────────────
 
   const saudacao = useMemo(() => getSaudacao(t), [t]);
@@ -193,7 +184,7 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
       }
     }, 2000);
     return () => clearTimeout(timer);
-  }, [dadosBriefing, briefingEntregue, addBotMessage]);
+  }, [dadosBriefing, briefingEntregue, addBotMessage, t]);
 
   // Callback para ouvir briefing (requer interação do usuário — mobile-safe)
   const ouvirBriefing = useCallback(() => {
@@ -212,6 +203,14 @@ export default function PaginaInicial(props: PaginaInicialProps): JSX.Element {
 
   const temPassagemEmAndamento = !!dadosFormulario.cabecalho.dss;
   const ocupacaoTexto = `${estatisticasPatio.ocupadas}/${estatisticasPatio.total}`;
+
+  if (!usuarioLogado) {
+    return (
+      <div style={{ padding: 40, textAlign: 'center', color: tema.textoSecundario }}>
+        {t('inicial.loadingOperator')}
+      </div>
+    );
+  }
 
   return (
     <>

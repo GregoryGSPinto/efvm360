@@ -95,7 +95,9 @@ export default function PaginaPerfil({
 
       setPerfilSalvo(true);
       setTimeout(() => setPerfilSalvo(false), 3000);
-    } catch { /* ignore */ }
+    } catch {
+      setPerfilSalvo(false);
+    }
   }, [usuarioLogado, editNome, editTurno]);
 
   // ── Avatar state ──
@@ -121,7 +123,7 @@ export default function PaginaPerfil({
       if (videoRef.current) { videoRef.current.srcObject = stream; videoRef.current.play(); }
       setAvatarMode('camera');
     } catch { alert(t('perfil.cameraAccessError')); }
-  }, []);
+  }, [t]);
   const capturePhoto = useCallback(() => {
     if (!videoRef.current || !canvasRef.current) return;
     const canvas = canvasRef.current; const video = videoRef.current;
@@ -159,11 +161,27 @@ export default function PaginaPerfil({
   // ── Intensification state ──
   const intensificacaoKey = `efvm360-intensificacao-${matricula}`;
   const [intensificacao, setIntensificacao] = useState(() => {
-    try { const s = localStorage.getItem(intensificacaoKey); if (s) { return JSON.parse(s).texto || ''; } } catch {} return '';
+    try {
+      const s = localStorage.getItem(intensificacaoKey);
+      if (s) {
+        return JSON.parse(s).texto || '';
+      }
+    } catch {
+      return '';
+    }
+    return '';
   });
   const [intensificacaoSalva, setIntensificacaoSalva] = useState(false);
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState(() => {
-    try { const s = localStorage.getItem(intensificacaoKey); if (s) { return JSON.parse(s).timestamp || ''; } } catch {} return '';
+    try {
+      const s = localStorage.getItem(intensificacaoKey);
+      if (s) {
+        return JSON.parse(s).timestamp || '';
+      }
+    } catch {
+      return '';
+    }
+    return '';
   });
 
   // ── Password ──

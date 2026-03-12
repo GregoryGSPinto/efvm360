@@ -26,9 +26,9 @@ describe('sanitizar()', () => {
   });
 
   it('deve retornar string vazia para input não-string', () => {
-    expect(sanitizar(null as any)).toBe('');
-    expect(sanitizar(undefined as any)).toBe('');
-    expect(sanitizar(123 as any)).toBe('');
+    expect(sanitizar(null)).toBe('');
+    expect(sanitizar(undefined)).toBe('');
+    expect(sanitizar(123)).toBe('');
   });
 
   it('deve preservar texto normal sem caracteres especiais', () => {
@@ -46,7 +46,7 @@ describe('sanitizarMatricula()', () => {
   });
 
   it('deve retornar vazio para input não-string', () => {
-    expect(sanitizarMatricula(null as any)).toBe('');
+    expect(sanitizarMatricula(null)).toBe('');
   });
 });
 

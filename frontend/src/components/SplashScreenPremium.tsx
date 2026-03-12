@@ -24,6 +24,7 @@ export const SplashScreenPremium = memo<Props>(({ duration = 4000, onComplete, i
   const [p, setP] = useState(0);
   const [m, setM] = useState(0);
   const [exit, setExit] = useState(false);
+  const messageCount = MSGS.length;
 
   const dk = isDark ?? (() => {
     try {
@@ -36,10 +37,10 @@ export const SplashScreenPremium = memo<Props>(({ duration = 4000, onComplete, i
 
   useEffect(() => {
     const pi = setInterval(() => setP(v => v >= 100 ? 100 : v + 1), duration / 100);
-    const mi = setInterval(() => setM(v => (v + 1) % MSGS.length), duration / MSGS.length);
+    const mi = setInterval(() => setM(v => (v + 1) % messageCount), duration / messageCount);
     const ct = setTimeout(() => { setExit(true); setTimeout(onComplete, 500); }, duration);
     return () => { clearInterval(pi); clearInterval(mi); clearTimeout(ct); };
-  }, [duration, onComplete]);
+  }, [duration, messageCount, onComplete]);
 
   const R = 32, C = 2 * Math.PI * R;
 

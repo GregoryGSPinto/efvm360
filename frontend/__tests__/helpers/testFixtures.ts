@@ -3,7 +3,14 @@
 // Gera dados de teste consistentes para todos os módulos
 // ============================================================================
 
-import type { LinhaPatio, Equipamento, DadosFormulario, RegistroHistorico } from '../../src/types';
+import type {
+  LinhaPatio,
+  Equipamento,
+  DadosFormulario,
+  RegistroHistorico,
+  SegurancaManobras,
+  ItemSeguranca,
+} from '../../src/types';
 
 // ── Linhas do Pátio ────────────────────────────────────────────────────
 
@@ -43,7 +50,7 @@ export const criarEquipamento = (overrides: Partial<Equipamento> = {}): Equipame
 // Os campos booleanos são do tipo ItemSeguranca: { resposta: boolean|null, observacao: string }
 // Este helper aceita valores flat (boolean/string) e converte para ItemSeguranca.
 
-const toItemSeguranca = (val: unknown): { resposta: boolean | null; observacao: string } => {
+const toItemSeguranca = (val: unknown): ItemSeguranca => {
   if (val != null && typeof val === 'object' && 'resposta' in (val as Record<string, unknown>)) {
     return val as { resposta: boolean | null; observacao: string };
   }
@@ -51,7 +58,7 @@ const toItemSeguranca = (val: unknown): { resposta: boolean | null; observacao: 
   return { resposta: null, observacao: '' };
 };
 
-const toLinhaLimpa = (val: unknown): { resposta: boolean | null; observacao: string } | undefined => {
+const toLinhaLimpa = (val: unknown): ItemSeguranca | undefined => {
   if (val === undefined) return undefined;
   if (val != null && typeof val === 'object' && 'resposta' in (val as Record<string, unknown>)) {
     return val as { resposta: boolean | null; observacao: string };
@@ -63,7 +70,7 @@ const toLinhaLimpa = (val: unknown): { resposta: boolean | null; observacao: str
   return { resposta: null, observacao: '' };
 };
 
-const toPontoCritico = (val: unknown): { resposta: boolean | null; observacao: string } | undefined => {
+const toPontoCritico = (val: unknown): ItemSeguranca | undefined => {
   if (val === undefined) return undefined;
   if (val != null && typeof val === 'object' && 'resposta' in (val as Record<string, unknown>)) {
     return val as { resposta: boolean | null; observacao: string };
@@ -75,7 +82,7 @@ const toPontoCritico = (val: unknown): { resposta: boolean | null; observacao: s
   return { resposta: null, observacao: '' };
 };
 
-export const criarSegurancaFlat = (overrides: Record<string, unknown> = {}): Record<string, unknown> => {
+export const criarSegurancaFlat = (overrides: Record<string, unknown> = {}): SegurancaManobras => {
   const defaults: Record<string, unknown> = {
     houveManobras: null,
     tipoManobra: '',
@@ -105,11 +112,17 @@ export const criarSegurancaFlat = (overrides: Record<string, unknown> = {}): Rec
   return {
     ...merged,
     houveManobras: toItemSeguranca(merged.houveManobras),
+    pontoCritico: toPontoCritico(merged.pontoCriticoProximoTurno) ?? { resposta: null, observacao: '' },
+    pontoCriticoDescricao: typeof merged.pontoCriticoProximoTurno === 'string' ? merged.pontoCriticoProximoTurno : '',
     freiosVerificados: toItemSeguranca(merged.freiosVerificados),
+    linhaLivre: toLinhaLimpa(merged.linhaLimpa) ?? { resposta: null, observacao: '' },
+    comunicacaoRealizada: toItemSeguranca(
+      Object.values((merged.comunicacao as Record<string, boolean>) ?? {}).every(Boolean)
+    ),
     restricaoAtiva: toItemSeguranca(merged.restricaoAtiva),
     linhaLimpa: toLinhaLimpa(merged.linhaLimpa),
     pontoCriticoProximoTurno: toPontoCritico(merged.pontoCriticoProximoTurno),
-  };
+  } as SegurancaManobras;
 };
 
 // ── DadosFormulario (usando flat SegurancaManobras) ────────────────────
@@ -138,7 +151,7 @@ export const criarDadosFormulario = (overrides: Partial<Record<string, unknown>>
     sala5s: 'Sala em ordem',
     maturidade5S: 3,
     confirmacoesConferencia: { patioCima: true, patioBaixo: true },
-    segurancaManobras: criarSegurancaFlat() as any,
+    segurancaManobras: criarSegurancaFlat(),
     assinaturas: {
       sai: { nome: 'Op Saindo', matricula: 'V001', confirmado: false },
       entra: { nome: 'Op Entrando', matricula: 'V002', confirmado: false },
@@ -166,7 +179,7 @@ export const criarDadosFormularioVazio = (): DadosFormulario => criarDadosFormul
   patioCima: [criarLinhaPatio({ linha: 'L1C', status: 'livre' })],
   patioBaixo: [criarLinhaPatio({ linha: 'L1B', status: 'livre' })],
   intervencoes: { temIntervencao: null, descricao: '', local: '' },
-  segurancaManobras: criarSegurancaFlat() as any,
+  segurancaManobras: criarSegurancaFlat(),
   equipamentos: [],
 });
 
@@ -195,5 +208,5 @@ export const criarDadosAltoRisco = (): DadosFormulario => criarDadosFormulario({
     comunicacao: { ccoCpt: false, oof: false, operadorSilo: false },
     pontoCriticoProximoTurno: '',
     freios: { automatico: false, independente: false, manuaisCalcos: false, naoAplicavel: false },
-  }) as any,
+  }),
 });

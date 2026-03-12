@@ -139,7 +139,7 @@ export const BoaJornadaInspection: React.FC<BoaJornadaInspectionProps> = ({
       }
     });
     return violations;
-  }, [items]);
+  }, [items, t]);
 
   const progress = useMemo(() => {
     const answered = items.filter(i => i.status !== null).length;

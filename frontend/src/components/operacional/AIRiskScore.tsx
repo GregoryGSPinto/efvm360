@@ -36,6 +36,7 @@ function SparkleIcon({ size = 14, color = '#69be28' }: { size?: number; color?: 
 
 // ── Deterministic Risk Calculation ──────────────────────────────────────
 
+// eslint-disable-next-line react-refresh/only-export-components -- deterministic scorer is reused in tests and other operational widgets
 export function calcularRisco(dados: DadosFormulario): { score: number; fatores: RiskFactor[] } {
   const fatores: RiskFactor[] = [];
   let score = 0;
@@ -155,11 +156,13 @@ export default function AIRiskScore({ tema, dadosFormulario, patio }: AIRiskScor
   }, [score, patio, fatores, ai]);
 
   // Auto-generate narrative when score changes
+  const shouldAutoGenerateNarrativa = score > 0 && ai.status === 'idle';
+
   useEffect(() => {
-    if (score > 0 && ai.status === 'idle') {
+    if (shouldAutoGenerateNarrativa) {
       gerarNarrativa();
     }
-  }, [score > 0]);
+  }, [gerarNarrativa, shouldAutoGenerateNarrativa]);
 
   const isDark = tema.card === '#1e1e1e';
   const nivelLabel = score <= 30 ? t('aiRisk.low') : score <= 60 ? t('aiRisk.moderate') : t('aiRisk.high');

@@ -325,10 +325,6 @@ export const AdamBootChat = memo<AdamBootChatProps>(({
   // Gerar recomendações ao abrir
   useEffect(() => {
     if (isOpen) {
-      setRecomendacoes(gerarRecomendacoes(memoria));
-      // FASE 3: Sugestões sempre visíveis
-      setMostrarRecomendacoes(true);
-      // Incrementar sessão
       setMemoria(prev => {
         const updated = {
           ...prev,
@@ -337,6 +333,8 @@ export const AdamBootChat = memo<AdamBootChatProps>(({
             sessoes: prev.estatisticas.sessoes + 1,
           },
         };
+        setRecomendacoes(gerarRecomendacoes(updated));
+        setMostrarRecomendacoes(true);
         salvarMemoria(updated);
         return updated;
       });
