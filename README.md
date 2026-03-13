@@ -66,6 +66,18 @@ Supporting assets:
 - `.github/workflows/`: CI, deployment, and security scan workflows.
 - `docker-compose*.yml`: local and production-style container orchestration.
 
+## Key Architecture Decisions
+
+| Decision | Chosen | Over | Rationale |
+|----------|--------|------|-----------|
+| ORM | Sequelize | Prisma | Mature MySQL support, migration tooling, team familiarity. Prisma's query engine adds binary dependency unsuitable for constrained railway field devices |
+| API Framework | Express | Fastify | Ecosystem maturity for enterprise middleware (helmet, cors, rate-limit). Performance delta irrelevant at expected RPS (~100) |
+| Offline Storage | IndexedDB | OPFS/SQLite-WASM | Browser support breadth critical for field devices (older Android WebViews). OPFS lacks Safari support as of build date |
+| Frontend State | Custom Hooks + IndexedDB | Redux/Zustand | Domain-driven state aligned with DDD aggregates. Global store adds indirection without benefit for form-heavy workflows |
+| IaC | Azure Bicep | Terraform | Native Azure integration, no state file management, first-class support for Azure Flexible Server and App Service |
+
+> Full Architecture Decision Records (ADRs) available in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+
 ## Frontend
 
 Implemented in code:
