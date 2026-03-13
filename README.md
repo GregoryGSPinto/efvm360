@@ -1,5 +1,13 @@
 # EFVM360
 
+[![Build](https://github.com/GregoryGSPinto/efvm360/actions/workflows/ci.yml/badge.svg)](https://github.com/GregoryGSPinto/efvm360/actions)
+[![Tests](https://img.shields.io/badge/tests-785%20passing-brightgreen)](#testing-strategy)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](#architecture-overview)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](#frontend)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Azure](https://img.shields.io/badge/Azure-Bicep%20IaC-0078D4?logo=microsoftazure&logoColor=white)](#deployment)
+[![Offline-First](https://img.shields.io/badge/Offline--First-PWA-blueviolet)](#reliability--offline--performance)
+
 Independent portfolio case study for digital shift handover and yard operations. The repository contains a React/Vite frontend, an Express/Sequelize backend, Playwright end-to-end tests, and supporting docs for audit, demo, and deployment review. It is not an official system, not a production service, and not affiliated with any railway operator.
 
 ## Executive Summary
