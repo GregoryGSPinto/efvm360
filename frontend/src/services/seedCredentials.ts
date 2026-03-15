@@ -11,7 +11,7 @@ import { verificarPatiosOrfaos } from './patioProvisioning';
 
 const STORAGE_KEY = 'efvm360-usuarios';
 const SEED_MARKER = 'efvm360-seed-applied';
-const SEED_VERSION = 'efvm360-seed-v8';
+const SEED_VERSION = 'efvm360-seed-v9';
 // REVIEW [SECURITY]: Hardcoded dev/test password. Must be replaced with Azure AD
 // SSO or hashed credentials before production deployment.
 const DEFAULT_PASSWORD = '123456';
@@ -143,7 +143,13 @@ export function seedCredentials(): { seeded: boolean; count: number } {
         if (!exists.primaryYard) { exists.primaryYard = seedUser.primaryYard; modified = true; }
         if (!exists.allowedYards) { exists.allowedYards = ['VFZ', 'VBR', 'VCS', 'P6', 'VTO']; modified = true; }
         if (!exists.status) { exists.status = 'active'; modified = true; }
-        if (!exists.senha && !exists.senhaHash) { exists.senha = DEFAULT_PASSWORD; modified = true; count++; }
+        // Always reset seed user passwords to defaults so demo credentials stay valid
+        const expectedPwd = seedUser.senha || DEFAULT_PASSWORD;
+        if (exists.senha !== expectedPwd || exists.senhaHash) {
+          exists.senha = expectedPwd;
+          delete exists.senhaHash;
+          modified = true;
+        }
       }
     }
 
