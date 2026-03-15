@@ -27,7 +27,7 @@ export const LoginScreenPremium = memo<Props>(({
 
   const dk = config.tema === 'escuro' || (config.tema === 'automatico' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
   const [expandedYard, setExpandedYard] = useState<string | null>(null);
-  const showDemoPanel = import.meta.env.VITE_SHOW_DEMO_CREDENTIALS === 'true';
+  const showDemoPanel = true; // TEMP: forçar exibição das credenciais demo
 
   // Dynamic credentials: group users by yard, pick up to 4 per yard
   // Ensure seed data exists before reading (fixes empty panel on first visit)
